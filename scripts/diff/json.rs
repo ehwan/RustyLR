@@ -2021,12 +2021,12 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [0, 15, 42, 43, 44, 97, 98,]; let shifted : &
-            'static [u8] = & [0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter())
-            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass0,
+            static __RULES : [u8; 7usize] = [0, 15, 42, 43, 44, 97, 98,]; static
+            __SHIFTED : [u8; 7usize] = [0, 0, 0, 0, 0, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
             ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
@@ -2037,10 +2037,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
@@ -2053,41 +2053,42 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![43]; __reduce_map
             .extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [43,]; let shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
-            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![44]; __reduce_map
-            .extend(__RUSTYLR_TSET1.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [44,]; let shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::eof,
-            ::rusty_lr::parser::state::ShiftTarget::new(6, true)),],
-            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [98,]; let shifted : & 'static
-            [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [43,]; static __SHIFTED : [u8; 1usize] = [2,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [98,];
-            let shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
+            vec![44]; __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term,
+            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
+            static __RULES : [u8; 1usize] = [44,]; static __SHIFTED : [u8; 1usize] =
+            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::eof,
+            ::rusty_lr::parser::state::ShiftTarget::new(6, true)),],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
+            ruleset : { static __RULES : [u8; 1usize] = [98,]; static __SHIFTED : [u8;
+            1usize] = [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
+            ruleset : { static __RULES : [u8; 1usize] = [98,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(8, false)),
@@ -2125,115 +2126,125 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(110, false)),], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [1, 2,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 23usize] = [1, 2,
             3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16, 31, 32, 33, 34, 35, 45, 46, 47, 92,
-            93,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            93,]; static __SHIFTED : [u8; 23usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass22,
             ::rusty_lr::parser::state::ShiftTarget::new(9, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
-            [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass24,
+            ruleset : { static __RULES : [u8; 1usize] = [46,]; static __SHIFTED : [u8;
+            1usize] = [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass24,
             ::rusty_lr::parser::state::ShiftTarget::new(10, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass25,
+            ruleset : { static __RULES : [u8; 1usize] = [46,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass25,
             ::rusty_lr::parser::state::ShiftTarget::new(11, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass19,
+            ruleset : { static __RULES : [u8; 1usize] = [46,]; static __SHIFTED : [u8;
+            1usize] = [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass19,
             ::rusty_lr::parser::state::ShiftTarget::new(12, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [46,]; let shifted : & 'static
-            [u8] = & [4,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![46]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [46,]; let shifted : & 'static [u8] = & [5,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [46,]; static __SHIFTED : [u8;
+            1usize] = [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![46]; __reduce_map
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [46,]; static __SHIFTED : [u8; 1usize] = [5,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass26,
             ::rusty_lr::parser::state::ShiftTarget::new(14, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
-            [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass24,
+            ruleset : { static __RULES : [u8; 1usize] = [47,]; static __SHIFTED : [u8;
+            1usize] = [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass24,
             ::rusty_lr::parser::state::ShiftTarget::new(15, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass24,
+            ruleset : { static __RULES : [u8; 1usize] = [47,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass24,
             ::rusty_lr::parser::state::ShiftTarget::new(16, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [47,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![47]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [47,]; let shifted : & 'static [u8] = & [4,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [47,]; static __SHIFTED : [u8;
+            1usize] = [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![47]; __reduce_map
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [47,]; static __SHIFTED : [u8; 1usize] = [4,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass8,
             ::rusty_lr::parser::state::ShiftTarget::new(18, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
-            [u8] = & [1,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass26,
+            ruleset : { static __RULES : [u8; 1usize] = [45,]; static __SHIFTED : [u8;
+            1usize] = [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass26,
             ::rusty_lr::parser::state::ShiftTarget::new(19, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass19,
+            ruleset : { static __RULES : [u8; 1usize] = [45,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass19,
             ::rusty_lr::parser::state::ShiftTarget::new(20, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [45,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![45]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [45,]; let shifted : & 'static [u8] = & [4,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [45,]; static __SHIFTED : [u8;
+            1usize] = [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![45]; __reduce_map
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [45,]; static __SHIFTED : [u8; 1usize] = [4,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -2243,9 +2254,9 @@ impl JsonParser {
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(26, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [34, 35,
-            92, 93,]; let shifted : & 'static [u8] = & [1, 1, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 4usize] = [34,
+            35, 92, 93,]; static __SHIFTED : [u8; 4usize] = [1, 1, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -2259,20 +2270,20 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![93]; __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [35, 90, 91, 92, 93, 93,]; let shifted : &
-            'static [u8] = & [2, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [35, 90, 91, 92, 93, 93,]; static __SHIFTED :
+            [u8; 6usize] = [2, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![35]; __reduce_map
             .extend(__RUSTYLR_TSET4.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [35,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass14,
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [35,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(24, false)),
             (JsonTerminalClasses::TermClass15,
             ::rusty_lr::parser::state::ShiftTarget::new(24, false)),],
@@ -2283,28 +2294,28 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![91]; __reduce_map
             .extend(__RUSTYLR_TSET4.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [91,]; let shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
-            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![34]; __reduce_map
-            .extend(__RUSTYLR_TSET4.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [34,]; let shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass14,
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [91,]; static __SHIFTED : [u8; 1usize] = [2,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
+            vec![34]; __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term,
+            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
+            static __RULES : [u8; 1usize] = [34,]; static __SHIFTED : [u8; 1usize] =
+            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(24, false)),
             (JsonTerminalClasses::TermClass15,
             ::rusty_lr::parser::state::ShiftTarget::new(24, false)),],
@@ -2315,20 +2326,20 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![93]; __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [33, 90, 91, 92, 93, 93,]; let shifted : &
-            'static [u8] = & [1, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [33, 90, 91, 92, 93, 93,]; static __SHIFTED :
+            [u8; 6usize] = [1, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![33]; __reduce_map
             .extend(__RUSTYLR_TSET4.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [33,]; let shifted : & 'static [u8] = & [2,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass0,
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [33,]; static __SHIFTED : [u8; 1usize] = [2,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
             ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
@@ -2345,20 +2356,20 @@ impl JsonParser {
             vec![51]; __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term,
             reduce_rules.clone()))); let reduce_rules = vec![97]; __reduce_map
             .extend(__RUSTYLR_TSET0.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [14, 15, 42, 43, 44, 48, 49, 50, 51, 97,]; let shifted : & 'static [u8] =
-            & [1, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            10usize] = [14, 15, 42, 43, 44, 48, 49, 50, 51, 97,]; static __SHIFTED : [u8;
+            10usize] = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED
+            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
+            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass12,
             ::rusty_lr::parser::state::ShiftTarget::new(31, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![48]; __reduce_map
             .extend(__RUSTYLR_TSET5.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [48, 49,]; let shifted : & 'static [u8] = & [1, 1,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            2usize] = [48, 49,]; static __SHIFTED : [u8; 2usize] = [1, 1,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -2375,12 +2386,12 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [15, 42, 43, 44, 48, 49, 49, 97,]; let shifted
-            : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 2, 0,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass6,
+            static __RULES : [u8; 8usize] = [15, 42, 43, 44, 48, 49, 49, 97,]; static
+            __SHIFTED : [u8; 8usize] = [0, 0, 0, 0, 0, 0, 2, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(8, false)),
             (JsonTerminalClasses::TermClass7,
             ::rusty_lr::parser::state::ShiftTarget::new(13, false)),
@@ -2416,12 +2427,12 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(97, false)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [1, 2,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 23usize] = [1, 2,
             3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16, 31, 32, 33, 34, 35, 45, 46, 47, 92,
-            93,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            93,]; static __SHIFTED : [u8; 23usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(26, false)),
@@ -2430,9 +2441,9 @@ impl JsonParser {
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(26, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [34, 35,
-            92, 93,]; let shifted : & 'static [u8] = & [1, 1, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 4usize] = [34,
+            35, 92, 93,]; static __SHIFTED : [u8; 4usize] = [1, 1, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -2446,10 +2457,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![93]; __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [35, 90, 91, 92, 93, 93,]; let shifted : &
-            'static [u8] = & [2, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [35, 90, 91, 92, 93, 93,]; static __SHIFTED :
+            [u8; 6usize] = [2, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(35, false)),
@@ -2462,10 +2473,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(35, false)),
@@ -2478,25 +2489,26 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![93]; __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [33, 90, 91, 92, 93, 93,]; let shifted : &
-            'static [u8] = & [1, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [33, 90, 91, 92, 93, 93,]; static __SHIFTED :
+            [u8; 6usize] = [1, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass21,
             ::rusty_lr::parser::state::ShiftTarget::new(38, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [14,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![14]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [14,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [14,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![14]; __reduce_map
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [14,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -2514,9 +2526,9 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET7.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [8, 9, 10, 11, 12, 13, 42, 43, 44, 97,]; let
-            shifted : & 'static [u8] = & [1, 1, 1, 0, 0, 0, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 10usize] = [8, 9, 10, 11, 12, 13, 42, 43, 44, 97,];
+            static __SHIFTED : [u8; 10usize] = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -2530,10 +2542,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET7.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(40, false)),
@@ -2546,41 +2558,43 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET7.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass28,
             ::rusty_lr::parser::state::ShiftTarget::new(43, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [10,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![10]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [10,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [10,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![10]; __reduce_map
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [10,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass28,
             ::rusty_lr::parser::state::ShiftTarget::new(45, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [9,]; let shifted : & 'static [u8]
-            = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![9]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [9,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [9,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![9]; __reduce_map
+            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [9,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass12,
@@ -2588,9 +2602,9 @@ impl JsonParser {
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![11]; __reduce_map
             .extend(__RUSTYLR_TSET8.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [11, 12,]; let shifted : & 'static [u8] = & [1, 1,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            2usize] = [11, 12,]; static __SHIFTED : [u8; 2usize] = [1, 1,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -2607,12 +2621,12 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [11, 12, 12, 13, 42, 43, 44, 97,]; let shifted
-            : & 'static [u8] = & [0, 0, 2, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass0,
+            static __RULES : [u8; 8usize] = [11, 12, 12, 13, 42, 43, 44, 97,]; static
+            __SHIFTED : [u8; 8usize] = [0, 0, 2, 0, 0, 0, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(48, false)),
             (JsonTerminalClasses::TermClass1,
             ::rusty_lr::parser::state::ShiftTarget::new(49, false)),],
@@ -2623,10 +2637,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(48, false)),
@@ -2639,26 +2653,26 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![12]; __reduce_map
             .extend(__RUSTYLR_TSET8.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [12,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass29,
+            __reduce_map.into_iter().collect() }, ruleset : { static __RULES : [u8;
+            1usize] = [12,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass29,
             ::rusty_lr::parser::state::ShiftTarget::new(52, false)),],
             shift_goto_map_nonterm : vec![(JsonNonTerminals::String,
             ::rusty_lr::parser::state::ShiftTarget::new(64, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [13,
-            16,]; let shifted : & 'static [u8] = & [1, 0,]; rules.iter().zip(shifted
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 2usize] = [13,
+            16,]; static __SHIFTED : [u8; 2usize] = [1, 0,]; __RULES.iter().zip(__SHIFTED
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
@@ -2729,11 +2743,11 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![55]; __reduce_map.extend(__RUSTYLR_TSET9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [16, 17, 18, 52, 53, 54, 55, 56, 57, 58, 59,
+            static __RULES : [u8; 34usize] = [16, 17, 18, 52, 53, 54, 55, 56, 57, 58, 59,
             60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
-            79, 80, 81, 82,]; let shifted : & 'static [u8] = & [1, 0, 0, 0, 0, 0, 0, 0,
+            79, 80, 81, 82,]; static __SHIFTED : [u8; 34usize] = [1, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass4,
@@ -2757,11 +2771,11 @@ impl JsonParser {
             shift_goto_map_nonterm : vec![(JsonNonTerminals::Escape,
             ::rusty_lr::parser::state::ShiftTarget::new(59, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [17, 19,
-            20, 21, 22, 23, 24, 25, 26, 27,]; let shifted : & 'static [u8] = & [1, 0, 0,
-            0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 10usize] = [17,
+            19, 20, 21, 22, 23, 24, 25, 26, 27,]; static __SHIFTED : [u8; 10usize] = [1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (&
+            rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass5,
             ::rusty_lr::parser::state::ShiftTarget::new(55, false)),
@@ -2790,13 +2804,13 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(55, false)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [27, 28,
-            29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; let shifted : & 'static [u8] =
-            & [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter())
-            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass5,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 13usize] = [27,
+            28, 29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; static __SHIFTED : [u8;
+            13usize] = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass5,
             ::rusty_lr::parser::state::ShiftTarget::new(56, false)),
             (JsonTerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(56, false)),
@@ -2823,13 +2837,13 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(56, false)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [27, 28,
-            29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; let shifted : & 'static [u8] =
-            & [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter())
-            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass5,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 13usize] = [27,
+            28, 29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; static __SHIFTED : [u8;
+            13usize] = [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass5,
             ::rusty_lr::parser::state::ShiftTarget::new(57, false)),
             (JsonTerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(57, false)),
@@ -2856,13 +2870,13 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(57, false)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [27, 28,
-            29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; let shifted : & 'static [u8] =
-            & [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter())
-            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass5,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 13usize] = [27,
+            28, 29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; static __SHIFTED : [u8;
+            13usize] = [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass5,
             ::rusty_lr::parser::state::ShiftTarget::new(58, false)),
             (JsonTerminalClasses::TermClass6,
             ::rusty_lr::parser::state::ShiftTarget::new(58, false)),
@@ -2889,26 +2903,26 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(58, false)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [27, 28,
-            29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; let shifted : & 'static [u8] =
-            & [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter())
-            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
-            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![27]; __reduce_map
-            .extend(__RUSTYLR_TSET10.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
-            'static [u8] = & [27,]; let shifted : & 'static [u8] = & [5,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 13usize] = [27,
+            28, 29, 30, 83, 84, 85, 86, 87, 88, 89, 92, 93,]; static __SHIFTED : [u8;
+            13usize] = [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
+            vec![27]; __reduce_map.extend(__RUSTYLR_TSET10.iter().map(| term | (* term,
+            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
+            static __RULES : [u8; 1usize] = [27,]; static __SHIFTED : [u8; 1usize] =
+            [5,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![17]; __reduce_map.extend(__RUSTYLR_TSET10.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [17,]; let shifted : & 'static [u8] = & [2,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [17,]; static __SHIFTED : [u8; 1usize] =
+            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass1,
@@ -2976,35 +2990,36 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![52]; __reduce_map.extend(__RUSTYLR_TSET9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [17, 18, 52, 52, 53, 53, 56, 57, 58, 59, 60,
+            static __RULES : [u8; 33usize] = [17, 18, 52, 52, 53, 53, 56, 57, 58, 59, 60,
             61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-            80, 81, 82,]; let shifted : & 'static [u8] = & [0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules
-            .iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            80, 81, 82,]; static __SHIFTED : [u8; 33usize] = [0, 0, 0, 1, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
+            __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![53]; __reduce_map.extend(__RUSTYLR_TSET9.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [53,]; let shifted : & 'static [u8] = & [2,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [53,]; static __SHIFTED : [u8; 1usize] =
+            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass29,
             ::rusty_lr::parser::state::ShiftTarget::new(63, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [16,]; let shifted : & 'static
-            [u8] = & [2,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
-            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
-            vec![16]; __reduce_map.extend(__RUSTYLR_TSET11.iter().map(| term | (* term,
-            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [16,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            ruleset : { static __RULES : [u8; 1usize] = [16,]; static __SHIFTED : [u8;
+            1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
+            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
+            std::collections::BTreeMap::new(); let reduce_rules = vec![16]; __reduce_map
+            .extend(__RUSTYLR_TSET11.iter().map(| term | (* term, reduce_rules
+            .clone()))); __reduce_map.into_iter().collect() }, ruleset : { static __RULES
+            : [u8; 1usize] = [16,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -3018,10 +3033,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [13, 42, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [13, 42, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(65, false)),
@@ -3034,10 +3049,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(65, false)),
@@ -3050,20 +3065,21 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET12.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass16,
             ::rusty_lr::parser::state::ShiftTarget::new(68, false)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); __reduce_map.into_iter().collect() },
-            ruleset : { let rules : & 'static [u8] = & [13,]; let shifted : & 'static
-            [u8] = & [3,]; rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
-            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
-            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
+            ruleset : { static __RULES : [u8; 1usize] = [13,]; static __SHIFTED : [u8;
+            1usize] = [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
+            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
+            : shifted as usize, } }).collect() } },
+            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
+            vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(1, false)),
             (JsonTerminalClasses::TermClass1,
             ::rusty_lr::parser::state::ShiftTarget::new(2, false)),],
@@ -3075,17 +3091,17 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [13, 15, 42, 43, 44, 97,]; let shifted : &
-            'static [u8] = & [4, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [13, 15, 42, 43, 44, 97,]; static __SHIFTED :
+            [u8; 6usize] = [4, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![13]; __reduce_map
             .extend(__RUSTYLR_TSET13.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
-            'static [u8] = & [13,]; let shifted : & 'static [u8] = & [5,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .clone()))); __reduce_map.into_iter().collect() }, ruleset : { static __RULES
+            : [u8; 1usize] = [13,]; static __SHIFTED : [u8; 1usize] = [5,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass6,
@@ -3124,12 +3140,12 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(81, false)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [1, 2,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 23usize] = [1, 2,
             3, 4, 5, 6, 7, 8, 9, 10, 14, 15, 16, 31, 32, 33, 34, 35, 45, 46, 47, 92,
-            93,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (&
-            rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            93,]; static __SHIFTED : [u8; 23usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(26, false)),
@@ -3138,9 +3154,9 @@ impl JsonParser {
             shift_goto_map_nonterm : vec![(JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(26, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [34, 35,
-            92, 93,]; let shifted : & 'static [u8] = & [1, 1, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 4usize] = [34,
+            35, 92, 93,]; static __SHIFTED : [u8; 4usize] = [1, 1, 0, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3154,10 +3170,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![93]; __reduce_map.extend(__RUSTYLR_TSET14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [35, 90, 91, 92, 93, 93,]; let shifted : &
-            'static [u8] = & [2, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [35, 90, 91, 92, 93, 93,]; static __SHIFTED :
+            [u8; 6usize] = [2, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(73, false)),
@@ -3170,10 +3186,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(73, false)),
@@ -3186,10 +3202,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![93]; __reduce_map.extend(__RUSTYLR_TSET14.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [33, 90, 91, 92, 93, 93,]; let shifted : &
-            'static [u8] = & [1, 0, 0, 0, 0, 1,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [33, 90, 91, 92, 93, 93,]; static __SHIFTED :
+            [u8; 6usize] = [1, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass28,
             ::rusty_lr::parser::state::ShiftTarget::new(76, false)),
@@ -3198,20 +3214,20 @@ impl JsonParser {
             shift_goto_map_nonterm : vec![(JsonNonTerminals::String,
             ::rusty_lr::parser::state::ShiftTarget::new(64, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [8, 13,
-            16,]; let shifted : & 'static [u8] = & [2, 1, 0,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
-            shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
-            std::collections::BTreeMap::new(); let reduce_rules = vec![8]; __reduce_map
-            .extend(__RUSTYLR_TSET2.iter().map(| term | (* term, reduce_rules.clone())));
-            __reduce_map.into_iter().collect() }, ruleset : { let rules : & 'static [u8]
-            = & [8,]; let shifted : & 'static [u8] = & [3,]; rules.iter().zip(shifted
-            .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
-            rule : rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(JsonTerminalClasses::TermClass0,
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 3usize] = [8, 13,
+            16,]; static __SHIFTED : [u8; 3usize] = [2, 1, 0,]; __RULES.iter()
+            .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
+            vec![8]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
+            reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
+            static __RULES : [u8; 1usize] = [8,]; static __SHIFTED : [u8; 1usize] = [3,];
+            __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
+            ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
+            usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(78, false)),
             (JsonTerminalClasses::TermClass1,
             ::rusty_lr::parser::state::ShiftTarget::new(79, false)),],
@@ -3222,10 +3238,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET13.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [15, 42, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [15, 42, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(78, false)),
@@ -3238,10 +3254,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET13.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(78, false)),
@@ -3254,17 +3270,17 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET13.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); let reduce_rules = vec![15]; __reduce_map
             .extend(__RUSTYLR_TSET15.iter().map(| term | (* term, reduce_rules
-            .clone()))); __reduce_map.into_iter().collect() }, ruleset : { let rules : &
-            'static [u8] = & [15,]; let shifted : & 'static [u8] = & [3,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .clone()))); __reduce_map.into_iter().collect() }, ruleset : { static __RULES
+            : [u8; 1usize] = [15,]; static __SHIFTED : [u8; 1usize] = [3,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass13,
@@ -3276,10 +3292,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![96]; __reduce_map.extend(__RUSTYLR_TSET16.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31, 94, 95, 96,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 4usize] = [31, 94, 95, 96,]; static __SHIFTED : [u8;
+            4usize] = [1, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule,
+            & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(84, false)),
@@ -3290,17 +3306,17 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(84, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [90, 91,
-            92, 93, 94,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 1,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [90,
+            91, 92, 93, 94,]; static __SHIFTED : [u8; 5usize] = [0, 0, 0, 0, 1,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![94]; __reduce_map.extend(__RUSTYLR_TSET17.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [94,]; let shifted : & 'static [u8] = & [2,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [94,]; static __SHIFTED : [u8; 1usize] =
+            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3314,10 +3330,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET16.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass18,
             ::rusty_lr::parser::state::ShiftTarget::new(86, false)),
@@ -3330,10 +3346,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET18.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31, 36, 37, 38, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [31, 36, 37, 38, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass10,
             ::rusty_lr::parser::state::ShiftTarget::new(87, false)),
@@ -3346,10 +3362,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [37, 39, 40, 41, 97,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [37, 39, 40, 41, 97,]; static __SHIFTED :
+            [u8; 5usize] = [1, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(89, false)),
@@ -3360,17 +3376,17 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(89, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [37, 90,
-            91, 92, 93,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [37,
+            90, 91, 92, 93,]; static __SHIFTED : [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![37]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [37,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [37,]; static __SHIFTED : [u8; 1usize] =
+            [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3384,10 +3400,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET18.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass10,
             ::rusty_lr::parser::state::ShiftTarget::new(91, false)),
@@ -3400,10 +3416,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [38, 39, 40, 41, 97,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [38, 39, 40, 41, 97,]; static __SHIFTED :
+            [u8; 5usize] = [1, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(89, false)),
@@ -3414,25 +3430,25 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(89, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [38, 90,
-            91, 92, 93,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [38,
+            90, 91, 92, 93,]; static __SHIFTED : [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![38]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [38,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [38,]; static __SHIFTED : [u8; 1usize] =
+            [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![31]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [31,]; static __SHIFTED : [u8; 1usize] =
+            [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -3446,10 +3462,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET20.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [15, 42, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [15, 42, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(95, false)),
@@ -3462,10 +3478,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET20.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(95, false)),
@@ -3478,10 +3494,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET20.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass13,
             ::rusty_lr::parser::state::ShiftTarget::new(98, false)),],
@@ -3492,10 +3508,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![96]; __reduce_map.extend(__RUSTYLR_TSET21.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31, 94, 95, 96,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 4usize] = [31, 94, 95, 96,]; static __SHIFTED : [u8;
+            4usize] = [1, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule,
+            & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(99, false)),
@@ -3506,9 +3522,9 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(99, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [90, 91,
-            92, 93, 94,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 1,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [90,
+            91, 92, 93, 94,]; static __SHIFTED : [u8; 5usize] = [0, 0, 0, 0, 1,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3522,10 +3538,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET21.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass18,
             ::rusty_lr::parser::state::ShiftTarget::new(101, false)),
@@ -3538,10 +3554,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET22.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31, 36, 37, 38, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [31, 36, 37, 38, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass10,
             ::rusty_lr::parser::state::ShiftTarget::new(102, false)),
@@ -3554,10 +3570,10 @@ impl JsonParser {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [37, 39, 40, 41, 97,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [37, 39, 40, 41, 97,]; static __SHIFTED :
+            [u8; 5usize] = [1, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(103, false)),
@@ -3568,9 +3584,9 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(103, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [37, 90,
-            91, 92, 93,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [37,
+            90, 91, 92, 93,]; static __SHIFTED : [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3584,10 +3600,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET22.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass10,
             ::rusty_lr::parser::state::ShiftTarget::new(105, false)),
@@ -3600,10 +3616,10 @@ impl JsonParser {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [38, 39, 40, 41, 97,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [38, 39, 40, 41, 97,]; static __SHIFTED :
+            [u8; 5usize] = [1, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(103, false)),
@@ -3614,17 +3630,17 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(103, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [38, 90,
-            91, 92, 93,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [38,
+            90, 91, 92, 93,]; static __SHIFTED : [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![49]; __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [49,]; let shifted : & 'static [u8] = & [3,];
-            rules.iter().zip(shifted.iter()).map(| (& rule, & shifted) | {
+            static __RULES : [u8; 1usize] = [49,]; static __SHIFTED : [u8; 1usize] =
+            [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass0,
@@ -3638,10 +3654,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET23.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [15, 42, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [15, 42, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(108, false)),
@@ -3654,10 +3670,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET23.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 44, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 0, 1, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 44, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 0, 1, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(108, false)),
@@ -3670,10 +3686,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET23.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [42, 43, 43, 44, 97,]; let shifted : & 'static
-            [u8] = & [0, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [42, 43, 43, 44, 97,]; static __SHIFTED :
+            [u8; 5usize] = [0, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass13,
             ::rusty_lr::parser::state::ShiftTarget::new(111, false)),],
@@ -3684,10 +3700,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![96]; __reduce_map.extend(__RUSTYLR_TSET24.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31, 94, 95, 96,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 4usize] = [31, 94, 95, 96,]; static __SHIFTED : [u8;
+            4usize] = [1, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule,
+            & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
+            shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(112, false)),
@@ -3698,9 +3714,9 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(112, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [90, 91,
-            92, 93, 94,]; let shifted : & 'static [u8] = & [0, 0, 0, 0, 1,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [90,
+            91, 92, 93, 94,]; static __SHIFTED : [u8; 5usize] = [0, 0, 0, 0, 1,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3714,10 +3730,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET24.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass18,
             ::rusty_lr::parser::state::ShiftTarget::new(114, false)),
@@ -3730,10 +3746,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET25.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [31, 36, 37, 38, 97,]; let shifted : & 'static
-            [u8] = & [2, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [31, 36, 37, 38, 97,]; static __SHIFTED :
+            [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass10,
             ::rusty_lr::parser::state::ShiftTarget::new(115, false)),
@@ -3746,10 +3762,10 @@ impl JsonParser {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [37, 39, 40, 41, 97,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [37, 39, 40, 41, 97,]; static __SHIFTED :
+            [u8; 5usize] = [1, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(116, false)),
@@ -3760,9 +3776,9 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(116, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [37, 90,
-            91, 92, 93,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [37,
+            90, 91, 92, 93,]; static __SHIFTED : [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![(JsonTerminalClasses::TermClass14,
@@ -3776,10 +3792,10 @@ impl JsonParser {
             mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![90]; __reduce_map.extend(__RUSTYLR_TSET25.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [90, 90, 91, 91, 92, 93,]; let shifted : &
-            'static [u8] = & [0, 1, 0, 1, 0, 0,]; rules.iter().zip(shifted.iter()).map(|
-            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 6usize] = [90, 90, 91, 91, 92, 93,]; static __SHIFTED :
+            [u8; 6usize] = [0, 1, 0, 1, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule
+            as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass10,
             ::rusty_lr::parser::state::ShiftTarget::new(118, false)),
@@ -3792,10 +3808,10 @@ impl JsonParser {
             let mut __reduce_map = std::collections::BTreeMap::new(); let reduce_rules =
             vec![97]; __reduce_map.extend(__RUSTYLR_TSET19.iter().map(| term | (* term,
             reduce_rules.clone()))); __reduce_map.into_iter().collect() }, ruleset : {
-            let rules : & 'static [u8] = & [38, 39, 40, 41, 97,]; let shifted : & 'static
-            [u8] = & [1, 0, 0, 0, 0,]; rules.iter().zip(shifted.iter()).map(| (& rule, &
-            shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
-            : shifted as usize, } }).collect() } },
+            static __RULES : [u8; 5usize] = [38, 39, 40, 41, 97,]; static __SHIFTED :
+            [u8; 5usize] = [1, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
+            (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as
+            usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(JsonTerminalClasses::TermClass14,
             ::rusty_lr::parser::state::ShiftTarget::new(116, false)),
@@ -3806,9 +3822,9 @@ impl JsonParser {
             (JsonNonTerminals::_TermSet33,
             ::rusty_lr::parser::state::ShiftTarget::new(116, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); __reduce_map
-            .into_iter().collect() }, ruleset : { let rules : & 'static [u8] = & [38, 90,
-            91, 92, 93,]; let shifted : & 'static [u8] = & [2, 0, 0, 0, 0,]; rules.iter()
-            .zip(shifted.iter()).map(| (& rule, & shifted) | {
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 5usize] = [38,
+            90, 91, 92, 93,]; static __SHIFTED : [u8; 5usize] = [2, 0, 0, 0, 0,]; __RULES
+            .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } },
         ];

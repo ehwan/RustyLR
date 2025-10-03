@@ -743,6 +743,7 @@ impl Grammar {
 
                 let mut ruleset_rules_body_stream = TokenStream::new();
                 let mut ruleset_shifted_body_stream = TokenStream::new();
+                let ruleset_len = state.ruleset.len();
                 let mut max_shifted = 0;
                 for &rule in &state.ruleset {
                     max_shifted = max_shifted.max(rule.shifted);
@@ -775,13 +776,13 @@ impl Grammar {
                             __reduce_map.into_iter().collect()
                         },
                         ruleset: {
-                            let rules: &'static [#rule_index_typename] = &[
+                            static __RULES: [#rule_index_typename; #ruleset_len] = [
                                 #ruleset_rules_body_stream
                             ];
-                            let shifted: &'static [#shifted_typename] = &[
+                            static __SHIFTED: [#shifted_typename; #ruleset_len] = [
                                 #ruleset_shifted_body_stream
                             ];
-                            rules.iter().zip(shifted.iter()).map(
+                            __RULES.iter().zip(__SHIFTED.iter()).map(
                                 |(&rule, &shifted)| {
                                     #module_prefix::rule::ShiftedRuleRef {
                                         rule: rule as usize,
