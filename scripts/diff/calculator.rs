@@ -238,11 +238,12 @@ impl EDataStack {
     fn reduce_A_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -258,7 +259,12 @@ impl EDataStack {
                 ETags::__stack1)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(ETags::Empty);
+        }
         let mut a2 = __data_stack.__stack1.pop().unwrap();
         let mut A = __data_stack.__stack1.pop().unwrap();
         let mut plus = __data_stack.__terminals.pop().unwrap();
@@ -268,19 +274,22 @@ impl EDataStack {
             *data += 1;
             A + a2
         };
-        __data_stack.__stack1.push(__res);
-        Ok(true)
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
+        Ok(())
     }
     ///A -> M
     #[inline]
     fn reduce_A_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -288,22 +297,29 @@ impl EDataStack {
                 ETags::__stack1)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(ETags::Empty);
+        }
         let mut M = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = M;
-        __data_stack.__stack1.push(__res);
-        Ok(true)
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
+        Ok(())
     }
     ///M -> M star M
     #[inline]
     fn reduce_M_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -319,7 +335,12 @@ impl EDataStack {
                 ETags::__stack1)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(ETags::Empty);
+        }
         let mut __rustylr_data_2 = __data_stack.__stack1.pop().unwrap();
         let mut __rustylr_data_0 = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -336,19 +357,22 @@ impl EDataStack {
         )?;
         let mut m2 = __rustylr_data_2;
         let __res = { M_optim * m2 };
-        __data_stack.__stack1.push(__res);
-        Ok(true)
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
+        Ok(())
     }
     ///P -> num
     #[inline]
     fn reduce_P_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -357,7 +381,11 @@ impl EDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(ETags::__stack1);
+        if __push_data {
+            __data_stack.__tags.push(ETags::__stack1);
+        } else {
+            __data_stack.__tags.push(ETags::Empty);
+        }
         let mut num = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -367,19 +395,22 @@ impl EDataStack {
                 return Err(format!("{:?}", num));
             }
         };
-        __data_stack.__stack1.push(__res);
-        Ok(true)
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
+        Ok(())
     }
     ///P -> lparen E rparen
     #[inline]
     fn reduce_P_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -395,24 +426,31 @@ impl EDataStack {
                 ETags::Empty)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(ETags::__stack1);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(ETags::__stack1);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        }
         let mut E = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = E;
-        __data_stack.__stack1.push(__res);
-        Ok(true)
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
+        Ok(())
     }
     ///E -> A
     #[inline]
     fn reduce_E_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Token>,
         data: &mut i32,
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
-    ) -> Result<bool, String> {
+    ) -> Result<(), String> {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
@@ -420,11 +458,17 @@ impl EDataStack {
                 ETags::__stack1)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(ETags::Empty);
+        }
         let mut A = __data_stack.__stack1.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = A;
-        __data_stack.__stack1.push(__res);
-        Ok(true)
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
+        Ok(())
     }
 }
 #[allow(
@@ -498,17 +542,19 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
     fn reduce_action(
         data_stack: &mut Self,
         location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        push_data: bool,
         rule_index: usize,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<bool, Self::ReduceActionError> {
+    ) -> Result<(), Self::ReduceActionError> {
         match rule_index {
             0usize => {
                 Self::reduce_A_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -519,6 +565,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 Self::reduce_A_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -529,6 +576,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 Self::reduce_M_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -539,6 +587,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 Self::reduce_P_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -549,6 +598,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 Self::reduce_P_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -559,6 +609,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 Self::reduce_E_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,

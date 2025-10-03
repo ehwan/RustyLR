@@ -519,39 +519,42 @@ impl JsonDataStack {
     fn reduce_Object_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Object -> '{' Members '}'
     #[inline]
     fn reduce_Object_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Object -> '{' error '}'
     #[inline]
     fn reduce_Object_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -561,437 +564,468 @@ impl JsonDataStack {
             let end = __rustylr_location_error.end;
             println!("Error recovered with '}}' at {start}..{end}");
         };
-        Ok(false)
+        Ok(())
     }
     ///Members -> Member
     #[inline]
     fn reduce_Members_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///Members -> Member ',' Members
     #[inline]
     fn reduce_Members_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Member -> WS String WS ':' Element
     #[inline]
     fn reduce_Member_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
-        Ok(false)
+        Ok(())
     }
     ///Array -> '[' $sep(Element, ',', *) ']'
     #[inline]
     fn reduce_Array_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Element -> WS Value WS
     #[inline]
     fn reduce_Element_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///String -> '"' Character* '"'
     #[inline]
     fn reduce_String_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Character -> '\\' Escape
     #[inline]
     fn reduce_Character_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Escape -> 'u' Hex Hex Hex Hex
     #[inline]
     fn reduce_Escape_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
-        Ok(false)
+        Ok(())
     }
     ///Number -> Integer ('.', Digits)? Exponent
     #[inline]
     fn reduce_Number_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Integer -> ['1'-'9'] Digit+
     #[inline]
     fn reduce_Integer_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Integer -> '-' ['0'-'9']
     #[inline]
     fn reduce_Integer_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Integer -> '-' ['1'-'9'] Digit+
     #[inline]
     fn reduce_Integer_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Exponent -> 'E' Sign Digit+
     #[inline]
     fn reduce_Exponent_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///Exponent -> 'e' Sign Digit+
     #[inline]
     fn reduce_Exponent_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///WS -> ' ' WS
     #[inline]
     fn reduce_WS_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///WS -> ['\t', '\n', '\r'] WS
     #[inline]
     fn reduce_WS_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///"true" -> 't' 'r' 'u' 'e'
     #[inline]
     fn reduce__LiteralString22_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 4usize);
-        Ok(false)
+        Ok(())
     }
     ///"false" -> 'f' 'a' 'l' 's' 'e'
     #[inline]
     fn reduce__LiteralString23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 5usize);
-        Ok(false)
+        Ok(())
     }
     ///"null" -> 'n' 'u' 'l' 'l'
     #[inline]
     fn reduce__LiteralString24_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 4usize);
-        Ok(false)
+        Ok(())
     }
     ///$sep(Element, ',', +) -> Element
     #[inline]
     fn reduce__ElementSepPlus25_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///$sep(Element, ',', +) -> Element ',' $sep(Element, ',', +)
     #[inline]
     fn reduce__ElementSepPlus25_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 3usize);
-        Ok(false)
+        Ok(())
     }
     ///$sep(Element, ',', *) ->
     #[inline]
     fn reduce__ElementSepStar26_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
     ///Character+ -> Character
     #[inline]
     fn reduce__CharacterPlus27_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///Character+ -> Character Character+
     #[inline]
     fn reduce__CharacterPlus27_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///Character* ->
     #[inline]
     fn reduce__CharacterStar28_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
     ///Digit+ -> ['0'-'9']
     #[inline]
     fn reduce__DigitPlus32_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///Digit+ -> ['0'-'9'] Digit+
     #[inline]
     fn reduce__DigitPlus32_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///['0'-'9'] -> ['1'-'9']
     #[inline]
     fn reduce__TermSet33_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 1usize);
-        Ok(false)
+        Ok(())
     }
     ///('.', Digits) -> '.' Digit+
     #[inline]
     fn reduce__Group34_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __location_stack.truncate(__location_stack.len() - 2usize);
-        Ok(false)
+        Ok(())
     }
     ///('.', Digits)? ->
     #[inline]
     fn reduce___Group34Question35_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
     ///"" ->
     #[inline]
     fn reduce__LiteralString36_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
         __rustylr_location0: &mut std::ops::Range<usize>,
-    ) -> Result<bool, ::rusty_lr::DefaultReduceActionError> {
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        Ok(false)
+        Ok(())
     }
 }
 #[allow(
@@ -1025,17 +1059,19 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     fn reduce_action(
         data_stack: &mut Self,
         location_stack: &mut Vec<std::ops::Range<usize>>,
+        push_data: bool,
         rule_index: usize,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Self::Term>,
         user_data: &mut Self::UserData,
         location0: &mut Self::Location,
-    ) -> Result<bool, Self::ReduceActionError> {
+    ) -> Result<(), Self::ReduceActionError> {
         match rule_index {
             8usize => {
                 Self::reduce_Object_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1046,6 +1082,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Object_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1056,6 +1093,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Object_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1066,6 +1104,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Members_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1076,6 +1115,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Members_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1086,6 +1126,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Member_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1096,6 +1137,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Array_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1106,6 +1148,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Element_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1116,6 +1159,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_String_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1126,6 +1170,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Character_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1136,6 +1181,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Escape_8(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1146,6 +1192,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Number_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1156,6 +1203,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Integer_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1166,6 +1214,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Integer_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1176,6 +1225,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Integer_3(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1186,6 +1236,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Exponent_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1196,6 +1247,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Exponent_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1206,6 +1258,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_WS_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1216,6 +1269,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_WS_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1226,6 +1280,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString22_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1236,6 +1291,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString23_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1246,6 +1302,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString24_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1256,6 +1313,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__ElementSepPlus25_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1266,6 +1324,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__ElementSepPlus25_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1276,6 +1335,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__ElementSepStar26_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1286,6 +1346,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__CharacterPlus27_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1296,6 +1357,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__CharacterPlus27_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1306,6 +1368,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__CharacterStar28_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1316,6 +1379,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__DigitPlus32_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1326,6 +1390,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__DigitPlus32_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1336,6 +1401,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__TermSet33_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1346,6 +1412,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__Group34_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1356,6 +1423,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce___Group34Question35_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1366,6 +1434,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString36_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
