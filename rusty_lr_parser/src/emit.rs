@@ -766,15 +766,23 @@ impl Grammar {
                     quote! { usize }
                 };
 
+                let reduce_map_construct_stream = if reduce_body_stream.is_empty() {
+                    quote! { Default::default() }
+                } else {
+                    quote! {
+                        {
+                        let mut __reduce_map = std::collections::BTreeMap::new();
+                        #reduce_body_stream
+                        __reduce_map.into_iter().collect()
+                        }
+                    }
+                };
+
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
-                        reduce_map: {
-                            let mut __reduce_map = std::collections::BTreeMap::new();
-                            #reduce_body_stream
-                            __reduce_map.into_iter().collect()
-                        },
+                        reduce_map: #reduce_map_construct_stream,
                         ruleset: {
                             static __RULES: [#rule_index_typename; #ruleset_len] = [
                                 #ruleset_rules_body_stream
