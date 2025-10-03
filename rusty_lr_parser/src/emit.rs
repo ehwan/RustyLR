@@ -1505,9 +1505,15 @@ impl Grammar {
         };
 
         let push_terminal_body_stream = if terminal_data_used {
-            quote! {
-                self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
-                self.#terminal_stack_name.push( term );
+            if unique_tag {
+                quote! {
+                    self.#terminal_stack_name.push( term );
+                }
+            } else {
+                quote! {
+                    self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
+                    self.#terminal_stack_name.push( term );
+                }
             }
         } else {
             quote! {
