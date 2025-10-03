@@ -65,7 +65,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<Data::StartType, ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         Data::Term: Clone,
-        Data::NonTerm: Hash + Eq + Copy + NonTerminal,
+        Data::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
         self.feed_eof(parser, userdata)?;
@@ -80,7 +80,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         parser: &P,
     ) -> bool
     where
-        Data::NonTerm: Hash + Eq + NonTerminal,
         P::State: State<StateIndex = StateIndex>,
     {
         let mut extra_state_stack = Vec::new();
@@ -230,6 +229,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     where
         Data::Location: Default,
         P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
         self.feed_location(parser, term, userdata, Default::default())
@@ -245,6 +245,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
@@ -362,6 +363,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
         debug_assert!(
@@ -446,10 +448,21 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let mut new_location =
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
+                let Some(next_nonterm_shift) = parser.get_states()
+                    [self.state_stack.last().unwrap().into_usize()]
+                .shift_goto_nonterm(rule.name) else {
+                    unreachable!(
+                        "Failed to shift nonterminal: {:?} in state {}",
+                        rule.name,
+                        self.state_stack.last().unwrap().into_usize()
+                    );
+                };
+
                 // call reduce action
-                let non_empty_pushed = match Data::reduce_action(
+                match Data::reduce_action(
                     &mut self.data_stack,
                     &mut self.location_stack,
+                    next_nonterm_shift.push,
                     reduce_rule.into_usize(),
                     &mut shift,
                     &term,
@@ -485,18 +498,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) = parser.get_states()
-                    [self.state_stack.last().unwrap().into_usize()]
-                .shift_goto_nonterm(rule.name)
-                {
-                    self.state_stack.push(next_state_id.state);
-                    if !next_state_id.push && non_empty_pushed {
-                        self.data_stack.pop();
-                        self.data_stack.push_empty();
-                    }
-                } else {
-                    unreachable!("shift nonterm failed");
-                }
+                self.state_stack.push(next_nonterm_shift.state);
             } else {
                 break shift;
             }
@@ -735,6 +737,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
         self.feed_location_impl(

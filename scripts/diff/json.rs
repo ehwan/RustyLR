@@ -519,6 +519,7 @@ impl JsonDataStack {
     fn reduce_Object_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -533,6 +534,7 @@ impl JsonDataStack {
     fn reduce_Object_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -547,6 +549,7 @@ impl JsonDataStack {
     fn reduce_Object_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -568,6 +571,7 @@ impl JsonDataStack {
     fn reduce_Members_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -582,6 +586,7 @@ impl JsonDataStack {
     fn reduce_Members_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -596,6 +601,7 @@ impl JsonDataStack {
     fn reduce_Member_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -610,6 +616,7 @@ impl JsonDataStack {
     fn reduce_Array_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -624,6 +631,7 @@ impl JsonDataStack {
     fn reduce_Element_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -638,6 +646,7 @@ impl JsonDataStack {
     fn reduce_String_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -652,6 +661,7 @@ impl JsonDataStack {
     fn reduce_Character_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -666,6 +676,7 @@ impl JsonDataStack {
     fn reduce_Escape_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -680,6 +691,7 @@ impl JsonDataStack {
     fn reduce_Number_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -694,6 +706,7 @@ impl JsonDataStack {
     fn reduce_Integer_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -708,6 +721,7 @@ impl JsonDataStack {
     fn reduce_Integer_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -722,6 +736,7 @@ impl JsonDataStack {
     fn reduce_Integer_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -736,6 +751,7 @@ impl JsonDataStack {
     fn reduce_Exponent_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -750,6 +766,7 @@ impl JsonDataStack {
     fn reduce_Exponent_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -764,6 +781,7 @@ impl JsonDataStack {
     fn reduce_WS_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -778,6 +796,7 @@ impl JsonDataStack {
     fn reduce_WS_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -792,6 +811,7 @@ impl JsonDataStack {
     fn reduce__LiteralString22_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -806,6 +826,7 @@ impl JsonDataStack {
     fn reduce__LiteralString23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -820,6 +841,7 @@ impl JsonDataStack {
     fn reduce__LiteralString24_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -834,6 +856,7 @@ impl JsonDataStack {
     fn reduce__ElementSepPlus25_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -848,6 +871,7 @@ impl JsonDataStack {
     fn reduce__ElementSepPlus25_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -862,6 +886,7 @@ impl JsonDataStack {
     fn reduce__ElementSepStar26_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -875,6 +900,7 @@ impl JsonDataStack {
     fn reduce__CharacterPlus27_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -889,6 +915,7 @@ impl JsonDataStack {
     fn reduce__CharacterPlus27_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -903,6 +930,7 @@ impl JsonDataStack {
     fn reduce__CharacterStar28_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -916,6 +944,7 @@ impl JsonDataStack {
     fn reduce__DigitPlus32_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -930,6 +959,7 @@ impl JsonDataStack {
     fn reduce__DigitPlus32_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -944,6 +974,7 @@ impl JsonDataStack {
     fn reduce__TermSet33_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -958,6 +989,7 @@ impl JsonDataStack {
     fn reduce__Group34_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -972,6 +1004,7 @@ impl JsonDataStack {
     fn reduce___Group34Question35_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -985,6 +1018,7 @@ impl JsonDataStack {
     fn reduce__LiteralString36_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
         data: &mut (),
@@ -1025,6 +1059,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     fn reduce_action(
         data_stack: &mut Self,
         location_stack: &mut Vec<std::ops::Range<usize>>,
+        push_data: bool,
         rule_index: usize,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<Self::Term>,
@@ -1036,6 +1071,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Object_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1046,6 +1082,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Object_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1056,6 +1093,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Object_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1066,6 +1104,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Members_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1076,6 +1115,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Members_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1086,6 +1126,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Member_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1096,6 +1137,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Array_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1106,6 +1148,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Element_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1116,6 +1159,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_String_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1126,6 +1170,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Character_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1136,6 +1181,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Escape_8(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1146,6 +1192,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Number_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1156,6 +1203,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Integer_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1166,6 +1214,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Integer_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1176,6 +1225,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Integer_3(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1186,6 +1236,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Exponent_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1196,6 +1247,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_Exponent_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1206,6 +1258,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_WS_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1216,6 +1269,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce_WS_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1226,6 +1280,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString22_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1236,6 +1291,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString23_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1246,6 +1302,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString24_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1256,6 +1313,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__ElementSepPlus25_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1266,6 +1324,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__ElementSepPlus25_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1276,6 +1335,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__ElementSepStar26_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1286,6 +1346,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__CharacterPlus27_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1296,6 +1357,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__CharacterPlus27_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1306,6 +1368,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__CharacterStar28_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1316,6 +1379,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__DigitPlus32_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1326,6 +1390,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__DigitPlus32_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1336,6 +1401,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__TermSet33_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1346,6 +1412,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__Group34_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1356,6 +1423,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce___Group34Question35_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -1366,6 +1434,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
                 Self::reduce__LiteralString36_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,

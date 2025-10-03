@@ -459,38 +459,34 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         #[cfg(feature = "tree")]
         let trees = node.tree_stack.split_off(node.tree_stack.len() - count);
 
+        let Some(next_nonterm_shift) = parser.get_states()[state].shift_goto_nonterm(rule.name)
+        else {
+            unreachable!(
+                "Failed to shift non-terminal: {:?} in state {}",
+                rule.name, state
+            );
+        };
+
         match Data::reduce_action(
             &mut node.data_stack,
             &mut node.location_stack,
+            next_nonterm_shift.push,
             reduce_rule,
             shift,
             term,
             userdata,
             &mut new_location,
         ) {
-            Ok(non_empty_pushed) => {
-                if let Some(nonterm_shift_state) =
-                    parser.get_states()[state].shift_goto_nonterm(rule.name)
+            Ok(_) => {
+                node.state_stack.push(next_nonterm_shift.state);
+                node.location_stack.push(new_location);
+                node.precedence_stack.push(precedence);
+                #[cfg(feature = "tree")]
                 {
-                    node.state_stack.push(nonterm_shift_state.state);
-                    if !nonterm_shift_state.push && non_empty_pushed {
-                        node.data_stack.pop();
-                        node.data_stack.push_empty();
-                    }
-                    node.location_stack.push(new_location);
-                    node.precedence_stack.push(precedence);
-                    #[cfg(feature = "tree")]
-                    {
-                        node.tree_stack
-                            .push(crate::tree::Tree::new_nonterminal(rule.name.clone(), trees));
-                    }
-                    Ok(node_to_shift)
-                } else {
-                    unreachable!(
-                        "no shift state for non-terminal: {:?}",
-                        parser.get_rules()[reduce_rule].name
-                    );
+                    node.tree_stack
+                        .push(crate::tree::Tree::new_nonterminal(rule.name.clone(), trees));
                 }
+                Ok(node_to_shift)
             }
             Err(err) => {
                 self.try_remove_node_recursive(node_to_shift);

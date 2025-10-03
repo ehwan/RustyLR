@@ -713,6 +713,7 @@ impl GrammarDataStack {
     fn reduce_Rule_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -742,7 +743,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
-        __data_stack.__tags.push(GrammarTags::__stack1);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack1);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut RuleType = __data_stack.__stack2.pop().unwrap();
         let mut RuleLines = __data_stack.__stack3.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -764,7 +769,9 @@ impl GrammarDataStack {
                 rule_lines: RuleLines,
             }
         };
-        __data_stack.__stack1.push(__res);
+        if __push_data {
+            __data_stack.__stack1.push(__res);
+        }
         Ok(true)
     }
     ///RuleType -> parengroup
@@ -772,6 +779,7 @@ impl GrammarDataStack {
     fn reduce_RuleType_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -785,7 +793,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack2);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack2);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut parengroup = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -794,7 +806,9 @@ impl GrammarDataStack {
             };
             Some(group)
         };
-        __data_stack.__stack2.push(__res);
+        if __push_data {
+            __data_stack.__stack2.push(__res);
+        }
         Ok(true)
     }
     ///RuleType ->
@@ -802,15 +816,22 @@ impl GrammarDataStack {
     fn reduce_RuleType_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack2);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack2);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { None };
-        __data_stack.__stack2.push(__res);
+        if __push_data {
+            __data_stack.__stack2.push(__res);
+        }
         Ok(true)
     }
     ///RuleLines -> RuleLines pipe RuleLine
@@ -818,6 +839,7 @@ impl GrammarDataStack {
     fn reduce_RuleLines_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -838,7 +860,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack3)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut RuleLines = __data_stack.__stack3.pop().unwrap();
         let mut RuleLine = __data_stack.__stack4.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -850,7 +877,9 @@ impl GrammarDataStack {
             RuleLines.push(RuleLine);
             RuleLines
         };
-        __data_stack.__stack3.push(__res);
+        if __push_data {
+            __data_stack.__stack3.push(__res);
+        }
         Ok(true)
     }
     ///RuleLines -> RuleLine
@@ -858,6 +887,7 @@ impl GrammarDataStack {
     fn reduce_RuleLines_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -871,11 +901,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack3);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack3);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut RuleLine = __data_stack.__stack4.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![RuleLine] };
-        __data_stack.__stack3.push(__res);
+        if __push_data {
+            __data_stack.__stack3.push(__res);
+        }
         Ok(true)
     }
     ///RuleLine -> TokenMapped* PrecDef* Action
@@ -883,6 +919,7 @@ impl GrammarDataStack {
     fn reduce_RuleLine_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -904,7 +941,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack4);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack4);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut TokenMapped = __data_stack.__stack11.pop().unwrap();
         let mut PrecDef = __data_stack.__stack12.pop().unwrap();
         let mut Action = __data_stack.__stack2.pop().unwrap();
@@ -919,7 +960,9 @@ impl GrammarDataStack {
                 dprec: None,
             }
         };
-        __data_stack.__stack4.push(__res);
+        if __push_data {
+            __data_stack.__stack4.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef -> percent prec IdentOrLiteral
@@ -927,6 +970,7 @@ impl GrammarDataStack {
     fn reduce_PrecDef_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -948,12 +992,18 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack5);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack5);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut IdentOrLiteral = __data_stack.__stack10.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
-        __data_stack.__stack5.push(__res);
+        if __push_data {
+            __data_stack.__stack5.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef -> percent prec error
@@ -961,6 +1011,7 @@ impl GrammarDataStack {
     fn reduce_PrecDef_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -982,7 +1033,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack5);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack5);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -996,7 +1051,9 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack5.push(__res);
+        if __push_data {
+            __data_stack.__stack5.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef -> percent dprec literal
@@ -1004,6 +1061,7 @@ impl GrammarDataStack {
     fn reduce_PrecDef_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1025,7 +1083,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack5);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack5);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
@@ -1035,7 +1097,9 @@ impl GrammarDataStack {
             };
             PrecDPrecArgs::DPrec(literal)
         };
-        __data_stack.__stack5.push(__res);
+        if __push_data {
+            __data_stack.__stack5.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef -> percent dprec error
@@ -1043,6 +1107,7 @@ impl GrammarDataStack {
     fn reduce_PrecDef_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1064,7 +1129,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack5);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack5);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1078,7 +1147,9 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack5.push(__res);
+        if __push_data {
+            __data_stack.__stack5.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef -> percent error
@@ -1086,6 +1157,7 @@ impl GrammarDataStack {
     fn reduce_PrecDef_4(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1103,7 +1175,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        __data_stack.__tags.push(GrammarTags::__stack5);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack5);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -1117,7 +1193,9 @@ impl GrammarDataStack {
                 });
             PrecDPrecArgs::None
         };
-        __data_stack.__stack5.push(__res);
+        if __push_data {
+            __data_stack.__stack5.push(__res);
+        }
         Ok(true)
     }
     ///TokenMapped -> Pattern
@@ -1125,6 +1203,7 @@ impl GrammarDataStack {
     fn reduce_TokenMapped_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1138,11 +1217,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack6);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { (None, Pattern) };
-        __data_stack.__stack6.push(__res);
+        if __push_data {
+            __data_stack.__stack6.push(__res);
+        }
         Ok(true)
     }
     ///TokenMapped -> ident equal Pattern
@@ -1150,6 +1235,7 @@ impl GrammarDataStack {
     fn reduce_TokenMapped_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1171,7 +1257,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack6);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack6);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
@@ -1182,7 +1272,9 @@ impl GrammarDataStack {
             };
             (Some(ident), Pattern)
         };
-        __data_stack.__stack6.push(__res);
+        if __push_data {
+            __data_stack.__stack6.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem -> ident
@@ -1190,6 +1282,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSetItem_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1203,7 +1296,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack7);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1212,7 +1309,9 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Terminal(ident)
         };
-        __data_stack.__stack7.push(__res);
+        if __push_data {
+            __data_stack.__stack7.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem -> ident minus ident
@@ -1220,6 +1319,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSetItem_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1241,7 +1341,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack7);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
@@ -1255,7 +1359,9 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Range(first, last)
         };
-        __data_stack.__stack7.push(__res);
+        if __push_data {
+            __data_stack.__stack7.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem -> ident minus error
@@ -1263,6 +1369,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSetItem_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1284,7 +1391,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack7);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1298,7 +1409,9 @@ impl GrammarDataStack {
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
-        __data_stack.__stack7.push(__res);
+        if __push_data {
+            __data_stack.__stack7.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem -> literal
@@ -1306,6 +1419,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSetItem_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1319,7 +1433,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack7);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1328,7 +1446,9 @@ impl GrammarDataStack {
             };
             TerminalSetItem::Literal(literal)
         };
-        __data_stack.__stack7.push(__res);
+        if __push_data {
+            __data_stack.__stack7.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem -> literal minus literal
@@ -1336,6 +1456,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSetItem_4(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1357,7 +1478,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack7);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
@@ -1371,7 +1496,9 @@ impl GrammarDataStack {
             };
             TerminalSetItem::LiteralRange(first, last)
         };
-        __data_stack.__stack7.push(__res);
+        if __push_data {
+            __data_stack.__stack7.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem -> literal minus error
@@ -1379,6 +1506,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSetItem_5(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1400,7 +1528,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack7);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack7);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -1414,7 +1546,9 @@ impl GrammarDataStack {
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
-        __data_stack.__stack7.push(__res);
+        if __push_data {
+            __data_stack.__stack7.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSet -> lbracket caret? TerminalSetItem* rbracket
@@ -1422,6 +1556,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSet_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1447,7 +1582,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack8);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut caret = __data_stack.__stack13.pop().unwrap();
         let mut TerminalSetItem = __data_stack.__stack14.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
@@ -1462,7 +1601,9 @@ impl GrammarDataStack {
                 close_span: __rustylr_location_rbracket.span(),
             }
         };
-        __data_stack.__stack8.push(__res);
+        if __push_data {
+            __data_stack.__stack8.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSet -> dot
@@ -1470,6 +1611,7 @@ impl GrammarDataStack {
     fn reduce_TerminalSet_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1483,7 +1625,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack8);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack8);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_dot = __location_stack.pop().unwrap();
         let __res = {
@@ -1495,7 +1641,9 @@ impl GrammarDataStack {
                 close_span: span,
             }
         };
-        __data_stack.__stack8.push(__res);
+        if __push_data {
+            __data_stack.__stack8.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> ident
@@ -1503,6 +1651,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1516,7 +1665,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1525,7 +1678,9 @@ impl GrammarDataStack {
             };
             PatternArgs::Ident(ident)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> Pattern plus
@@ -1533,6 +1688,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1549,7 +1705,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack9)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         let mut plus = __data_stack.__terminals.pop().unwrap();
         let mut __rustylr_location_plus = __location_stack.pop().unwrap();
@@ -1560,7 +1721,9 @@ impl GrammarDataStack {
             };
             PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> Pattern star
@@ -1568,6 +1731,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1584,7 +1748,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack9)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_star = __location_stack.pop().unwrap();
@@ -1592,7 +1761,9 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> Pattern question
@@ -1600,6 +1771,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1616,7 +1788,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack9)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_question = __location_stack.pop().unwrap();
@@ -1624,7 +1801,9 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> Pattern exclamation
@@ -1632,6 +1811,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_4(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1648,7 +1828,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack9)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_exclamation = __location_stack.pop().unwrap();
@@ -1659,7 +1844,9 @@ impl GrammarDataStack {
                 __rustylr_location_exclamation.span(),
             )
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> TerminalSet
@@ -1667,6 +1854,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_5(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1680,11 +1868,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut TerminalSet = __data_stack.__stack8.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { PatternArgs::TerminalSet(TerminalSet) };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> Pattern slash Pattern
@@ -1692,6 +1886,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_6(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1712,13 +1907,20 @@ impl GrammarDataStack {
                 GrammarTags::__stack9)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut lh = __data_stack.__stack9.pop().unwrap();
         let mut p1 = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> lparen $sep(Pattern*, pipe, +) rparen
@@ -1726,6 +1928,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_7(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1747,7 +1950,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Pattern = __data_stack.__stack16.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         let mut __rustylr_location_rparen = __location_stack.pop().unwrap();
@@ -1760,7 +1967,9 @@ impl GrammarDataStack {
                 __rustylr_location_rparen.span(),
             )
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> lparen error rparen
@@ -1768,6 +1977,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1789,7 +1999,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1804,7 +2018,9 @@ impl GrammarDataStack {
                 });
             PatternArgs::Ident(format_ident!("dummy"))
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> literal
@@ -1812,6 +2028,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_9(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1825,7 +2042,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -1834,7 +2055,9 @@ impl GrammarDataStack {
             };
             PatternArgs::Literal(literal)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> Pattern minus Pattern
@@ -1842,6 +2065,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_10(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1862,13 +2086,20 @@ impl GrammarDataStack {
                 GrammarTags::__stack9)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut p2 = __data_stack.__stack9.pop().unwrap();
         let mut p1 = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
         let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
@@ -1876,6 +2107,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_11(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1917,7 +2149,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut del = __data_stack.__stack9.pop().unwrap();
         let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
@@ -1941,7 +2177,9 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
@@ -1949,6 +2187,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_12(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -1994,7 +2233,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut del = __data_stack.__stack9.pop().unwrap();
         let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
@@ -2018,7 +2261,9 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
@@ -2026,6 +2271,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_13(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2071,7 +2317,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut del = __data_stack.__stack9.pop().unwrap();
         let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 5usize);
@@ -2095,7 +2345,9 @@ impl GrammarDataStack {
             }
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern error rparen
@@ -2103,6 +2355,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_14(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2144,7 +2397,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 8usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut del = __data_stack.__stack9.pop().unwrap();
         let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 3usize);
@@ -2177,7 +2434,9 @@ impl GrammarDataStack {
                 });
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
@@ -2185,6 +2444,7 @@ impl GrammarDataStack {
     fn reduce_Pattern_15(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2230,7 +2490,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 9usize);
-        __data_stack.__tags.push(GrammarTags::__stack9);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack9);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut del = __data_stack.__stack9.pop().unwrap();
         let mut base = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 4usize);
@@ -2263,7 +2527,9 @@ impl GrammarDataStack {
                 });
             PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
         };
-        __data_stack.__stack9.push(__res);
+        if __push_data {
+            __data_stack.__stack9.push(__res);
+        }
         Ok(true)
     }
     ///Action -> bracegroup
@@ -2271,6 +2537,7 @@ impl GrammarDataStack {
     fn reduce_Action_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2284,7 +2551,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack2);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack2);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut bracegroup = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -2293,7 +2564,9 @@ impl GrammarDataStack {
             };
             Some(group)
         };
-        __data_stack.__stack2.push(__res);
+        if __push_data {
+            __data_stack.__stack2.push(__res);
+        }
         Ok(true)
     }
     ///Action ->
@@ -2301,15 +2574,22 @@ impl GrammarDataStack {
     fn reduce_Action_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack2);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack2);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { None };
-        __data_stack.__stack2.push(__res);
+        if __push_data {
+            __data_stack.__stack2.push(__res);
+        }
         Ok(true)
     }
     ///IdentOrLiteral -> ident
@@ -2317,6 +2597,7 @@ impl GrammarDataStack {
     fn reduce_IdentOrLiteral_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2330,7 +2611,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack10);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -2339,7 +2624,9 @@ impl GrammarDataStack {
             };
             IdentOrLiteral::Ident(ident)
         };
-        __data_stack.__stack10.push(__res);
+        if __push_data {
+            __data_stack.__stack10.push(__res);
+        }
         Ok(true)
     }
     ///IdentOrLiteral -> literal
@@ -2347,6 +2634,7 @@ impl GrammarDataStack {
     fn reduce_IdentOrLiteral_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2360,7 +2648,11 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack10);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack10);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut literal = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
@@ -2369,7 +2661,9 @@ impl GrammarDataStack {
             };
             IdentOrLiteral::Literal(literal)
         };
-        __data_stack.__stack10.push(__res);
+        if __push_data {
+            __data_stack.__stack10.push(__res);
+        }
         Ok(true)
     }
     ///Directive -> percent token ident [^semicolon]+ semicolon
@@ -2377,6 +2671,7 @@ impl GrammarDataStack {
     fn reduce_Directive_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2430,6 +2725,7 @@ impl GrammarDataStack {
     fn reduce_Directive_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2476,6 +2772,7 @@ impl GrammarDataStack {
     fn reduce_Directive_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2522,6 +2819,7 @@ impl GrammarDataStack {
     fn reduce_Directive_3(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2564,6 +2862,7 @@ impl GrammarDataStack {
     fn reduce_Directive_4(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2610,6 +2909,7 @@ impl GrammarDataStack {
     fn reduce_Directive_5(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2657,6 +2957,7 @@ impl GrammarDataStack {
     fn reduce_Directive_6(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2699,6 +3000,7 @@ impl GrammarDataStack {
     fn reduce_Directive_7(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2746,6 +3048,7 @@ impl GrammarDataStack {
     fn reduce_Directive_8(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2788,6 +3091,7 @@ impl GrammarDataStack {
     fn reduce_Directive_9(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2834,6 +3138,7 @@ impl GrammarDataStack {
     fn reduce_Directive_10(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2880,6 +3185,7 @@ impl GrammarDataStack {
     fn reduce_Directive_11(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2926,6 +3232,7 @@ impl GrammarDataStack {
     fn reduce_Directive_12(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -2972,6 +3279,7 @@ impl GrammarDataStack {
     fn reduce_Directive_13(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3014,6 +3322,7 @@ impl GrammarDataStack {
     fn reduce_Directive_14(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3060,6 +3369,7 @@ impl GrammarDataStack {
     fn reduce_Directive_15(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3107,6 +3417,7 @@ impl GrammarDataStack {
     fn reduce_Directive_16(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3149,6 +3460,7 @@ impl GrammarDataStack {
     fn reduce_Directive_17(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3196,6 +3508,7 @@ impl GrammarDataStack {
     fn reduce_Directive_18(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3238,6 +3551,7 @@ impl GrammarDataStack {
     fn reduce_Directive_19(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3273,6 +3587,7 @@ impl GrammarDataStack {
     fn reduce_Directive_20(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3319,6 +3634,7 @@ impl GrammarDataStack {
     fn reduce_Directive_21(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3354,6 +3670,7 @@ impl GrammarDataStack {
     fn reduce_Directive_22(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3400,6 +3717,7 @@ impl GrammarDataStack {
     fn reduce_Directive_23(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3434,6 +3752,7 @@ impl GrammarDataStack {
     fn reduce_Directive_24(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3480,6 +3799,7 @@ impl GrammarDataStack {
     fn reduce_Directive_25(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3515,6 +3835,7 @@ impl GrammarDataStack {
     fn reduce_Directive_26(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3561,6 +3882,7 @@ impl GrammarDataStack {
     fn reduce_Directive_27(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3608,6 +3930,7 @@ impl GrammarDataStack {
     fn reduce_Directive_28(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3654,6 +3977,7 @@ impl GrammarDataStack {
     fn reduce_Directive_29(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3700,6 +4024,7 @@ impl GrammarDataStack {
     fn reduce_Directive_30(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3742,6 +4067,7 @@ impl GrammarDataStack {
     fn reduce_Directive_31(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3787,6 +4113,7 @@ impl GrammarDataStack {
     fn reduce_Directive_32(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3829,6 +4156,7 @@ impl GrammarDataStack {
     fn reduce_Directive_33(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3871,6 +4199,7 @@ impl GrammarDataStack {
     fn reduce_GrammarLine_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3897,6 +4226,7 @@ impl GrammarDataStack {
     fn reduce__TokenMappedPlus15_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3910,11 +4240,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack11);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack11);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__stack6.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack11.push(__res);
+        if __push_data {
+            __data_stack.__stack11.push(__res);
+        }
         Ok(true)
     }
     ///TokenMapped+ -> TokenMapped+ TokenMapped
@@ -3922,6 +4258,7 @@ impl GrammarDataStack {
     fn reduce__TokenMappedPlus15_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3938,7 +4275,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack11)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Ap = __data_stack.__stack11.pop().unwrap();
         let mut A = __data_stack.__stack6.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -3946,7 +4288,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack11.push(__res);
+        if __push_data {
+            __data_stack.__stack11.push(__res);
+        }
         Ok(true)
     }
     ///TokenMapped* -> TokenMapped+
@@ -3954,6 +4298,7 @@ impl GrammarDataStack {
     fn reduce__TokenMappedStar16_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -3966,10 +4311,16 @@ impl GrammarDataStack {
                 GrammarTags::__stack11)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token0 = __data_stack.__stack11.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = __token0;
-        __data_stack.__stack11.push(__res);
+        if __push_data {
+            __data_stack.__stack11.push(__res);
+        }
         Ok(true)
     }
     ///TokenMapped* ->
@@ -3977,15 +4328,22 @@ impl GrammarDataStack {
     fn reduce__TokenMappedStar16_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack11);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack11);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { vec![] };
-        __data_stack.__stack11.push(__res);
+        if __push_data {
+            __data_stack.__stack11.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef+ -> PrecDef
@@ -3993,6 +4351,7 @@ impl GrammarDataStack {
     fn reduce__PrecDefPlus17_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4006,11 +4365,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack12);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack12);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__stack5.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack12.push(__res);
+        if __push_data {
+            __data_stack.__stack12.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef+ -> PrecDef+ PrecDef
@@ -4018,6 +4383,7 @@ impl GrammarDataStack {
     fn reduce__PrecDefPlus17_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4034,7 +4400,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack12)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Ap = __data_stack.__stack12.pop().unwrap();
         let mut A = __data_stack.__stack5.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -4042,7 +4413,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack12.push(__res);
+        if __push_data {
+            __data_stack.__stack12.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef* -> PrecDef+
@@ -4050,6 +4423,7 @@ impl GrammarDataStack {
     fn reduce__PrecDefStar18_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4062,10 +4436,16 @@ impl GrammarDataStack {
                 GrammarTags::__stack12)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token0 = __data_stack.__stack12.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = __token0;
-        __data_stack.__stack12.push(__res);
+        if __push_data {
+            __data_stack.__stack12.push(__res);
+        }
         Ok(true)
     }
     ///PrecDef* ->
@@ -4073,15 +4453,22 @@ impl GrammarDataStack {
     fn reduce__PrecDefStar18_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack12);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack12);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { vec![] };
-        __data_stack.__stack12.push(__res);
+        if __push_data {
+            __data_stack.__stack12.push(__res);
+        }
         Ok(true)
     }
     ///caret? -> caret
@@ -4089,6 +4476,7 @@ impl GrammarDataStack {
     fn reduce__caretQuestion19_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4102,11 +4490,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack13);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack13);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = Some(A);
-        __data_stack.__stack13.push(__res);
+        if __push_data {
+            __data_stack.__stack13.push(__res);
+        }
         Ok(true)
     }
     ///caret? ->
@@ -4114,15 +4508,22 @@ impl GrammarDataStack {
     fn reduce__caretQuestion19_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack13);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack13);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { None };
-        __data_stack.__stack13.push(__res);
+        if __push_data {
+            __data_stack.__stack13.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem
@@ -4130,6 +4531,7 @@ impl GrammarDataStack {
     fn reduce__TerminalSetItemPlus20_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4143,11 +4545,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack14);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack14);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__stack7.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack14.push(__res);
+        if __push_data {
+            __data_stack.__stack14.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
@@ -4155,6 +4563,7 @@ impl GrammarDataStack {
     fn reduce__TerminalSetItemPlus20_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4171,7 +4580,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack14)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Ap = __data_stack.__stack14.pop().unwrap();
         let mut A = __data_stack.__stack7.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -4179,7 +4593,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack14.push(__res);
+        if __push_data {
+            __data_stack.__stack14.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem* -> TerminalSetItem+
@@ -4187,6 +4603,7 @@ impl GrammarDataStack {
     fn reduce__TerminalSetItemStar21_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4199,10 +4616,16 @@ impl GrammarDataStack {
                 GrammarTags::__stack14)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token0 = __data_stack.__stack14.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = __token0;
-        __data_stack.__stack14.push(__res);
+        if __push_data {
+            __data_stack.__stack14.push(__res);
+        }
         Ok(true)
     }
     ///TerminalSetItem* ->
@@ -4210,15 +4633,22 @@ impl GrammarDataStack {
     fn reduce__TerminalSetItemStar21_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack14);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack14);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { vec![] };
-        __data_stack.__stack14.push(__res);
+        if __push_data {
+            __data_stack.__stack14.push(__res);
+        }
         Ok(true)
     }
     ///Pattern+ -> Pattern
@@ -4226,6 +4656,7 @@ impl GrammarDataStack {
     fn reduce__PatternPlus22_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4239,11 +4670,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack15);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack15);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__stack9.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack15.push(__res);
+        if __push_data {
+            __data_stack.__stack15.push(__res);
+        }
         Ok(true)
     }
     ///Pattern+ -> Pattern+ Pattern
@@ -4251,6 +4688,7 @@ impl GrammarDataStack {
     fn reduce__PatternPlus22_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4267,7 +4705,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack15)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Ap = __data_stack.__stack15.pop().unwrap();
         let mut A = __data_stack.__stack9.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -4275,7 +4718,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack15.push(__res);
+        if __push_data {
+            __data_stack.__stack15.push(__res);
+        }
         Ok(true)
     }
     ///Pattern* -> Pattern+
@@ -4283,6 +4728,7 @@ impl GrammarDataStack {
     fn reduce__PatternStar23_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4295,10 +4741,16 @@ impl GrammarDataStack {
                 GrammarTags::__stack15)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token0 = __data_stack.__stack15.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = __token0;
-        __data_stack.__stack15.push(__res);
+        if __push_data {
+            __data_stack.__stack15.push(__res);
+        }
         Ok(true)
     }
     ///Pattern* ->
@@ -4306,15 +4758,22 @@ impl GrammarDataStack {
     fn reduce__PatternStar23_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack15);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack15);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { vec![] };
-        __data_stack.__stack15.push(__res);
+        if __push_data {
+            __data_stack.__stack15.push(__res);
+        }
         Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
@@ -4322,6 +4781,7 @@ impl GrammarDataStack {
     fn reduce___PatternStar23SepPlus24_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4335,11 +4795,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack16);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack16);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token0 = __data_stack.__stack15.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![__token0] };
-        __data_stack.__stack16.push(__res);
+        if __push_data {
+            __data_stack.__stack16.push(__res);
+        }
         Ok(true)
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
@@ -4347,6 +4813,7 @@ impl GrammarDataStack {
     fn reduce___PatternStar23SepPlus24_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4367,7 +4834,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack16)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token1 = __data_stack.__stack15.pop().unwrap();
         let mut __token0 = __data_stack.__stack16.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
@@ -4376,7 +4848,9 @@ impl GrammarDataStack {
             __token0.push(__token1);
             __token0
         };
-        __data_stack.__stack16.push(__res);
+        if __push_data {
+            __data_stack.__stack16.push(__res);
+        }
         Ok(true)
     }
     ///comma? -> comma
@@ -4384,6 +4858,7 @@ impl GrammarDataStack {
     fn reduce__commaQuestion25_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4407,6 +4882,7 @@ impl GrammarDataStack {
     fn reduce__commaQuestion25_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4421,6 +4897,7 @@ impl GrammarDataStack {
     fn reduce___TermSet26Plus27_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4434,11 +4911,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack17);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack17);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack17.push(__res);
+        if __push_data {
+            __data_stack.__stack17.push(__res);
+        }
         Ok(true)
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
@@ -4446,6 +4929,7 @@ impl GrammarDataStack {
     fn reduce___TermSet26Plus27_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4462,7 +4946,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack17)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Ap = __data_stack.__stack17.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -4470,7 +4959,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack17.push(__res);
+        if __push_data {
+            __data_stack.__stack17.push(__res);
+        }
         Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
@@ -4478,6 +4969,7 @@ impl GrammarDataStack {
     fn reduce__IdentOrLiteralPlus28_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4491,11 +4983,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack18);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack18);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__stack10.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack18.push(__res);
+        if __push_data {
+            __data_stack.__stack18.push(__res);
+        }
         Ok(true)
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
@@ -4503,6 +5001,7 @@ impl GrammarDataStack {
     fn reduce__IdentOrLiteralPlus28_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4519,7 +5018,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack18)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__stack10.pop().unwrap();
         let mut Ap = __data_stack.__stack18.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -4527,7 +5031,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack18.push(__res);
+        if __push_data {
+            __data_stack.__stack18.push(__res);
+        }
         Ok(true)
     }
     ///ident+ -> ident
@@ -4535,6 +5041,7 @@ impl GrammarDataStack {
     fn reduce__identPlus29_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4548,11 +5055,17 @@ impl GrammarDataStack {
             );
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __data_stack.__tags.push(GrammarTags::__stack17);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack17);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = { vec![A] };
-        __data_stack.__stack17.push(__res);
+        if __push_data {
+            __data_stack.__stack17.push(__res);
+        }
         Ok(true)
     }
     ///ident+ -> ident+ ident
@@ -4560,6 +5073,7 @@ impl GrammarDataStack {
     fn reduce__identPlus29_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4576,7 +5090,12 @@ impl GrammarDataStack {
                 GrammarTags::__stack17)
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        if __push_data {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+        } else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut Ap = __data_stack.__stack17.pop().unwrap();
         let mut A = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
@@ -4584,7 +5103,9 @@ impl GrammarDataStack {
             Ap.push(A);
             Ap
         };
-        __data_stack.__stack17.push(__res);
+        if __push_data {
+            __data_stack.__stack17.push(__res);
+        }
         Ok(true)
     }
     ///ident* -> ident+
@@ -4592,6 +5113,7 @@ impl GrammarDataStack {
     fn reduce__identStar30_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4604,10 +5126,16 @@ impl GrammarDataStack {
                 GrammarTags::__stack17)
             );
         }
+        if __push_data {} else {
+            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let mut __token0 = __data_stack.__stack17.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = __token0;
-        __data_stack.__stack17.push(__res);
+        if __push_data {
+            __data_stack.__stack17.push(__res);
+        }
         Ok(true)
     }
     ///ident* ->
@@ -4615,15 +5143,22 @@ impl GrammarDataStack {
     fn reduce__identStar30_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
         __rustylr_location0: &mut SpanPair,
     ) -> Result<bool, ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(GrammarTags::__stack17);
+        if __push_data {
+            __data_stack.__tags.push(GrammarTags::__stack17);
+        } else {
+            __data_stack.__tags.push(GrammarTags::Empty);
+        }
         let __res = { vec![] };
-        __data_stack.__stack17.push(__res);
+        if __push_data {
+            __data_stack.__stack17.push(__res);
+        }
         Ok(true)
     }
     ///GrammarLine+ -> GrammarLine
@@ -4631,6 +5166,7 @@ impl GrammarDataStack {
     fn reduce__GrammarLinePlus31_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4651,6 +5187,7 @@ impl GrammarDataStack {
     fn reduce__GrammarLinePlus31_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<SpanPair>,
+        __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
@@ -4896,6 +5433,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     fn reduce_action(
         data_stack: &mut Self,
         location_stack: &mut Vec<SpanPair>,
+        push_data: bool,
         rule_index: usize,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Self::Term>,
@@ -4907,6 +5445,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Rule_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4917,6 +5456,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_RuleType_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4927,6 +5467,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_RuleType_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4937,6 +5478,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_RuleLines_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4947,6 +5489,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_RuleLines_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4957,6 +5500,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_RuleLine_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4967,6 +5511,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_PrecDef_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4977,6 +5522,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_PrecDef_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4987,6 +5533,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_PrecDef_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -4997,6 +5544,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_PrecDef_3(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5007,6 +5555,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_PrecDef_4(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5017,6 +5566,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TokenMapped_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5027,6 +5577,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TokenMapped_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5037,6 +5588,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSetItem_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5047,6 +5599,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSetItem_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5057,6 +5610,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSetItem_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5067,6 +5621,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSetItem_3(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5077,6 +5632,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSetItem_4(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5087,6 +5643,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSetItem_5(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5097,6 +5654,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSet_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5107,6 +5665,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_TerminalSet_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5117,6 +5676,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5127,6 +5687,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5137,6 +5698,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5147,6 +5709,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_3(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5157,6 +5720,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_4(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5167,6 +5731,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_5(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5177,6 +5742,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_6(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5187,6 +5753,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_7(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5197,6 +5764,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_8(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5207,6 +5775,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_9(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5217,6 +5786,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_10(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5227,6 +5797,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_11(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5237,6 +5808,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_12(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5247,6 +5819,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_13(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5257,6 +5830,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_14(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5267,6 +5841,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Pattern_15(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5277,6 +5852,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Action_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5287,6 +5863,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Action_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5297,6 +5874,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_IdentOrLiteral_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5307,6 +5885,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_IdentOrLiteral_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5317,6 +5896,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5327,6 +5907,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5337,6 +5918,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_2(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5347,6 +5929,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_3(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5357,6 +5940,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_4(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5367,6 +5951,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_5(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5377,6 +5962,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_6(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5387,6 +5973,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_7(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5397,6 +5984,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_8(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5407,6 +5995,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_9(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5417,6 +6006,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_10(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5427,6 +6017,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_11(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5437,6 +6028,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_12(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5447,6 +6039,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_13(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5457,6 +6050,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_14(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5467,6 +6061,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_15(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5477,6 +6072,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_16(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5487,6 +6083,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_17(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5497,6 +6094,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_18(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5507,6 +6105,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_19(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5517,6 +6116,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_20(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5527,6 +6127,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_21(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5537,6 +6138,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_22(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5547,6 +6149,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_23(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5557,6 +6160,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_24(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5567,6 +6171,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_25(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5577,6 +6182,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_26(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5587,6 +6193,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_27(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5597,6 +6204,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_28(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5607,6 +6215,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_29(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5617,6 +6226,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_30(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5627,6 +6237,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_31(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5637,6 +6248,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_32(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5647,6 +6259,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_Directive_33(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5657,6 +6270,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce_GrammarLine_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5667,6 +6281,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TokenMappedPlus15_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5677,6 +6292,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TokenMappedPlus15_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5687,6 +6303,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TokenMappedStar16_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5697,6 +6314,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TokenMappedStar16_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5707,6 +6325,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PrecDefPlus17_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5717,6 +6336,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PrecDefPlus17_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5727,6 +6347,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PrecDefStar18_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5737,6 +6358,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PrecDefStar18_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5747,6 +6369,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__caretQuestion19_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5757,6 +6380,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__caretQuestion19_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5767,6 +6391,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TerminalSetItemPlus20_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5777,6 +6402,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TerminalSetItemPlus20_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5787,6 +6413,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TerminalSetItemStar21_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5797,6 +6424,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__TerminalSetItemStar21_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5807,6 +6435,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PatternPlus22_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5817,6 +6446,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PatternPlus22_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5827,6 +6457,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PatternStar23_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5837,6 +6468,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__PatternStar23_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5847,6 +6479,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce___PatternStar23SepPlus24_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5857,6 +6490,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce___PatternStar23SepPlus24_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5867,6 +6501,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__commaQuestion25_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5877,6 +6512,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__commaQuestion25_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5887,6 +6523,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce___TermSet26Plus27_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5897,6 +6534,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce___TermSet26Plus27_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5907,6 +6545,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__IdentOrLiteralPlus28_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5917,6 +6556,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__IdentOrLiteralPlus28_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5927,6 +6567,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__identPlus29_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5937,6 +6578,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__identPlus29_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5947,6 +6589,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__identStar30_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5957,6 +6600,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__identStar30_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5967,6 +6611,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__GrammarLinePlus31_0(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,
@@ -5977,6 +6622,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 Self::reduce__GrammarLinePlus31_1(
                     data_stack,
                     location_stack,
+                    push_data,
                     shift,
                     lookahead,
                     user_data,

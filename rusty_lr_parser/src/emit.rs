@@ -1151,31 +1151,97 @@ impl Grammar {
                         TokenStream::new()
                     } else {
                         if rule.tokens.len() > 0 {
-                            // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
-                            // just pop n-1 tokens
-                            let first_tag_name = token_to_stack_name(rule.tokens[0].token)
-                                .unwrap_or(&empty_tag_name);
+                            if new_tag_name == &empty_tag_name {
+                                // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
+                                // just pop n-1 tokens
+                                let first_tag_name = token_to_stack_name(rule.tokens[0].token)
+                                    .unwrap_or(&empty_tag_name);
 
-                            if first_tag_name == new_tag_name {
-                                // pop n-1 tokens, no new insertion
-                                let len = rule.tokens.len() - 1;
-                                let truncate_stream = if len > 0 {
-                                    quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);}
+                                if first_tag_name == new_tag_name {
+                                    // pop n-1 tokens, no new insertion
+                                    let len = rule.tokens.len() - 1;
+                                    let truncate_stream = if len > 0 {
+                                        quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);}
+                                    } else {
+                                        TokenStream::new()
+                                    };
+                                    truncate_stream
                                 } else {
-                                    TokenStream::new()
-                                };
-                                truncate_stream
+                                    let len = rule.tokens.len();
+                                    // len > 0 here
+                                    quote! {
+                                        __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                                        __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                    }
+                                }
                             } else {
-                                let len = rule.tokens.len();
-                                // len > 0 here
-                                quote! {
-                                    __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
-                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
+                                // just pop n-1 tokens
+                                let first_tag_name = token_to_stack_name(rule.tokens[0].token)
+                                    .unwrap_or(&empty_tag_name);
+
+                                if first_tag_name == new_tag_name {
+                                    // pop n-1 tokens, no new insertion
+                                    let lenm1 = rule.tokens.len() - 1;
+                                    let truncate_stream = if lenm1 > 0 {
+                                        quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #lenm1);}
+                                    } else {
+                                        TokenStream::new()
+                                    };
+
+                                    let len = rule.tokens.len();
+                                    quote! {
+                                        if __push_data {
+                                            #truncate_stream
+                                        } else {
+                                            __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                                        }
+                                    }
+                                } else if first_tag_name == &empty_tag_name {
+                                    // pop n-1 tokens, no new insertion
+                                    let lenm1 = rule.tokens.len() - 1;
+                                    let truncate_stream = if lenm1 > 0 {
+                                        quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #lenm1);}
+                                    } else {
+                                        TokenStream::new()
+                                    };
+
+                                    let len = rule.tokens.len();
+                                    quote! {
+                                        if __push_data {
+                                            __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                        } else {
+                                            #truncate_stream
+                                        }
+                                    }
+                                } else {
+                                    let len = rule.tokens.len();
+                                    // len > 0 here
+                                    quote! {
+                                        __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
+                                        if __push_data {
+                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                        } else {
+                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                                        }
+                                    }
                                 }
                             }
                         } else {
-                            quote! {
-                                __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                            if new_tag_name == &empty_tag_name {
+                                quote! {
+                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                }
+                            } else {
+                                quote! {
+                                    if __push_data {
+                                        __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
+                                    } else {
+                                        __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
+                                    }
+                                }
                             }
                         }
                     };
@@ -1286,7 +1352,7 @@ impl Grammar {
                     }
 
                     reduce_action_case_streams.extend(quote! {
-                        #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, shift, lookahead, user_data, location0 ),
+                        #rule_index => Self::#reduce_fn_ident( data_stack, location_stack, push_data, shift, lookahead, user_data, location0 ),
                     });
 
                     let returns_non_empty = stack_names_for_nonterm[nonterm_idx].is_some();
@@ -1309,6 +1375,7 @@ impl Grammar {
                             fn #reduce_fn_ident(
                                 __data_stack: &mut Self,
                                 __location_stack: &mut Vec<#location_typename>,
+                                __push_data: bool,
                                 shift: &mut bool,
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
@@ -1324,7 +1391,9 @@ impl Grammar {
                                 #custom_reduce_action_stream
 
                                 let __res = #reduce_action_body
-                                __data_stack.#stack_name.push(__res);
+                                if __push_data {
+                                    __data_stack.#stack_name.push(__res);
+                                }
 
                                 Ok(#returns_non_empty)
                             }
@@ -1336,6 +1405,7 @@ impl Grammar {
                             fn #reduce_fn_ident(
                                 __data_stack: &mut Self,
                                 __location_stack: &mut Vec<#location_typename>,
+                                __push_data: bool,
                                 shift: &mut bool,
                                 lookahead: &#module_prefix::TerminalSymbol<#token_typename>,
                                 #user_data_parameter_name: &mut #user_data_typename,
@@ -1662,6 +1732,7 @@ impl Grammar {
             fn reduce_action(
                 data_stack: &mut Self,
                 location_stack: &mut Vec<#location_typename>,
+                push_data: bool,
                 rule_index: usize,
                 shift: &mut bool,
                 lookahead: &#module_prefix::TerminalSymbol<Self::Term>,

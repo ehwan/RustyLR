@@ -42,6 +42,7 @@ pub trait DataStack: Sized + Default {
         // the caller (usually from generated code) must pops all of the tokens used for this reduce_action
         data_stack: &mut Self,
         location_stack: &mut Vec<Self::Location>,
+        push_data: bool,
 
         // the index of the production rule to reduce
         rule_index: usize,
