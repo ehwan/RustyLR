@@ -16,12 +16,17 @@ impl<StateIndex> ShiftTarget<StateIndex> {
     }
 }
 
+pub enum ReduceMap<Map, Value> {
+    Map(Map),
+    Value(Value),
+}
+
 /// This intermediate state is a common structure to convert from generated code and grammar builder
 /// into various types of parser states (SparseState, DenseState, ...).
 pub struct IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_term: Vec<(TermClass, ShiftTarget<StateIndex>)>, // must be sorted
     pub shift_goto_map_nonterm: Vec<(NonTerm, ShiftTarget<StateIndex>)>, // must be sorted
-    pub reduce_map: Vec<(TermClass, Vec<RuleIndex>)>,                   // must be sorted
+    pub reduce_map: ReduceMap<Vec<(TermClass, Vec<RuleIndex>)>, Vec<RuleIndex>>, // must be sorted
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 

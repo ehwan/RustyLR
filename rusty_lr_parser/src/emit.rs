@@ -782,7 +782,7 @@ impl Grammar {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
-                        reduce_map: #reduce_map_construct_stream,
+                        reduce_map: #module_prefix::parser::state::ReduceMap::Map(#reduce_map_construct_stream),
                         ruleset: {
                             static __RULES: [#rule_index_typename; #ruleset_len] = [
                                 #ruleset_rules_body_stream
