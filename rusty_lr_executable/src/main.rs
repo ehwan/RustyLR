@@ -135,7 +135,7 @@ fn main() {
                     for r in rules.iter_mut().skip(1) {
                         *r = format!("\n    {}", r);
                     }
-                    println!("    {} }}", rules.join(""));
+                    println!("    {}\n}}", rules.join(""));
                 }
             }
             if !from_states.is_empty() {
