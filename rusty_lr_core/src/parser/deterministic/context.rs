@@ -282,32 +282,28 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         userdata,
                         Some(error_location),
                     ) {
-                        Err(ParseError::NoAction(err)) => {
+                        Err(ParseError::NoAction(err1)) => {
                             if self.state_stack.len() == 1 {
-                                return Err(ParseError::NoAction(super::error::NoActionError {
-                                    term: err.term,
-                                    location: err.location,
-                                    state: err.state,
-                                }));
+                                return Err(ParseError::NoAction(err));
+                            } else {
+                                // no action for `error` token, continue to panic mode
+                                // merge location with previous
+                                error_location = Data::Location::new(
+                                    std::iter::once(&err1.location.unwrap())
+                                        .chain(self.location_stack.iter().rev()),
+                                    2, // error node
+                                );
+                                self.data_stack.pop();
+                                self.precedence_stack.pop();
+                                self.location_stack.pop();
+                                self.state_stack.pop();
+
+                                #[cfg(feature = "tree")]
+                                self.tree_stack.pop(); // pop tree node for `error`
                             }
-
-                            // no action for `error` token, continue to panic mode
-                            // merge location with previous
-                            error_location = Data::Location::new(
-                                std::iter::once(&err.location.unwrap())
-                                    .chain(self.location_stack.iter().rev()),
-                                2, // error node
-                            );
-                            self.data_stack.pop();
-                            self.precedence_stack.pop();
-                            self.location_stack.pop();
-                            self.state_stack.pop();
-
-                            #[cfg(feature = "tree")]
-                            self.tree_stack.pop(); // pop tree node for `error`
                         }
-                        Ok(()) => break,             // successfully shifted `error`
-                        Err(err) => return Err(err), // other errors
+                        Ok(()) => break, // successfully shifted `error`
+                        Err(_) => return Err(ParseError::NoAction(err)), // other errors
                     }
                 }
 
