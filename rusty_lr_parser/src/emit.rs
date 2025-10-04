@@ -104,11 +104,17 @@ impl Grammar {
         };
 
         if self.glr {
+            use rusty_lr_core::parser::state::ReduceMap;
             // count the max number of multiple reduce rules in a single state
             let max_reduce_rules = self
                 .states
                 .iter()
-                .flat_map(|s| s.reduce_map.iter().map(|(_, rules)| rules.len()))
+                .map(|s| match &s.reduce_map {
+                    ReduceMap::Map(map) => {
+                        map.iter().map(|(_, rules)| rules.len()).max().unwrap_or(1)
+                    }
+                    ReduceMap::Value(value) => value.len(),
+                })
                 .max()
                 .unwrap_or(1);
 
@@ -716,30 +722,55 @@ impl Grammar {
                     });
                 }
 
-                let mut reduce_body_stream = TokenStream::new();
-                let mut reduce_rules_terms_map = std::collections::BTreeMap::new();
-                for (term, rules) in &state.reduce_map {
-                    reduce_rules_terms_map
-                        .entry(rules)
-                        .or_insert_with(std::collections::BTreeSet::new)
-                        .insert(*term);
-                }
-                for (rules, terms) in reduce_rules_terms_map {
-                    let terms_set_name = get_or_insert_terminal_set(terms);
+                use rusty_lr_core::parser::state::ReduceMap;
+                let reduce_map_stream = match &state.reduce_map {
+                    ReduceMap::Map(map) => {
+                        if map.is_empty() {
+                            quote! {
+                                #module_prefix::parser::state::ReduceMap::Map(Default::default())
+                            }
+                        } else {
+                            let mut reduce_rules_terms_map = std::collections::BTreeMap::new();
+                            for (term, rules) in map {
+                                reduce_rules_terms_map
+                                    .entry(rules)
+                                    .or_insert_with(std::collections::BTreeSet::new)
+                                    .insert(*term);
+                            }
+                            let mut reduce_map_extend_stream = TokenStream::new();
+                            for (rules, terms) in reduce_rules_terms_map {
+                                let terms_set_name = get_or_insert_terminal_set(terms);
 
-                    let rules_it = rules
-                        .iter()
-                        .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+                                let rules_len = rules.len();
+                                let rules_it = rules
+                                    .iter()
+                                    .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
 
-                    reduce_body_stream.extend(quote! {
-                        let reduce_rules = vec![#(#rules_it),*];
-                        __reduce_map.extend(
-                            #terms_set_name.iter().map(
-                                |term| (*term, reduce_rules.clone())
-                            )
-                        );
-                    });
-                }
+                                reduce_map_extend_stream.extend(quote! {
+                                    static REDUCE_RULES: [#rule_index_typename; #rules_len] = [#(#rules_it),*];
+                                    __reduce_map.extend(
+                                        #terms_set_name.iter().map(
+                                            |term| (*term, REDUCE_RULES.to_vec())
+                                        )
+                                    );
+                                });
+                            }
+                            quote! {
+                                #module_prefix::parser::state::ReduceMap::Map({
+                                let mut __reduce_map = std::collections::BTreeMap::new();
+                                #reduce_map_extend_stream
+                                __reduce_map.into_iter().collect()
+                                })
+                            }
+                        }
+                    }
+                    ReduceMap::Value(value) => {
+                        let rules_it = value
+                            .iter()
+                            .map(|&rule_id| proc_macro2::Literal::usize_unsuffixed(rule_id));
+                        quote! { #module_prefix::parser::state::ReduceMap::Value(vec![#(#rules_it),*]) }
+                    }
+                };
 
                 let mut ruleset_rules_body_stream = TokenStream::new();
                 let mut ruleset_shifted_body_stream = TokenStream::new();
@@ -766,23 +797,11 @@ impl Grammar {
                     quote! { usize }
                 };
 
-                let reduce_map_construct_stream = if reduce_body_stream.is_empty() {
-                    quote! { Default::default() }
-                } else {
-                    quote! {
-                        {
-                        let mut __reduce_map = std::collections::BTreeMap::new();
-                        #reduce_body_stream
-                        __reduce_map.into_iter().collect()
-                        }
-                    }
-                };
-
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
                         shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
-                        reduce_map: #module_prefix::parser::state::ReduceMap::Map(#reduce_map_construct_stream),
+                        reduce_map: #reduce_map_stream,
                         ruleset: {
                             static __RULES: [#rule_index_typename; #ruleset_len] = [
                                 #ruleset_rules_body_stream

@@ -73,11 +73,13 @@ where
                     )
                 })
                 .collect(),
-            reduce_map: state
-                .reduce_map
-                .into_iter()
-                .map(|(term, rules)| (term, rules.into_iter().collect()))
-                .collect(),
+            reduce_map: crate::parser::state::ReduceMap::Map(
+                state
+                    .reduce_map
+                    .into_iter()
+                    .map(|(term, rules)| (term, rules.into_iter().collect()))
+                    .collect(),
+            ),
             ruleset: state.ruleset.into_iter().collect(),
         }
     }

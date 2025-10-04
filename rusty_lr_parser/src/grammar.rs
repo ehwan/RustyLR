@@ -1801,6 +1801,7 @@ impl Grammar {
 
             let rules = state
                 .reduce_map
+                .to_map()
                 .iter()
                 .map(|(_, r)| r)
                 .collect::<BTreeSet<_>>();
@@ -1950,7 +1951,7 @@ impl Grammar {
         // check for unused production rules
         let mut rules_used = vec![false; self.builder.rules.len()];
         for state in &new_states {
-            for rules in state.reduce_map.iter().map(|(_, r)| r) {
+            for rules in state.reduce_map.to_map().iter().map(|(_, r)| r) {
                 for &rule in rules {
                     rules_used[rule] = true;
                 }

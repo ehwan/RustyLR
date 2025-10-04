@@ -16,9 +16,18 @@ impl<StateIndex> ShiftTarget<StateIndex> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum ReduceMap<Map, Value> {
     Map(Map),
     Value(Value),
+}
+impl<Map, Value> ReduceMap<Map, Value> {
+    pub fn to_map(&self) -> &Map {
+        match self {
+            Self::Map(map) => map,
+            _ => panic!(),
+        }
+    }
 }
 
 /// This intermediate state is a common structure to convert from generated code and grammar builder
@@ -121,8 +130,14 @@ pub trait State {
 
     /// Get the next state for a given non-terminal symbol.
     fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>>;
-    /// Get the reduce rule index for a given terminal symbol.
-    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules>;
+    /// Get the next shift target and reduce rule index for a given terminal symbol.
+    fn shift_reduce(
+        &self,
+        class: Self::TermClass,
+    ) -> (
+        Option<ShiftTarget<Self::StateIndex>>,
+        Option<&Self::ReduceRules>,
+    );
 
     /// Check if this state is an accept state.
     fn is_accept(&self) -> bool;
@@ -150,7 +165,7 @@ pub struct SparseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     pub(crate) shift_goto_map_nonterm: HashMap<NonTerm, ShiftTarget<StateIndex>>,
 
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: HashMap<TermClass, RuleContainer>,
+    pub(crate) reduce_map: ReduceMap<HashMap<TermClass, RuleContainer>, RuleContainer>,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
@@ -174,13 +189,27 @@ impl<
     fn shift_goto_nonterm(&self, nonterm: Self::NonTerm) -> Option<ShiftTarget<Self::StateIndex>> {
         self.shift_goto_map_nonterm.get(&nonterm).copied()
     }
-    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
-        self.reduce_map.get(&class)
+    fn shift_reduce(
+        &self,
+        class: Self::TermClass,
+    ) -> (
+        Option<ShiftTarget<Self::StateIndex>>,
+        Option<&Self::ReduceRules>,
+    ) {
+        let shift = self.shift_goto_class(class);
+        let reduce = match &self.reduce_map {
+            ReduceMap::Map(map) => map.get(&class),
+            ReduceMap::Value(value) => shift.is_none().then_some(value),
+        };
+        (shift, reduce)
     }
     fn is_accept(&self) -> bool {
-        self.reduce_map.is_empty()
-            && self.shift_goto_map_class.is_empty()
+        self.shift_goto_map_class.is_empty()
             && self.shift_goto_map_nonterm.is_empty()
+            && match &self.reduce_map {
+                ReduceMap::Map(m) => m.is_empty(),
+                ReduceMap::Value(_) => false,
+            }
     }
     fn expected_shift_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
         self.shift_goto_map_class.keys().copied()
@@ -189,7 +218,12 @@ impl<
         self.shift_goto_map_nonterm.keys().copied()
     }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
-        self.reduce_map.values().flat_map(RuleContainer::to_iter)
+        let container: Vec<_> = match &self.reduce_map {
+            ReduceMap::Map(m) => m.values().flat_map(RuleContainer::to_iter).collect(),
+            ReduceMap::Value(value) => value.to_iter().collect(),
+        };
+
+        container.into_iter()
     }
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
@@ -213,9 +247,8 @@ pub struct DenseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     pub(crate) shift_goto_map_nonterm_keys: Vec<NonTerm>,
 
     /// terminal symbol -> reduce rule index
-    pub(crate) reduce_map: Vec<Option<RuleContainer>>,
+    pub(crate) reduce_map: ReduceMap<(usize, Vec<Option<RuleContainer>>), RuleContainer>,
     /// reduce_map[i] will contain i+offset 'th class's reduce rule.
-    pub(crate) reduce_offset: usize,
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
@@ -246,15 +279,29 @@ impl<
             .copied()
             .flatten()
     }
-    fn reduce(&self, class: Self::TermClass) -> Option<&Self::ReduceRules> {
-        self.reduce_map
-            .get(class.to_usize().wrapping_sub(self.reduce_offset))
-            .and_then(|r| r.as_ref())
+    fn shift_reduce(
+        &self,
+        class: Self::TermClass,
+    ) -> (
+        Option<ShiftTarget<Self::StateIndex>>,
+        Option<&Self::ReduceRules>,
+    ) {
+        let shift = self.shift_goto_class(class);
+        let reduce = match &self.reduce_map {
+            ReduceMap::Map((offset, map)) => map
+                .get(class.to_usize().wrapping_sub(*offset))
+                .and_then(|r| r.as_ref()),
+            ReduceMap::Value(value) => shift.is_none().then_some(value),
+        };
+        (shift, reduce)
     }
     fn is_accept(&self) -> bool {
-        self.reduce_map.is_empty()
-            && self.shift_goto_map_class.is_empty()
+        self.shift_goto_map_class.is_empty()
             && self.shift_goto_map_nonterm.is_empty()
+            && match &self.reduce_map {
+                ReduceMap::Map((_, m)) => m.is_empty(),
+                ReduceMap::Value(_) => false,
+            }
     }
     fn expected_shift_term(&self) -> impl Iterator<Item = Self::TermClass> + '_ {
         self.shift_goto_map_class_keys.iter().copied()
@@ -263,10 +310,15 @@ impl<
         self.shift_goto_map_nonterm_keys.iter().copied()
     }
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
-        self.reduce_map
-            .iter()
-            .filter_map(|r| r.as_ref())
-            .flat_map(RuleContainer::to_iter)
+        let container: Vec<_> = match &self.reduce_map {
+            ReduceMap::Map((_, m)) => m
+                .iter()
+                .filter_map(|r| r.as_ref())
+                .flat_map(RuleContainer::to_iter)
+                .collect(),
+            ReduceMap::Value(value) => value.to_iter().collect(),
+        };
+        container.into_iter()
     }
 
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
@@ -297,26 +349,27 @@ where
                 .collect::<Vec<_>>();
             debug_assert!(keys.is_sorted());
 
-            let keys = builder_state
-                .reduce_map
-                .iter()
-                .map(|(term, _)| term)
-                .collect::<Vec<_>>();
-            debug_assert!(keys.is_sorted());
+            if let ReduceMap::Map(map) = &builder_state.reduce_map {
+                let keys = map.iter().map(|(term, _)| term).collect::<Vec<_>>();
+                debug_assert!(keys.is_sorted());
+            }
         }
         SparseState {
             shift_goto_map_class: builder_state.shift_goto_map_term.into_iter().collect(),
             shift_goto_map_nonterm: builder_state.shift_goto_map_nonterm.into_iter().collect(),
-            reduce_map: builder_state
-                .reduce_map
-                .into_iter()
-                .map(|(term, rule)| {
-                    (
-                        term.try_into().expect("term conversion failed"),
-                        RuleContainer::from_set(rule),
-                    )
-                })
-                .collect(),
+            reduce_map: match builder_state.reduce_map {
+                ReduceMap::Map(map) => ReduceMap::Map(
+                    map.into_iter()
+                        .map(|(term, rule)| {
+                            (
+                                term.try_into().expect("term conversion failed"),
+                                RuleContainer::from_set(rule),
+                            )
+                        })
+                        .collect(),
+                ),
+                ReduceMap::Value(value) => ReduceMap::Value(RuleContainer::from_set(value)),
+            },
             ruleset: builder_state.ruleset.into_iter().collect(),
         }
     }
@@ -345,12 +398,10 @@ where
                 .collect::<Vec<_>>();
             debug_assert!(keys.is_sorted());
 
-            let keys = builder_state
-                .reduce_map
-                .iter()
-                .map(|(term, _)| term)
-                .collect::<Vec<_>>();
-            debug_assert!(keys.is_sorted());
+            if let ReduceMap::Map(map) = &builder_state.reduce_map {
+                let keys = map.iter().map(|(term, _)| term).collect::<Vec<_>>();
+                debug_assert!(keys.is_sorted());
+            }
         }
 
         let (shift_min, shift_len) = {
@@ -367,16 +418,27 @@ where
                 (0, 0)
             }
         };
-        let (reduce_min, reduce_len) = {
-            let mut iter = builder_state.reduce_map.iter().map(|(term, _)| term);
-            let min: Option<usize> = iter.next().map(|x| x.to_usize());
-            let max: Option<usize> = iter.next_back().map(|x| x.to_usize()).or(min);
-            if let (Some(min), Some(max)) = (min, max) {
-                (min, max - min + 1)
-            } else {
-                (0, 0)
+        let reduce_map = match builder_state.reduce_map {
+            ReduceMap::Map(map) => {
+                let (reduce_min, reduce_len) = {
+                    let mut iter = map.iter().map(|(term, _)| term);
+                    let min: Option<usize> = iter.next().map(|x| x.to_usize());
+                    let max: Option<usize> = iter.next_back().map(|x| x.to_usize()).or(min);
+                    if let (Some(min), Some(max)) = (min, max) {
+                        (min, max - min + 1)
+                    } else {
+                        (0, 0)
+                    }
+                };
+                let mut reduce_map = vec![None; reduce_len];
+                for (term, rule) in map {
+                    reduce_map[term.to_usize() - reduce_min] = Some(RuleContainer::from_set(rule));
+                }
+                ReduceMap::Map((reduce_min, reduce_map))
             }
+            ReduceMap::Value(value) => ReduceMap::Value(RuleContainer::from_set(value)),
         };
+
         let (nonterm_min, nonterm_len) = {
             let mut iter = builder_state
                 .shift_goto_map_nonterm
@@ -401,11 +463,6 @@ where
             shift_goto_map_class[term.to_usize() - shift_min] = Some(state);
         }
 
-        let mut reduce_map = vec![None; reduce_len];
-        for (term, rule) in builder_state.reduce_map {
-            reduce_map[term.to_usize() - reduce_min] = Some(RuleContainer::from_set(rule));
-        }
-
         let nonterm_keys = builder_state
             .shift_goto_map_nonterm
             .iter()
@@ -424,7 +481,6 @@ where
             shift_goto_map_nonterm_keys: nonterm_keys,
             shift_nonterm_offset: nonterm_min,
             reduce_map,
-            reduce_offset: reduce_min,
             ruleset: builder_state.ruleset.into_iter().collect(),
             _phantom: std::marker::PhantomData,
         }

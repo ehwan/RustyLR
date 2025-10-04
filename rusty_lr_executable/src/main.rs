@@ -94,12 +94,35 @@ fn main() {
                 }
                 println!("}}");
             }
-            if !state.reduce_map.is_empty() {
-                println!("Reduce on Terminals: {{");
-                for (term, rules) in &state.reduce_map {
-                    let term = term_class_map(*term);
-                    let preline = format!("    {term:>4} => {{ ");
-                    let mut rules = rules
+            match &state.reduce_map {
+                rusty_lr_core::parser::state::ReduceMap::Map(map) => {
+                    if !map.is_empty() {
+                        println!("Reduce on Terminals: {{");
+                        for (term, rules) in map {
+                            let term = term_class_map(*term);
+                            let preline = format!("    {term:>4} => {{ ");
+                            let mut rules = rules
+                                .iter()
+                                .map(|rule| {
+                                    out.grammar.builder.rules[*rule]
+                                        .rule
+                                        .clone()
+                                        .map(&term_class_map, &nonterm_map)
+                                        .to_string()
+                                })
+                                .collect::<Vec<_>>();
+                            for r in rules.iter_mut().skip(1) {
+                                *r = format!("\n{}{}", " ".repeat(preline.len()), r);
+                            }
+
+                            println!("{}{} }}", preline, rules.join(""));
+                        }
+                        println!("}}");
+                    }
+                }
+                rusty_lr_core::parser::state::ReduceMap::Value(value) => {
+                    println!("ReduceMap compressed to LR(0) table => {{");
+                    let mut rules = value
                         .iter()
                         .map(|rule| {
                             out.grammar.builder.rules[*rule]
@@ -110,12 +133,10 @@ fn main() {
                         })
                         .collect::<Vec<_>>();
                     for r in rules.iter_mut().skip(1) {
-                        *r = format!("\n{}{}", " ".repeat(preline.len()), r);
+                        *r = format!("\n    {}", r);
                     }
-
-                    println!("{}{} }}", preline, rules.join(""));
+                    println!("    {} }}", rules.join(""));
                 }
-                println!("}}");
             }
             if !from_states.is_empty() {
                 println!("From States: {{");

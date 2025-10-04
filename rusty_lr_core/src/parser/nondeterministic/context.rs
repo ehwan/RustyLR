@@ -1019,8 +1019,8 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         use crate::parser::State;
 
         let last_state = self.state(node);
-        let shift_state = parser.get_states()[last_state].shift_goto_class(class);
-        if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
+        let (shift_state, reduce) = parser.get_states()[last_state].shift_reduce(class);
+        if let Some(reduce_rules) = reduce {
             let mut shift = None;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
@@ -1428,8 +1428,8 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                     })
                     .unwrap_or(0)
             });
-        let shift_state = parser.get_states()[last_state].shift_goto_class(class);
-        if let Some(reduce_rules) = parser.get_states()[last_state].reduce(class) {
+        let (shift_state, reduce) = parser.get_states()[last_state].shift_reduce(class);
+        if let Some(reduce_rules) = reduce {
             let mut shift = None;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 

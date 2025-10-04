@@ -12,5 +12,6 @@ categories = ["parsing"]
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
 rusty_lr_buildscript = { version = "0.60.0", path = "../rusty_lr_buildscript" }
+rusty_lr_core = { version = "3.38.0", path = "../rusty_lr_core" }
 prettyplease = "0.2"
 syn = "2.0"

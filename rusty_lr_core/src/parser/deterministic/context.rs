@@ -375,8 +375,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let shift_to = loop {
             let state = &parser.get_states()[self.state_stack.last().unwrap().into_usize()];
 
-            let shift = state.shift_goto_class(class);
-            if let Some(reduce_rule) = state.reduce(class) {
+            let (shift, reduce) = state.shift_reduce(class);
+            if let Some(reduce_rule) = reduce {
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
@@ -630,8 +630,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 .unwrap_or_else(|| self.state_stack[stack_len])
                 .into_usize()];
 
-            let shift = state.shift_goto_class(class);
-            if let Some(reduce_rule) = state.reduce(class) {
+            let (shift, reduce) = state.shift_reduce(class);
+            if let Some(reduce_rule) = reduce {
                 use super::super::state::ReduceRules;
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
                 let rule = &parser.get_rules()[reduce_rule.into_usize()];
