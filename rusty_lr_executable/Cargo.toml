@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "1.26.0"
+version = "1.27.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Executable for rusty_lr, a Bison-like Parser generator & Compiler frontend framework for Rust generating IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing."
@@ -11,6 +11,6 @@ categories = ["parsing"]
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-rusty_lr_buildscript = { version = "0.60.0", path = "../rusty_lr_buildscript" }
+rusty_lr_buildscript = { version = "0.61.0", path = "../rusty_lr_buildscript" }
 prettyplease = "0.2"
 syn = "2.0"
