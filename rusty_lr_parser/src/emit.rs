@@ -747,12 +747,14 @@ impl Grammar {
                                     .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
 
                                 reduce_map_extend_stream.extend(quote! {
-                                    static REDUCE_RULES: [#rule_index_typename; #rules_len] = [#(#rules_it),*];
+                                    {
+                                    static __REDUCE_RULES: [#rule_index_typename; #rules_len] = [#(#rules_it),*];
                                     __reduce_map.extend(
                                         #terms_set_name.iter().map(
-                                            |term| (*term, REDUCE_RULES.to_vec())
+                                            |term| (*term, __REDUCE_RULES.to_vec())
                                         )
                                     );
+                                    }
                                 });
                             }
                             quote! {
