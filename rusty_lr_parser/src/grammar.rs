@@ -1973,6 +1973,10 @@ impl Grammar {
             }
         }
 
+        for state in &mut new_states {
+            state.optimize_lr0();
+        }
+
         self.states = new_states;
 
         collector

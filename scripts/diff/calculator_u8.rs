@@ -950,54 +950,12 @@ impl EParser {
             vec![::rusty_lr::Token::NonTerm(ENonTerminals::E),
             ::rusty_lr::Token::Term(ETerminalClasses::eof),], precedence : None, },
         ];
-        static __RUSTYLR_TSET4: [ETerminalClasses; 9usize] = [
-            ETerminalClasses::TermClass0,
-            ETerminalClasses::TermClass2,
-            ETerminalClasses::TermClass3,
-            ETerminalClasses::TermClass4,
-            ETerminalClasses::TermClass5,
-            ETerminalClasses::TermClass6,
-            ETerminalClasses::TermClass7,
-            ETerminalClasses::TermClass8,
-            ETerminalClasses::eof,
-        ];
-        static __RUSTYLR_TSET6: [ETerminalClasses; 7usize] = [
-            ETerminalClasses::TermClass0,
-            ETerminalClasses::TermClass3,
-            ETerminalClasses::TermClass5,
-            ETerminalClasses::TermClass6,
-            ETerminalClasses::TermClass7,
-            ETerminalClasses::TermClass8,
-            ETerminalClasses::eof,
-        ];
-        static __RUSTYLR_TSET3: [ETerminalClasses; 8usize] = [
-            ETerminalClasses::TermClass2,
-            ETerminalClasses::TermClass3,
-            ETerminalClasses::TermClass4,
-            ETerminalClasses::TermClass5,
-            ETerminalClasses::TermClass6,
-            ETerminalClasses::TermClass7,
-            ETerminalClasses::TermClass8,
-            ETerminalClasses::eof,
-        ];
-        static __RUSTYLR_TSET0: [ETerminalClasses; 4usize] = [
-            ETerminalClasses::TermClass2,
-            ETerminalClasses::TermClass4,
-            ETerminalClasses::TermClass5,
-            ETerminalClasses::TermClass6,
-        ];
-        static __RUSTYLR_TSET5: [ETerminalClasses; 3usize] = [
+        static __RUSTYLR_TSET1: [ETerminalClasses; 3usize] = [
             ETerminalClasses::TermClass3,
             ETerminalClasses::TermClass7,
             ETerminalClasses::TermClass8,
         ];
-        static __RUSTYLR_TSET1: [ETerminalClasses; 4usize] = [
-            ETerminalClasses::TermClass3,
-            ETerminalClasses::TermClass7,
-            ETerminalClasses::TermClass8,
-            ETerminalClasses::eof,
-        ];
-        static __RUSTYLR_TSET2: [ETerminalClasses; 3usize] = [
+        static __RUSTYLR_TSET0: [ETerminalClasses; 3usize] = [
             ETerminalClasses::TermClass7,
             ETerminalClasses::TermClass8,
             ETerminalClasses::eof,
@@ -1021,20 +979,14 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 11usize] = [2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 16,]; static
             __SHIFTED : [u8; 11usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [3];
-            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![3]), ruleset : { static
             __RULES : [u8; 1usize] = [3,]; static __SHIFTED : [u8; 1usize] = [1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
@@ -1068,10 +1020,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 11usize] = [2, 3, 4, 5, 5, 6, 7, 10, 11, 12, 13,]; static
             __SHIFTED : [u8; 11usize] = [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1084,7 +1033,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(4, true)),], reduce_map :
             ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
             std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [5];
-            __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (* term, REDUCE_RULES
+            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
             .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
             __RULES : [u8; 4usize] = [5, 5, 8, 9,]; static __SHIFTED : [u8; 4usize] = [1,
             3, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1093,19 +1042,13 @@ impl EParser {
             shift_goto_map_term : vec![(ETerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(7, false)),],
             shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [12];
-            __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![12]), ruleset : { static
             __RULES : [u8; 2usize] = [11, 12,]; static __SHIFTED : [u8; 2usize] = [1,
             1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [11];
-            __reduce_map.extend(__RUSTYLR_TSET4.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![11]), ruleset : { static
             __RULES : [u8; 1usize] = [11,]; static __SHIFTED : [u8; 1usize] = [2,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
@@ -1138,10 +1081,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 11usize] = [2, 3, 4, 4, 5, 6, 7, 10, 11, 12, 13,]; static
             __SHIFTED : [u8; 11usize] = [0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1167,20 +1107,14 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(12, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 5usize] = [4, 10, 11, 12, 13,]; static __SHIFTED : [u8;
             5usize] = [4, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize,
             shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [4];
-            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![4]), ruleset : { static
             __RULES : [u8; 1usize] = [4,]; static __SHIFTED : [u8; 1usize] = [5,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
@@ -1195,10 +1129,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 11usize] = [2, 3, 4, 5, 5, 6, 7, 10, 11, 12, 13,]; static
             __SHIFTED : [u8; 11usize] = [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1212,7 +1143,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(13, true)),], reduce_map :
             ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
             std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [5];
-            __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (* term, REDUCE_RULES
+            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, REDUCE_RULES
             .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
             __RULES : [u8; 4usize] = [5, 5, 8, 9,]; static __SHIFTED : [u8; 4usize] = [1,
             3, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1246,10 +1177,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 11usize] = [2, 3, 4, 5, 6, 6, 7, 10, 11, 12, 13,]; static
             __SHIFTED : [u8; 11usize] = [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1257,29 +1185,20 @@ impl EParser {
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm :
             vec![(ENonTerminals::Op, ::rusty_lr::parser::state::ShiftTarget::new(13,
-            true)),], reduce_map : ::rusty_lr::parser::state::ReduceMap::Map({ let mut
-            __reduce_map = std::collections::BTreeMap::new(); static REDUCE_RULES : [u8;
-            1usize] = [6]; __reduce_map.extend(__RUSTYLR_TSET5.iter().map(| term | (*
-            term, REDUCE_RULES.to_vec()))); __reduce_map.into_iter().collect() }),
+            true)),], reduce_map : ::rusty_lr::parser::state::ReduceMap::Value(vec![6]),
             ruleset : { static __RULES : [u8; 2usize] = [5, 6,]; static __SHIFTED : [u8;
             2usize] = [1, 3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
             : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [0];
-            __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![0]), ruleset : { static
             __RULES : [u8; 1usize] = [0,]; static __SHIFTED : [u8; 1usize] = [1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [14];
-            __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![14]), ruleset : { static
             __RULES : [u8; 1usize] = [14,]; static __SHIFTED : [u8; 1usize] = [1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
@@ -1296,29 +1215,20 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(22, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 8usize] = [0, 1, 2, 10, 11, 12, 13, 15,]; static __SHIFTED :
             [u8; 8usize] = [0, 0, 2, 0, 0, 0, 0, 1,]; __RULES.iter().zip(__SHIFTED
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr::rule::ShiftedRuleRef {
             rule : rule as usize, shifted : shifted as usize, } }).collect() } },
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term : vec![],
             shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [15];
-            __reduce_map.extend(__RUSTYLR_TSET6.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![15]), ruleset : { static
             __RULES : [u8; 1usize] = [15,]; static __SHIFTED : [u8; 1usize] = [2,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [2];
-            __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![2]), ruleset : { static
             __RULES : [u8; 1usize] = [2,]; static __SHIFTED : [u8; 1usize] = [3,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted : shifted as
@@ -1333,10 +1243,7 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
             (ENonTerminals::__Terminal32Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map :
-            ::rusty_lr::parser::state::ReduceMap::Map({ let mut __reduce_map =
-            std::collections::BTreeMap::new(); static REDUCE_RULES : [u8; 1usize] = [13];
-            __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term | (* term, REDUCE_RULES
-            .to_vec()))); __reduce_map.into_iter().collect() }), ruleset : { static
+            ::rusty_lr::parser::state::ReduceMap::Value(vec![13]), ruleset : { static
             __RULES : [u8; 11usize] = [2, 3, 4, 5, 6, 6, 7, 10, 11, 12, 13,]; static
             __SHIFTED : [u8; 11usize] = [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
@@ -1344,10 +1251,7 @@ impl EParser {
             usize, } }).collect() } }, ::rusty_lr::parser::state::IntermediateState {
             shift_goto_map_term : vec![], shift_goto_map_nonterm :
             vec![(ENonTerminals::Op, ::rusty_lr::parser::state::ShiftTarget::new(4,
-            true)),], reduce_map : ::rusty_lr::parser::state::ReduceMap::Map({ let mut
-            __reduce_map = std::collections::BTreeMap::new(); static REDUCE_RULES : [u8;
-            1usize] = [6]; __reduce_map.extend(__RUSTYLR_TSET2.iter().map(| term | (*
-            term, REDUCE_RULES.to_vec()))); __reduce_map.into_iter().collect() }),
+            true)),], reduce_map : ::rusty_lr::parser::state::ReduceMap::Value(vec![6]),
             ruleset : { static __RULES : [u8; 2usize] = [5, 6,]; static __SHIFTED : [u8;
             2usize] = [1, 3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr::rule::ShiftedRuleRef { rule : rule as usize, shifted
