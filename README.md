@@ -2,9 +2,9 @@
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
-***A Bison-like parser generator & compiler frontend for Rust supporting IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing.***
+***A Bison-like Parser generator & Compiler frontend for Rust generating optimised IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing.***
 
-RustyLR is a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables with deterministic LR and non-deterministic GLR parsing strategies. It supports custom reduce actions in Rust, with beautiful diagnostics.
+RustyLR is a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables and supporting deterministic LR and non-deterministic GLR parsing strategies. It supports custom reduce actions in Rust, with beautiful diagnostics.
 Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
 It constructs optimized state machines, ensuring efficient and reliable parsing.
 
@@ -17,169 +17,118 @@ It constructs optimized state machines, ensuring efficient and reliable parsing.
  - **Detailed Diagnostics:** Detects grammar conflicts, verbose conflict resolution stages, and optimization stages.
  - **Static & Runtime Conflict Resolution:** Provides mechanisms to resolve conflicts at compile time or runtime.
  - **Location Tracking:** Tracks the location of every token in the parse tree, useful for error reporting and debugging.
+ - **State Machine Debugging:** The `rustylr` executable provides a `--state` option that allows you to debug and visualize the generated state machine. This is useful for understanding how the parser will behave and for identifying potential issues in the grammar.
 
- ## Installation & Usage
- Add RustyLR to your `Cargo.toml`:
- ```toml
- [dependencies]
- rusty_lr = "..."
- ```
- 
- To work with `rusty_lr`, you need to generate parser code using one of the following methods:
-  - **Executable:** Use the standalone `rustylr` executable to generate parser code
-    ```sh
-    cargo install rustylr
-    ```
-  - **Build script:** Enable the `build` feature and generate parser code during the build process
-    ```toml
-    [build-dependencies]
-    rusty_lr = { version = "...", features = ["build"] }
-    ```
-  - **Procedural macros:** Use the built-in `lr1!` macro
+## Quick Start: Using the `rustylr` Executable
 
-**Recommendation:** Use the `rustylr` executable. It's faster and provides helpful grammar diagnostics, and commands for debugging state machines directly.
+The recommended way to use RustyLR is with the standalone `rustylr` executable. It's faster, provides richer grammar diagnostics, and includes commands for debugging state machines directly.
 
-**Important:** Ensure the version of the generated code targets the same version of `rusty_lr` in your `Cargo.toml`. Otherwise, you may encounter build errors.
+Here is a step-by-step guide to get you started.
 
- ### Using Procedural Macros
- Define your grammar using the `lr1!` macro:
- ```rust
-// This defines an `EParser` struct where `E` is the start symbol
-pub enum MyToken {
-    Num(i32),
-    Op(char),
-    Whitespace(char),
-}
+**1. Add `rusty_lr` to your dependencies**
 
-lr1! {
-    %userdata i32;              // User data type passed to parser
-    %tokentype MyToken;         // Token type; sequence of tokens fed to parser
-    %start E;                   // Start symbol; this is the final value of parser
+First, add the `rusty_lr` runtime library to your project's `Cargo.toml`. The generated parser code will depend on it.
 
-    // Token definitions
-    %token num  MyToken::Num(_);
-    %token plus MyToken::Op('+');
-    %token star MyToken::Op('*');
-    %token ws   MyToken::Whitespace(_);
-
-    // Left reduction for '+' and '*'
-    // Operator precedence: '*' > '+'
-    %left plus;
-    %left star;
-
-    // ================= Production Rules =================
-    Number(i32)                  // Production rule `Number` holds `i32` value
-        : ws* num ws*            // `Number` is one `num` surrounded by zero or more whitespaces
-        { 
-            // Extract the numeric value from the first token
-            if let MyToken::Num(value) = num {
-                value
-            } else {
-                println!("Error at: {:?}", @num); // location of the token
-                0
-            }
-        };
-
-    // Binary operator
-    BinOp(MyToken): plus | star ;
-
-    // Expression rules
-    E(f32): E BinOp e2=E { 
-        match BinOp {
-            MyToken::Op('+') => E + e2,  // Handle addition
-            MyToken::Op('*') => E * e2,  // Handle multiplication
-            _ => {
-                println!("Unexpected operator: {:?}", @BinOp); // location of the operator
-                0.0 // Default value for unexpected operators
-            }
-        }
-    }
-    | E error e2=E {
-        println!("Expected '+' or '*' at {:?}", @error); // location of the error token
-        0.0
-    }
-    | Number { Number as f32 }           // Number is `i32`, so cast to `f32`
-    ;
-}
-```
-This defines a simple arithmetic expression parser that can handle expressions like `2 + 3 * 4`.
-
-### Using Build Script
-For complex grammars, you can use a build script to generate the parser. This approach provides more detailed error messages when conflicts occur.
-
-**1. Create a grammar file** (e.g., `src/parser.rs`) with the following content:
-```rust
-// Rust code: `use` statements and type definitions
-use std::collections::HashMap;
-
-pub enum MyToken {
-    Identifier(String),
-    Number(i32),
-    // ... other token types
-}
-
-%% // Grammar definition starts here
-
-%tokentype MyToken;
-%start E;
-
-%token id MyToken::Identifier(_);
-%token num MyToken::Number(_);
-
-E: id
- | num
- ;
+```toml
+[dependencies]
+rusty_lr = "..." # Use the same version as the executable
 ```
 
-**2. Set up `build.rs`**:
-```rust
-// build.rs
-use rusty_lr::build;
+**2. Install the `rustylr` executable**
 
-fn main() {
-    println!("cargo::rerun-if-changed=src/parser.rs");
-
-    let output = format!("{}/parser.rs", std::env::var("OUT_DIR").unwrap());
-    build::Builder::new()
-        .file("src/parser.rs")     // Path to the input grammar file
-        .build(&output);           // Path to the generated output file
-}
-```
-
-**3. Include the generated source code:**
-```rust
-include!(concat!(env!("OUT_DIR"), "/parser.rs"));
-```
-
-**4. Use the parser in your code:**
-```rust
-let parser = parser::EParser::new();        // Create <StartSymbol>Parser instance
-let mut context = parser::EContext::new();  // Create <StartSymbol>Context instance
-let mut userdata: i32 = 0;
-
-for token in tokens {
-    match context.feed(&parser, token, &mut userdata) {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Parse error: {}", e);
-            return;
-        }
-    }
-}
-
-// Get the final parsed result
-let result: i32 = context.accept(&parser).unwrap();
-```
-
-### Using the `rustylr` Executable
-[![crates.io](https://img.shields.io/crates/v/rustylr.svg)](https://crates.io/crates/rustylr)
+You can install the executable from crates.io using `cargo`:
 
 ```bash
 cargo install rustylr
-rustylr input_grammar.rs output_parser.rs
 ```
 
-See the [Executable Documentation](rusty_lr_executable/README.md) for more details.
+**3. Create a grammar file**
+
+Create a file named `src/grammar.rs`. This file will contain your token definitions and grammar rules. Any Rust code above the `%%` separator will be copied directly to the generated output file.
+
+```rust
+// src/grammar.rs
+// This code is copied to the generated file.
+pub enum MyToken {
+    Num(i32),
+    Plus,
+}
+
+%% // Grammar rules start here.
+
+%tokentype MyToken;
+%start E;
+%left plus; // Specify left-associativity for the 'plus' token.
+
+// Define tokens and how they map to MyToken variants.
+%token num MyToken::Num(_);
+%token plus MyToken::Plus;
+
+// Define grammar rules and their return types.
+// E(i32) means the non-terminal E returns an i32.
+// In the action blocks `{ ... }`, you can refer to the values of symbols
+// on the right-hand side by their names (e.g., `e1`, `e2`, `num`).
+E(i32): e1=E plus e2=E { e1 + e2 }
+      | num { let MyToken::Num(num) = num else { unreachable!(); };
+        num
+      }
+      ;
+```
+
+**4. Generate the parser code**
+
+Run the `rustylr` executable to process your grammar file. This command will generate `src/parser.rs` from `src/grammar.rs`.
+
+```bash
+rustylr src/grammar.rs src/parser.rs
+```
+
+**5. Use the generated parser in your code**
+
+Finally, include the newly generated `src/parser.rs` as a module in your `main.rs` or `lib.rs` and use it to parse a token stream.
+
+```rust
+// In src/main.rs
+
+// Include the generated parser module.
+mod parser;
+// Bring the token enum into scope.
+use parser::MyToken;
+
+fn main() {
+    // Example token stream for "1 + 2"
+    let tokens = vec![MyToken::Num(1), MyToken::Plus, MyToken::Num(2)]; 
+
+    let parser = parser::EParser::new();        // Assumes 'E' is your start symbol
+    let mut context = parser::EContext::new();
+    let mut userdata = (); // No userdata in this example.
+
+    for token in tokens {
+        match context.feed(&parser, token, &mut userdata) {
+            Ok(_) => {}
+            Err(e) => {
+                eprintln!("Parse error: {}", e);
+                return;
+            }
+        }
+    }
+
+    // Get the final parsed result.
+    match context.accept(&parser) {
+        Ok(result) => {
+            let final_result: i32 = result;
+            println!("Parsed result: {}", final_result); // Should print "3"
+        },
+        Err(e) => {
+            eprintln!("Failed to produce a final result: {}", e);
+        }
+    }
+}
+```
+
+**Important:** Ensure the version of the `rustylr` executable you run matches the version of the `rusty_lr` crate in your `Cargo.toml`. Mismatched versions can lead to build errors.
+
+
 
 ## Generated Code Structure
 
@@ -248,6 +197,21 @@ Expr: exp1=Expr '+' exp2=Expr {
 
 See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for detailed information.
 
+## State Machine Debugging
+The `rustylr` executable includes a powerful `--state` option for debugging the generated parser's state machine. This feature allows you to inspect the details of each state, including its production rules, expected tokens, and transitions to other states. It is an invaluable tool for diagnosing grammar ambiguities, understanding shift/reduce conflicts, and verifying that the parser behaves as expected.
+
+To use it, run `rustylr` with the `--state` flag, followed by your grammar file:
+
+```bash
+rustylr --state src/grammar.rs
+```
+
+This will output a detailed, color-coded representation of the state machine directly in your terminal, making it easy to trace the parser's logic.
+
+![State Machine Debug](images/state_option.png)
+
+This visualization helps you understand the parsing process step-by-step and is particularly useful for debugging complex grammars.
+
 ## Examples
  - [Calculator (enum version)](examples/calculator/src/parser.rs): A numeric expression parser using custom token enums
  - [Calculator (u8 version)](examples/calculator_u8/src/parser.rs): A numeric expression parser using byte tokens
@@ -283,6 +247,33 @@ The crates have the following dependency relationships:
 - `rusty_lr_derive` and `rusty_lr_buildscript` depend on `rusty_lr_parser`
 - `rusty_lr_parser` depends on `rusty_lr_core`
 - `rusty_lr_executable` depends on `rusty_lr_buildscript`
+
+```mermaid
+graph TD;
+    subgraph User Facing
+        rusty_lr;
+        rusty_lr_executable;
+    end
+
+    subgraph Internal
+        rusty_lr_derive;
+        rusty_lr_buildscript;
+        rusty_lr_parser;
+        rusty_lr_core;
+    end
+
+    rusty_lr --> rusty_lr_core;
+    rusty_lr --> rusty_lr_derive;
+    rusty_lr --> rusty_lr_buildscript;
+
+    rusty_lr_derive --> rusty_lr_parser;
+    rusty_lr_buildscript --> rusty_lr_parser;
+    
+    rusty_lr_executable --> rusty_lr_buildscript;
+
+    rusty_lr_parser --> rusty_lr_core;
+```
+
 
 ### About the Versioning
 RustyLR consists of two big parts:
