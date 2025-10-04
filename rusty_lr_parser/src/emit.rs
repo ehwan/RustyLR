@@ -727,17 +727,20 @@ impl Grammar {
                 for (rules, terms) in reduce_rules_terms_map {
                     let terms_set_name = get_or_insert_terminal_set(terms);
 
+                    let rules_len = rules.len();
                     let rules_it = rules
                         .iter()
                         .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
 
                     reduce_body_stream.extend(quote! {
-                        let reduce_rules = vec![#(#rules_it),*];
+                        {
+                        static __REDUCE_RULES:[#rule_index_typename; #rules_len] = [#(#rules_it),*];
                         __reduce_map.extend(
                             #terms_set_name.iter().map(
-                                |term| (*term, reduce_rules.clone())
+                                |term| (*term, __REDUCE_RULES.to_vec())
                             )
                         );
+                        }
                     });
                 }
 
