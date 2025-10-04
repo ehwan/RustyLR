@@ -1973,8 +1973,47 @@ impl Grammar {
             }
         }
 
+        // if this state is convertible to LR(0) table, (e.g. table without lookahead symbols),
+        // convert it
         for state in &mut new_states {
-            state.optimize_lr0();
+            use std::collections::BTreeSet;
+            // reduce map must consist with unique ruleset
+            let rules: BTreeSet<_> = state
+                .reduce_map
+                .to_map()
+                .iter()
+                .map(|(_, rules)| rules)
+                .collect();
+            if rules.len() != 1 {
+                continue;
+            }
+
+            let shift_keys: BTreeSet<_> = state
+                .shift_goto_map_term
+                .iter()
+                .map(|(term, _)| term)
+                .collect();
+            let reduce_keys: BTreeSet<_> = state
+                .reduce_map
+                .to_map()
+                .iter()
+                .map(|(term, _)| term)
+                .collect();
+
+            // keys of shiftmap and reducemap must not overlap
+            if !shift_keys.is_disjoint(&reduce_keys) {
+                continue;
+            }
+
+            let rules = rules.into_iter().next().unwrap().clone();
+            // if this state is related to zero-length production rule, do not make it LR(0) table
+            if rules.iter().any(|&rule| {
+                let (nonterm, local_id) = self.get_rule_by_id(rule).unwrap();
+                nonterm.rules[local_id].tokens.len() == 0
+            }) {
+                continue;
+            }
+            state.reduce_map = rusty_lr_core::parser::state::ReduceMap::Value(rules);
         }
 
         self.states = new_states;

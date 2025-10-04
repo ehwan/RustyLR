@@ -39,46 +39,6 @@ pub struct IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex> {
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
 }
 
-impl<TermClass: Ord, NonTerm, StateIndex, RuleIndex: Ord + Clone>
-    IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex>
-{
-    /// if this state is convertible to LR(0) table, (e.g. table without lookahead symbols),
-    /// convert it
-    pub fn optimize_lr0(&mut self) {
-        use std::collections::BTreeSet;
-        // reduce map must consist with unique ruleset
-        let rules: BTreeSet<_> = self
-            .reduce_map
-            .to_map()
-            .iter()
-            .map(|(_, rules)| rules)
-            .collect();
-        if rules.len() != 1 {
-            return;
-        }
-
-        let shift_keys: BTreeSet<_> = self
-            .shift_goto_map_term
-            .iter()
-            .map(|(term, _)| term)
-            .collect();
-        let reduce_keys: BTreeSet<_> = self
-            .reduce_map
-            .to_map()
-            .iter()
-            .map(|(term, _)| term)
-            .collect();
-
-        // keys of shiftmap and reducemap must not overlap
-        if !shift_keys.is_disjoint(&reduce_keys) {
-            return;
-        }
-
-        let rules = rules.into_iter().next().unwrap().clone();
-        self.reduce_map = ReduceMap::Value(rules);
-    }
-}
-
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
 /// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.
 pub trait Index: Copy {
