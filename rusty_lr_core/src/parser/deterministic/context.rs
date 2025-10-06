@@ -269,41 +269,41 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     return Err(ParseError::NoAction(err));
                 }
 
-                let mut error_location = Location::new(self.location_stack.iter().rev(), 0);
-                let error = P::TermClass::ERROR;
-                let error_prec = error.precedence();
-
+                let error_prec = P::TermClass::ERROR.precedence();
+                let mut error_location = Data::Location::new(self.location_stack.iter().rev(), 0);
                 loop {
-                    match self.feed_location_impl(
-                        parser,
-                        TerminalSymbol::Error,
-                        error,
-                        error_prec,
-                        userdata,
-                        Some(error_location),
-                    ) {
-                        Err(ParseError::NoAction(err1)) => {
-                            if self.state_stack.len() == 1 {
-                                return Err(ParseError::NoAction(err));
-                            } else {
-                                // no action for `error` token, continue to panic mode
-                                // merge location with previous
-                                error_location = Data::Location::new(
-                                    std::iter::once(&err1.location.unwrap())
-                                        .chain(self.location_stack.iter().rev()),
-                                    2, // error node
-                                );
-                                self.data_stack.pop();
-                                self.precedence_stack.pop();
-                                self.location_stack.pop();
-                                self.state_stack.pop();
-
-                                #[cfg(feature = "tree")]
-                                self.tree_stack.pop(); // pop tree node for `error`
+                    if let Some(s) = self.state_stack.last() {
+                        if parser.get_states()[s.into_usize()].can_accept_error() {
+                            match self.feed_location_impl(
+                                parser,
+                                TerminalSymbol::Error,
+                                P::TermClass::ERROR,
+                                error_prec,
+                                userdata,
+                                Some(error_location),
+                            ) {
+                                Ok(()) => break, // successfully shifted `error`
+                                Err(ParseError::NoAction(err1)) => {
+                                    error_location = err1.location.unwrap();
+                                }
+                                Err(_) => return Err(ParseError::NoAction(err)), // other errors
                             }
                         }
-                        Ok(()) => break, // successfully shifted `error`
-                        Err(_) => return Err(ParseError::NoAction(err)), // other errors
+
+                        error_location = Data::Location::new(
+                            std::iter::once(&error_location)
+                                .chain(self.location_stack.iter().rev()),
+                            2,
+                        );
+
+                        self.location_stack.pop();
+                        self.state_stack.pop();
+                        self.precedence_stack.pop();
+                        self.data_stack.pop();
+                        #[cfg(feature = "tree")]
+                        self.tree_stack.pop();
+                    } else {
+                        return Err(ParseError::NoAction(err));
                     }
                 }
 
