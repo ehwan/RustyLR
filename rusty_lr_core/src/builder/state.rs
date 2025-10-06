@@ -81,6 +81,7 @@ where
                 .map(|(term, rules)| (term, rules.into_iter().collect()))
                 .collect(),
             ruleset: state.ruleset.into_iter().collect(),
+            can_accept_error: state.can_accept_error,
         }
     }
 }

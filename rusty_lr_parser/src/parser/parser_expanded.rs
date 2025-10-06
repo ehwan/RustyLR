@@ -7540,7 +7540,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted)
             | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::parengroup,
             ::rusty_lr_core::parser::state::ShiftTarget::new(2, true)),],
@@ -7553,7 +7553,7 @@ impl GrammarParser {
             2,]; static __SHIFTED : [u8; 3usize] = [1, 0, 0,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7562,7 +7562,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [1,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::colon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(4, true)),],
@@ -7570,7 +7570,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [0,]; static __SHIFTED : [u8; 1usize] = [2,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(5, true)),
@@ -7607,7 +7607,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::equal,
             ::rusty_lr_core::parser::state::ShiftTarget::new(6, true)),],
@@ -7618,7 +7618,7 @@ impl GrammarParser {
             { static __RULES : [u8; 2usize] = [12, 21,]; static __SHIFTED : [u8; 2usize]
             = [1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
@@ -7641,7 +7641,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 19usize] = [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7650,7 +7650,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [21,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7659,7 +7659,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [20,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(10, true)),],
@@ -7667,17 +7667,17 @@ impl GrammarParser {
             static __RULES : [u8; 5usize] = [32, 33, 34, 35, 36,]; static __SHIFTED :
             [u8; 5usize] = [1, 1, 1, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::lparen,
+            as usize, shifted : shifted as usize, } }).collect() }, can_accept_error :
+            false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::lparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(11, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : Default::default(), ruleset : {
             static __RULES : [u8; 5usize] = [32, 33, 34, 35, 36,]; static __SHIFTED :
             [u8; 5usize] = [2, 2, 2, 2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::ident,
+            as usize, shifted : shifted as usize, } }).collect() }, can_accept_error :
+            false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
             (GrammarTerminalClasses::dot,
             ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
@@ -7698,18 +7698,18 @@ impl GrammarParser {
             36,]; static __SHIFTED : [u8; 23usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
-            = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
-            [30]; __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term,
-            __REDUCE_RULES.to_vec()))); } __reduce_map.into_iter().collect() }, ruleset :
-            { static __RULES : [u8; 1usize] = [30,]; static __SHIFTED : [u8; 1usize] =
-            [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::ident,
+            as usize, shifted : shifted as usize, } }).collect() }, can_accept_error :
+            false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); { static
+            __REDUCE_RULES : [u8; 1usize] = [30]; __reduce_map.extend(__RUSTYLR_TSET3
+            .iter().map(| term | (* term, __REDUCE_RULES.to_vec()))); } __reduce_map
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 1usize] = [30,];
+            static __SHIFTED : [u8; 1usize] = [1,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
+            rule as usize, shifted : shifted as usize, } }).collect() }, can_accept_error
+            : true, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
             (GrammarTerminalClasses::dot,
             ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
@@ -7742,7 +7742,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES
             .iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::caret,
             ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),],
@@ -7755,7 +7755,7 @@ impl GrammarParser {
             86, 87,]; static __SHIFTED : [u8; 3usize] = [1, 0, 0,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7764,7 +7764,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [86,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),
@@ -7783,9 +7783,9 @@ impl GrammarParser {
             14, 15, 16, 17, 18, 19, 88, 89, 90, 91,]; static __SHIFTED : [u8; 11usize] =
             [0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter())
             .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
-            rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::minus,
+            rule as usize, shifted : shifted as usize, } }).collect() }, can_accept_error
+            : false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::minus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(18, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map =
             std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7794,7 +7794,7 @@ impl GrammarParser {
             { static __RULES : [u8; 3usize] = [13, 14, 15,]; static __SHIFTED : [u8;
             3usize] = [1, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(19, true)),
@@ -7804,7 +7804,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [14, 15,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7813,7 +7813,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [14,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7822,7 +7822,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [15,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::minus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(22, true)),],
@@ -7833,7 +7833,7 @@ impl GrammarParser {
             { static __RULES : [u8; 3usize] = [16, 17, 18,]; static __SHIFTED : [u8;
             3usize] = [1, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::literal,
             ::rusty_lr_core::parser::state::ShiftTarget::new(23, true)),
@@ -7843,7 +7843,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [17, 18,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7852,7 +7852,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [17,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7861,7 +7861,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [18,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7870,7 +7870,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [88,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),
@@ -7885,7 +7885,7 @@ impl GrammarParser {
             14, 15, 16, 17, 18, 89, 90,]; static __SHIFTED : [u8; 8usize] = [0, 0, 0, 0,
             0, 0, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted)
             | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7894,7 +7894,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [89,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::rbracket,
             ::rusty_lr_core::parser::state::ShiftTarget::new(29, true)),],
@@ -7902,7 +7902,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [19,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7911,7 +7911,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [19,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7920,7 +7920,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [26,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -7941,7 +7941,7 @@ impl GrammarParser {
             36,]; static __SHIFTED : [u8; 11usize] = [1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7950,7 +7950,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [22,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7959,7 +7959,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [23,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -7968,7 +7968,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [24,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
@@ -7991,7 +7991,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 19usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8010,18 +8010,18 @@ impl GrammarParser {
             { static __RULES : [u8; 6usize] = [22, 23, 24, 25, 27, 31,]; static __SHIFTED
             : [u8; 6usize] = [1, 1, 1, 1, 1, 3,]; __RULES.iter().zip(__SHIFTED.iter())
             .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
-            rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
-            = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
-            [25]; __reduce_map.extend(__RUSTYLR_TSET3.iter().map(| term | (* term,
-            __REDUCE_RULES.to_vec()))); } __reduce_map.into_iter().collect() }, ruleset :
-            { static __RULES : [u8; 1usize] = [25,]; static __SHIFTED : [u8; 1usize] =
-            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::ident,
+            rule as usize, shifted : shifted as usize, } }).collect() }, can_accept_error
+            : true, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); { static
+            __REDUCE_RULES : [u8; 1usize] = [25]; __reduce_map.extend(__RUSTYLR_TSET3
+            .iter().map(| term | (* term, __REDUCE_RULES.to_vec()))); } __reduce_map
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 1usize] = [25,];
+            static __SHIFTED : [u8; 1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
+            rule as usize, shifted : shifted as usize, } }).collect() }, can_accept_error
+            : true, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
             (GrammarTerminalClasses::dot,
             ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
@@ -8042,7 +8042,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 19usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8059,9 +8059,9 @@ impl GrammarParser {
             { static __RULES : [u8; 5usize] = [22, 23, 24, 25, 27,]; static __SHIFTED :
             [u8; 5usize] = [1, 1, 1, 1, 3,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::ident,
+            as usize, shifted : shifted as usize, } }).collect() }, can_accept_error :
+            true, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
             (GrammarTerminalClasses::dot,
             ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
@@ -8082,15 +8082,15 @@ impl GrammarParser {
             36,]; static __SHIFTED : [u8; 23usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5,]; __RULES.iter().zip(__SHIFTED.iter()).map(|
             (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule
-            as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::rparen,
+            as usize, shifted : shifted as usize, } }).collect() }, can_accept_error :
+            false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(42, true)),],
             shift_goto_map_nonterm : vec![], reduce_map : Default::default(), ruleset : {
             static __RULES : [u8; 1usize] = [29,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8099,7 +8099,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [29,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8121,7 +8121,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 7usize] = [1, 1, 1, 1, 1, 1, 1,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
@@ -8147,7 +8147,7 @@ impl GrammarParser {
             static __SHIFTED : [u8; 20usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8169,7 +8169,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 7usize] = [1, 1, 1, 1, 1, 1, 2,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8178,7 +8178,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [96,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::pipe,
             ::rusty_lr_core::parser::state::ShiftTarget::new(48, true)),
@@ -8188,7 +8188,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [28, 97,]; static __SHIFTED : [u8; 2usize] =
             [2, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
@@ -8218,7 +8218,8 @@ impl GrammarParser {
             94, 95, 97,]; static __SHIFTED : [u8; 23usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,]; __RULES.iter().zip(__SHIFTED
             .iter()).map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef
-            { rule : rule as usize, shifted : shifted as usize, } }).collect() } },
+            { rule : rule as usize, shifted : shifted as usize, } }).collect() },
+            can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8227,7 +8228,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [97,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8236,7 +8237,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [28,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8264,7 +8265,7 @@ impl GrammarParser {
             13usize] = [1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 0, 0,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(53, true)),
@@ -8279,7 +8280,7 @@ impl GrammarParser {
             { static __RULES : [u8; 4usize] = [33, 34, 36, 98,]; static __SHIFTED : [u8;
             4usize] = [7, 7, 7, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule,
             & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::rparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(54, true)),],
@@ -8287,7 +8288,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [33,]; static __SHIFTED : [u8; 1usize] =
             [8,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8296,7 +8297,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [33,]; static __SHIFTED : [u8; 1usize] =
             [9,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::rparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(56, true)),],
@@ -8304,7 +8305,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [34,]; static __SHIFTED : [u8; 1usize] =
             [8,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8313,7 +8314,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [34,]; static __SHIFTED : [u8; 1usize] =
             [9,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::rparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(58, true)),],
@@ -8321,7 +8322,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [36,]; static __SHIFTED : [u8; 1usize] =
             [8,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8330,7 +8331,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [36,]; static __SHIFTED : [u8; 1usize] =
             [9,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::rparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(60, true)),],
@@ -8338,7 +8339,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [35,]; static __SHIFTED : [u8; 1usize] =
             [7,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8347,7 +8348,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [35,]; static __SHIFTED : [u8; 1usize] =
             [8,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::rparen,
             ::rusty_lr_core::parser::state::ShiftTarget::new(62, true)),],
@@ -8355,7 +8356,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [32,]; static __SHIFTED : [u8; 1usize] =
             [7,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8364,7 +8365,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [32,]; static __SHIFTED : [u8; 1usize] =
             [8,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8386,7 +8387,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 7usize] = [3, 1, 1, 1, 1, 1, 1,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(65, false)),
@@ -8396,7 +8397,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [0, 3,]; static __SHIFTED : [u8; 2usize] =
             [4, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8405,7 +8406,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [0,]; static __SHIFTED : [u8; 1usize] =
             [5,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(5, true)),
@@ -8440,7 +8441,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8449,7 +8450,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [3,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8458,7 +8459,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [78,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::plus,
             ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
@@ -8480,7 +8481,7 @@ impl GrammarParser {
             __SHIFTED : [u8; 7usize] = [1, 1, 1, 1, 1, 1, 1,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(5, true)),
@@ -8508,18 +8509,18 @@ impl GrammarParser {
             79, 80,]; static __SHIFTED : [u8; 22usize] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter())
             .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
-            rule as usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
-            = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
-            [79]; __reduce_map.extend(__RUSTYLR_TSET11.iter().map(| term | (* term,
-            __REDUCE_RULES.to_vec()))); } __reduce_map.into_iter().collect() }, ruleset :
-            { static __RULES : [u8; 1usize] = [79,]; static __SHIFTED : [u8; 1usize] =
-            [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
-            ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
-            vec![(GrammarTerminalClasses::percent,
+            rule as usize, shifted : shifted as usize, } }).collect() }, can_accept_error
+            : false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![], reduce_map : {
+            let mut __reduce_map = std::collections::BTreeMap::new(); { static
+            __REDUCE_RULES : [u8; 1usize] = [79]; __reduce_map.extend(__RUSTYLR_TSET11
+            .iter().map(| term | (* term, __REDUCE_RULES.to_vec()))); } __reduce_map
+            .into_iter().collect() }, ruleset : { static __RULES : [u8; 1usize] = [79,];
+            static __SHIFTED : [u8; 1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter())
+            .map(| (& rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule :
+            rule as usize, shifted : shifted as usize, } }).collect() }, can_accept_error
+            : false, }, ::rusty_lr_core::parser::state::IntermediateState {
+            shift_goto_map_term : vec![(GrammarTerminalClasses::percent,
             ::rusty_lr_core::parser::state::ShiftTarget::new(73, true)),],
             shift_goto_map_nonterm : vec![(GrammarNonTerminals::PrecDef,
             ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
@@ -8534,7 +8535,7 @@ impl GrammarParser {
             7, 8, 9, 10, 82, 83, 84, 85,]; static __SHIFTED : [u8; 10usize] = [1, 0, 0,
             0, 0, 0, 0, 0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::prec,
             ::rusty_lr_core::parser::state::ShiftTarget::new(74, true)),
@@ -8546,8 +8547,8 @@ impl GrammarParser {
             static __RULES : [u8; 5usize] = [6, 7, 8, 9, 10,]; static __SHIFTED : [u8;
             5usize] = [1, 1, 1, 1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (&
             rule, & shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as
-            usize, shifted : shifted as usize, } }).collect() } },
-            ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
+            usize, shifted : shifted as usize, } }).collect() }, can_accept_error : true,
+            }, ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
             (GrammarTerminalClasses::literal,
@@ -8560,7 +8561,7 @@ impl GrammarParser {
             40,]; static __SHIFTED : [u8; 4usize] = [2, 2, 0, 0,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8569,7 +8570,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [39,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8578,7 +8579,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [40,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8587,7 +8588,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [7,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8596,7 +8597,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [6,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::literal,
             ::rusty_lr_core::parser::state::ShiftTarget::new(80, true)),
@@ -8606,7 +8607,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [8, 9,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8615,7 +8616,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [8,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8624,7 +8625,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [9,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8633,7 +8634,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [10,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8642,7 +8643,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [82,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::percent,
             ::rusty_lr_core::parser::state::ShiftTarget::new(73, true)),],
@@ -8655,7 +8656,7 @@ impl GrammarParser {
             8, 9, 10, 83, 84,]; static __SHIFTED : [u8; 7usize] = [0, 0, 0, 0, 0, 1, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8664,7 +8665,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [83,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::bracegroup,
             ::rusty_lr_core::parser::state::ShiftTarget::new(87, true)),],
@@ -8677,7 +8678,7 @@ impl GrammarParser {
             38,]; static __SHIFTED : [u8; 3usize] = [2, 0, 0,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8686,7 +8687,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [37,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8695,7 +8696,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [5,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8704,7 +8705,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [4,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::left,
             ::rusty_lr_core::parser::state::ShiftTarget::new(91, true)),
@@ -8747,7 +8748,7 @@ impl GrammarParser {
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
@@ -8763,7 +8764,7 @@ impl GrammarParser {
             51, 143, 144,]; static __SHIFTED : [u8; 6usize] = [0, 0, 2, 2, 0, 0,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(93, false)),],
@@ -8771,7 +8772,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [51,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8780,7 +8781,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [51,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8789,7 +8790,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [143,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
@@ -8803,7 +8804,7 @@ impl GrammarParser {
             144,]; static __SHIFTED : [u8; 4usize] = [0, 0, 3, 1,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8812,7 +8813,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [50,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8821,7 +8822,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [144,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
@@ -8837,7 +8838,7 @@ impl GrammarParser {
             53, 143, 144,]; static __SHIFTED : [u8; 6usize] = [0, 0, 2, 2, 0, 0,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(100, false)),],
@@ -8845,7 +8846,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [53,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8854,7 +8855,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [53,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
@@ -8868,7 +8869,7 @@ impl GrammarParser {
             144,]; static __SHIFTED : [u8; 4usize] = [0, 0, 3, 1,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8877,7 +8878,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [52,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(104, true)),
@@ -8887,7 +8888,7 @@ impl GrammarParser {
             static __RULES : [u8; 3usize] = [41, 42, 43,]; static __SHIFTED : [u8;
             3usize] = [2, 2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -8985,7 +8986,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -8994,7 +8995,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [42,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9003,7 +9004,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [141,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -9099,7 +9100,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9108,7 +9109,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [41,]; static __SHIFTED : [u8; 1usize] =
             [5,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9117,7 +9118,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [142,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(111, false)),],
@@ -9125,7 +9126,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [43,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9134,7 +9135,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [43,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(113, true)),
@@ -9144,7 +9145,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [44, 45,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(114, false)),],
@@ -9152,7 +9153,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [44,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9161,7 +9162,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [44,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(116, false)),],
@@ -9169,7 +9170,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [45,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9178,7 +9179,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [45,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -9276,7 +9277,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9285,7 +9286,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [47,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -9381,7 +9382,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9390,7 +9391,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [46,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -9488,7 +9489,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9497,7 +9498,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [49,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -9593,7 +9594,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9602,7 +9603,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [48,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -9700,7 +9701,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9709,7 +9710,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [57,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -9805,7 +9806,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9814,7 +9815,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [56,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -9912,7 +9913,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -9921,7 +9922,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [59,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -10017,7 +10018,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10026,7 +10027,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [58,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(134, false)),
@@ -10036,7 +10037,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [62, 63,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10045,7 +10046,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [62,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(136, false)),],
@@ -10053,7 +10054,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [63,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10062,7 +10063,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [63,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(138, false)),
@@ -10072,7 +10073,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [60, 61,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10081,7 +10082,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [60,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(140, false)),],
@@ -10089,7 +10090,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [61,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10098,7 +10099,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [61,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
@@ -10114,7 +10115,7 @@ impl GrammarParser {
             55, 143, 144,]; static __SHIFTED : [u8; 6usize] = [0, 0, 2, 2, 0, 0,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(143, false)),],
@@ -10122,7 +10123,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [55,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10131,7 +10132,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [55,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
@@ -10145,7 +10146,7 @@ impl GrammarParser {
             144,]; static __SHIFTED : [u8; 4usize] = [0, 0, 3, 1,]; __RULES.iter()
             .zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10154,7 +10155,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [54,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(147, false)),
@@ -10164,7 +10165,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [64, 65,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10173,7 +10174,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [64,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(149, false)),],
@@ -10181,7 +10182,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [65,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10190,7 +10191,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [65,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(151, false)),
@@ -10200,7 +10201,7 @@ impl GrammarParser {
             static __RULES : [u8; 2usize] = [66, 67,]; static __SHIFTED : [u8; 2usize] =
             [2, 2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10209,7 +10210,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [66,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(153, false)),],
@@ -10217,7 +10218,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [67,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10226,7 +10227,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [67,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(155, true)),
@@ -10243,7 +10244,7 @@ impl GrammarParser {
             69, 145, 146, 147, 148,]; static __SHIFTED : [u8; 6usize] = [2, 2, 0, 0, 0,
             0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : true, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10252,7 +10253,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [145,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(157, false)),],
@@ -10260,7 +10261,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [69,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10269,7 +10270,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [69,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(159, true)),],
@@ -10280,7 +10281,7 @@ impl GrammarParser {
             { static __RULES : [u8; 2usize] = [146, 147,]; static __SHIFTED : [u8;
             2usize] = [1, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10289,7 +10290,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [146,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(161, false)),],
@@ -10297,7 +10298,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [68,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10306,7 +10307,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [68,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -10404,7 +10405,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10413,7 +10414,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [71,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -10509,7 +10510,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10518,7 +10519,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [70,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
@@ -10616,7 +10617,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10625,7 +10626,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [73,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),
@@ -10721,7 +10722,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,];
             __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10730,7 +10731,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [72,]; static __SHIFTED : [u8; 1usize] =
             [4,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::semicolon,
             ::rusty_lr_core::parser::state::ShiftTarget::new(171, false)),],
@@ -10738,7 +10739,7 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [74,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10747,7 +10748,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [74,]; static __SHIFTED : [u8; 1usize] =
             [3,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10756,7 +10757,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [75,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::ident,
             ::rusty_lr_core::parser::state::ShiftTarget::new(1, true)),
@@ -10780,7 +10781,7 @@ impl GrammarParser {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 1, 0, 1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : { let mut __reduce_map
             = std::collections::BTreeMap::new(); { static __REDUCE_RULES : [u8; 1usize] =
@@ -10789,7 +10790,7 @@ impl GrammarParser {
             { static __RULES : [u8; 1usize] = [150,]; static __SHIFTED : [u8; 1usize] =
             [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![(GrammarTerminalClasses::eof,
             ::rusty_lr_core::parser::state::ShiftTarget::new(176, true)),],
@@ -10797,13 +10798,13 @@ impl GrammarParser {
             static __RULES : [u8; 1usize] = [151,]; static __SHIFTED : [u8; 1usize] =
             [1,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, & shifted) | {
             ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize, shifted :
-            shifted as usize, } }).collect() } },
+            shifted as usize, } }).collect() }, can_accept_error : false, },
             ::rusty_lr_core::parser::state::IntermediateState { shift_goto_map_term :
             vec![], shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
             ruleset : { static __RULES : [u8; 1usize] = [151,]; static __SHIFTED : [u8;
             1usize] = [2,]; __RULES.iter().zip(__SHIFTED.iter()).map(| (& rule, &
             shifted) | { ::rusty_lr_core::rule::ShiftedRuleRef { rule : rule as usize,
-            shifted : shifted as usize, } }).collect() } },
+            shifted : shifted as usize, } }).collect() }, can_accept_error : false, },
         ];
         let states: Vec<GrammarState> = states
             .into_iter()

@@ -781,6 +781,8 @@ impl Grammar {
                     }
                 };
 
+                let can_accept_error = state.can_accept_error;
+
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
@@ -801,7 +803,8 @@ impl Grammar {
                                     }
                                 }
                             ).collect()
-                        }
+                        },
+                        can_accept_error: #can_accept_error,
                     },
                 });
             }
