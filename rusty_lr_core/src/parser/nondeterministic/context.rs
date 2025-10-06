@@ -1234,8 +1234,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         mut node: usize,
         error_prec: Precedence,
         userdata: &mut Data::UserData,
-    ) -> bool
-    where
+    ) where
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1244,34 +1243,47 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         use crate::Location;
 
         let mut error_location = Data::Location::new(self.location_iter(node), 0);
-
         loop {
-            match self.feed_location_impl(
-                parser,
-                node,
-                TerminalSymbol::Error,
-                P::TermClass::ERROR,
-                error_prec,
-                Some(error_location),
-                userdata,
-            ) {
-                Ok(_) => {
-                    return true;
-                }
-                Err((err_node, _, err_loc)) => {
-                    if self.node(err_node).len() == 0 {
-                        return false; // root node; no more nodes to process
+            let node_ = self.node(node);
+            if !node_.is_leaf() {
+                self.try_remove_node(node);
+                return;
+            }
+            if let Some(&s) = node_.state_stack.last() {
+                if parser.get_states()[s.into_usize()].can_accept_error() {
+                    match self.feed_location_impl(
+                        parser,
+                        node,
+                        TerminalSymbol::Error,
+                        P::TermClass::ERROR,
+                        error_prec,
+                        Some(error_location),
+                        userdata,
+                    ) {
+                        Ok(()) => break, // successfully shifted `error`
+                        Err((err_node, _, err_loc)) => {
+                            // if this `error` feed causes reduce error, do not try panic mode anymore
+                            if !self.reduce_errors.is_empty() {
+                                return;
+                            }
+                            error_location = err_loc.unwrap();
+                            node = err_node;
+                        } // other errors
                     }
-                    error_location = Data::Location::new(
-                        std::iter::once(&err_loc.unwrap()).chain(self.location_iter(err_node)),
-                        2,
-                    );
-                    if let Some(next_node) = self.pop(err_node) {
-                        node = next_node;
-                    } else {
-                        return false;
-                    }
                 }
+
+                error_location = Data::Location::new(
+                    std::iter::once(&error_location).chain(self.location_iter(node)),
+                    2,
+                );
+                let next_node = self.pop(node);
+                if let Some(next_node) = next_node {
+                    node = next_node;
+                } else {
+                    return; // reached root node; no more nodes to process
+                }
+            } else {
+                unreachable!("state stack is empty but node is not root");
             }
         }
     }
@@ -1337,6 +1349,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
 
             let error_prec = P::TermClass::ERROR.precedence();
 
+            let reduce_action_errors = std::mem::take(&mut self.reduce_errors);
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
             // try enter panic mode and store error nodes to next_nodes
             for node in fallback_nodes.drain(..) {
@@ -1349,7 +1362,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 Err(ParseError {
                     term: TerminalSymbol::Term(term),
                     location: Some(location),
-                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    reduce_action_errors,
                     no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
                 })
