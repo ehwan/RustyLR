@@ -2006,13 +2006,6 @@ impl Grammar {
             }
 
             let rules = rules.into_iter().next().unwrap().clone();
-            // if this state is related to zero-length production rule, do not make it LR(0) table
-            if rules.iter().any(|&rule| {
-                let (nonterm, local_id) = self.get_rule_by_id(rule).unwrap();
-                nonterm.rules[local_id].tokens.len() == 0
-            }) {
-                continue;
-            }
             state.reduce_map = rusty_lr_core::parser::state::ReduceMap::Value(rules);
         }
 
