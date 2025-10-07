@@ -269,80 +269,110 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     return Err(ParseError::NoAction(err));
                 }
 
-                let mut error_location = Location::new(self.location_stack.iter().rev(), 0);
-                let error = P::TermClass::ERROR;
-                let error_prec = error.precedence();
+                let error_prec = P::TermClass::ERROR.precedence();
 
-                loop {
-                    match self.feed_location_impl(
-                        parser,
-                        TerminalSymbol::Error,
-                        error,
-                        error_prec,
-                        userdata,
-                        Some(error_location),
-                    ) {
-                        Err(ParseError::NoAction(err1)) => {
-                            if self.state_stack.len() == 1 {
-                                return Err(ParseError::NoAction(err));
-                            } else {
-                                // no action for `error` token, continue to panic mode
-                                // merge location with previous
-                                error_location = Data::Location::new(
-                                    std::iter::once(&err1.location.unwrap())
-                                        .chain(self.location_stack.iter().rev()),
-                                    2, // error node
-                                );
-                                self.data_stack.pop();
-                                self.precedence_stack.pop();
-                                self.location_stack.pop();
-                                self.state_stack.pop();
+                let mut extra_state_stack = Vec::new();
+                let mut extra_precedence_stack = Vec::new();
 
-                                #[cfg(feature = "tree")]
-                                self.tree_stack.pop(); // pop tree node for `error`
+                use crate::TriState;
+                let mut pop_count = 0;
+                let mut found = false;
+                for &s in self.state_stack.iter().rev() {
+                    match parser.get_states()[s.into_usize()].can_accept_error() {
+                        TriState::False => {}
+                        TriState::Maybe => {
+                            extra_precedence_stack.clear();
+                            extra_state_stack.clear();
+
+                            if self.can_feed_impl(
+                                self.precedence_stack.len() - pop_count,
+                                &mut extra_state_stack,
+                                &mut extra_precedence_stack,
+                                parser,
+                                P::TermClass::ERROR,
+                                error_prec,
+                            ) == Some(true)
+                            {
+                                found = true;
+                                break;
                             }
                         }
-                        Ok(()) => break, // successfully shifted `error`
-                        Err(_) => return Err(ParseError::NoAction(err)), // other errors
+                        TriState::True => {
+                            found = true;
+                            break;
+                        }
                     }
+
+                    self.data_stack.pop();
+                    pop_count += 1;
                 }
 
-                // try shift given term again
-                // to check if the given terminal should be merged with `error` token
-                // or it can be shift right after the error token
-                if let Some(next_state) = parser.get_states()
-                    [self.state_stack.last().unwrap().into_usize()]
-                .shift_goto_class(class)
+                if !found {
+                    return Err(ParseError::NoAction(err));
+                }
+
+                let error_location =
+                    Data::Location::new(self.location_stack.iter().rev(), pop_count);
+                self.location_stack
+                    .truncate(self.location_stack.len() - pop_count);
+                self.state_stack
+                    .truncate(self.state_stack.len() - pop_count);
+                self.precedence_stack
+                    .truncate(self.precedence_stack.len() - pop_count);
+                #[cfg(feature = "tree")]
                 {
-                    #[cfg(feature = "tree")]
-                    self.tree_stack
-                        .push(crate::tree::Tree::new_terminal(err.term.clone()));
-
-                    // shift after `error` token
-                    if next_state.push {
-                        self.data_stack.push_terminal(err.term.into_term().unwrap());
-                    } else {
-                        self.data_stack.push_empty();
-                    }
-
-                    self.location_stack.push(err.location.unwrap());
-                    self.precedence_stack.push(shift_prec);
-                    self.state_stack.push(next_state.state);
-                } else {
-                    // merge term with previous error
-
-                    let error_location = Data::Location::new(
-                        std::iter::once(&err.location.unwrap())
-                            .chain(self.location_stack.iter().rev()),
-                        2, // error node
-                    );
-                    if let Some(err_loc) = self.location_stack.last_mut() {
-                        *err_loc = error_location;
-                    } else {
-                        unreachable!("location stack must have at least one element");
-                    }
+                    let l = self.tree_stack.len() - pop_count;
+                    self.tree_stack.truncate(l);
                 }
-                Ok(())
+
+                match self.feed_location_impl(
+                    parser,
+                    TerminalSymbol::Error,
+                    P::TermClass::ERROR,
+                    error_prec,
+                    userdata,
+                    Some(error_location),
+                ) {
+                    Ok(()) => {
+                        // try shift given term again
+                        // to check if the given terminal should be merged with `error` token
+                        // or it can be shift right after the error token
+                        if let Some(next_state) = parser.get_states()
+                            [self.state_stack.last().unwrap().into_usize()]
+                        .shift_goto_class(class)
+                        {
+                            #[cfg(feature = "tree")]
+                            self.tree_stack
+                                .push(crate::tree::Tree::new_terminal(err.term.clone()));
+
+                            // shift after `error` token
+                            if next_state.push {
+                                self.data_stack.push_terminal(err.term.into_term().unwrap());
+                            } else {
+                                self.data_stack.push_empty();
+                            }
+
+                            self.location_stack.push(err.location.unwrap());
+                            self.precedence_stack.push(shift_prec);
+                            self.state_stack.push(next_state.state);
+                        } else {
+                            // merge term with previous error
+
+                            let error_location = Data::Location::new(
+                                std::iter::once(&err.location.unwrap())
+                                    .chain(self.location_stack.iter().rev()),
+                                2, // error node
+                            );
+                            if let Some(err_loc) = self.location_stack.last_mut() {
+                                *err_loc = error_location;
+                            } else {
+                                unreachable!("location stack must have at least one element");
+                            }
+                        }
+                        Ok(())
+                    }
+                    Err(_) => Err(ParseError::NoAction(err)), // other errors
+                }
             }
             Err(err) => Err(err),
         }

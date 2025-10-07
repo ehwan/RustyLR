@@ -3,6 +3,7 @@ use std::hash::Hash;
 use crate::hash::HashMap;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::terminalclass::TerminalClass;
+use crate::TriState;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ShiftTarget<StateIndex> {
@@ -37,6 +38,7 @@ pub struct IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_nonterm: Vec<(NonTerm, ShiftTarget<StateIndex>)>, // must be sorted
     pub reduce_map: ReduceMap<Vec<(TermClass, Vec<RuleIndex>)>, Vec<RuleIndex>>, // must be sorted
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
+    pub can_accept_error: TriState,
 }
 
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
@@ -153,6 +155,8 @@ pub trait State {
 
     /// Get the set of rules that this state is trying to parse
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
+
+    fn can_accept_error(&self) -> TriState;
 }
 
 /// `State` implementation for a sparse state representation using HashMap
@@ -169,6 +173,8 @@ pub struct SparseState<TermClass, NonTerm, RuleContainer, StateIndex> {
 
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
+
+    pub(crate) can_accept_error: TriState,
 }
 
 impl<
@@ -228,6 +234,9 @@ impl<
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
+    fn can_accept_error(&self) -> TriState {
+        self.can_accept_error
+    }
 }
 
 /// `State` implementation for a dense state representation using Vec
@@ -253,7 +262,7 @@ pub struct DenseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 
-    _phantom: std::marker::PhantomData<TermClass>,
+    pub(crate) can_accept_error: TriState,
 }
 impl<
         TermClass: TerminalClass,
@@ -324,6 +333,10 @@ impl<
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
+
+    fn can_accept_error(&self) -> TriState {
+        self.can_accept_error
+    }
 }
 
 impl<TermClass: TerminalClass, NonTerm: NonTerminal, RuleContainer, StateIndex, RuleIndex>
@@ -371,6 +384,7 @@ where
                 ReduceMap::Value(value) => ReduceMap::Value(RuleContainer::from_set(value)),
             },
             ruleset: builder_state.ruleset.into_iter().collect(),
+            can_accept_error: builder_state.can_accept_error,
         }
     }
 }
@@ -482,7 +496,7 @@ where
             shift_nonterm_offset: nonterm_min,
             reduce_map,
             ruleset: builder_state.ruleset.into_iter().collect(),
-            _phantom: std::marker::PhantomData,
+            can_accept_error: builder_state.can_accept_error,
         }
     }
 }

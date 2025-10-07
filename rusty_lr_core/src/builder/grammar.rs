@@ -12,6 +12,8 @@ use super::States;
 use crate::hash::HashMap;
 use crate::rule::*;
 use crate::token::Token;
+use crate::TerminalSymbol;
+use crate::TriState;
 
 /// struct that holding pre-calculated information for `expand()` function.
 #[derive(Debug, Clone)]
@@ -51,7 +53,7 @@ pub struct Grammar<Term, NonTerm> {
     pub precedence_types: Vec<Option<ReduceType>>,
 }
 
-impl<Term, NonTerm> Grammar<Term, NonTerm> {
+impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     pub fn new() -> Self {
         Grammar {
             rules: Vec::new(),
@@ -68,8 +70,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn add_rule(
         &mut self,
         name: NonTerm,
-        rule: Vec<Token<Term, NonTerm>>,
-        lookaheads: Option<BTreeSet<Term>>,
+        rule: Vec<Token<TerminalSymbol<Term>, NonTerm>>,
+        lookaheads: Option<BTreeSet<TerminalSymbol<Term>>>,
         precedence: Option<Precedence>,
         priority: usize,
     ) -> usize
@@ -92,7 +94,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// false if precedence already exists and different
-    pub fn add_precedence(&mut self, term: Term, level: usize) -> bool
+    pub fn add_precedence(&mut self, term: TerminalSymbol<Term>, level: usize) -> bool
     where
         Term: Hash + Eq,
     {
@@ -110,7 +112,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// search for every production rules with name 'name'
-    fn search_rules(&self, name: NonTerm) -> Result<&[usize], BuildError<Term, NonTerm>>
+    fn search_rules(
+        &self,
+        name: NonTerm,
+    ) -> Result<&[usize], BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         NonTerm: Hash + Eq,
     {
@@ -187,14 +192,14 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     }
 
     /// pre calculate the information for `expand()` function.
-    fn calculate_expand_cache(&mut self) -> Result<(), BuildError<Term, NonTerm>>
+    fn calculate_expand_cache(&mut self) -> Result<(), BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Ord + Copy,
         NonTerm: Hash + Eq + Copy,
     {
-        let mut pong: Vec<ExpandCache<Term>> = Vec::new();
+        let mut pong: Vec<ExpandCache<TerminalSymbol<Term>>> = Vec::new();
         for (nonterm, nonterm_rules) in self.rules_map.iter() {
-            let mut rules: BTreeMap<usize, ExpandCache<Term>> = nonterm_rules
+            let mut rules: BTreeMap<usize, ExpandCache<TerminalSymbol<Term>>> = nonterm_rules
                 .iter()
                 .map(|rule| {
                     (
@@ -265,9 +270,9 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// 1st `bool` of returned tuple is true if follow_tokens can be empty.
     fn lookahead(
         &self,
-        follow_tokens: &[Token<Term, NonTerm>],
-        lookaheads: &BTreeSet<Term>,
-    ) -> Result<(BTreeSet<Term>, bool), BuildError<Term, NonTerm>>
+        follow_tokens: &[Token<TerminalSymbol<Term>, NonTerm>],
+        lookaheads: &BTreeSet<TerminalSymbol<Term>>,
+    ) -> Result<(BTreeSet<TerminalSymbol<Term>>, bool), BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Ord + Copy,
         NonTerm: Copy + Hash + Eq,
@@ -298,7 +303,10 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
     /// for given set of production rules,
     /// if the first token of each rule is nonterminal, attach its production rules
-    fn expand(&self, rules: &mut LookaheadRuleRefSet<Term>) -> Result<(), BuildError<Term, NonTerm>>
+    fn expand(
+        &self,
+        rules: &mut LookaheadRuleRefSet<TerminalSymbol<Term>>,
+    ) -> Result<(), BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Copy + Ord,
         NonTerm: Copy + Hash + Eq,
@@ -390,8 +398,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// check for any shift/reduce or reduce/reduce conflicts and report them to `diags`.
     fn check_conflicts(
         &self,
-        states: &[State<Term, NonTerm>],
-        diags: &mut DiagnosticCollector<Term>,
+        states: &[State<TerminalSymbol<Term>, NonTerm>],
+        diags: &mut DiagnosticCollector<TerminalSymbol<Term>>,
     ) where
         Term: Ord + Copy + Hash,
         NonTerm: Copy + PartialEq + Ord,
@@ -487,8 +495,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     fn build_full(
         &mut self,
         augmented_name: NonTerm,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<States<Term, NonTerm>, BuildError<Term, NonTerm>>
+        diags: &mut DiagnosticCollector<TerminalSymbol<Term>>,
+    ) -> Result<States<TerminalSymbol<Term>, NonTerm>, BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
@@ -525,6 +533,16 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
             panic!("main state is not 0");
         }
 
+        for state in &mut states {
+            if state
+                .shift_goto_map_term
+                .contains_key(&TerminalSymbol::Error)
+                || state.reduce_map.contains_key(&TerminalSymbol::Error)
+            {
+                state.can_accept_error = TriState::True;
+            }
+        }
+
         Ok(States { states })
     }
 
@@ -532,8 +550,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn build(
         &mut self,
         augmented_name: NonTerm,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<States<Term, NonTerm>, BuildError<Term, NonTerm>>
+        diags: &mut DiagnosticCollector<TerminalSymbol<Term>>,
+    ) -> Result<States<TerminalSymbol<Term>, NonTerm>, BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
@@ -662,6 +680,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                                 .shift_goto_map_nonterm
                                 .append(&mut state_b.shift_goto_map_nonterm);
                             state_a.reduce_map.append(&mut state_b.reduce_map);
+                            state_a.can_accept_error =
+                                state_a.can_accept_error | state_b.can_accept_error;
                             merged = true;
                         }
                     }
@@ -716,8 +736,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     pub fn build_lalr(
         &mut self,
         augmented_name: NonTerm,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<States<Term, NonTerm>, BuildError<Term, NonTerm>>
+        diags: &mut DiagnosticCollector<TerminalSymbol<Term>>,
+    ) -> Result<States<TerminalSymbol<Term>, NonTerm>, BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Copy + Ord + Hash,
         NonTerm: Copy + Hash + Ord,
@@ -757,6 +777,8 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
                         .or_default()
                         .append(&mut reduce_rules);
                 }
+                states[state_a].can_accept_error =
+                    states[state_a].can_accept_error | state_b.can_accept_error;
             }
         }
         let mut new_states = Vec::with_capacity(states.len() - merge_into.len());
@@ -927,11 +949,11 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
     /// build new state with given production rules
     fn build_recursive(
         &self,
-        mut rules: LookaheadRuleRefSet<Term>,
-        states: &mut Vec<State<Term, NonTerm>>,
-        state_map: &mut BTreeMap<LookaheadRuleRefSet<Term>, usize>,
-        diags: &mut DiagnosticCollector<Term>,
-    ) -> Result<usize, BuildError<Term, NonTerm>>
+        mut rules: LookaheadRuleRefSet<TerminalSymbol<Term>>,
+        states: &mut Vec<State<TerminalSymbol<Term>, NonTerm>>,
+        state_map: &mut BTreeMap<LookaheadRuleRefSet<TerminalSymbol<Term>>, usize>,
+        diags: &mut DiagnosticCollector<TerminalSymbol<Term>>,
+    ) -> Result<usize, BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Hash + Ord + Copy,
         NonTerm: Hash + Ord + Copy,
@@ -954,7 +976,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
         // we don't care about the conflicts here
         let mut next_rules_term = BTreeMap::new();
         let mut next_rules_nonterm = BTreeMap::new();
-        let mut reduce_map: BTreeMap<Term, BTreeSet<usize>> = BTreeMap::new();
+        let mut reduce_map: BTreeMap<TerminalSymbol<Term>, BTreeSet<usize>> = BTreeMap::new();
         for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
             let rule = &self.rules[rule_ref.rule].rule;
             match rule.rule.get(rule_ref.shifted) {
@@ -1118,7 +1140,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 
         // process rules that no more tokens left to shift
         // if next token is one of lookahead, add reduce action
-        // if there are multiple recude rules for same lookahead, it is a reduce/reduce conflict
+        // if there are multiple reduce rules for same lookahead, it is a reduce/reduce conflict
         // reduce_type conflict resolving
         for (lookahead, reduce_rules) in reduce_map.into_iter() {
             let state = &mut states[state_id];
@@ -1160,7 +1182,7 @@ impl<Term, NonTerm> Grammar<Term, NonTerm> {
 //     }
 // }
 
-impl<Term, NonTerm> Default for Grammar<Term, NonTerm> {
+impl<Term, NonTerm> Default for Grammar<TerminalSymbol<Term>, NonTerm> {
     fn default() -> Self {
         Self::new()
     }

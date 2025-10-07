@@ -819,7 +819,8 @@ impl Grammar {
                                     }
                                 }
                             ).collect()
-                        }
+                        },
+                        can_accept_error: #can_accept_error,
                     },
                 });
             }
