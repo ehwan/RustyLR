@@ -1240,6 +1240,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
+        /*
         use crate::Location;
 
         let mut error_location = Data::Location::new(self.location_iter(node), 0);
@@ -1286,6 +1287,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 unreachable!("state stack is empty but node is not root");
             }
         }
+        */
     }
 
     /// Feed one terminal with location to parser, and update state stack.

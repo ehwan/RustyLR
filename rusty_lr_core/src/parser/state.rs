@@ -136,7 +136,7 @@ pub trait State {
     /// Get the set of rules that this state is trying to parse
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
 
-    fn can_accept_error(&self) -> bool;
+    fn can_accept_error(&self) -> TriState;
 }
 
 /// `State` implementation for a sparse state representation using HashMap
@@ -154,7 +154,7 @@ pub struct SparseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 
-    pub(crate) can_accept_error: bool,
+    pub(crate) can_accept_error: TriState,
 }
 
 impl<
@@ -195,7 +195,7 @@ impl<
     fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
         &self.ruleset
     }
-    fn can_accept_error(&self) -> bool {
+    fn can_accept_error(&self) -> TriState {
         self.can_accept_error
     }
 }
@@ -224,7 +224,7 @@ pub struct DenseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     /// set of rules that this state is trying to parse
     pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 
-    pub(crate) can_accept_error: bool,
+    pub(crate) can_accept_error: TriState,
 }
 impl<
         TermClass: TerminalClass,
@@ -277,7 +277,7 @@ impl<
         &self.ruleset
     }
 
-    fn can_accept_error(&self) -> bool {
+    fn can_accept_error(&self) -> TriState {
         self.can_accept_error
     }
 }
@@ -326,8 +326,7 @@ where
                 })
                 .collect(),
             ruleset: builder_state.ruleset.into_iter().collect(),
-            can_accept_error: false,
-            // builder_state.can_accept_error,
+            can_accept_error: builder_state.can_accept_error,
         }
     }
 }
@@ -436,8 +435,7 @@ where
             reduce_map,
             reduce_offset: reduce_min,
             ruleset: builder_state.ruleset.into_iter().collect(),
-            can_accept_error: false,
-            // builder_state.can_accept_error,
+            can_accept_error: builder_state.can_accept_error,
         }
     }
 }
