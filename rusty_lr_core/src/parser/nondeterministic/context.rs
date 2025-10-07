@@ -232,24 +232,6 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             .map(move |&node| self.state_iter(node).chain(std::iter::once(0)))
     }
 
-    /// pop one stack from the node.
-    fn pop(&mut self, node: usize) -> Option<usize> {
-        match self.node(node).len() {
-            0 => unreachable!("cannot pop from empty node"),
-            1 => self.try_remove_node(node),
-            _ => {
-                let node_ = self.node_mut(node);
-                node_.data_stack.pop();
-                node_.location_stack.pop();
-                #[cfg(feature = "tree")]
-                node_.tree_stack.pop();
-                node_.state_stack.pop();
-                node_.precedence_stack.pop();
-                Some(node)
-            }
-        }
-    }
-
     /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
     /// Returns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
     /// and other stack containing the (data_stack.len() - reduce_token_count) number of elements.
@@ -1234,7 +1216,9 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         mut node: usize,
         error_prec: Precedence,
         userdata: &mut Data::UserData,
-    ) -> bool
+        extra_state_stack: &mut Vec<StateIndex>,
+        extra_precedence_stack: &mut Vec<Precedence>,
+    ) -> Option<Data::Location>
     where
         Data: Clone,
         P::Term: Clone,
@@ -1242,38 +1226,111 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
+        use crate::TriState;
 
-        let mut error_location = Data::Location::new(self.location_iter(node), 0);
+        let mut error_location_preserved = None;
 
-        loop {
-            match self.feed_location_impl(
-                parser,
-                node,
-                TerminalSymbol::Error,
-                P::TermClass::ERROR,
-                error_prec,
-                Some(error_location),
-                userdata,
-            ) {
-                Ok(_) => {
-                    return true;
-                }
-                Err((err_node, _, err_loc)) => {
-                    if self.node(err_node).len() == 0 {
-                        return false; // root node; no more nodes to process
-                    }
-                    error_location = Data::Location::new(
-                        std::iter::once(&err_loc.unwrap()).chain(self.location_iter(err_node)),
-                        2,
-                    );
-                    if let Some(next_node) = self.pop(err_node) {
-                        node = next_node;
-                    } else {
-                        return false;
-                    }
-                }
+        let pop_count = loop {
+            let node_ = self.node(node);
+            if !node_.is_leaf() {
+                self.try_remove_node(node);
+                return error_location_preserved;
             }
+
+            let mut pop_count = 0;
+            let mut found = false;
+
+            for &s in node_.state_stack.iter().rev() {
+                match parser.get_states()[s.into_usize()].can_accept_error() {
+                    TriState::False => {}
+                    TriState::Maybe => {
+                        extra_precedence_stack.clear();
+                        extra_state_stack.clear();
+
+                        if self.can_feed_impl(
+                            extra_state_stack,
+                            extra_precedence_stack,
+                            parser,
+                            Some((node, NonZeroUsize::new(node_.len() - pop_count).unwrap())),
+                            P::TermClass::ERROR,
+                            error_prec,
+                        ) == Some(true)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    TriState::True => {
+                        found = true;
+                        break;
+                    }
+                }
+
+                pop_count += 1;
+            }
+
+            if !found {
+                error_location_preserved = Some(if let Some(prev) = error_location_preserved {
+                    Data::Location::new(
+                        std::iter::once(&prev).chain(self.location_iter(node)),
+                        pop_count + 1,
+                    )
+                } else {
+                    Data::Location::new(self.location_iter(node), pop_count)
+                });
+
+                if let Some(parent) = self.try_remove_node(node) {
+                    node = parent;
+                    continue;
+                } else {
+                    return error_location_preserved;
+                }
+            } else {
+                break pop_count;
+            }
+        };
+
+        let error_location = if let Some(prev) = error_location_preserved {
+            Data::Location::new(
+                std::iter::once(&prev).chain(self.location_iter(node)),
+                pop_count + 1,
+            )
+        } else {
+            Data::Location::new(self.location_iter(node), pop_count)
+        };
+        let node_ = self.node_mut(node);
+        node_
+            .location_stack
+            .truncate(node_.location_stack.len() - pop_count);
+        node_
+            .state_stack
+            .truncate(node_.state_stack.len() - pop_count);
+        node_
+            .precedence_stack
+            .truncate(node_.precedence_stack.len() - pop_count);
+        for _ in 0..pop_count {
+            node_.data_stack.pop();
         }
+        #[cfg(feature = "tree")]
+        {
+            let l = node_.tree_stack.len() - pop_count;
+            node_.tree_stack.truncate(l);
+        }
+        match self.feed_location_impl(
+            parser,
+            node,
+            TerminalSymbol::Error,
+            P::TermClass::ERROR,
+            error_prec,
+            Some(error_location),
+            userdata,
+        ) {
+            Ok(()) => {}
+            Err((err_node, _, _)) => {
+                self.try_remove_node(err_node);
+            } // other errors
+        }
+        None
     }
 
     /// Feed one terminal with location to parser, and update state stack.
@@ -1316,6 +1373,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 self.fallback_nodes.push(node);
             }
         }
+        // put back for reused allocated memory
         self.current_nodes = current_nodes;
 
         // next_nodes is empty; invalid terminal was given
@@ -1338,11 +1396,53 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             let error_prec = P::TermClass::ERROR.precedence();
 
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
+            let mut extra_state_stack = Vec::new();
+            let mut extra_precedence_stack = Vec::new();
+            let mut error_location = None;
             // try enter panic mode and store error nodes to next_nodes
             for node in fallback_nodes.drain(..) {
-                self.panic_mode(parser, node, error_prec, userdata);
+                error_location = self.panic_mode(
+                    parser,
+                    node,
+                    error_prec,
+                    userdata,
+                    &mut extra_state_stack,
+                    &mut extra_precedence_stack,
+                );
             }
+            // put back for reuse allocated memory
             self.fallback_nodes = fallback_nodes;
+
+            if self.next_nodes.is_empty() {
+                // for-loop above doesn't check for root state (0).
+                // check for 0 state here
+                if parser.get_states()[0].can_accept_error() == crate::TriState::True {
+                    if error_location.is_none() {
+                        error_location = Some(Data::Location::new(std::iter::empty(), 0));
+                    }
+
+                    // all nodes were deleted, so create new
+                    let node = self.new_node();
+                    if let Err(_) = self.feed_location_impl(
+                        parser,
+                        node,
+                        TerminalSymbol::Error,
+                        P::TermClass::ERROR,
+                        error_prec,
+                        error_location,
+                        userdata,
+                    ) {
+                        return Err(ParseError {
+                            term: TerminalSymbol::Term(term),
+                            location: Some(location),
+                            reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                            no_precedences: std::mem::take(&mut self.no_precedences),
+                            states: self.states().collect(),
+                        });
+                    }
+                }
+            }
+
             // if next_node is still empty, then no panic mode was entered, this is an error
             // restore current_nodes to fallback_nodes
             if self.next_nodes.is_empty() {

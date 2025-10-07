@@ -781,6 +781,12 @@ impl Grammar {
                     }
                 };
 
+                let can_accept_error = match state.can_accept_error {
+                    rusty_lr_core::TriState::False => quote! { #module_prefix::TriState::False },
+                    rusty_lr_core::TriState::True => quote! { #module_prefix::TriState::True },
+                    rusty_lr_core::TriState::Maybe => quote! { #module_prefix::TriState::Maybe },
+                };
+
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
                         shift_goto_map_term: vec![#shift_term_body_stream],
@@ -801,7 +807,8 @@ impl Grammar {
                                     }
                                 }
                             ).collect()
-                        }
+                        },
+                        can_accept_error: #can_accept_error,
                     },
                 });
             }
