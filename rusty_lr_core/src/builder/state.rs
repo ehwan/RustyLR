@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
+use crate::TriState;
+
 /// state for internal usage during grammar building stage
 #[derive(Debug, Clone)]
 pub struct State<Term, NonTerm> {
@@ -8,7 +10,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
     pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
     pub ruleset: BTreeSet<crate::rule::ShiftedRuleRef>,
-    pub can_accept_error: bool,
+    pub can_accept_error: TriState,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
     pub fn new() -> Self {
@@ -17,7 +19,7 @@ impl<Term, NonTerm> State<Term, NonTerm> {
             shift_goto_map_nonterm: Default::default(),
             reduce_map: Default::default(),
             ruleset: Default::default(),
-            can_accept_error: false,
+            can_accept_error: TriState::False,
         }
     }
 

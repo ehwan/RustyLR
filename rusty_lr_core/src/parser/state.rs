@@ -3,6 +3,7 @@ use std::hash::Hash;
 use crate::hash::HashMap;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::terminalclass::TerminalClass;
+use crate::TriState;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ShiftTarget<StateIndex> {
@@ -23,7 +24,7 @@ pub struct IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex> {
     pub shift_goto_map_nonterm: Vec<(NonTerm, ShiftTarget<StateIndex>)>, // must be sorted
     pub reduce_map: Vec<(TermClass, Vec<RuleIndex>)>,                   // must be sorted
     pub ruleset: Vec<crate::rule::ShiftedRuleRef>,
-    pub can_accept_error: bool,
+    pub can_accept_error: TriState,
 }
 
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
@@ -325,7 +326,8 @@ where
                 })
                 .collect(),
             ruleset: builder_state.ruleset.into_iter().collect(),
-            can_accept_error: builder_state.can_accept_error,
+            can_accept_error: false,
+            // builder_state.can_accept_error,
         }
     }
 }
@@ -434,7 +436,8 @@ where
             reduce_map,
             reduce_offset: reduce_min,
             ruleset: builder_state.ruleset.into_iter().collect(),
-            can_accept_error: builder_state.can_accept_error,
+            can_accept_error: false,
+            // builder_state.can_accept_error,
         }
     }
 }

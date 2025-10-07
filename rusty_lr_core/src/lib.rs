@@ -50,3 +50,22 @@ impl std::error::Error for DefaultReduceActionError {
         "Default reduce action error"
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TriState {
+    False,
+    Maybe,
+    True,
+}
+impl std::ops::BitOr for TriState {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (TriState::False, TriState::False) => TriState::False,
+            (TriState::False, _) => TriState::Maybe,
+            (_, TriState::False) => TriState::Maybe,
+            (TriState::True, TriState::True) => TriState::True,
+            _ => TriState::Maybe,
+        }
+    }
+}

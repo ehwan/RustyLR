@@ -781,7 +781,11 @@ impl Grammar {
                     }
                 };
 
-                let can_accept_error = state.can_accept_error;
+                let can_accept_error = match state.can_accept_error {
+                    rusty_lr_core::TriState::False => quote! { #module_prefix::TriState::False },
+                    rusty_lr_core::TriState::True => quote! { #module_prefix::TriState::True },
+                    rusty_lr_core::TriState::Maybe => quote! { #module_prefix::TriState::Maybe },
+                };
 
                 states_body_stream.extend(quote! {
                     #module_prefix::parser::state::IntermediateState {
