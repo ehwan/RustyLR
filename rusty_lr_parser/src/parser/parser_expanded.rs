@@ -5408,6 +5408,31 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
             __tags: __other_tag_stack,
         }
     }
+    fn truncate(&mut self, at: usize) {
+        let mut __counts: [u8; 19usize + 1] = [0; 19usize + 1];
+        for &tag in &self.__tags[at..] {
+            __counts[tag as usize] += 1;
+        }
+        self.__terminals.truncate(self.__terminals.len() - (__counts[0usize] as usize));
+        self.__stack1.truncate(self.__stack1.len() - (__counts[1usize] as usize));
+        self.__stack2.truncate(self.__stack2.len() - (__counts[2usize] as usize));
+        self.__stack3.truncate(self.__stack3.len() - (__counts[3usize] as usize));
+        self.__stack4.truncate(self.__stack4.len() - (__counts[4usize] as usize));
+        self.__stack5.truncate(self.__stack5.len() - (__counts[5usize] as usize));
+        self.__stack6.truncate(self.__stack6.len() - (__counts[6usize] as usize));
+        self.__stack7.truncate(self.__stack7.len() - (__counts[7usize] as usize));
+        self.__stack8.truncate(self.__stack8.len() - (__counts[8usize] as usize));
+        self.__stack9.truncate(self.__stack9.len() - (__counts[9usize] as usize));
+        self.__stack10.truncate(self.__stack10.len() - (__counts[10usize] as usize));
+        self.__stack11.truncate(self.__stack11.len() - (__counts[11usize] as usize));
+        self.__stack12.truncate(self.__stack12.len() - (__counts[12usize] as usize));
+        self.__stack13.truncate(self.__stack13.len() - (__counts[13usize] as usize));
+        self.__stack14.truncate(self.__stack14.len() - (__counts[14usize] as usize));
+        self.__stack15.truncate(self.__stack15.len() - (__counts[15usize] as usize));
+        self.__stack16.truncate(self.__stack16.len() - (__counts[16usize] as usize));
+        self.__stack17.truncate(self.__stack17.len() - (__counts[17usize] as usize));
+        self.__stack18.truncate(self.__stack18.len() - (__counts[18usize] as usize));
+    }
     fn append(&mut self, other: &mut Self) {
         self.__tags.append(&mut other.__tags);
         self.__terminals.append(&mut other.__terminals);

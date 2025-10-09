@@ -303,7 +303,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         }
                     }
 
-                    self.data_stack.pop();
                     pop_count += 1;
                 }
 
@@ -317,8 +316,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     .truncate(self.location_stack.len() - pop_count);
                 self.state_stack
                     .truncate(self.state_stack.len() - pop_count);
+                self.data_stack
+                    .truncate(self.precedence_stack.len() - pop_count);
                 self.precedence_stack
                     .truncate(self.precedence_stack.len() - pop_count);
+
                 #[cfg(feature = "tree")]
                 {
                     let l = self.tree_stack.len() - pop_count;

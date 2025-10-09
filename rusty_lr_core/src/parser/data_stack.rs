@@ -33,6 +33,7 @@ pub trait DataStack: Sized + Default {
     }
 
     fn split_off(&mut self, at: usize) -> Self;
+    fn truncate(&mut self, at: usize);
     fn append(&mut self, other: &mut Self);
 
     /// Performs a reduce action with the given rule index.

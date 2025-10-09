@@ -1299,18 +1299,11 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             Data::Location::new(self.location_iter(node), pop_count)
         };
         let node_ = self.node_mut(node);
-        node_
-            .location_stack
-            .truncate(node_.location_stack.len() - pop_count);
-        node_
-            .state_stack
-            .truncate(node_.state_stack.len() - pop_count);
-        node_
-            .precedence_stack
-            .truncate(node_.precedence_stack.len() - pop_count);
-        for _ in 0..pop_count {
-            node_.data_stack.pop();
-        }
+        let l = node_.len() - pop_count;
+        node_.location_stack.truncate(l);
+        node_.state_stack.truncate(l);
+        node_.precedence_stack.truncate(l);
+        node_.data_stack.truncate(l);
         #[cfg(feature = "tree")]
         {
             let l = node_.tree_stack.len() - pop_count;

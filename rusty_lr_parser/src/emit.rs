@@ -1517,6 +1517,7 @@ impl Grammar {
         let stack_len = stack_names_in_order.len();
         let mut split_off_split_stream = TokenStream::new();
         let mut split_off_ctor_stream = TokenStream::new();
+        let mut truncate_stream = TokenStream::new();
         for (stack_idx, (stack_name, typename)) in stack_names_in_order.iter().enumerate() {
             stack_definition_stream.extend(quote! {
                 #stack_name: Vec<#typename>,
@@ -1553,6 +1554,16 @@ impl Grammar {
             split_off_ctor_stream.extend(quote! {
                 #stack_name: #other_stack_name,
             });
+
+            if unique_tag {
+                truncate_stream.extend(quote! {
+                    self.#stack_name.truncate( at );
+                });
+            } else {
+                truncate_stream.extend(quote! {
+                    self.#stack_name.truncate( self.#stack_name.len() - (__counts[#stack_idx] as usize) );
+                });
+            };
         }
 
         let pop_stream = if unique_tag {
@@ -1582,6 +1593,17 @@ impl Grammar {
                 #tag_stack_name: __other_tag_stack,
             });
         }
+
+        let truncate_count_stream = if unique_tag {
+            quote! {}
+        } else {
+            quote! {
+                let mut __counts: [#shift_typename; #stack_len+1] = [0; #stack_len+1];
+                for &tag in &self.#tag_stack_name[at..] {
+                    __counts[ tag as usize ] += 1;
+                }
+            }
+        };
 
         let derive_clone_for_glr = if self.glr {
             quote! {#[derive(Clone)]}
@@ -1741,6 +1763,10 @@ impl Grammar {
                 Self {
                     #split_off_ctor_stream
                 }
+            }
+            fn truncate(&mut self, at: usize) {
+                #truncate_count_stream
+                #truncate_stream
             }
             fn append(&mut self, other: &mut Self) {
                 #tag_stack_append_stream

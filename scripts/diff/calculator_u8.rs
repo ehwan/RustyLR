@@ -714,6 +714,16 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
             __tags: __other_tag_stack,
         }
     }
+    fn truncate(&mut self, at: usize) {
+        let mut __counts: [u8; 4usize + 1] = [0; 4usize + 1];
+        for &tag in &self.__tags[at..] {
+            __counts[tag as usize] += 1;
+        }
+        self.__terminals.truncate(self.__terminals.len() - (__counts[0usize] as usize));
+        self.__stack1.truncate(self.__stack1.len() - (__counts[1usize] as usize));
+        self.__stack2.truncate(self.__stack2.len() - (__counts[2usize] as usize));
+        self.__stack3.truncate(self.__stack3.len() - (__counts[3usize] as usize));
+    }
     fn append(&mut self, other: &mut Self) {
         self.__tags.append(&mut other.__tags);
         self.__terminals.append(&mut other.__terminals);

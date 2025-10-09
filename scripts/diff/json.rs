@@ -1055,6 +1055,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     fn split_off(&mut self, at: usize) -> Self {
         Self {}
     }
+    fn truncate(&mut self, at: usize) {}
     fn append(&mut self, other: &mut Self) {}
     fn reduce_action(
         data_stack: &mut Self,
