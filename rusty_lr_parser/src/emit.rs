@@ -1602,6 +1602,7 @@ impl Grammar {
                 for &tag in &self.#tag_stack_name[at..] {
                     __counts[ tag as usize ] += 1;
                 }
+                self.#tag_stack_name.truncate( self.#tag_stack_name.len() - at );
             }
         };
 

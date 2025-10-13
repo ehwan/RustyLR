@@ -719,6 +719,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
         for &tag in &self.__tags[at..] {
             __counts[tag as usize] += 1;
         }
+        self.__tags.truncate(self.__tags.len() - at);
         self.__terminals.truncate(self.__terminals.len() - (__counts[0usize] as usize));
         self.__stack1.truncate(self.__stack1.len() - (__counts[1usize] as usize));
         self.__stack2.truncate(self.__stack2.len() - (__counts[2usize] as usize));
