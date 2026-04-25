@@ -213,12 +213,12 @@ This will output a detailed, color-coded representation of the state machine dir
 This visualization helps you understand the parsing process step-by-step and is particularly useful for debugging complex grammars.
 
 ## Examples
- - [Calculator (enum version)](examples/calculator/src/parser.rs): A numeric expression parser using custom token enums
- - [Calculator (u8 version)](examples/calculator_u8/src/parser.rs): A numeric expression parser using byte tokens
- - [JSON Validator](examples/json/src/parser.rs): A JSON syntax validator
+ - [Calculator (enum version)](https://github.com/ehwan/RustyLR/blob/main/example/calculator/src/parser.rs): A numeric expression parser using custom token enums
+ - [Calculator (u8 version)](https://github.com/ehwan/RustyLR/blob/main/example/calculator_u8/src/parser.rs): A numeric expression parser using byte tokens
+ - [JSON Validator](https://github.com/ehwan/RustyLR/blob/main/example/json/src/parser.rs): A JSON syntax validator
  - [Lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete Lua language parser
  - [C language parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/main/src/ast/parser_lr.rs): A C language parser
- - [Bootstrap parser](rusty_lr_parser/src/parser/parser.rs): RustyLR's own syntax parser is written in RustyLR itself
+ - [Bootstrap parser](https://github.com/ehwan/RustyLR/blob/main/rusty_lr_parser/src/parser/parser.rs): RustyLR's own syntax parser is written in RustyLR itself
 
 ## Cargo Features
  - `build`: Enables build script tools for generating parsers at compile time.
