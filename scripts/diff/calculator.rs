@@ -194,6 +194,7 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
     }
 }
 /// tag for token that represents which stack a token is using
+#[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ETags {
@@ -202,6 +203,7 @@ pub enum ETags {
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
+#[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub struct EDataStack {
     pub __tags: Vec<ETags>,
@@ -217,6 +219,7 @@ impl Default for EDataStack {
         }
     }
 }
+#[rustfmt::skip]
 #[allow(
     unused_braces,
     unused_parens,
@@ -471,6 +474,7 @@ impl EDataStack {
         Ok(())
     }
 }
+#[rustfmt::skip]
 #[allow(
     unused_braces,
     unused_parens,
@@ -639,6 +643,7 @@ pub struct EParser {
     /// states
     pub states: Vec<EState>,
 }
+#[rustfmt::skip]
 impl ::rusty_lr::parser::Parser for EParser {
     type Term = Token;
     type TermClass = ETerminalClasses;
@@ -660,6 +665,7 @@ impl ::rusty_lr::parser::Parser for EParser {
     }
 }
 /// A struct that holds the whole parser table.
+#[rustfmt::skip]
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 impl EParser {
     /// Calculates the states and parser tables from the grammar.

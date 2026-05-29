@@ -866,6 +866,7 @@ impl Grammar {
                 /// states
                 pub states: Vec<#state_typename>,
             }
+            #[rustfmt::skip]
             impl #module_prefix::parser::Parser for #parser_struct_name {
                 type Term = #token_typename;
                 type TermClass = #termclass_typename;
@@ -889,6 +890,7 @@ impl Grammar {
             }
 
             /// A struct that holds the whole parser table.
+            #[rustfmt::skip]
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
             impl #parser_struct_name {
                 /// Calculates the states and parser tables from the grammar.
@@ -1656,6 +1658,7 @@ impl Grammar {
             }
             quote! {
                 /// tag for token that represents which stack a token is using
+                #[rustfmt::skip]
                 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
                 #[derive(Clone, Copy, PartialEq, Eq)]
                 pub enum #tag_enum_name {
@@ -1706,6 +1709,7 @@ impl Grammar {
         #tag_definition_stream
 
         /// enum for each non-terminal and terminal symbol, that actually hold data
+        #[rustfmt::skip]
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #derive_clone_for_glr
         pub struct #data_stack_typename {
@@ -1722,12 +1726,14 @@ impl Grammar {
             }
         }
 
+        #[rustfmt::skip]
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
         impl #data_stack_typename {
             #fn_reduce_for_each_rule_stream
         }
 
 
+        #[rustfmt::skip]
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
         impl #module_prefix::parser::data_stack::DataStack for #data_stack_typename {
             type Term = #token_typename;
