@@ -263,7 +263,7 @@ impl Builder {
                     ]);
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
                 return Err("Lexing error".to_string());
             }
@@ -281,7 +281,7 @@ impl Builder {
                 ]);
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
                 return Err(diag.message);
             }
@@ -314,7 +314,7 @@ impl Builder {
 
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
                 return Err(diag.message);
             }
@@ -336,7 +336,7 @@ impl Builder {
                 .with_notes(vec![format!("refer to: {}", error.link)]);
             let writer = self.stream();
             let config = codespan_reporting::term::Config::default();
-            term::emit(&mut writer.lock(), &config, &files, &diag)
+            term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                 .expect("Failed to write to stderr");
         }
 
@@ -488,7 +488,7 @@ impl Builder {
 
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
                 return Err(diag.message);
             }
@@ -751,7 +751,7 @@ impl Builder {
 
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
 
                 return Err(diag.message);
@@ -1235,7 +1235,7 @@ impl Builder {
             for diag in conflict_diags_resolved.into_iter() {
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to verbose stream");
             }
         }
@@ -1245,7 +1245,7 @@ impl Builder {
             for diag in conflict_diags.into_iter() {
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
             if has_diags {
@@ -1261,7 +1261,7 @@ impl Builder {
                     .with_notes(diag.notes);
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
-                term::emit(&mut writer.lock(), &config, &files, &diag)
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                     .expect("Failed to write to stderr");
             }
         }
@@ -1269,7 +1269,7 @@ impl Builder {
         for diag in optimize_diags.into_iter() {
             let writer = self.stream();
             let config = codespan_reporting::term::Config::default();
-            term::emit(&mut writer.lock(), &config, &files, &diag)
+            term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                 .expect("Failed to write to verbose stream");
         }
 
