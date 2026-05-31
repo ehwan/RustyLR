@@ -612,6 +612,7 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
     }
 }
 /// tag for token that represents which stack a token is using
+#[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum GrammarTags {
@@ -637,6 +638,7 @@ pub enum GrammarTags {
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
+#[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub struct GrammarDataStack {
     pub __tags: Vec<GrammarTags>,
@@ -686,6 +688,7 @@ impl Default for GrammarDataStack {
         }
     }
 }
+#[rustfmt::skip]
 #[allow(
     unused_braces,
     unused_parens,
@@ -5209,6 +5212,7 @@ impl GrammarDataStack {
         Ok(())
     }
 }
+#[rustfmt::skip]
 #[allow(
     unused_braces,
     unused_parens,
@@ -6669,6 +6673,7 @@ pub struct GrammarParser {
     /// states
     pub states: Vec<GrammarState>,
 }
+#[rustfmt::skip]
 impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type Term = Lexed;
     type TermClass = GrammarTerminalClasses;
@@ -6690,6 +6695,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     }
 }
 /// A struct that holds the whole parser table.
+#[rustfmt::skip]
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 impl GrammarParser {
     /// Calculates the states and parser tables from the grammar.
