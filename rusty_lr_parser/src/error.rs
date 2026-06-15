@@ -6,13 +6,17 @@ use proc_macro2::TokenStream;
 use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::span_pair::byte_range_to_span;
 
 /// failed to feed() the token
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseArgError {
-    /// feed() failed
-    MacroLineParse { span: Span, message: String },
+    /// feed() failed; `span` is the byte range `[start, end)` in the source
+    MacroLineParse {
+        span: std::ops::Range<usize>,
+        message: String,
+    },
 }
 
 #[non_exhaustive]
@@ -195,17 +199,18 @@ impl ArgError {
 #[allow(unused)]
 impl ParseArgError {
     pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
         let message = self.short_message();
+        let span = byte_range_to_span(self.span());
         quote_spanned! {
             span=>
             compile_error!(#message);
         }
     }
 
-    pub fn span(&self) -> Span {
+    /// Returns the byte range `[start, end)` of the error location in the source.
+    pub fn span(&self) -> std::ops::Range<usize> {
         match self {
-            ParseArgError::MacroLineParse { span, message } => *span,
+            ParseArgError::MacroLineParse { span, message } => span.clone(),
         }
     }
 

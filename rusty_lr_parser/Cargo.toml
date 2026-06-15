@@ -10,7 +10,7 @@ keywords = ["parser", "bison", "lr", "glr", "compiler"]
 categories = ["parsing"]
 
 [dependencies]
-proc-macro2 = "1.0.86"
+proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
 quote = "1.0"
 rusty_lr_core = { version = "3.40.0", path = "../rusty_lr_core", features = [
     "builder",

@@ -371,8 +371,8 @@ impl PatternArgs {
                 }
             }
             PatternArgs::Sep(_, _, _, span) => {
-                let (first, last) = span.pair.unwrap();
-                Err(ParseError::OnlyTerminalSet(first, last))
+                let s = span.span();
+                Err(ParseError::OnlyTerminalSet(s, s))
             }
         }
     }
@@ -400,7 +400,10 @@ impl PatternArgs {
             PatternArgs::Minus(base, terminal_set) => {
                 (base.span_pair().0, terminal_set.span_pair().1)
             }
-            PatternArgs::Sep(_, _, _, span) => span.pair.unwrap(),
+            PatternArgs::Sep(_, _, _, span) => {
+                let s = span.span();
+                (s, s)
+            }
         }
     }
 

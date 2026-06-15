@@ -185,7 +185,7 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = err.location().unwrap().pair.unwrap().0;
+                let span = err.location().map(|loc| loc.to_range()).unwrap_or(0..0);
                 return Err(ParseArgError::MacroLineParse { span, message });
             }
         }
@@ -193,8 +193,7 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = Span::call_site();
-                return Err(ParseArgError::MacroLineParse { span, message });
+                return Err(ParseArgError::MacroLineParse { span: 0..0, message });
             }
         }
 

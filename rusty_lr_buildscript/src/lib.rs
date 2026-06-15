@@ -293,19 +293,17 @@ impl Builder {
                 let diag =
                     match e {
                         ParseArgError::MacroLineParse { span, message } => {
-                            let range = span.byte_range();
-
                             Diagnostic::error()
                                 .with_message("Parse Failed")
                                 .with_labels(vec![
-                                    Label::primary(file_id, range).with_message("Error here")
+                                    Label::primary(file_id, span).with_message("Error here")
                                 ])
                                 .with_notes(vec![message])
                         }
 
                         _ => {
                             let message = e.short_message();
-                            let span = e.span().byte_range();
+                            let span = e.span();
                             Diagnostic::error().with_message(message).with_labels(vec![
                                 Label::primary(file_id, span).with_message("occured here"),
                             ])
@@ -321,13 +319,7 @@ impl Builder {
         };
 
         for error in &grammar_args.error_recovered {
-            let range = if let Some((first, last)) = error.span.pair {
-                let first_range = first.byte_range();
-                let last_range = last.byte_range();
-                first_range.start..last_range.end
-            } else {
-                0..1 // default range if span is not defined
-            };
+            let range = error.span.to_range();
             let diag = Diagnostic::error()
                 .with_message("Syntax error in grammar")
                 .with_labels(vec![
