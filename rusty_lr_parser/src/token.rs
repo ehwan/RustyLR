@@ -1,6 +1,6 @@
 use proc_macro2::Ident;
 
-use crate::parser::span_pair::SpanPair;
+use crate::parser::location::Location;
 
 /// for syntax <Ident> '=' <Token>
 #[derive(Debug, Clone)]
@@ -23,6 +23,6 @@ pub struct TokenMapped {
     /// where r_i is the i'th reduce action in the chain.
     pub reduce_action_chains: Vec<usize>,
 
-    /// span of the token
-    pub span: SpanPair,
+    /// location of the token
+    pub location: Location,
 }

@@ -6,8 +6,8 @@ use proc_macro2::TokenStream;
 use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
-use crate::parser::span_pair::byte_range_to_span;
-use crate::parser::span_pair::SpanPair;
+use crate::parser::location::byte_range_to_span;
+use crate::parser::location::Location;
 
 /// failed to feed() the token
 #[non_exhaustive]
@@ -114,11 +114,11 @@ pub enum ParseError {
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
         name: Ident,
-        span: SpanPair,
+        span: Location,
     },
 
     /// Only terminal or terminal set is allowed
-    OnlyTerminalSet(SpanPair, SpanPair),
+    OnlyTerminalSet(Location, Location),
 
     /// unknown non-terminal symbol name
     NonTerminalNotDefined(Ident),

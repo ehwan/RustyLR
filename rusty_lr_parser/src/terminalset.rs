@@ -1,12 +1,12 @@
 use proc_macro2::Ident;
 use proc_macro2::Literal;
-use proc_macro2::Span;
 use quote::ToTokens;
 
 use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
+use crate::parser::location::Location;
 use crate::terminal_info::TerminalName;
 
 #[derive(Debug, Clone)]
@@ -138,10 +138,10 @@ impl TerminalSetItem {
 pub struct TerminalSet {
     pub negate: bool,
     pub items: Vec<TerminalSetItem>,
-    // '['
-    pub open_span: Span,
-    // ']'
-    pub close_span: Span,
+    // location of '[' or '.'
+    pub open_location: Location,
+    // location of ']' or '.'
+    pub close_location: Location,
 }
 impl TerminalSet {
     // in case of negation, `include_eof` is true if the final terminal set contains eof
@@ -161,6 +161,10 @@ impl TerminalSet {
             item.range_resolve(grammar)?;
         }
         Ok(())
+    }
+
+    pub fn location(&self) -> Location {
+        self.open_location.merge(&self.close_location)
     }
 }
 

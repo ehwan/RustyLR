@@ -176,8 +176,8 @@ impl Builder {
         message_secondary: &str,
     ) {
         let (nonterm, local_rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
-        if let Some(origin_span) = nonterm.origin_span() {
-            let origin_range = origin_span.to_range();
+        if let Some(root_location) = nonterm.root_location() {
+            let origin_range = root_location.to_range();
             let message = format!("{}{} was generated here", prefix_str, nonterm.pretty_name,);
             let mut duplicated_primary = false;
             for label in labels.iter() {
@@ -190,7 +190,7 @@ impl Builder {
                 labels.push(Label::primary(fileid, origin_range).with_message(message));
             }
         } else {
-            let rule_location = nonterm.rules[local_rule].span_pair();
+            let rule_location = nonterm.rules[local_rule].location();
             let rule_range = rule_location.to_range();
             let origin_range = nonterm.name.span().byte_range();
 
@@ -317,7 +317,7 @@ impl Builder {
         };
 
         for error in &grammar_args.error_recovered {
-            let range = error.span.to_range();
+            let range = error.location.to_range();
             let diag = Diagnostic::error()
                 .with_message("Syntax error in grammar")
                 .with_labels(vec![
@@ -794,7 +794,7 @@ impl Builder {
                     match o {
                         OptimizeRemove::TerminalClassRuleMerge(rule) => {
                             let message = "Production Rule deleted";
-                            let rule_location = rule.span_pair();
+                            let rule_location = rule.location();
                             let range = rule_location.to_range();
                             let labels =
                                 vec![Label::primary(file_id, range).with_message("defined here")];
@@ -820,7 +820,7 @@ impl Builder {
                                     .with_message("non-terminal defined here"),
                             );
 
-                            let rule_location = rule.span_pair();
+                            let rule_location = rule.location();
                             let rule_range = rule_location.to_range();
                             labels.push(
                                 Label::secondary(file_id, rule_range)

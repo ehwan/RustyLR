@@ -21,9 +21,9 @@ use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrU32;
+use crate::parser::location::Location;
 use crate::parser::parser_expanded::GrammarContext;
 use crate::parser::parser_expanded::GrammarParser;
-use crate::parser::span_pair::SpanPair;
 use crate::pattern::Pattern;
 use crate::pattern::PatternToToken;
 use crate::rangeresolver::RangeResolver;
@@ -494,7 +494,7 @@ impl Grammar {
                 pretty_name: rules_arg.name.to_string(),
                 ruletype: rules_arg.typename.clone(),
                 rules: Vec::new(), // production rules will be added later
-                regex_span: None,
+                root_location: None,
                 trace: false,
                 protected: false,
                 nonterm_type: None,
@@ -561,15 +561,15 @@ impl Grammar {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 let mut patterns = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
-                    let span_pair = pattern.span_pair();
+                    let location = pattern.location();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
-                        pattern.to_token(&mut grammar, &mut pattern_map, span_pair)?;
+                        pattern.to_token(&mut grammar, &mut pattern_map, location)?;
 
                     tokens.push(TokenMapped {
                         token: pattern_rule.token,
                         mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
-                        span: span_pair,
+                        location,
                         reduce_action_chains: Vec::new(),
                     });
                     patterns.push(pattern_rule);
@@ -600,7 +600,7 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        let span = tokens[from_token].span;
+                                        let span = tokens[from_token].location;
                                         Some((Precedence::Fixed(level), span))
                                     } else {
                                         return Err(ParseError::PrecedenceNotDefined(prec));
@@ -635,13 +635,13 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        op = Some((Precedence::Fixed(level), token.span));
+                                        op = Some((Precedence::Fixed(level), token.location));
                                         break;
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
-                                        op = Some((Precedence::Fixed(error_prec), token.span));
+                                        op = Some((Precedence::Fixed(error_prec), token.location));
                                         break;
                                     }
                                 }
@@ -811,10 +811,10 @@ impl Grammar {
                             Some(ReduceAction::Identity(unique_mapto_idx))
                         } else {
                             let span = if tokens.is_empty() {
-                                rule.separator_span.into()
+                                rule.separator_location.into()
                             } else {
-                                let first: SpanPair = rule.separator_span.into();
-                                let last = &tokens.last().unwrap().span;
+                                let first: Location = rule.separator_location.into();
+                                let last = &tokens.last().unwrap().location;
                                 first.merge(last)
                             };
 
@@ -851,7 +851,7 @@ impl Grammar {
                 rule_lines.push(Rule {
                     tokens,
                     reduce_action,
-                    separator_span: rule.separator_span,
+                    separator_location: rule.separator_location,
                     lookaheads: None,
                     prec,
                     dprec,
@@ -954,18 +954,18 @@ impl Grammar {
                     TokenMapped {
                         token: Token::NonTerm(*start_idx),
                         mapto: None,
-                        span: SpanPair::Generated,
+                        location: Location::Generated,
                         reduce_action_chains: Vec::new(),
                     },
                     TokenMapped {
                         token: Token::Term(TerminalSymbol::Eof),
                         mapto: None,
-                        span: SpanPair::Generated,
+                        location: Location::Generated,
                         reduce_action_chains: Vec::new(),
                     },
                 ],
                 reduce_action: None,
-                separator_span: Span::call_site(),
+                separator_location: Location::Generated,
                 lookaheads: None,
                 prec: None,
                 dprec: None,
@@ -975,7 +975,7 @@ impl Grammar {
                 name: augmented_ident.clone(),
                 pretty_name: utils::AUGMENTED_NAME.to_string(),
                 ruletype: None,
-                regex_span: None,
+                root_location: None,
                 rules: vec![augmented_rule],
                 trace: false,
                 protected: true,

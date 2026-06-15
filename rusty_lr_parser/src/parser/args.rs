@@ -8,7 +8,7 @@ use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
-use crate::parser::span_pair::SpanPair;
+use crate::parser::location::Location;
 use crate::pattern::Pattern;
 use crate::pattern::PatternInternal;
 use crate::terminal_info::TerminalName;
@@ -70,31 +70,29 @@ impl std::fmt::Display for IdentOrLiteral {
 pub enum PatternArgs {
     Ident(Ident),
 
-    /// span of punctuation('+', '*', ...) after the pattern
+    /// location of punctuation('+', '*', ...) after the pattern
     Plus {
         base: Box<PatternArgs>,
-        op_span: SpanPair,
+        op_location: Location,
     },
     Star {
         base: Box<PatternArgs>,
-        op_span: SpanPair,
+        op_location: Location,
     },
     Question {
         base: Box<PatternArgs>,
-        op_span: SpanPair,
+        op_location: Location,
     },
     Exclamation {
         base: Box<PatternArgs>,
-        op_span: SpanPair,
+        op_location: Location,
     },
 
-    /// span of '[' and ']' containing terminal set
     /// a group delimited by '[' and ']' containing terminal set
     TerminalSet(TerminalSet),
 
     /// force lookahead tokens for this pattern.
     /// lookaheads will not be consumed.
-    /// span of the rightmost of this pattern
     Lookaheads {
         pattern: Box<PatternArgs>,
         lookaheads: Box<PatternArgs>,
@@ -103,11 +101,10 @@ pub enum PatternArgs {
     /// ( Pattern+ )
     /// alternatives is a list of alternatives (separated by '|'),
     /// each alternative is a list of patterns.
-    /// open/close are spans of '(' and ')'
     Group {
         alternatives: Vec<Vec<PatternArgs>>,
-        open_span: SpanPair,
-        close_span: SpanPair,
+        open_location: Location,
+        close_location: Location,
     },
 
     /// 'a', b'a', "abc", b"abc"
@@ -124,8 +121,8 @@ pub enum PatternArgs {
         delimiter: Box<PatternArgs>,
         /// if true, use '+' (at least one); otherwise '*' (zero or more)
         at_least_one: bool,
-        /// span of the whole $sep(...)
-        span: SpanPair,
+        /// location of the whole $sep(...)
+        location: Location,
     },
 }
 
@@ -375,24 +372,27 @@ impl PatternArgs {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            PatternArgs::Plus { base, op_span } => {
-                Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span))
-            }
-            PatternArgs::Star { base, op_span } => {
-                Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span))
-            }
-            PatternArgs::Question { base, op_span } => {
-                Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span))
-            }
+            PatternArgs::Plus {
+                base,
+                op_location: op_span,
+            } => Err(ParseError::OnlyTerminalSet(base.location(), *op_span)),
+            PatternArgs::Star {
+                base,
+                op_location: op_span,
+            } => Err(ParseError::OnlyTerminalSet(base.location(), *op_span)),
+            PatternArgs::Question {
+                base,
+                op_location: op_span,
+            } => Err(ParseError::OnlyTerminalSet(base.location(), *op_span)),
             PatternArgs::Exclamation { base, .. } => base.to_terminal_set(grammar),
             PatternArgs::Lookaheads { pattern, .. } => {
-                let sp = pattern.span_pair();
+                let sp = pattern.location();
                 Err(ParseError::OnlyTerminalSet(sp, sp))
             }
             PatternArgs::Group {
                 alternatives,
-                open_span,
-                close_span,
+                open_location: open_span,
+                close_location: close_span,
             } => {
                 if alternatives.len() == 1 && alternatives[0].len() == 1 {
                     alternatives[0][0].to_terminal_set(grammar)
@@ -429,29 +429,43 @@ impl PatternArgs {
                     (true, true) => Ok((false, rhs_set.difference(&lhs_set).copied().collect())),
                 }
             }
-            PatternArgs::Sep { span, .. } => Err(ParseError::OnlyTerminalSet(*span, *span)),
+            PatternArgs::Sep { location: span, .. } => {
+                Err(ParseError::OnlyTerminalSet(*span, *span))
+            }
         }
     }
-    pub fn span_pair(&self) -> SpanPair {
+    pub fn location(&self) -> Location {
         match self {
             PatternArgs::Ident(ident) => ident.span().into(),
-            PatternArgs::Plus { base, op_span } => base.span_pair().merge(op_span),
-            PatternArgs::Star { base, op_span } => base.span_pair().merge(op_span),
-            PatternArgs::Question { base, op_span } => base.span_pair().merge(op_span),
-            PatternArgs::Exclamation { base, op_span } => base.span_pair().merge(op_span),
-            PatternArgs::TerminalSet(terminal_set) => terminal_set.open_span.into(),
+            PatternArgs::Plus {
+                base,
+                op_location: op_span,
+            } => base.location().merge(op_span),
+            PatternArgs::Star {
+                base,
+                op_location: op_span,
+            } => base.location().merge(op_span),
+            PatternArgs::Question {
+                base,
+                op_location: op_span,
+            } => base.location().merge(op_span),
+            PatternArgs::Exclamation {
+                base,
+                op_location: op_span,
+            } => base.location().merge(op_span),
+            PatternArgs::TerminalSet(terminal_set) => terminal_set.location(),
             PatternArgs::Lookaheads {
                 pattern,
                 lookaheads,
-            } => pattern.span_pair().merge(&lookaheads.span_pair()),
+            } => pattern.location().merge(&lookaheads.location()),
             PatternArgs::Group {
-                open_span,
-                close_span,
+                open_location: open_span,
+                close_location: close_span,
                 ..
             } => open_span.merge(close_span),
             PatternArgs::Literal(literal) => literal.span().into(),
-            PatternArgs::Minus { base, exclude } => base.span_pair().merge(&exclude.span_pair()),
-            PatternArgs::Sep { span, .. } => *span,
+            PatternArgs::Minus { base, exclude } => base.location().merge(&exclude.location()),
+            PatternArgs::Sep { location: span, .. } => *span,
         }
     }
 
@@ -534,8 +548,8 @@ pub struct RuleLineArgs {
     /// mapto '=' pattern
     pub tokens: Vec<(Option<Ident>, PatternArgs)>,
     pub reduce_action: Option<TokenStream>,
-    /// span of ':' or '|' in front of this rule line
-    pub separator_span: Span,
+    /// location of ':' or '|' in front of this rule line
+    pub separator_location: Location,
     /// %prec or %dprec, allow duplicates here, return error later
     pub precs: Vec<PrecDPrecArgs>,
 
@@ -564,7 +578,7 @@ pub struct RuleDefArgs {
 pub struct RecoveredError {
     pub message: String,
     pub link: String,
-    pub span: SpanPair,
+    pub location: Location,
 }
 
 /// parsed arguments for the grammar

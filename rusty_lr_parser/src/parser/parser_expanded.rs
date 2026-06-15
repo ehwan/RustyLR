@@ -12,12 +12,11 @@ use crate::parser::args::IdentOrLiteral;
 use crate::parser::args::PrecDPrecArgs;
 use crate::parser::args::RecoveredError;
 use crate::parser::lexer::Lexed;
-use crate::parser::span_pair::SpanPair;
+use crate::parser::location::Location;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 use proc_macro2::Group;
 use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use quote::format_ident;
@@ -210,7 +209,7 @@ pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     Lexed,
-    SpanPair,
+    Location,
     ::rusty_lr_core::DefaultReduceActionError,
 >;
 /// A enum that represents terminal classes
@@ -701,7 +700,7 @@ impl GrammarDataStack {
     fn custom_reduce_action_0(
         mut t: Vec<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<TokenStream, ::rusty_lr_core::DefaultReduceActionError> {
         Ok({
             let mut tokens = TokenStream::new();
@@ -715,12 +714,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Rule_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -762,9 +761,8 @@ impl GrammarDataStack {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Rule-Ident");
             };
-            let span = __rustylr_location_colon.span();
             if let Some(fisrt) = RuleLines.first_mut() {
-                fisrt.separator_span = span;
+                fisrt.separator_location = __rustylr_location_colon;
             }
             RuleDefArgs {
                 name: ident,
@@ -781,12 +779,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_RuleType_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -818,12 +816,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_RuleType_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -841,12 +839,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_RuleLines_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -876,7 +874,7 @@ impl GrammarDataStack {
         let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
-            RuleLine.separator_span = __rustylr_location_pipe.span();
+            RuleLine.separator_location = __rustylr_location_pipe;
             RuleLines.push(RuleLine);
             RuleLines
         };
@@ -889,12 +887,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_RuleLines_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -921,12 +919,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_RuleLine_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -957,7 +955,7 @@ impl GrammarDataStack {
             RuleLineArgs {
                 tokens: TokenMapped,
                 reduce_action: Action.map(|action| action.to_token_stream()),
-                separator_span: Span::call_site(),
+                separator_location: Location::Generated,
                 precs: PrecDef,
                 prec: None,
                 dprec: None,
@@ -972,12 +970,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_PrecDef_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1013,12 +1011,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_PrecDef_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1050,7 +1048,7 @@ impl GrammarDataStack {
                     message: "Expected <ident> to token or <literal>".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             PrecDPrecArgs::None
         };
@@ -1063,12 +1061,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_PrecDef_2(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1109,12 +1107,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_PrecDef_3(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1146,7 +1144,7 @@ impl GrammarDataStack {
                     message: "Expected integer literal".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#rule-priority"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             PrecDPrecArgs::None
         };
@@ -1159,12 +1157,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_PrecDef_4(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1192,7 +1190,7 @@ impl GrammarDataStack {
                     message: "Expected %prec or %dprec".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             PrecDPrecArgs::None
         };
@@ -1205,12 +1203,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TokenMapped_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1237,12 +1235,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TokenMapped_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1284,12 +1282,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSetItem_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1321,12 +1319,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSetItem_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1371,12 +1369,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSetItem_2(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1408,7 +1406,7 @@ impl GrammarDataStack {
                     message: "Expected ident for terminal set".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
@@ -1421,12 +1419,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSetItem_3(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1458,12 +1456,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSetItem_4(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1508,12 +1506,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSetItem_5(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1545,7 +1543,7 @@ impl GrammarDataStack {
                     message: "Expected literal for terminal set".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             TerminalSetItem::Terminal(format_ident!("dummy"))
         };
@@ -1558,12 +1556,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSet_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1600,8 +1598,8 @@ impl GrammarDataStack {
             TerminalSet {
                 negate: caret.is_some(),
                 items: TerminalSetItem,
-                open_span: __rustylr_location_lbracket.span(),
-                close_span: __rustylr_location_rbracket.span(),
+                open_location: __rustylr_location_lbracket,
+                close_location: __rustylr_location_rbracket,
             }
         };
         if __push_data {
@@ -1613,12 +1611,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_TerminalSet_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1636,12 +1634,12 @@ impl GrammarDataStack {
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut __rustylr_location_dot = __location_stack.pop().unwrap();
         let __res = {
-            let span = __rustylr_location_dot.span();
+            let span = __rustylr_location_dot;
             TerminalSet {
                 negate: true,
                 items: vec![],
-                open_span: span,
-                close_span: span,
+                open_location: span.clone(),
+                close_location: span,
             }
         };
         if __push_data {
@@ -1653,12 +1651,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1690,12 +1688,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1724,7 +1722,7 @@ impl GrammarDataStack {
             };
             PatternArgs::Plus {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_plus,
+                op_location: __rustylr_location_plus,
             }
         };
         if __push_data {
@@ -1736,12 +1734,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_2(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1767,7 +1765,7 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Star {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_star,
+                op_location: __rustylr_location_star,
             }
         };
         if __push_data {
@@ -1779,12 +1777,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_3(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1810,7 +1808,7 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Question {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_question,
+                op_location: __rustylr_location_question,
             }
         };
         if __push_data {
@@ -1822,12 +1820,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_4(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1853,7 +1851,7 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Exclamation {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_exclamation,
+                op_location: __rustylr_location_exclamation,
             }
         };
         if __push_data {
@@ -1865,12 +1863,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_5(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1897,12 +1895,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_6(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1944,12 +1942,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_7(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -1980,8 +1978,8 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Group {
                 alternatives: Pattern,
-                open_span: __rustylr_location_lparen,
-                close_span: __rustylr_location_rparen,
+                open_location: __rustylr_location_lparen,
+                close_location: __rustylr_location_rparen,
             }
         };
         if __push_data {
@@ -1993,12 +1991,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_8(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2031,7 +2029,7 @@ impl GrammarDataStack {
                     message: "syntax error when parsing GROUP".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             PatternArgs::Ident(format_ident!("dummy"))
         };
@@ -2044,12 +2042,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_9(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2081,12 +2079,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_10(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2128,12 +2126,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_11(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2194,14 +2192,14 @@ impl GrammarDataStack {
                         message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_ident,
+                        location: __rustylr_location_ident,
                     });
             }
             PatternArgs::Sep {
                 base: Box::new(base),
                 delimiter: Box::new(del),
                 at_least_one: false,
-                span: *__rustylr_location0,
+                location: *__rustylr_location0,
             }
         };
         if __push_data {
@@ -2213,12 +2211,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_12(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2283,14 +2281,14 @@ impl GrammarDataStack {
                         message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_ident,
+                        location: __rustylr_location_ident,
                     });
             }
             PatternArgs::Sep {
                 base: Box::new(base),
                 delimiter: Box::new(del),
                 at_least_one: true,
-                span: *__rustylr_location0,
+                location: *__rustylr_location0,
             }
         };
         if __push_data {
@@ -2302,12 +2300,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_13(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2372,14 +2370,14 @@ impl GrammarDataStack {
                         message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_ident,
+                        location: __rustylr_location_ident,
                     });
             }
             PatternArgs::Sep {
                 base: Box::new(base),
                 delimiter: Box::new(del),
                 at_least_one: false,
-                span: *__rustylr_location0,
+                location: *__rustylr_location0,
             }
         };
         if __push_data {
@@ -2391,12 +2389,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_14(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2459,7 +2457,7 @@ impl GrammarDataStack {
                         message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_ident,
+                        location: __rustylr_location_ident,
                     });
             }
             data.error_recovered
@@ -2467,13 +2465,13 @@ impl GrammarDataStack {
                     message: "Unexpected $sep arguments".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             PatternArgs::Sep {
                 base: Box::new(base),
                 delimiter: Box::new(del),
                 at_least_one: false,
-                span: *__rustylr_location0,
+                location: *__rustylr_location0,
             }
         };
         if __push_data {
@@ -2485,12 +2483,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Pattern_15(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2557,7 +2555,7 @@ impl GrammarDataStack {
                         message: "Expected $sep".to_string(),
                         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                             .to_string(),
-                        span: __rustylr_location_ident,
+                        location: __rustylr_location_ident,
                     });
             }
             data.error_recovered
@@ -2565,13 +2563,13 @@ impl GrammarDataStack {
                     message: "Expected '+' or '*' repetition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
             PatternArgs::Sep {
                 base: Box::new(base),
                 delimiter: Box::new(del),
                 at_least_one: false,
-                span: *__rustylr_location0,
+                location: *__rustylr_location0,
             }
         };
         if __push_data {
@@ -2583,12 +2581,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Action_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2620,12 +2618,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Action_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -2643,12 +2641,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_IdentOrLiteral_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2680,12 +2678,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_IdentOrLiteral_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2717,12 +2715,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2771,12 +2769,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2809,7 +2807,7 @@ impl GrammarDataStack {
                     message: "Expected token definition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-definition-must-defined"
                         .to_string(),
-                    span: __rustylr_location_ident,
+                    location: __rustylr_location_ident,
                 });
         };
         Ok(())
@@ -2818,12 +2816,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_2(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2856,7 +2854,7 @@ impl GrammarDataStack {
                     message: "Expected token name".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-definition-must-defined"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -2865,12 +2863,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_3(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2908,12 +2906,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_4(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -2946,7 +2944,7 @@ impl GrammarDataStack {
                     message: "Expected start rule name".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#start-symbol-must-defined"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -2955,12 +2953,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_5(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3003,12 +3001,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_6(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3037,7 +3035,7 @@ impl GrammarDataStack {
                     message: "Expected token type definition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-type-must-defined"
                         .to_string(),
-                    span: __rustylr_location_tokentype,
+                    location: __rustylr_location_tokentype,
                 });
         };
         Ok(())
@@ -3046,12 +3044,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_7(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3094,12 +3092,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_8(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3128,7 +3126,7 @@ impl GrammarDataStack {
                     message: "Expected userdata definition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#userdata-type-optional"
                         .to_string(),
-                    span: __rustylr_location_userdata,
+                    location: __rustylr_location_userdata,
                 });
         };
         Ok(())
@@ -3137,12 +3135,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_9(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3184,12 +3182,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_10(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3222,7 +3220,7 @@ impl GrammarDataStack {
                     message: "Expected <ident> to token or <literal>".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3231,12 +3229,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_11(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3278,12 +3276,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_12(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3316,7 +3314,7 @@ impl GrammarDataStack {
                     message: "Expected <ident> to token or <literal>".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3325,12 +3323,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_13(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3368,12 +3366,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_14(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3406,7 +3404,7 @@ impl GrammarDataStack {
                     message: "Expected <ident> to token or <literal>".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3415,12 +3413,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_15(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3463,12 +3461,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_16(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3497,7 +3495,7 @@ impl GrammarDataStack {
                     message: "Expected error type definition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#error-type-optional"
                         .to_string(),
-                    span: __rustylr_location_errortype,
+                    location: __rustylr_location_errortype,
                 });
         };
         Ok(())
@@ -3506,12 +3504,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_17(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3554,12 +3552,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_18(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3588,7 +3586,7 @@ impl GrammarDataStack {
                     message: "Expected moduleprefix definition".to_string(),
                     link: "This is hidden directive, user must not use this explicitly"
                         .to_string(),
-                    span: __rustylr_location_moduleprefix,
+                    location: __rustylr_location_moduleprefix,
                 });
         };
         Ok(())
@@ -3597,12 +3595,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_19(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3633,12 +3631,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_20(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3671,7 +3669,7 @@ impl GrammarDataStack {
                     message: "Expected semicolon".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#glr-parser-generation"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3680,12 +3678,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_21(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3716,12 +3714,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_22(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3754,7 +3752,7 @@ impl GrammarDataStack {
                     message: "Expected semicolon".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#lalr-parser-generation"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3763,12 +3761,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_23(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3798,12 +3796,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_24(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3836,7 +3834,7 @@ impl GrammarDataStack {
                     message: "Expected semicolon".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#no-optimization"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3845,12 +3843,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_25(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3881,12 +3879,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_26(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3919,7 +3917,7 @@ impl GrammarDataStack {
                     message: "Expected semicolon".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#dense-parser-table"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -3928,12 +3926,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_27(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -3976,12 +3974,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_28(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4014,7 +4012,7 @@ impl GrammarDataStack {
                     message: "Expected ident".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#tracing-non-terminals"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -4023,12 +4021,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_29(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4070,12 +4068,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_30(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4104,7 +4102,7 @@ impl GrammarDataStack {
                     message: "Expected filter definition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#filter-directive"
                         .to_string(),
-                    span: __rustylr_location_filter,
+                    location: __rustylr_location_filter,
                 });
         };
         Ok(())
@@ -4113,12 +4111,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_31(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4159,12 +4157,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_32(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4183,7 +4181,8 @@ impl GrammarDataStack {
         }
         __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
         __data_stack.__tags.push(GrammarTags::Empty);
-        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
+        let mut location = __data_stack.__terminals.pop().unwrap();
+        __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_location = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
@@ -4193,7 +4192,7 @@ impl GrammarDataStack {
                     message: "Expected location type definition".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#location-tracking"
                         .to_string(),
-                    span: __rustylr_location_location,
+                    location: __rustylr_location_location,
                 });
         };
         Ok(())
@@ -4202,12 +4201,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_Directive_33(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4236,7 +4235,7 @@ impl GrammarDataStack {
                     message: "Expected directive, e.g. %token, %start, ...".to_string(),
                     link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#syntax"
                         .to_string(),
-                    span: __rustylr_location_error,
+                    location: __rustylr_location_error,
                 });
         };
         Ok(())
@@ -4245,12 +4244,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce_GrammarLine_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4272,12 +4271,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TokenMappedPlus15_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4304,12 +4303,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TokenMappedPlus15_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4344,12 +4343,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TokenMappedStar16_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4374,12 +4373,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TokenMappedStar16_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -4397,12 +4396,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PrecDefPlus17_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4429,12 +4428,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PrecDefPlus17_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4469,12 +4468,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PrecDefStar18_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4499,12 +4498,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PrecDefStar18_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -4522,12 +4521,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__caretQuestion19_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4554,12 +4553,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__caretQuestion19_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -4577,12 +4576,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TerminalSetItemPlus20_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4609,12 +4608,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TerminalSetItemPlus20_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4649,12 +4648,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TerminalSetItemStar21_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4679,12 +4678,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__TerminalSetItemStar21_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -4702,12 +4701,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PatternPlus22_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4734,12 +4733,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PatternPlus22_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4774,12 +4773,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PatternStar23_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4804,12 +4803,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__PatternStar23_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -4827,12 +4826,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce___PatternStar23SepPlus24_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4859,12 +4858,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce___PatternStar23SepPlus24_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4904,12 +4903,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__commaQuestion25_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4928,12 +4927,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__commaQuestion25_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         __data_stack.__tags.push(GrammarTags::Empty);
@@ -4943,12 +4942,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce___TermSet26Plus27_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -4975,12 +4974,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce___TermSet26Plus27_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5015,12 +5014,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__IdentOrLiteralPlus28_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5047,12 +5046,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__IdentOrLiteralPlus28_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5087,12 +5086,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__identPlus29_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5119,12 +5118,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__identPlus29_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5159,12 +5158,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__identStar30_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5189,12 +5188,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__identStar30_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
         if __push_data {
@@ -5212,12 +5211,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__GrammarLinePlus31_0(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5233,12 +5232,12 @@ impl GrammarDataStack {
     #[inline]
     fn reduce__GrammarLinePlus31_1(
         __data_stack: &mut Self,
-        __location_stack: &mut Vec<SpanPair>,
+        __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
         data: &mut GrammarArgs,
-        __rustylr_location0: &mut SpanPair,
+        __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)]
         {
@@ -5270,7 +5269,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     type ReduceActionError = ::rusty_lr_core::DefaultReduceActionError;
     type UserData = GrammarArgs;
     type StartType = ();
-    type Location = SpanPair;
+    type Location = Location;
     fn pop_start(&mut self) -> Option<Self::StartType> {
         let tag = self.__tags.pop();
         debug_assert!(tag == Some(GrammarTags::Empty));
@@ -5506,7 +5505,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     }
     fn reduce_action(
         data_stack: &mut Self,
-        location_stack: &mut Vec<SpanPair>,
+        location_stack: &mut Vec<Location>,
         push_data: bool,
         rule_index: usize,
         shift: &mut bool,

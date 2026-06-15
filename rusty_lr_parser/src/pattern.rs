@@ -7,7 +7,7 @@ use super::error::ParseError;
 use super::grammar::Grammar;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
 use super::token::TokenMapped;
-use crate::parser::span_pair::SpanPair;
+use crate::parser::location::Location;
 
 use std::collections::BTreeSet;
 
@@ -73,12 +73,12 @@ impl Pattern {
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
-        root_span_pair: SpanPair,
+        root_location: Location,
     ) -> Result<PatternToToken, ParseError> {
         if let Some(existing) = pattern_cache.get(self) {
             return Ok(existing.clone());
         }
-        let ret = self.to_token_impl(grammar, pattern_cache, root_span_pair)?;
+        let ret = self.to_token_impl(grammar, pattern_cache, root_location)?;
         pattern_cache.insert(self.clone(), ret.clone());
         Ok(ret)
     }
@@ -95,7 +95,7 @@ impl Pattern {
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
-        root_span_pair: SpanPair,
+        root_location: Location,
     ) -> Result<PatternToToken, ParseError> {
         use crate::nonterminal_info::ReduceAction;
         use rusty_lr_core::parser::nonterminal::NonTerminalType;
@@ -138,11 +138,11 @@ impl Pattern {
                 }
             }
             PatternInternal::Plus(pattern) => {
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Plus{}", base_rule.name, newrule_idx),
-                    root_span_pair.span(),
+                    root_location.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -153,13 +153,13 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("A", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![A] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -170,20 +170,20 @@ impl Pattern {
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: Some(Ident::new("Ap", Span::call_site())),
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: Some(Ident::new("A", Span::call_site())),
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { Ap.push(A); Ap }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -195,7 +195,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusLeft),
@@ -219,11 +219,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -234,18 +234,18 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -257,7 +257,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusRight),
@@ -280,14 +280,14 @@ impl Pattern {
                     internal: PatternInternal::Plus(pattern.clone()),
                     pretty_name: format!("{}+", pattern.pretty_name),
                 }
-                .to_token(grammar, pattern_cache, root_span_pair)?;
+                .to_token(grammar, pattern_cache, root_location)?;
 
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Star{}", base_rule.name, newrule_idx),
-                    root_span_pair.span(),
+                    root_location.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -298,11 +298,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -313,7 +313,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -325,7 +325,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -349,11 +349,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -362,7 +362,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -373,7 +373,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -392,11 +392,11 @@ impl Pattern {
                 }
             }
             PatternInternal::Question(pattern) => {
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Question{}", base_rule.name, newrule_idx),
-                    root_span_pair.span(),
+                    root_location.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -407,11 +407,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("A", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! { Some(A) })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -422,7 +422,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { None }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -434,7 +434,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! {Option<#base_typename>}),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Optional),
@@ -458,11 +458,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -471,7 +471,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -483,7 +483,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Optional),
@@ -503,7 +503,7 @@ impl Pattern {
             }
 
             PatternInternal::Exclamation(pattern) => {
-                let mut base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let mut base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 base_rule.ruletype = None;
                 Ok(base_rule)
             }
@@ -526,18 +526,18 @@ impl Pattern {
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name =
-                    Ident::new(&format!("_TermSet{}", newrule_idx), root_span_pair.span());
+                    Ident::new(&format!("_TermSet{}", newrule_idx), root_location.span());
                 let mut rules = Vec::with_capacity(terminal_set.len());
                 for terminal in terminals {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: Token::Term(TerminalSymbol::Term(terminal)),
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -550,7 +550,7 @@ impl Pattern {
                     pretty_name: self.pretty_name.clone(),
                     ruletype: Some(grammar.token_typename.clone()),
                     rules,
-                    regex_span: Some(root_span_pair),
+                    root_location: Some(root_location),
                     trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::TerminalSet),
@@ -573,12 +573,12 @@ impl Pattern {
                 } else {
                     lookaheads.clone()
                 };
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}LH{}", base_rule.name, newrule_idx),
-                    root_span_pair.span(),
+                    root_location.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -586,11 +586,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
@@ -602,7 +602,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(base_typename.clone()),
                         rules: vec![rule],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Lookahead),
@@ -623,11 +623,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
@@ -639,7 +639,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Lookahead),
@@ -673,7 +673,7 @@ impl Pattern {
 
                     let mut elements = Vec::with_capacity(line.len());
                     for child in line.iter() {
-                        elements.push(child.to_token(grammar, pattern_cache, root_span_pair)?);
+                        elements.push(child.to_token(grammar, pattern_cache, root_location)?);
                     }
                     let mut tokens = Vec::with_capacity(line.len());
                     // indices of children that have ruletype
@@ -682,7 +682,7 @@ impl Pattern {
                         tokens.push(TokenMapped {
                             token: child.token,
                             mapto: Some(format_ident!("__token{child_idx}")),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         });
                         if child.ruletype.is_some() {
@@ -695,7 +695,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: None,
-                                separator_span: Span::call_site(),
+                                separator_location: Location::Generated,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -711,7 +711,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
-                                separator_span: Span::call_site(),
+                                separator_location: Location::Generated,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -736,7 +736,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: Some(ReduceAction::new_custom(initializer)),
-                                separator_span: Span::call_site(),
+                                separator_location: Location::Generated,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -770,7 +770,7 @@ impl Pattern {
                     pretty_name: self.pretty_name.clone(),
                     ruletype: ruletype.clone(),
                     rules,
-                    regex_span: Some(root_span_pair),
+                    root_location: Some(root_location),
                     trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::Group),
@@ -828,13 +828,13 @@ impl Pattern {
                                 TokenMapped {
                                     token: Token::Term(TerminalSymbol::Term(term_id)),
                                     mapto: None,
-                                    span: str_span,
+                                    location: str_span,
                                     reduce_action_chains: Vec::new(),
                                 }
                             })
                             .collect(),
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -846,7 +846,7 @@ impl Pattern {
                         pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some(str_span),
+                        root_location: Some(str_span),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::LiteralString),
@@ -880,13 +880,13 @@ impl Pattern {
                                 TokenMapped {
                                     token: Token::Term(TerminalSymbol::Term(term_id)),
                                     mapto: None,
-                                    span: str_span,
+                                    location: str_span,
                                     reduce_action_chains: Vec::new(),
                                 }
                             })
                             .collect(),
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -898,7 +898,7 @@ impl Pattern {
                         pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some(str_span),
+                        root_location: Some(str_span),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::LiteralString),
@@ -919,12 +919,12 @@ impl Pattern {
             },
 
             PatternInternal::Sep(base, del, true) => {
-                let base_rule = base.to_token(grammar, pattern_cache, root_span_pair)?;
-                let del = del.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = base.to_token(grammar, pattern_cache, root_location)?;
+                let del = del.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}SepPlus{}", base_rule.name, newrule_idx),
-                    root_span_pair.span(),
+                    root_location.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -932,13 +932,13 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![__token0] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -949,19 +949,19 @@ impl Pattern {
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: Some(Ident::new("__token0", Span::call_site())),
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: Some(Ident::new("__token1", Span::call_site())),
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -971,7 +971,7 @@ impl Pattern {
                             __token0
                             }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -983,7 +983,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![rule1, rule2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusLeft),
@@ -1004,11 +1004,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1019,24 +1019,24 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                span: SpanPair::Generated,
+                                location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1048,7 +1048,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![rule1, rule2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusRight),
@@ -1072,14 +1072,14 @@ impl Pattern {
                     internal: PatternInternal::Sep(base.clone(), del.clone(), true),
                     pretty_name: format!("$sep({}, {}, +)", base.pretty_name, del.pretty_name),
                 }
-                .to_token(grammar, pattern_cache, root_span_pair)?;
+                .to_token(grammar, pattern_cache, root_location)?;
 
-                let base_rule = base.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = base.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}SepStar{}", base_rule.name, newrule_idx),
-                    root_span_pair.span(),
+                    root_location.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -1090,11 +1090,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1105,7 +1105,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1117,7 +1117,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -1141,11 +1141,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            span: SpanPair::Generated,
+                            location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1154,7 +1154,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::Generated,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1165,7 +1165,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
