@@ -551,11 +551,21 @@ pub struct RuleLineArgs {
     pub separator_location: Location,
     /// %prec or %dprec, allow duplicates here, return error later
     pub precs: Vec<PrecDPrecArgs>,
+}
 
-    /// %prec
-    pub prec: Option<IdentOrLiteral>,
-    /// %dprec
-    pub dprec: Option<Literal>,
+impl RuleLineArgs {
+    pub(crate) fn precs(&self) -> impl Iterator<Item = &'_ IdentOrLiteral> + '_ {
+        self.precs.iter().filter_map(|p| match p {
+            PrecDPrecArgs::Prec(prec) => Some(prec),
+            _ => None,
+        })
+    }
+    pub(crate) fn dprecs(&self) -> impl Iterator<Item = &'_ Literal> + '_ {
+        self.precs.iter().filter_map(|p| match p {
+            PrecDPrecArgs::DPrec(dprec) => Some(dprec),
+            _ => None,
+        })
+    }
 }
 
 /// For %prec and %dprec at the end of a rule line
@@ -563,6 +573,7 @@ pub struct RuleLineArgs {
 pub enum PrecDPrecArgs {
     Prec(IdentOrLiteral),
     DPrec(Literal),
+    /// for error recovery
     None,
 }
 
@@ -589,7 +600,7 @@ pub struct GrammarArgs {
     pub error_typename: Vec<(Location, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
     pub precedences: Vec<(
-        Location,                                    // location of %left, %right, %precedence
+        Location,                                // location of %left, %right, %precedence
         Option<rusty_lr_core::rule::ReduceType>, // actual definition of precedence type
         Vec<IdentOrLiteral>,                     // items
     )>,

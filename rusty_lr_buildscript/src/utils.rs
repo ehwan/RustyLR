@@ -1,6 +1,5 @@
 use proc_macro2::TokenStream;
 
-use rusty_lr_parser::Location;
 use std::ops::Range;
 
 pub fn tokenstream_range(stream: TokenStream) -> Range<usize> {
@@ -16,8 +15,4 @@ pub fn tokenstream_range(stream: TokenStream) -> Range<usize> {
     };
 
     first.start..last.end
-}
-pub fn span_stream_range(loc: Location, stream: TokenStream) -> Range<usize> {
-    let stream_range = tokenstream_range(stream);
-    loc.to_range().start..stream_range.end
 }

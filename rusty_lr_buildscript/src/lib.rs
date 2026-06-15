@@ -334,102 +334,150 @@ impl Builder {
             return Err("Syntax error in grammar".to_string());
         }
 
-        match rusty_lr_parser::grammar::Grammar::arg_check_error(&mut grammar_args) {
-            Ok(_) => {}
+        grammar_args = match rusty_lr_parser::grammar::Grammar::arg_check_error(grammar_args) {
+            Ok(grammar_args) => grammar_args,
             Err(e) => {
                 let diag = match e {
-                    ArgError::MultipleModulePrefixDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleModulePrefixDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %moduleprefix definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec![
                                 "Only one %moduleprefix definition is allowed".to_string()
                             ])
                     }
-                    ArgError::MultipleUserDataDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
-
+                    ArgError::MultipleUserDataDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
                         Diagnostic::error()
                             .with_message("Multiple %userdata definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(
                                 vec!["Only one %userdata definition is allowed".to_string()],
                             )
                     }
-                    ArgError::MultipleErrorDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleErrorDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %error definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["Only one %error definition is allowed".to_string()])
                     }
-                    ArgError::MultipleTokenTypeDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleTokenTypeDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %tokentype definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec![
                                 "Only one %tokentype definition is allowed".to_string()
                             ])
                     }
-                    ArgError::MultipleEofDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleEofDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %eof definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["Only one %eof definition is allowed".to_string()])
                     }
-                    ArgError::MultipleStartDefinition(ident1, ident2) => {
-                        let range1 = ident1.span().byte_range();
-                        let range2 = ident2.span().byte_range();
+                    ArgError::MultipleStartDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %start definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["Only one %start definition is allowed".to_string()])
+                    }
+                    ArgError::MultiplePrecDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Multiple %prec definition")
+                            .with_labels(labels)
+                            .with_notes(vec!["%prec must be unique".to_string()])
+                    }
+                    ArgError::MultipleDPrecDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Multiple %dprec definition")
+                            .with_labels(labels)
+                            .with_notes(vec!["%dprec must be unique".to_string()])
                     }
 
                     ArgError::StartNotDefined => Diagnostic::error()
@@ -454,25 +502,17 @@ impl Builder {
                             ">>> %tokentype <TokenType>".to_string(),
                         ]),
 
-                    ArgError::MultiplePrecDefinition(loc) => Diagnostic::error()
-                        .with_message("multiple %prec definition")
-                        .with_labels(vec![Label::primary(file_id, loc.to_range())
-                            .with_message("This %prec is defined here")])
-                        .with_notes(vec!["%prec must be unique".to_string()]),
-
-                    ArgError::MultipleDPrecDefinition(loc) => Diagnostic::error()
-                        .with_message("multiple %dprec definition")
-                        .with_labels(vec![Label::primary(file_id, loc.to_range())
-                            .with_message("This %dprec is defined here")])
-                        .with_notes(vec!["%dprec must be unique".to_string()]),
                     _ => {
                         let message = e.short_message();
-                        let span = e.span().byte_range();
+                        let mut labels = Vec::new();
+                        for loc in e.locations() {
+                            let range = loc.to_range();
+                            labels
+                                .push(Label::primary(file_id, range).with_message("occured here"));
+                        }
                         Diagnostic::error()
                             .with_message(message)
-                            .with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here")
-                            ])
+                            .with_labels(labels)
                     }
                 };
 
@@ -482,7 +522,7 @@ impl Builder {
                     .expect("Failed to write to stderr");
                 return Err(diag.message);
             }
-        }
+        };
 
         if let Some(glr) = self.glr {
             grammar_args.glr = glr;

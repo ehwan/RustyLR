@@ -23,21 +23,20 @@ pub enum ParseArgError {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ArgError {
-    MultipleModulePrefixDefinition((Location, TokenStream), (Location, TokenStream)),
-    MultipleUserDataDefinition((Location, TokenStream), (Location, TokenStream)),
-    MultipleErrorDefinition((Location, TokenStream), (Location, TokenStream)),
-    MultipleTokenTypeDefinition((Location, TokenStream), (Location, TokenStream)),
-    MultipleEofDefinition((Location, TokenStream), (Location, TokenStream)),
-    MultipleStartDefinition(Ident, Ident),
+    MultipleModulePrefixDefinition(Vec<Location>),
+    MultipleUserDataDefinition(Vec<Location>),
+    MultipleErrorDefinition(Vec<Location>),
+    MultipleTokenTypeDefinition(Vec<Location>),
+    MultipleEofDefinition(Vec<Location>),
+    MultipleStartDefinition(Vec<Location>),
+    /// multiple %prec in the same rule
+    MultiplePrecDefinition(Vec<Location>),
+    /// multiple %dprec in the same rule
+    MultipleDPrecDefinition(Vec<Location>),
 
     StartNotDefined,
     EofNotDefined,
     TokenTypeNotDefined,
-
-    /// multiple %prec in the same rule
-    MultiplePrecDefinition(Location),
-    /// multiple %dprec in the same rule
-    MultipleDPrecDefinition(Location),
 }
 
 #[non_exhaustive]
@@ -129,65 +128,49 @@ pub enum ParseError {
 #[allow(unused)]
 impl ArgError {
     pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
+        let mut output = TokenStream::new();
         let message = self.short_message();
-        quote_spanned! {
-            span=>
-            compile_error!(#message);
+        for loc in self.locations() {
+            let span = loc.span();
+            output.extend(quote_spanned! {
+                span=>
+                compile_error!(#message);
+            });
         }
+        output
     }
 
-    pub fn span(&self) -> Span {
+    pub fn locations(&self) -> Vec<Location> {
         match self {
-            ArgError::MultipleModulePrefixDefinition(
-                (loc1, _),
-                (loc2, _),
-            ) => loc2.span(),
-            ArgError::MultipleUserDataDefinition((_, _), (loc2, _)) => loc2.span(),
-            ArgError::MultipleErrorDefinition((_, _), (loc2, _)) => loc2.span(),
-            ArgError::MultipleTokenTypeDefinition((_, _), (loc2, _)) => loc2.span(),
-            ArgError::MultipleEofDefinition((_, _), (loc2, _)) => loc2.span(),
-            ArgError::MultipleStartDefinition(old, new) => new.span(),
-
-            ArgError::StartNotDefined => Span::call_site(),
-            ArgError::EofNotDefined => Span::call_site(),
-            ArgError::TokenTypeNotDefined => Span::call_site(),
-
-            ArgError::MultiplePrecDefinition(loc) => loc.span(),
-            ArgError::MultipleDPrecDefinition(loc) => loc.span(),
+            ArgError::MultipleModulePrefixDefinition(locs)
+            | ArgError::MultipleUserDataDefinition(locs)
+            | ArgError::MultipleErrorDefinition(locs)
+            | ArgError::MultipleTokenTypeDefinition(locs)
+            | ArgError::MultipleEofDefinition(locs)
+            | ArgError::MultipleStartDefinition(locs)
+            | ArgError::MultiplePrecDefinition(locs)
+            | ArgError::MultipleDPrecDefinition(locs) => locs.clone(),
+            _ => vec![Location::call_site()],
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
-            ArgError::MultipleModulePrefixDefinition(
-                (span1, tokenstream1),
-                (span2, tokenstream2),
-            ) => "Multiple %moduleprefix definition".into(),
-            ArgError::MultipleUserDataDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %userdata definition".into()
+            ArgError::MultipleModulePrefixDefinition(_) => {
+                "Multiple %moduleprefix definition".into()
             }
-            ArgError::MultipleErrorDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %error definition".into()
-            }
-            ArgError::MultipleTokenTypeDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %tokentype definition".into()
-            }
-            ArgError::MultipleEofDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %eof definition".into()
-            }
-            ArgError::MultipleStartDefinition(old, new) => {
-                format!("Multiple %start definition: {} and {}", old, new)
-            }
-
+            ArgError::MultipleUserDataDefinition(_) => "Multiple %userdata definition".into(),
+            ArgError::MultipleErrorDefinition(_) => "Multiple %error definition".into(),
+            ArgError::MultipleTokenTypeDefinition(_) => "Multiple %tokentype definition".into(),
+            ArgError::MultipleEofDefinition(_) => "Multiple %eof definition".into(),
+            ArgError::MultipleStartDefinition(_) => "Multiple %start definition".into(),
+            ArgError::MultiplePrecDefinition(_) => "Multiple %prec definition".into(),
+            ArgError::MultipleDPrecDefinition(_) => "Multiple %dprec definition".into(),
             ArgError::StartNotDefined => "Start rule not defined\n>>> %start <rule_name>;".into(),
             ArgError::EofNotDefined => "Eof not defined\n>>> %eof <eof_token_value>;".into(),
             ArgError::TokenTypeNotDefined => {
                 "Token type not defined\n>>> %tokentype <token_type_name>;".into()
             }
-
-            ArgError::MultiplePrecDefinition(_) => "Multiple %prec definition".into(),
-            ArgError::MultipleDPrecDefinition(_) => "Multiple %dprec definition".into(),
         }
     }
 }

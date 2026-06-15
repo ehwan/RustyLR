@@ -23,6 +23,10 @@ impl Default for Location {
     }
 }
 impl Location {
+    /// Returns a `Location` representing the Span::call_site() of the macro.
+    pub fn call_site() -> Self {
+        Span::call_site().into()
+    }
     /// Returns the byte range `[start, end)` of this span.
     pub fn to_range(&self) -> std::ops::Range<usize> {
         match self {

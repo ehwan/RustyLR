@@ -17,10 +17,10 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         Ok(grammar_args) => grammar_args,
         Err(e) => return e.to_compile_error().into(),
     };
-    match Grammar::arg_check_error(&mut grammar_args) {
-        Ok(_) => {}
+    grammar_args = match Grammar::arg_check_error(grammar_args) {
+        Ok(grammar_args) => grammar_args,
         Err(e) => return e.to_compile_error().into(),
-    }
+    };
 
     // If there are any errors in the grammar arguments, emit compile errors.
     if !grammar_args.error_recovered.is_empty() {

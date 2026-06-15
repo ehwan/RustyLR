@@ -203,28 +203,37 @@ impl Grammar {
 
         Ok(grammar_args)
     }
-    pub fn arg_check_error(grammar_args: &mut GrammarArgs) -> Result<(), ArgError> {
+    pub fn arg_check_error(grammar_args: GrammarArgs) -> Result<GrammarArgs, ArgError> {
         // %error
         if grammar_args.error_typename.len() > 1 {
             return Err(ArgError::MultipleErrorDefinition(
-                grammar_args.error_typename[0].clone(),
-                grammar_args.error_typename[1].clone(),
+                grammar_args
+                    .error_typename
+                    .into_iter()
+                    .map(|(loc, _)| loc)
+                    .collect(),
             ));
         }
 
         // %moduleprefix
         if grammar_args.module_prefix.len() > 1 {
-            return Err(ArgError::MultipleUserDataDefinition(
-                grammar_args.module_prefix[0].clone(),
-                grammar_args.module_prefix[1].clone(),
+            return Err(ArgError::MultipleModulePrefixDefinition(
+                grammar_args
+                    .module_prefix
+                    .into_iter()
+                    .map(|(loc, _)| loc)
+                    .collect(),
             ));
         }
 
         // %userdata
         if grammar_args.userdata_typename.len() > 1 {
             return Err(ArgError::MultipleUserDataDefinition(
-                grammar_args.userdata_typename[0].clone(),
-                grammar_args.userdata_typename[1].clone(),
+                grammar_args
+                    .userdata_typename
+                    .into_iter()
+                    .map(|(loc, _)| loc)
+                    .collect(),
             ));
         }
 
@@ -233,8 +242,11 @@ impl Grammar {
             return Err(ArgError::TokenTypeNotDefined);
         } else if grammar_args.token_typename.len() > 1 {
             return Err(ArgError::MultipleTokenTypeDefinition(
-                grammar_args.token_typename[0].clone(),
-                grammar_args.token_typename[1].clone(),
+                grammar_args
+                    .token_typename
+                    .into_iter()
+                    .map(|(loc, _)| loc)
+                    .collect(),
             ));
         }
 
@@ -243,42 +255,37 @@ impl Grammar {
             return Err(ArgError::StartNotDefined);
         } else if grammar_args.start_rule_name.len() > 1 {
             return Err(ArgError::MultipleStartDefinition(
-                grammar_args.start_rule_name[0].clone(),
-                grammar_args.start_rule_name[1].clone(),
+                grammar_args
+                    .start_rule_name
+                    .into_iter()
+                    .map(|start| start.span().into())
+                    .collect(),
             ));
         }
 
         // %prec and %dprec in each production rules
-        for rules in grammar_args.rules.iter_mut() {
-            use crate::parser::args::PrecDPrecArgs;
-            for rule in rules.rule_lines.iter_mut() {
-                let mut unique_prec = None;
-                let mut unique_dprec = None;
-                for prec in std::mem::take(&mut rule.precs) {
-                    match prec {
-                        PrecDPrecArgs::Prec(p) => {
-                            if unique_prec.is_some() {
-                                return Err(ArgError::MultiplePrecDefinition(p.location()));
-                            }
-                            unique_prec = Some(p);
-                        }
-                        PrecDPrecArgs::DPrec(d) => {
-                            if unique_dprec.is_some() {
-                                return Err(ArgError::MultipleDPrecDefinition(d.span().into()));
-                            }
-                            unique_dprec = Some(d);
-                        }
-                        _ => {
-                            unreachable!("unexpected PrecDPrecArgs variant");
-                        }
-                    }
+        for rules in grammar_args.rules.iter() {
+            for rule in rules.rule_lines.iter() {
+                let precs: Vec<_> = rule.precs().collect();
+                let dprecs: Vec<_> = rule.dprecs().collect();
+
+                if precs.len() > 1 {
+                    return Err(ArgError::MultiplePrecDefinition(
+                        precs.into_iter().map(|prec| prec.location()).collect(),
+                    ));
                 }
-                rule.prec = unique_prec;
-                rule.dprec = unique_dprec;
+                if dprecs.len() > 1 {
+                    return Err(ArgError::MultipleDPrecDefinition(
+                        dprecs
+                            .into_iter()
+                            .map(|dprec| dprec.span().into())
+                            .collect(),
+                    ));
+                }
             }
         }
 
-        Ok(())
+        Ok(grammar_args)
     }
 
     pub(crate) fn get_char_value(&self, lit: &syn::Lit) -> Result<u32, ParseError> {
@@ -399,7 +406,7 @@ impl Grammar {
             // add terminals from %prec definition in each rule
             for rules_arg in grammar_args.rules.iter() {
                 for rule in rules_arg.rule_lines.iter() {
-                    if let Some(ref prec_ident) = rule.prec {
+                    if let Some(prec_ident) = rule.precs().next() {
                         prec_ident.range_resolve(&mut grammar)?;
                     }
                 }
@@ -415,7 +422,7 @@ impl Grammar {
             // production rule definition
             for rules_arg in grammar_args.rules.iter() {
                 for rule in &rules_arg.rule_lines {
-                    if let Some(ref prec_ident) = rule.prec {
+                    if let Some(prec_ident) = rule.precs().next() {
                         prec_ident.range_resolve(&mut grammar)?;
                     }
                     for (_, pattern) in &rule.tokens {
@@ -525,7 +532,8 @@ impl Grammar {
                     IdentOrU32::Ident(ident) => {
                         if let Some(&term_idx) = grammar.terminals_index.get(&ident.clone().into())
                         {
-                            grammar.terminals[term_idx].precedence = Some((level, item_location.clone()));
+                            grammar.terminals[term_idx].precedence =
+                                Some((level, item_location.clone()));
                         } else if ident == utils::ERROR_NAME {
                             grammar.error_precedence = Some(level);
                         }
@@ -536,13 +544,17 @@ impl Grammar {
                             .terminals_index
                             .get(&TerminalName::CharRange(ch, ch))
                         {
-                            grammar.terminals[term_idx].precedence = Some((level, item_location.clone()));
+                            grammar.terminals[term_idx].precedence =
+                                Some((level, item_location.clone()));
                         } else {
                             unreachable!("unexpected char type in precedence order");
                         }
                     }
                 }
-                if let Some(old) = grammar.precedence_levels.insert(itemu, (level, item_location.clone())) {
+                if let Some(old) = grammar
+                    .precedence_levels
+                    .insert(itemu, (level, item_location.clone()))
+                {
                     return Err(ParseError::MultiplePrecedenceOrderDefinition {
                         cur: item,
                         old: old.1,
@@ -557,10 +569,10 @@ impl Grammar {
         // insert production rules & auto-generated rules from regex pattern
         for (rule_idx, rules) in grammar_args.rules.into_iter().enumerate() {
             let mut rule_lines = Vec::new();
-            for rule in rules.rule_lines.into_iter() {
+            for mut rule in rules.rule_lines.into_iter() {
                 let mut tokens = Vec::with_capacity(rule.tokens.len());
                 let mut patterns = Vec::with_capacity(rule.tokens.len());
-                for (mapto, pattern) in rule.tokens.into_iter() {
+                for (mapto, pattern) in std::mem::take(&mut rule.tokens) {
                     let location = pattern.location();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
@@ -576,7 +588,7 @@ impl Grammar {
                 }
 
                 // parse %prec definition
-                let prec = if let Some(prec) = rule.prec {
+                let prec = if let Some(prec) = rule.precs().next() {
                     let span = prec.location();
                     let precu = prec.clone().into_ident_or_u32(&grammar)?;
                     // check if this ident exists in tokens
@@ -603,14 +615,14 @@ impl Grammar {
                                         let loc = tokens[from_token].location.clone();
                                         Some((Precedence::Fixed(level), loc))
                                     } else {
-                                        return Err(ParseError::PrecedenceNotDefined(prec));
+                                        return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
                                         Some((Precedence::Fixed(error_prec), span))
                                     } else {
-                                        return Err(ParseError::PrecedenceNotDefined(prec));
+                                        return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                                     }
                                 }
                                 TerminalSymbol::Eof => {
@@ -623,7 +635,7 @@ impl Grammar {
                     } else if let Some(&(level, ref loc)) = grammar.precedence_levels.get(&precu) {
                         Some((Precedence::Fixed(level), loc.clone()))
                     } else {
-                        return Err(ParseError::PrecedenceNotDefined(prec));
+                        return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                     }
                 } else {
                     // not defined,
@@ -635,13 +647,19 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        op = Some((Precedence::Fixed(level), token.location.clone()));
+                                        op = Some((
+                                            Precedence::Fixed(level),
+                                            token.location.clone(),
+                                        ));
                                         break;
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
-                                        op = Some((Precedence::Fixed(error_prec), token.location.clone()));
+                                        op = Some((
+                                            Precedence::Fixed(error_prec),
+                                            token.location.clone(),
+                                        ));
                                         break;
                                     }
                                 }
@@ -655,7 +673,7 @@ impl Grammar {
                 };
 
                 // parse %dprec literal value
-                let dprec = if let Some(dprec) = rule.dprec {
+                let dprec = if let Some(dprec) = rule.dprecs().next() {
                     let lit = match syn::parse2::<syn::Lit>(dprec.to_token_stream()) {
                         Ok(lit) => lit,
                         Err(_) => {

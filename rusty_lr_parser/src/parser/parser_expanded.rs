@@ -957,8 +957,6 @@ impl GrammarDataStack {
                 reduce_action: Action.map(|action| action.to_token_stream()),
                 separator_location: Location::Generated,
                 precs: PrecDef,
-                prec: None,
-                dprec: None,
             }
         };
         if __push_data {
