@@ -153,8 +153,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("A", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
@@ -171,15 +170,13 @@ impl Pattern {
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: Some(Ident::new("Ap", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: Some(Ident::new("A", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -222,8 +219,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
@@ -238,15 +234,13 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -304,8 +298,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
@@ -356,8 +349,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
@@ -415,8 +407,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("A", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! { Some(A) })),
@@ -467,8 +458,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
@@ -543,8 +533,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: Token::Term(TerminalSymbol::Term(terminal)),
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
@@ -597,8 +586,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
@@ -635,8 +623,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
@@ -695,8 +682,7 @@ impl Pattern {
                         tokens.push(TokenMapped {
                             token: child.token,
                             mapto: Some(format_ident!("__token{child_idx}")),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         });
                         if child.ruletype.is_some() {
@@ -831,6 +817,8 @@ impl Pattern {
                     let newrule_name =
                         Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
 
+                    let str_span = str_span.into();
+
                     let rule = Rule {
                         tokens: s
                             .value()
@@ -840,8 +828,7 @@ impl Pattern {
                                 TokenMapped {
                                     token: Token::Term(TerminalSymbol::Term(term_id)),
                                     mapto: None,
-                                    begin_span: str_span,
-                                    end_span: str_span,
+                                    span: str_span,
                                     reduce_action_chains: Vec::new(),
                                 }
                             })
@@ -859,7 +846,7 @@ impl Pattern {
                         pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some(SpanPair::new_single(str_span)),
+                        regex_span: Some(str_span),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::LiteralString),
@@ -883,6 +870,8 @@ impl Pattern {
                         Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
                     let vec = s.value();
 
+                    let str_span = str_span.into();
+
                     let rule = Rule {
                         tokens: vec
                             .iter()
@@ -891,8 +880,7 @@ impl Pattern {
                                 TokenMapped {
                                     token: Token::Term(TerminalSymbol::Term(term_id)),
                                     mapto: None,
-                                    begin_span: str_span,
-                                    end_span: str_span,
+                                    span: str_span,
                                     reduce_action_chains: Vec::new(),
                                 }
                             })
@@ -910,7 +898,7 @@ impl Pattern {
                         pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some(SpanPair::new_single(str_span)),
+                        regex_span: Some(str_span),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::LiteralString),
@@ -944,8 +932,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
@@ -962,22 +949,19 @@ impl Pattern {
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: Some(Ident::new("__token0", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: Some(Ident::new("__token1", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -1020,8 +1004,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
@@ -1036,22 +1019,19 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                span: SpanPair::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -1110,8 +1090,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
@@ -1162,8 +1141,7 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            span: SpanPair::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,

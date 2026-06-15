@@ -375,18 +375,15 @@ impl PatternArgs {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            PatternArgs::Plus {
-                base,
-                op_span,
-            } => Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span)),
-            PatternArgs::Star {
-                base,
-                op_span,
-            } => Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span)),
-            PatternArgs::Question {
-                base,
-                op_span,
-            } => Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span)),
+            PatternArgs::Plus { base, op_span } => {
+                Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span))
+            }
+            PatternArgs::Star { base, op_span } => {
+                Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span))
+            }
+            PatternArgs::Question { base, op_span } => {
+                Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span))
+            }
             PatternArgs::Exclamation { base, .. } => base.to_terminal_set(grammar),
             PatternArgs::Lookaheads { pattern, .. } => {
                 let sp = pattern.span_pair();
@@ -432,37 +429,28 @@ impl PatternArgs {
                     (true, true) => Ok((false, rhs_set.difference(&lhs_set).copied().collect())),
                 }
             }
-            PatternArgs::Sep { span, .. } => {
-                Err(ParseError::OnlyTerminalSet(*span, *span))
-            }
+            PatternArgs::Sep { span, .. } => Err(ParseError::OnlyTerminalSet(*span, *span)),
         }
     }
     pub fn span_pair(&self) -> SpanPair {
         match self {
-            PatternArgs::Ident(ident) => SpanPair::new_single(ident.span()),
-            PatternArgs::Plus { base, op_span } => SpanPair {
-                pair: (base.span_pair().pair.0, op_span.pair.1),
-            },
-            PatternArgs::Star { base, op_span } => SpanPair {
-                pair: (base.span_pair().pair.0, op_span.pair.1),
-            },
-            PatternArgs::Question { base, op_span } => SpanPair {
-                pair: (base.span_pair().pair.0, op_span.pair.1),
-            },
-            PatternArgs::Exclamation { base, op_span } => SpanPair {
-                pair: (base.span_pair().pair.0, op_span.pair.1),
-            },
-            PatternArgs::TerminalSet(terminal_set) => SpanPair::new_single(terminal_set.open_span),
-            PatternArgs::Lookaheads { pattern, lookaheads } => SpanPair {
-                pair: (pattern.span_pair().pair.0, lookaheads.span_pair().pair.1),
-            },
-            PatternArgs::Group { open_span, close_span, .. } => SpanPair {
-                pair: (open_span.pair.0, close_span.pair.1),
-            },
-            PatternArgs::Literal(literal) => SpanPair::new_single(literal.span()),
-            PatternArgs::Minus { base, exclude } => SpanPair {
-                pair: (base.span_pair().pair.0, exclude.span_pair().pair.1),
-            },
+            PatternArgs::Ident(ident) => ident.span().into(),
+            PatternArgs::Plus { base, op_span } => base.span_pair().merge(op_span),
+            PatternArgs::Star { base, op_span } => base.span_pair().merge(op_span),
+            PatternArgs::Question { base, op_span } => base.span_pair().merge(op_span),
+            PatternArgs::Exclamation { base, op_span } => base.span_pair().merge(op_span),
+            PatternArgs::TerminalSet(terminal_set) => terminal_set.open_span.into(),
+            PatternArgs::Lookaheads {
+                pattern,
+                lookaheads,
+            } => pattern.span_pair().merge(&lookaheads.span_pair()),
+            PatternArgs::Group {
+                open_span,
+                close_span,
+                ..
+            } => open_span.merge(close_span),
+            PatternArgs::Literal(literal) => literal.span().into(),
+            PatternArgs::Minus { base, exclude } => base.span_pair().merge(&exclude.span_pair()),
             PatternArgs::Sep { span, .. } => *span,
         }
     }

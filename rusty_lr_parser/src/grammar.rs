@@ -954,15 +954,13 @@ impl Grammar {
                     TokenMapped {
                         token: Token::NonTerm(*start_idx),
                         mapto: None,
-                        begin_span: Span::call_site(),
-                        end_span: Span::call_site(),
+                        span: SpanPair::Generated,
                         reduce_action_chains: Vec::new(),
                     },
                     TokenMapped {
                         token: Token::Term(TerminalSymbol::Eof),
                         mapto: None,
-                        begin_span: Span::call_site(),
-                        end_span: Span::call_site(),
+                        span: SpanPair::Generated,
                         reduce_action_chains: Vec::new(),
                     },
                 ],

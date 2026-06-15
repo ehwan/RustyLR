@@ -177,7 +177,7 @@ impl Builder {
     ) {
         let (nonterm, local_rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
         if let Some(origin_span) = nonterm.origin_span() {
-            let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
+            let origin_range = origin_span.to_range();
             let message = format!("{}{} was generated here", prefix_str, nonterm.pretty_name,);
             let mut duplicated_primary = false;
             for label in labels.iter() {
@@ -694,7 +694,7 @@ impl Builder {
                     ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
                         // `name` must not be generated rule,
                         // since it is programmically generated, it must have a proper reduce action
-                        let span = span.0.byte_range().start..span.1.byte_range().end;
+                        let span = span.to_range();
                         Diagnostic::error()
                             .with_message("Reduce action not defined")
                             .with_labels(vec![
@@ -994,7 +994,7 @@ impl Builder {
                     );
                 }
                 if !nonterm_info.is_auto_generated() {
-                    let op_range = rule_info.prec.unwrap().1.byte_range();
+                    let op_range = rule_info.prec.unwrap().1.to_range();
                     labels.push(
                         Label::secondary(file_id, op_range)
                             .with_message("[Removed] (Reduce) operator for reduce rule"),
@@ -1059,7 +1059,7 @@ impl Builder {
                 }
 
                 if !nonterm_info.is_auto_generated() {
-                    let op_range = rule_info.prec.unwrap().1.byte_range();
+                    let op_range = rule_info.prec.unwrap().1.to_range();
                     labels.push(
                         Label::secondary(file_id, op_range)
                             .with_message("(Reduce) operator for reduce rule"),
