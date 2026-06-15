@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::token::TokenMapped;
+use crate::parser::span_pair::SpanPair;
 use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
@@ -106,8 +107,8 @@ pub struct NonTerminalInfo {
     pub rules: Vec<Rule>,
 
     /// If this non-terminal is auto-generated from regex pattern,
-    /// the (begin, end) span-pair of the regex pattern.
-    pub(crate) regex_span: Option<(Span, Span)>,
+    /// the span-pair of the regex pattern.
+    pub(crate) regex_span: Option<SpanPair>,
 
     pub(crate) trace: bool,
     /// protected from optimization removal; trace rules are always protected
@@ -124,7 +125,7 @@ impl NonTerminalInfo {
     }
     /// only for auto-generated rules
     /// returns the span of the regex pattern that generated this rule
-    pub fn origin_span(&self) -> Option<(Span, Span)> {
+    pub fn origin_span(&self) -> Option<SpanPair> {
         self.regex_span
     }
 

@@ -558,17 +558,15 @@ impl Grammar {
                 let mut patterns = Vec::with_capacity(rule.tokens.len());
                 for (mapto, pattern) in rule.tokens.into_iter() {
                     let span_pair = pattern.span_pair();
-                    let begin_span = span_pair.span();
-                    let end_span = span_pair.span();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
-                        pattern.to_token(&mut grammar, &mut pattern_map, (begin_span, end_span))?;
+                        pattern.to_token(&mut grammar, &mut pattern_map, span_pair)?;
 
                     tokens.push(TokenMapped {
                         token: pattern_rule.token,
                         mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
-                        begin_span,
-                        end_span,
+                        begin_span: span_pair.span(),
+                        end_span: span_pair.span(),
                         reduce_action_chains: Vec::new(),
                     });
                     patterns.push(pattern_rule);

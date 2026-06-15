@@ -7,6 +7,7 @@ use super::error::ParseError;
 use super::grammar::Grammar;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
 use super::token::TokenMapped;
+use crate::parser::span_pair::SpanPair;
 
 use std::collections::BTreeSet;
 
@@ -72,7 +73,7 @@ impl Pattern {
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
-        root_span_pair: (Span, Span),
+        root_span_pair: SpanPair,
     ) -> Result<PatternToToken, ParseError> {
         if let Some(existing) = pattern_cache.get(self) {
             return Ok(existing.clone());
@@ -94,7 +95,7 @@ impl Pattern {
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
-        root_span_pair: (Span, Span),
+        root_span_pair: SpanPair,
     ) -> Result<PatternToToken, ParseError> {
         use crate::nonterminal_info::ReduceAction;
         use rusty_lr_core::parser::nonterminal::NonTerminalType;
@@ -141,7 +142,7 @@ impl Pattern {
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Plus{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                    root_span_pair.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -292,7 +293,7 @@ impl Pattern {
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Star{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                    root_span_pair.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -403,7 +404,7 @@ impl Pattern {
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Question{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                    root_span_pair.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -535,7 +536,7 @@ impl Pattern {
 
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name =
-                    Ident::new(&format!("_TermSet{}", newrule_idx), root_span_pair.0);
+                    Ident::new(&format!("_TermSet{}", newrule_idx), root_span_pair.span());
                 let mut rules = Vec::with_capacity(terminal_set.len());
                 for terminal in terminals {
                     let rule = Rule {
@@ -588,7 +589,7 @@ impl Pattern {
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}LH{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                    root_span_pair.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -858,7 +859,7 @@ impl Pattern {
                         pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some((str_span, str_span)),
+                        regex_span: Some(SpanPair::new_single(str_span)),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::LiteralString),
@@ -909,7 +910,7 @@ impl Pattern {
                         pretty_name: s.to_token_stream().to_string(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some((str_span, str_span)),
+                        regex_span: Some(SpanPair::new_single(str_span)),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::LiteralString),
@@ -935,7 +936,7 @@ impl Pattern {
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}SepPlus{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                    root_span_pair.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -1098,7 +1099,7 @@ impl Pattern {
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}SepStar{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                    root_span_pair.span(),
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
