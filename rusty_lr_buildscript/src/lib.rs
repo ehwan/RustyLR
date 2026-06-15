@@ -319,7 +319,7 @@ impl Builder {
         };
 
         for error in &grammar_args.error_recovered {
-            let range = error.span.pair.map(|(s, e)| s..e).unwrap_or(0..1);
+            let range = error.span.to_range();
             let diag = Diagnostic::error()
                 .with_message("Syntax error in grammar")
                 .with_labels(vec![

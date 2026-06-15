@@ -35,16 +35,19 @@ impl rusty_lr_core::Location for SpanPair {
         Self: 'a,
     {
         if len == 0 {
-            if let Some(last) = stack.next() {
-                let pair = last.pair.map(|(_, e)| (e, e));
+            // zero-length: point to position after the most recent token
+            if let Some(after_pos) = stack.next() {
+                let pair = after_pos.pair.map(|(_, e)| (e, e));
                 return SpanPair { pair };
             }
             return SpanPair { pair: None };
         }
+        // The iterator yields items most-recent-first, so the first item is the end span
+        // and the last item taken is the start span.
         let mut take = stack.take(len).filter_map(|x| x.pair);
-        let pair = if let Some(last) = take.next() {
-            let first = take.last().unwrap_or(last);
-            Some((first.0, last.1))
+        let pair = if let Some(end_span) = take.next() {
+            let start_span = take.last().unwrap_or(end_span);
+            Some((start_span.0, end_span.1))
         } else {
             None
         };
