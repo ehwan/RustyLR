@@ -1,5 +1,11 @@
 use proc_macro2::Span;
 
+/// Converts a byte range `[start, end)` into a `proc_macro2::Span`.
+/// Currently, byte offsets cannot be mapped back precisely, so this returns `Span::call_site()`.
+pub fn byte_range_to_span(_range: std::ops::Range<usize>) -> Span {
+    Span::call_site()
+}
+
 /// type for %location for each token
 /// stores byte offset range [start, end) in the source file.
 #[derive(Clone, Debug, Copy)]
@@ -24,9 +30,9 @@ impl SpanPair {
         self.pair.map(|(s, e)| s..e).unwrap_or(0..0)
     }
     /// Returns a `proc_macro2::Span` for use in proc-macro error reporting.
-    /// Since byte offsets cannot be converted back to `Span`, this always returns `Span::call_site()`.
+    /// Since byte offsets cannot be converted back to `Span`, this falls back to `byte_range_to_span`.
     pub fn span(&self) -> Span {
-        Span::call_site()
+        byte_range_to_span(self.to_range())
     }
 }
 impl rusty_lr_core::Location for SpanPair {

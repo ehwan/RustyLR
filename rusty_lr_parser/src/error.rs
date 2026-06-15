@@ -6,6 +6,7 @@ use proc_macro2::TokenStream;
 use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::span_pair::byte_range_to_span;
 
 /// failed to feed() the token
 #[non_exhaustive]
@@ -199,8 +200,9 @@ impl ArgError {
 impl ParseArgError {
     pub fn to_compile_error(&self) -> TokenStream {
         let message = self.short_message();
+        let span = byte_range_to_span(self.span());
         quote_spanned! {
-            Span::call_site()=>
+            span=>
             compile_error!(#message);
         }
     }
