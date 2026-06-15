@@ -23,6 +23,7 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrU32;
 use crate::parser::parser_expanded::GrammarContext;
 use crate::parser::parser_expanded::GrammarParser;
+use crate::parser::span_pair::SpanPair;
 use crate::pattern::Pattern;
 use crate::pattern::PatternToToken;
 use crate::rangeresolver::RangeResolver;
@@ -193,7 +194,10 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                return Err(ParseArgError::MacroLineParse { span: 0..0, message });
+                return Err(ParseArgError::MacroLineParse {
+                    span: 0..0,
+                    message,
+                });
             }
         }
 
@@ -565,8 +569,7 @@ impl Grammar {
                     tokens.push(TokenMapped {
                         token: pattern_rule.token,
                         mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
-                        begin_span: span_pair.span(),
-                        end_span: span_pair.span(),
+                        span: span_pair,
                         reduce_action_chains: Vec::new(),
                     });
                     patterns.push(pattern_rule);
@@ -574,7 +577,7 @@ impl Grammar {
 
                 // parse %prec definition
                 let prec = if let Some(prec) = rule.prec {
-                    let span = prec.span();
+                    let span = prec.span().into();
                     let precu = prec.clone().into_ident_or_u32(&grammar)?;
                     // check if this ident exists in tokens
                     let from_token = match &precu {
@@ -597,7 +600,7 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        let span = tokens[from_token].begin_span;
+                                        let span = tokens[from_token].span;
                                         Some((Precedence::Fixed(level), span))
                                     } else {
                                         return Err(ParseError::PrecedenceNotDefined(prec));
@@ -632,13 +635,13 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        op = Some((Precedence::Fixed(level), token.end_span));
+                                        op = Some((Precedence::Fixed(level), token.span));
                                         break;
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
-                                        op = Some((Precedence::Fixed(error_prec), token.end_span));
+                                        op = Some((Precedence::Fixed(error_prec), token.span));
                                         break;
                                     }
                                 }
@@ -670,7 +673,7 @@ impl Grammar {
                             return Err(ParseError::OnlyUsizeLiteral(dprec.span()));
                         }
                     };
-                    Some((val, dprec.span()))
+                    Some((val, dprec.span().into()))
                 } else {
                     None
                 };
@@ -808,11 +811,11 @@ impl Grammar {
                             Some(ReduceAction::Identity(unique_mapto_idx))
                         } else {
                             let span = if tokens.is_empty() {
-                                (rule.separator_span, rule.separator_span)
+                                rule.separator_span.into()
                             } else {
-                                let first = rule.separator_span;
-                                let last = tokens.last().unwrap().end_span;
-                                (first, last)
+                                let first: SpanPair = rule.separator_span.into();
+                                let last = &tokens.last().unwrap().span;
+                                first.merge(last)
                             };
 
                             return Err(ParseError::RuleTypeDefinedButActionNotDefined {
@@ -914,7 +917,7 @@ impl Grammar {
                                 // TODO
                                 // no need to be an error on GLR parser?
                                 return Err(ParseError::NonTerminalPrecedenceNotDefined(
-                                    prec.1,
+                                    prec.1.span(),
                                     token_nonterm_idx,
                                 ));
                             }

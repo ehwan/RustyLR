@@ -34,7 +34,19 @@ impl SpanPair {
     /// Returns a `proc_macro2::Span` for use in proc-macro error reporting.
     /// Since byte offsets cannot be converted back to `Span`, this falls back to `byte_range_to_span`.
     pub fn span(&self) -> Span {
-        byte_range_to_span(self.to_range())
+        unimplemented!("Cannot convert byte range back to Span, using call_site() instead");
+        // byte_range_to_span(self.to_range())
+    }
+
+    pub fn merge(&self, other: &SpanPair) -> SpanPair {
+        let start = self.pair.0.min(other.pair.0);
+        let end = self.pair.1.max(other.pair.1);
+        SpanPair { pair: (start, end) }
+    }
+}
+impl From<Span> for SpanPair {
+    fn from(span: Span) -> Self {
+        Self::new_single(span)
     }
 }
 impl rusty_lr_core::Location for SpanPair {

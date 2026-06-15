@@ -64,23 +64,23 @@ pub struct Rule {
     /// force lookahead tokens for this pattern.
     pub lookaheads: Option<BTreeSet<usize>>,
     /// %prec definition
-    pub prec: Option<(rusty_lr_core::rule::Precedence, Span)>,
+    pub prec: Option<(rusty_lr_core::rule::Precedence, SpanPair)>,
     /// %dprec definition
-    pub dprec: Option<(usize, Span)>,
+    pub dprec: Option<(usize, SpanPair)>,
 
     /// in `Grammar::build_grammar()`, some production rules will be optimized out and deleted
     pub(crate) is_used: bool,
 }
 
 impl Rule {
-    pub fn span_pair(&self) -> (Span, Span) {
-        let begin = self.separator_span;
-        let end = if let Some(token) = self.tokens.last() {
-            token.end_span
+    pub fn span_pair(&self) -> SpanPair {
+        let begin: SpanPair = self.separator_span.into();
+        if let Some(token) = self.tokens.last() {
+            let end = &token.span;
+            begin.merge(&end)
         } else {
             begin
-        };
-        (begin, end)
+        }
     }
     pub fn reduce_action_contains_ident(&self, ident: &Ident) -> bool {
         match self.reduce_action.as_ref() {

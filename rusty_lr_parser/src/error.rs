@@ -114,7 +114,7 @@ pub enum ParseError {
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
         name: Ident,
-        span: (Span, Span),
+        span: SpanPair,
     },
 
     /// Only terminal or terminal set is allowed
@@ -269,7 +269,7 @@ impl ParseError {
             ParseError::PrecedenceNotDefined(name) => name.span(),
             ParseError::NonTerminalPrecedenceNotDefined(span, _) => *span,
 
-            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
+            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.span(),
             ParseError::OnlyTerminalSet(span_begin, span_end) => span_begin.span(),
             ParseError::NonTerminalNotDefined(ident) => ident.span(),
             ParseError::OnlyUsizeLiteral(span) => *span,

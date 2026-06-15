@@ -1,4 +1,6 @@
-use proc_macro2::{Ident, Span};
+use proc_macro2::Ident;
+
+use crate::parser::span_pair::SpanPair;
 
 /// for syntax <Ident> '=' <Token>
 #[derive(Debug, Clone)]
@@ -22,6 +24,5 @@ pub struct TokenMapped {
     pub reduce_action_chains: Vec<usize>,
 
     /// span of the token
-    pub begin_span: Span,
-    pub end_span: Span,
+    pub span: SpanPair,
 }

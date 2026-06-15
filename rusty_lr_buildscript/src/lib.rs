@@ -190,8 +190,8 @@ impl Builder {
                 labels.push(Label::primary(fileid, origin_range).with_message(message));
             }
         } else {
-            let (rule_begin, rule_end) = nonterm.rules[local_rule].span_pair();
-            let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
+            let rule_location = nonterm.rules[local_rule].span_pair();
+            let rule_range = rule_location.to_range();
             let origin_range = nonterm.name.span().byte_range();
 
             let primary_message = format!("{}{} was defined here", prefix_str, nonterm.pretty_name);
@@ -794,8 +794,8 @@ impl Builder {
                     match o {
                         OptimizeRemove::TerminalClassRuleMerge(rule) => {
                             let message = "Production Rule deleted";
-                            let (b, e) = rule.span_pair();
-                            let range = b.byte_range().start..e.byte_range().end;
+                            let rule_location = rule.span_pair();
+                            let range = rule_location.to_range();
                             let labels =
                                 vec![Label::primary(file_id, range).with_message("defined here")];
                             let notes =
@@ -820,8 +820,8 @@ impl Builder {
                                     .with_message("non-terminal defined here"),
                             );
 
-                            let (b, e) = rule.span_pair();
-                            let rule_range = b.byte_range().start..e.byte_range().end;
+                            let rule_location = rule.span_pair();
+                            let rule_range = rule_location.to_range();
                             labels.push(
                                 Label::secondary(file_id, rule_range)
                                     .with_message("this rule has only one child rule"),
