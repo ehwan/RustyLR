@@ -473,7 +473,7 @@ Directive
         });
     }
     | percent tokentype RustCode semicolon {
-        data.token_typename.push( (@tokentype.span(), RustCode) );
+        data.token_typename.push( (@tokentype, RustCode) );
     }
     | percent tokentype semicolon {
         data.error_recovered.push( RecoveredError {
@@ -483,7 +483,7 @@ Directive
         });
     }
     | percent userdata RustCode semicolon {
-        data.userdata_typename.push( (@userdata.span(),RustCode) );
+        data.userdata_typename.push( (@userdata, RustCode) );
     }
     | percent userdata semicolon {
         data.error_recovered.push( RecoveredError {
@@ -493,7 +493,7 @@ Directive
         });
     }
     | percent left IdentOrLiteral+ semicolon {
-        data.precedences.push( (@left.span(), Some(ReduceType::Left), IdentOrLiteral) );
+        data.precedences.push( (@left, Some(ReduceType::Left), IdentOrLiteral) );
     }
     | percent left error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -503,7 +503,7 @@ Directive
         });
     }
     | percent right IdentOrLiteral+ semicolon {
-        data.precedences.push( (@right.span(), Some(ReduceType::Right), IdentOrLiteral) );
+        data.precedences.push( (@right, Some(ReduceType::Right), IdentOrLiteral) );
     }
     | percent right error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -513,7 +513,7 @@ Directive
         });
     }
     | percent precedence IdentOrLiteral+ semicolon {
-        data.precedences.push( (@precedence.span(), None, IdentOrLiteral) );
+        data.precedences.push( (@precedence, None, IdentOrLiteral) );
     }
     | percent precedence error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -523,7 +523,7 @@ Directive
         });
     }
     | percent errortype RustCode semicolon {
-        data.error_typename.push( (@errortype.span(), RustCode) );
+        data.error_typename.push( (@errortype, RustCode) );
     }
     | percent errortype semicolon {
         data.error_recovered.push( RecoveredError {
@@ -533,7 +533,7 @@ Directive
         });
     }
     | percent moduleprefix RustCode semicolon {
-        data.module_prefix.push( (@moduleprefix.span(), RustCode) );
+        data.module_prefix.push( (@moduleprefix, RustCode) );
     }
     | percent moduleprefix semicolon {
         data.error_recovered.push( RecoveredError {

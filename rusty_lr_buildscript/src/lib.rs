@@ -454,15 +454,15 @@ impl Builder {
                             ">>> %tokentype <TokenType>".to_string(),
                         ]),
 
-                    ArgError::MultiplePrecDefinition(span) => Diagnostic::error()
+                    ArgError::MultiplePrecDefinition(loc) => Diagnostic::error()
                         .with_message("multiple %prec definition")
-                        .with_labels(vec![Label::primary(file_id, span.byte_range())
+                        .with_labels(vec![Label::primary(file_id, loc.to_range())
                             .with_message("This %prec is defined here")])
                         .with_notes(vec!["%prec must be unique".to_string()]),
 
-                    ArgError::MultipleDPrecDefinition(span) => Diagnostic::error()
+                    ArgError::MultipleDPrecDefinition(loc) => Diagnostic::error()
                         .with_message("multiple %dprec definition")
-                        .with_labels(vec![Label::primary(file_id, span.byte_range())
+                        .with_labels(vec![Label::primary(file_id, loc.to_range())
                             .with_message("This %dprec is defined here")])
                         .with_notes(vec!["%dprec must be unique".to_string()]),
                     _ => {
@@ -647,8 +647,8 @@ impl Builder {
                                 "First terminal symbol has to be less than or equal to the last terminal symbol".to_string()
                             ])
                     }
-                    ParseError::TokenInLiteralMode(span) => {
-                        let range = span.byte_range();
+                    ParseError::TokenInLiteralMode(loc) => {
+                        let range = loc.to_range();
                         Diagnostic::error()
                             .with_message("%token with %tokentype `char` or `u8` is not supported")
                             .with_labels(vec![Label::primary(file_id, range)
@@ -658,15 +658,15 @@ impl Builder {
                         Diagnostic::error()
                             .with_message("Multiple operator precedence defined")
                             .with_labels(vec![
-                                Label::primary(file_id, cur.span().byte_range())
+                                Label::primary(file_id, cur.location().to_range())
                                     .with_message("defined here"),
-                                Label::secondary(file_id, old.byte_range())
+                                Label::secondary(file_id, old.to_range())
                                     .with_message("first defined here"),
                             ])
                             .with_notes(vec!["%prec name must be unique".to_string()])
                     }
                     ParseError::PrecedenceNotDefined(ident) => {
-                        let range = ident.span().byte_range();
+                        let range = ident.location().to_range();
                         Diagnostic::error()
                             .with_message("Precedence is not defined for this token")
                             .with_labels(vec![
@@ -678,8 +678,8 @@ impl Builder {
                                 "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string()
                             ])
                     }
-                    ParseError::NonTerminalPrecedenceNotDefined(span, _) => {
-                        let range = span.byte_range();
+                    ParseError::NonTerminalPrecedenceNotDefined(loc, _) => {
+                        let range = loc.to_range();
                         Diagnostic::error()
                             .with_message("Precedence is not defined for this non-terminal")
                             .with_labels(vec![Label::primary(file_id, range)
@@ -721,8 +721,8 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This non-terminal is not defined")])
                     }
-                    ParseError::OnlyUsizeLiteral(span) => {
-                        let range = span.byte_range();
+                    ParseError::OnlyUsizeLiteral(loc) => {
+                        let range = loc.to_range();
                         Diagnostic::error()
                             .with_message("Only usize literal is allowed for %dprec")
                             .with_labels(vec![Label::primary(file_id, range)])

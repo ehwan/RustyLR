@@ -2993,7 +2993,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.token_typename.push((__rustylr_location_tokentype.span(), RustCode));
+            data.token_typename.push((__rustylr_location_tokentype, RustCode));
         };
         Ok(())
     }
@@ -3084,7 +3084,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.userdata_typename.push((__rustylr_location_userdata.span(), RustCode));
+            data.userdata_typename.push((__rustylr_location_userdata, RustCode));
         };
         Ok(())
     }
@@ -3170,11 +3170,7 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         {
             data.precedences
-                .push((
-                    __rustylr_location_left.span(),
-                    Some(ReduceType::Left),
-                    IdentOrLiteral,
-                ));
+                .push((__rustylr_location_left, Some(ReduceType::Left), IdentOrLiteral));
         };
         Ok(())
     }
@@ -3265,7 +3261,7 @@ impl GrammarDataStack {
         {
             data.precedences
                 .push((
-                    __rustylr_location_right.span(),
+                    __rustylr_location_right,
                     Some(ReduceType::Right),
                     IdentOrLiteral,
                 ));
@@ -3357,8 +3353,7 @@ impl GrammarDataStack {
         let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         {
-            data.precedences
-                .push((__rustylr_location_precedence.span(), None, IdentOrLiteral));
+            data.precedences.push((__rustylr_location_precedence, None, IdentOrLiteral));
         };
         Ok(())
     }
@@ -3453,7 +3448,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.error_typename.push((__rustylr_location_errortype.span(), RustCode));
+            data.error_typename.push((__rustylr_location_errortype, RustCode));
         };
         Ok(())
     }
@@ -3544,7 +3539,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.module_prefix.push((__rustylr_location_moduleprefix.span(), RustCode));
+            data.module_prefix.push((__rustylr_location_moduleprefix, RustCode));
         };
         Ok(())
     }

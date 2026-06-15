@@ -1,6 +1,7 @@
 use proc_macro2::Ident;
 use proc_macro2::Span;
 
+use crate::parser::location::Location;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 
@@ -101,7 +102,7 @@ pub struct TerminalInfo {
     pub name: TerminalName,
 
     /// the precedence level of this terminal
-    pub precedence: Option<(usize, Span)>,
+    pub precedence: Option<(usize, Location)>,
 
     /// the actual Rust expr to be emitted
     pub body: TokenStream,

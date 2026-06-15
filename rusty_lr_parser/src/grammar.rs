@@ -89,10 +89,10 @@ pub struct Grammar {
     pub terminals_index: HashMap<TerminalName, TerminalIndex>,
 
     /// %left, %right, or %precedence for each precedence level
-    pub precedence_types: Vec<(Option<rusty_lr_core::rule::ReduceType>, Span)>,
+    pub precedence_types: Vec<(Option<rusty_lr_core::rule::ReduceType>, Location)>,
 
     /// precedence levels; line number of %left, %right, or %precedence directive
-    pub precedence_levels: HashMap<IdentOrU32, (usize, Span)>,
+    pub precedence_levels: HashMap<IdentOrU32, (usize, Location)>,
 
     /// rule definitions
     pub nonterminals: Vec<NonTerminalInfo>,
@@ -258,13 +258,13 @@ impl Grammar {
                     match prec {
                         PrecDPrecArgs::Prec(p) => {
                             if unique_prec.is_some() {
-                                return Err(ArgError::MultiplePrecDefinition(p.span()));
+                                return Err(ArgError::MultiplePrecDefinition(p.location()));
                             }
                             unique_prec = Some(p);
                         }
                         PrecDPrecArgs::DPrec(d) => {
                             if unique_dprec.is_some() {
-                                return Err(ArgError::MultipleDPrecDefinition(d.span()));
+                                return Err(ArgError::MultipleDPrecDefinition(d.span().into()));
                             }
                             unique_dprec = Some(d);
                         }
@@ -440,7 +440,7 @@ impl Grammar {
             }
             if !grammar_args.terminals.is_empty() {
                 return Err(ParseError::TokenInLiteralMode(
-                    grammar_args.terminals.first().unwrap().0.span(),
+                    grammar_args.terminals.first().unwrap().0.span().into(),
                 ));
             }
         } else {
@@ -517,15 +517,15 @@ impl Grammar {
         // precedence orders
         for (level, (span, reduce_type, items)) in grammar_args.precedences.into_iter().enumerate()
         {
-            grammar.precedence_types.push((reduce_type, span)); // set i'th level's precedence type
+            grammar.precedence_types.push((reduce_type, span.clone())); // set i'th level's precedence type
             for item in items {
-                let span = item.span();
+                let item_location = item.location();
                 let itemu = item.clone().into_ident_or_u32(&grammar)?;
                 match &itemu {
                     IdentOrU32::Ident(ident) => {
                         if let Some(&term_idx) = grammar.terminals_index.get(&ident.clone().into())
                         {
-                            grammar.terminals[term_idx].precedence = Some((level, span));
+                            grammar.terminals[term_idx].precedence = Some((level, item_location.clone()));
                         } else if ident == utils::ERROR_NAME {
                             grammar.error_precedence = Some(level);
                         }
@@ -536,13 +536,13 @@ impl Grammar {
                             .terminals_index
                             .get(&TerminalName::CharRange(ch, ch))
                         {
-                            grammar.terminals[term_idx].precedence = Some((level, span));
+                            grammar.terminals[term_idx].precedence = Some((level, item_location.clone()));
                         } else {
                             unreachable!("unexpected char type in precedence order");
                         }
                     }
                 }
-                if let Some(old) = grammar.precedence_levels.insert(itemu, (level, span)) {
+                if let Some(old) = grammar.precedence_levels.insert(itemu, (level, item_location.clone())) {
                     return Err(ParseError::MultiplePrecedenceOrderDefinition {
                         cur: item,
                         old: old.1,
@@ -564,7 +564,7 @@ impl Grammar {
                     let location = pattern.location();
                     let pattern = pattern.into_pattern(&mut grammar, false)?;
                     let pattern_rule =
-                        pattern.to_token(&mut grammar, &mut pattern_map, location)?;
+                        pattern.to_token(&mut grammar, &mut pattern_map, location.clone())?;
 
                     tokens.push(TokenMapped {
                         token: pattern_rule.token,
@@ -577,7 +577,7 @@ impl Grammar {
 
                 // parse %prec definition
                 let prec = if let Some(prec) = rule.prec {
-                    let span = prec.span().into();
+                    let span = prec.location();
                     let precu = prec.clone().into_ident_or_u32(&grammar)?;
                     // check if this ident exists in tokens
                     let from_token = match &precu {
@@ -600,8 +600,8 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        let span = tokens[from_token].location;
-                                        Some((Precedence::Fixed(level), span))
+                                        let loc = tokens[from_token].location.clone();
+                                        Some((Precedence::Fixed(level), loc))
                                     } else {
                                         return Err(ParseError::PrecedenceNotDefined(prec));
                                     }
@@ -620,8 +620,8 @@ impl Grammar {
                         } else {
                             Some((Precedence::Dynamic(from_token), span))
                         }
-                    } else if let Some(&(level, _)) = grammar.precedence_levels.get(&precu) {
-                        Some((Precedence::Fixed(level), span))
+                    } else if let Some(&(level, ref loc)) = grammar.precedence_levels.get(&precu) {
+                        Some((Precedence::Fixed(level), loc.clone()))
                     } else {
                         return Err(ParseError::PrecedenceNotDefined(prec));
                     }
@@ -635,13 +635,13 @@ impl Grammar {
                                 TerminalSymbol::Term(term_idx) => {
                                     if let Some((level, _)) = grammar.terminals[term_idx].precedence
                                     {
-                                        op = Some((Precedence::Fixed(level), token.location));
+                                        op = Some((Precedence::Fixed(level), token.location.clone()));
                                         break;
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
-                                        op = Some((Precedence::Fixed(error_prec), token.location));
+                                        op = Some((Precedence::Fixed(error_prec), token.location.clone()));
                                         break;
                                     }
                                 }
@@ -666,11 +666,11 @@ impl Grammar {
                         syn::Lit::Int(lit) => match lit.base10_parse::<usize>() {
                             Ok(val) => val,
                             Err(_) => {
-                                return Err(ParseError::OnlyUsizeLiteral(lit.span()));
+                                return Err(ParseError::OnlyUsizeLiteral(dprec.span().into()));
                             }
                         },
                         _ => {
-                            return Err(ParseError::OnlyUsizeLiteral(dprec.span()));
+                            return Err(ParseError::OnlyUsizeLiteral(dprec.span().into()));
                         }
                     };
                     Some((val, dprec.span().into()))
@@ -810,17 +810,17 @@ impl Grammar {
                         if let Some(unique_mapto_idx) = unique_token_idx {
                             Some(ReduceAction::Identity(unique_mapto_idx))
                         } else {
-                            let span = if tokens.is_empty() {
-                                rule.separator_location.into()
+                            let loc = if tokens.is_empty() {
+                                rule.separator_location.clone()
                             } else {
-                                let first: Location = rule.separator_location.into();
+                                let first = rule.separator_location.clone();
                                 let last = &tokens.last().unwrap().location;
                                 first.merge(last)
                             };
 
                             return Err(ParseError::RuleTypeDefinedButActionNotDefined {
                                 name: rules.name.clone(),
-                                span,
+                                span: loc,
                             });
                         }
                     } else {
@@ -917,7 +917,7 @@ impl Grammar {
                                 // TODO
                                 // no need to be an error on GLR parser?
                                 return Err(ParseError::NonTerminalPrecedenceNotDefined(
-                                    prec.1.span(),
+                                    prec.1.clone(),
                                     token_nonterm_idx,
                                 ));
                             }

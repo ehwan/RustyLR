@@ -1,6 +1,5 @@
 use proc_macro2::Ident;
 use proc_macro2::Literal;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 
@@ -26,10 +25,10 @@ pub enum IdentOrLiteral {
     Literal(Literal),
 }
 impl IdentOrLiteral {
-    pub fn span(&self) -> Span {
+    pub fn location(&self) -> Location {
         match self {
-            IdentOrLiteral::Ident(ident) => ident.span(),
-            IdentOrLiteral::Literal(literal) => literal.span(),
+            IdentOrLiteral::Ident(ident) => ident.span().into(),
+            IdentOrLiteral::Literal(literal) => literal.span().into(),
         }
     }
     pub fn into_ident_or_u32(self, grammar: &Grammar) -> Result<IdentOrU32, ParseError> {
@@ -583,14 +582,14 @@ pub struct RecoveredError {
 
 /// parsed arguments for the grammar
 pub struct GrammarArgs {
-    pub module_prefix: Vec<(Span, TokenStream)>,
-    pub token_typename: Vec<(Span, TokenStream)>,
-    pub userdata_typename: Vec<(Span, TokenStream)>,
+    pub module_prefix: Vec<(Location, TokenStream)>,
+    pub token_typename: Vec<(Location, TokenStream)>,
+    pub userdata_typename: Vec<(Location, TokenStream)>,
     pub start_rule_name: Vec<Ident>,
-    pub error_typename: Vec<(Span, TokenStream)>,
+    pub error_typename: Vec<(Location, TokenStream)>,
     pub terminals: Vec<(Ident, TokenStream)>,
     pub precedences: Vec<(
-        Span,                                    // span of %left, %right, %precedence
+        Location,                                    // location of %left, %right, %precedence
         Option<rusty_lr_core::rule::ReduceType>, // actual definition of precedence type
         Vec<IdentOrLiteral>,                     // items
     )>,

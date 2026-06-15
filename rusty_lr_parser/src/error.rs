@@ -23,11 +23,11 @@ pub enum ParseArgError {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ArgError {
-    MultipleModulePrefixDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleUserDataDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleErrorDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleTokenTypeDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleEofDefinition((Span, TokenStream), (Span, TokenStream)),
+    MultipleModulePrefixDefinition((Location, TokenStream), (Location, TokenStream)),
+    MultipleUserDataDefinition((Location, TokenStream), (Location, TokenStream)),
+    MultipleErrorDefinition((Location, TokenStream), (Location, TokenStream)),
+    MultipleTokenTypeDefinition((Location, TokenStream), (Location, TokenStream)),
+    MultipleEofDefinition((Location, TokenStream), (Location, TokenStream)),
     MultipleStartDefinition(Ident, Ident),
 
     StartNotDefined,
@@ -35,9 +35,9 @@ pub enum ArgError {
     TokenTypeNotDefined,
 
     /// multiple %prec in the same rule
-    MultiplePrecDefinition(Span),
+    MultiplePrecDefinition(Location),
     /// multiple %dprec in the same rule
-    MultipleDPrecDefinition(Span),
+    MultipleDPrecDefinition(Location),
 }
 
 #[non_exhaustive]
@@ -97,19 +97,19 @@ pub enum ParseError {
     InvalidLiteralRange(Literal, Literal),
 
     /// TokenType in Literal mode is not supported
-    TokenInLiteralMode(Span),
+    TokenInLiteralMode(Location),
 
     /// conflicts in precedence definition
     MultiplePrecedenceOrderDefinition {
         cur: IdentOrLiteral,
-        old: Span,
+        old: Location,
     },
 
     /// Precedence not defined for the given token
     PrecedenceNotDefined(IdentOrLiteral),
 
     /// All production rules in this non-terminal must have %prec defined
-    NonTerminalPrecedenceNotDefined(Span, usize),
+    NonTerminalPrecedenceNotDefined(Location, usize),
 
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
@@ -124,7 +124,7 @@ pub enum ParseError {
     NonTerminalNotDefined(Ident),
 
     /// only 'usize' literal is allowed for %dprec
-    OnlyUsizeLiteral(Span),
+    OnlyUsizeLiteral(Location),
 }
 #[allow(unused)]
 impl ArgError {
@@ -140,27 +140,21 @@ impl ArgError {
     pub fn span(&self) -> Span {
         match self {
             ArgError::MultipleModulePrefixDefinition(
-                (span1, tokenstream1),
-                (span2, tokenstream2),
-            ) => *span2,
-            ArgError::MultipleUserDataDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                *span2
-            }
-            ArgError::MultipleErrorDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                *span2
-            }
-            ArgError::MultipleTokenTypeDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                *span2
-            }
-            ArgError::MultipleEofDefinition((span1, tokenstream1), (span2, tokenstream2)) => *span2,
+                (loc1, _),
+                (loc2, _),
+            ) => loc2.span(),
+            ArgError::MultipleUserDataDefinition((_, _), (loc2, _)) => loc2.span(),
+            ArgError::MultipleErrorDefinition((_, _), (loc2, _)) => loc2.span(),
+            ArgError::MultipleTokenTypeDefinition((_, _), (loc2, _)) => loc2.span(),
+            ArgError::MultipleEofDefinition((_, _), (loc2, _)) => loc2.span(),
             ArgError::MultipleStartDefinition(old, new) => new.span(),
 
             ArgError::StartNotDefined => Span::call_site(),
             ArgError::EofNotDefined => Span::call_site(),
             ArgError::TokenTypeNotDefined => Span::call_site(),
 
-            ArgError::MultiplePrecDefinition(span) => *span,
-            ArgError::MultipleDPrecDefinition(span) => *span,
+            ArgError::MultiplePrecDefinition(loc) => loc.span(),
+            ArgError::MultipleDPrecDefinition(loc) => loc.span(),
         }
     }
 
@@ -192,8 +186,8 @@ impl ArgError {
                 "Token type not defined\n>>> %tokentype <token_type_name>;".into()
             }
 
-            ArgError::MultiplePrecDefinition(span) => "Multiple %prec definition".into(),
-            ArgError::MultipleDPrecDefinition(span) => "Multiple %dprec definition".into(),
+            ArgError::MultiplePrecDefinition(_) => "Multiple %prec definition".into(),
+            ArgError::MultipleDPrecDefinition(_) => "Multiple %dprec definition".into(),
         }
     }
 }
@@ -263,16 +257,16 @@ impl ParseError {
 
             ParseError::InvalidLiteralRange(first, last) => first.span(),
 
-            ParseError::TokenInLiteralMode(open_span) => *open_span,
+            ParseError::TokenInLiteralMode(loc) => loc.span(),
 
-            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.span(),
-            ParseError::PrecedenceNotDefined(name) => name.span(),
-            ParseError::NonTerminalPrecedenceNotDefined(span, _) => *span,
+            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.location().span(),
+            ParseError::PrecedenceNotDefined(name) => name.location().span(),
+            ParseError::NonTerminalPrecedenceNotDefined(loc, _) => loc.span(),
 
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.span(),
             ParseError::OnlyTerminalSet(span_begin, span_end) => span_begin.span(),
             ParseError::NonTerminalNotDefined(ident) => ident.span(),
-            ParseError::OnlyUsizeLiteral(span) => *span,
+            ParseError::OnlyUsizeLiteral(loc) => loc.span(),
         }
     }
 
