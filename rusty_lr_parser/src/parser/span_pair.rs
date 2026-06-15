@@ -23,10 +23,6 @@ impl Default for SpanPair {
     }
 }
 impl SpanPair {
-    pub fn new_single(span: Span) -> Self {
-        let range = span.byte_range();
-        SpanPair::Range(range.start, range.end)
-    }
     /// Returns the byte range `[start, end)` of this span.
     pub fn to_range(&self) -> std::ops::Range<usize> {
         match self {
@@ -55,7 +51,8 @@ impl SpanPair {
 }
 impl From<Span> for SpanPair {
     fn from(span: Span) -> Self {
-        Self::new_single(span)
+        let range = span.byte_range();
+        SpanPair::Range(range.start, range.end)
     }
 }
 impl rusty_lr_core::Location for SpanPair {

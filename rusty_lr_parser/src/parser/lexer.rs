@@ -247,11 +247,10 @@ pub fn feed_recursive(
     context: &mut GrammarContext,
     grammar_args: &mut GrammarArgs,
 ) -> Result<(), GrammarParseError> {
-    use super::span_pair::SpanPair;
     let mut input = input.into_iter().peekable();
 
     while let Some(next) = input.next() {
-        let location = SpanPair::new_single(next.span());
+        let location = next.span().into();
         match next {
             TokenTree::Ident(ident) => {
                 if let Some(keyword) = ident_to_keyword(ident.clone()) {
@@ -334,14 +333,14 @@ pub fn feed_recursive(
                             parser,
                             Lexed::LParen,
                             grammar_args,
-                            SpanPair::new_single(group.span_open()),
+                            group.span_open().into(),
                         )?;
                         feed_recursive(group.stream(), parser, context, grammar_args)?;
                         context.feed_location(
                             parser,
                             Lexed::RParen,
                             grammar_args,
-                            SpanPair::new_single(group.span_close()),
+                            group.span_close().into(),
                         )?;
                     }
                 }
@@ -367,14 +366,14 @@ pub fn feed_recursive(
                             parser,
                             Lexed::LBracket,
                             grammar_args,
-                            SpanPair::new_single(group.span_open()),
+                            group.span_open().into(),
                         )?;
                         feed_recursive(group.stream(), parser, context, grammar_args)?;
                         context.feed_location(
                             parser,
                             Lexed::RBracket,
                             grammar_args,
-                            SpanPair::new_single(group.span_close()),
+                            group.span_close().into(),
                         )?;
                     }
                 }
