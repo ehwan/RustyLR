@@ -261,25 +261,25 @@ Pattern(PatternArgs): ident {
     let Lexed::Plus(plus) = plus else {
         unreachable!( "Pattern-Plus" );
     };
-    PatternArgs::Plus( Box::new(Pattern), @plus.span() )
+    PatternArgs::Plus { base: Box::new(Pattern), op_span: @plus.span() }
 }
 | Pattern star {
-    PatternArgs::Star( Box::new(Pattern), @star.span() )
+    PatternArgs::Star { base: Box::new(Pattern), op_span: @star.span() }
 }
 | Pattern question {
-    PatternArgs::Question( Box::new(Pattern), @question.span() )
+    PatternArgs::Question { base: Box::new(Pattern), op_span: @question.span() }
 }
 | Pattern exclamation {
-    PatternArgs::Exclamation( Box::new(Pattern), @exclamation.span() )
+    PatternArgs::Exclamation { base: Box::new(Pattern), op_span: @exclamation.span() }
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
 }
 | p1=Pattern slash lh=Pattern {
-    PatternArgs::Lookaheads( Box::new(p1), Box::new(lh) )
+    PatternArgs::Lookaheads { pattern: Box::new(p1), lookaheads: Box::new(lh) }
 }
 | lparen $sep( Pattern*, pipe, + ) rparen {
-    PatternArgs::Group(Pattern, @lparen.span(), @rparen.span())
+    PatternArgs::Group { alternatives: Pattern, open_span: @lparen.span(), close_span: @rparen.span() }
 }
 | lparen error rparen {
     data.error_recovered.push( RecoveredError {
@@ -296,7 +296,7 @@ Pattern(PatternArgs): ident {
     PatternArgs::Literal(literal)
 }
 | p1=Pattern minus p2=Pattern {
-    PatternArgs::Minus( Box::new(p1), Box::new(p2) )
+    PatternArgs::Minus { base: Box::new(p1), exclude: Box::new(p2) }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma? rparen {
     let Lexed::Ident(ident) = ident else {
@@ -309,12 +309,12 @@ Pattern(PatternArgs): ident {
             span: @ident,
         });
     }
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false, // default is '*'
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false, // default is '*'
+        span: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma plus rparen {
     let Lexed::Ident(ident) = ident else {
@@ -327,12 +327,12 @@ Pattern(PatternArgs): ident {
             span: @ident,
         });
     }
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        true,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: true,
+        span: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma star rparen {
     let Lexed::Ident(ident) = ident else {
@@ -345,12 +345,12 @@ Pattern(PatternArgs): ident {
             span: @ident,
         });
     }
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false,
+        span: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern error rparen {
     let Lexed::Ident(ident) = ident else {
@@ -369,12 +369,12 @@ Pattern(PatternArgs): ident {
         span: @error
     });
 
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false,
+        span: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma error rparen {
     let Lexed::Ident(ident) = ident else {
@@ -393,12 +393,12 @@ Pattern(PatternArgs): ident {
         span: @error
     });
 
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false,
+        span: *@$
+    }
 }
 // | Pattern error {
 //     data.error_recovered.push( RecoveredError {

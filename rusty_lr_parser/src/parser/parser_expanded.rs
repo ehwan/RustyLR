@@ -1722,7 +1722,10 @@ impl GrammarDataStack {
             let Lexed::Plus(plus) = plus else {
                 unreachable!("Pattern-Plus");
             };
-            PatternArgs::Plus(Box::new(Pattern), __rustylr_location_plus.span())
+            PatternArgs::Plus {
+                base: Box::new(Pattern),
+                op_span: __rustylr_location_plus.span(),
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -1762,7 +1765,10 @@ impl GrammarDataStack {
         let mut __rustylr_location_star = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
-            PatternArgs::Star(Box::new(Pattern), __rustylr_location_star.span())
+            PatternArgs::Star {
+                base: Box::new(Pattern),
+                op_span: __rustylr_location_star.span(),
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -1802,7 +1808,10 @@ impl GrammarDataStack {
         let mut __rustylr_location_question = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
-            PatternArgs::Question(Box::new(Pattern), __rustylr_location_question.span())
+            PatternArgs::Question {
+                base: Box::new(Pattern),
+                op_span: __rustylr_location_question.span(),
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -1842,10 +1851,10 @@ impl GrammarDataStack {
         let mut __rustylr_location_exclamation = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         let __res = {
-            PatternArgs::Exclamation(
-                Box::new(Pattern),
-                __rustylr_location_exclamation.span(),
-            )
+            PatternArgs::Exclamation {
+                base: Box::new(Pattern),
+                op_span: __rustylr_location_exclamation.span(),
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -1920,7 +1929,12 @@ impl GrammarDataStack {
         let mut p1 = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        let __res = { PatternArgs::Lookaheads(Box::new(p1), Box::new(lh)) };
+        let __res = {
+            PatternArgs::Lookaheads {
+                pattern: Box::new(p1),
+                lookaheads: Box::new(lh),
+            }
+        };
         if __push_data {
             __data_stack.__stack9.push(__res);
         }
@@ -1964,11 +1978,11 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 1usize);
         let mut __rustylr_location_lparen = __location_stack.pop().unwrap();
         let __res = {
-            PatternArgs::Group(
-                Pattern,
-                __rustylr_location_lparen.span(),
-                __rustylr_location_rparen.span(),
-            )
+            PatternArgs::Group {
+                alternatives: Pattern,
+                open_span: __rustylr_location_lparen.span(),
+                close_span: __rustylr_location_rparen.span(),
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2099,7 +2113,12 @@ impl GrammarDataStack {
         let mut p1 = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         __location_stack.truncate(__location_stack.len() - 3usize);
-        let __res = { PatternArgs::Minus(Box::new(p1), Box::new(p2)) };
+        let __res = {
+            PatternArgs::Minus {
+                base: Box::new(p1),
+                exclude: Box::new(p2),
+            }
+        };
         if __push_data {
             __data_stack.__stack9.push(__res);
         }
@@ -2178,7 +2197,12 @@ impl GrammarDataStack {
                         span: __rustylr_location_ident,
                     });
             }
-            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+            PatternArgs::Sep {
+                base: Box::new(base),
+                delimiter: Box::new(del),
+                at_least_one: false,
+                span: *__rustylr_location0,
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2262,7 +2286,12 @@ impl GrammarDataStack {
                         span: __rustylr_location_ident,
                     });
             }
-            PatternArgs::Sep(Box::new(base), Box::new(del), true, *__rustylr_location0)
+            PatternArgs::Sep {
+                base: Box::new(base),
+                delimiter: Box::new(del),
+                at_least_one: true,
+                span: *__rustylr_location0,
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2346,7 +2375,12 @@ impl GrammarDataStack {
                         span: __rustylr_location_ident,
                     });
             }
-            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+            PatternArgs::Sep {
+                base: Box::new(base),
+                delimiter: Box::new(del),
+                at_least_one: false,
+                span: *__rustylr_location0,
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2435,7 +2469,12 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+            PatternArgs::Sep {
+                base: Box::new(base),
+                delimiter: Box::new(del),
+                at_least_one: false,
+                span: *__rustylr_location0,
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2528,7 +2567,12 @@ impl GrammarDataStack {
                         .to_string(),
                     span: __rustylr_location_error,
                 });
-            PatternArgs::Sep(Box::new(base), Box::new(del), false, *__rustylr_location0)
+            PatternArgs::Sep {
+                base: Box::new(base),
+                delimiter: Box::new(del),
+                at_least_one: false,
+                span: *__rustylr_location0,
+            }
         };
         if __push_data {
             __data_stack.__stack9.push(__res);

@@ -71,10 +71,22 @@ pub enum PatternArgs {
     Ident(Ident),
 
     /// span of punctuation('+', '*', ...) after the pattern
-    Plus(Box<PatternArgs>, Span),
-    Star(Box<PatternArgs>, Span),
-    Question(Box<PatternArgs>, Span),
-    Exclamation(Box<PatternArgs>, Span),
+    Plus {
+        base: Box<PatternArgs>,
+        op_span: Span,
+    },
+    Star {
+        base: Box<PatternArgs>,
+        op_span: Span,
+    },
+    Question {
+        base: Box<PatternArgs>,
+        op_span: Span,
+    },
+    Exclamation {
+        base: Box<PatternArgs>,
+        op_span: Span,
+    },
 
     /// span of '[' and ']' containing terminal set
     /// a group delimited by '[' and ']' containing terminal set
@@ -83,38 +95,60 @@ pub enum PatternArgs {
     /// force lookahead tokens for this pattern.
     /// lookaheads will not be consumed.
     /// span of the rightmost of this pattern
-    Lookaheads(Box<PatternArgs>, Box<PatternArgs>),
+    Lookaheads {
+        pattern: Box<PatternArgs>,
+        lookaheads: Box<PatternArgs>,
+    },
 
     /// ( Pattern+ )
-    /// span of '(' and ')'
-    Group(Vec<Vec<PatternArgs>>, Span, Span),
+    /// alternatives is a list of alternatives (separated by '|'),
+    /// each alternative is a list of patterns.
+    /// open/close are spans of '(' and ')'
+    Group {
+        alternatives: Vec<Vec<PatternArgs>>,
+        open_span: Span,
+        close_span: Span,
+    },
 
     /// 'a', b'a', "abc", b"abc"
     Literal(Literal),
 
     /// Pattern - Terminals exclusion
-    Minus(Box<PatternArgs>, Box<PatternArgs>),
+    Minus {
+        base: Box<PatternArgs>,
+        exclude: Box<PatternArgs>,
+    },
 
-    Sep(Box<PatternArgs>, Box<PatternArgs>, bool, SpanPair),
+    Sep {
+        base: Box<PatternArgs>,
+        delimiter: Box<PatternArgs>,
+        /// if true, use '+' (at least one); otherwise '*' (zero or more)
+        at_least_one: bool,
+        /// span of the whole $sep(...)
+        span: SpanPair,
+    },
 }
 
 impl std::fmt::Display for PatternArgs {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             PatternArgs::Ident(ident) => write!(f, "{}", ident),
-            PatternArgs::Plus(base, _) => write!(f, "{}+", base),
-            PatternArgs::Star(base, _) => write!(f, "{}*", base),
-            PatternArgs::Question(base, _) => write!(f, "{}?", base),
-            PatternArgs::Exclamation(base, _) => write!(f, "{}", base),
+            PatternArgs::Plus { base, .. } => write!(f, "{}+", base),
+            PatternArgs::Star { base, .. } => write!(f, "{}*", base),
+            PatternArgs::Question { base, .. } => write!(f, "{}?", base),
+            PatternArgs::Exclamation { base, .. } => write!(f, "{}", base),
             PatternArgs::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
-            PatternArgs::Lookaheads(base, terminal_set) => {
-                write!(f, "{}/{}", base, terminal_set)
+            PatternArgs::Lookaheads {
+                pattern,
+                lookaheads,
+            } => {
+                write!(f, "{}/{}", pattern, lookaheads)
             }
-            PatternArgs::Group(group, _, _) => {
+            PatternArgs::Group { alternatives, .. } => {
                 write!(
                     f,
                     "({})",
-                    group
+                    alternatives
                         .iter()
                         .map(|p| p
                             .iter()
@@ -128,11 +162,20 @@ impl std::fmt::Display for PatternArgs {
             PatternArgs::Literal(literal) => {
                 write!(f, "{}", literal)
             }
-            PatternArgs::Minus(base, terminal_set) => {
-                write!(f, "{}-{}", base, terminal_set)
+            PatternArgs::Minus { base, exclude } => {
+                write!(f, "{}-{}", base, exclude)
             }
-            PatternArgs::Sep(base, del, one, _) => {
-                write!(f, "$sep({base}, {del}, {})", if *one { '+' } else { '*' })
+            PatternArgs::Sep {
+                base,
+                delimiter,
+                at_least_one,
+                ..
+            } => {
+                write!(
+                    f,
+                    "$sep({base}, {delimiter}, {})",
+                    if *at_least_one { '+' } else { '*' }
+                )
             }
         }
     }
@@ -165,25 +208,25 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
-            PatternArgs::Plus(pattern, _) => Ok(Pattern {
+            PatternArgs::Plus { base, .. } => Ok(Pattern {
                 internal: PatternInternal::Plus(Box::new(
-                    pattern.into_pattern(grammar, put_exclamation)?,
+                    base.into_pattern(grammar, put_exclamation)?,
                 )),
                 pretty_name,
             }),
-            PatternArgs::Star(pattern, _) => Ok(Pattern {
+            PatternArgs::Star { base, .. } => Ok(Pattern {
                 internal: PatternInternal::Star(Box::new(
-                    pattern.into_pattern(grammar, put_exclamation)?,
+                    base.into_pattern(grammar, put_exclamation)?,
                 )),
                 pretty_name,
             }),
-            PatternArgs::Question(pattern, _) => Ok(Pattern {
+            PatternArgs::Question { base, .. } => Ok(Pattern {
                 internal: PatternInternal::Question(Box::new(
-                    pattern.into_pattern(grammar, put_exclamation)?,
+                    base.into_pattern(grammar, put_exclamation)?,
                 )),
                 pretty_name,
             }),
-            PatternArgs::Exclamation(pattern, _) => pattern.into_pattern(grammar, true),
+            PatternArgs::Exclamation { base, .. } => base.into_pattern(grammar, true),
             PatternArgs::TerminalSet(terminal_set) => {
                 let (negate, terminal_set) = terminal_set.to_terminal_set(grammar)?;
                 let pattern = Pattern {
@@ -199,7 +242,10 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
-            PatternArgs::Lookaheads(pattern, lookaheads) => {
+            PatternArgs::Lookaheads {
+                pattern,
+                lookaheads,
+            } => {
                 let (negate, terminal_set) = lookaheads.to_terminal_set(grammar)?;
                 let pattern = Pattern {
                     internal: PatternInternal::Lookaheads(
@@ -211,9 +257,9 @@ impl PatternArgs {
                 };
                 Ok(pattern)
             }
-            PatternArgs::Group(group, _, _) => {
-                if group.len() == 1 && group[0].len() == 1 {
-                    let line = group.into_iter().next().unwrap();
+            PatternArgs::Group { alternatives, .. } => {
+                if alternatives.len() == 1 && alternatives[0].len() == 1 {
+                    let line = alternatives.into_iter().next().unwrap();
                     return line
                         .into_iter()
                         .next()
@@ -221,7 +267,7 @@ impl PatternArgs {
                         .into_pattern(grammar, put_exclamation);
                 }
 
-                let patterns = group
+                let patterns = alternatives
                     .into_iter()
                     .map(|line| {
                         line.into_iter()
@@ -276,7 +322,7 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
-            PatternArgs::Minus(_, _) => {
+            PatternArgs::Minus { .. } => {
                 let (negate, terminal_set) = self.to_terminal_set(grammar)?;
                 let pattern = Pattern {
                     internal: PatternInternal::TerminalSet(negate, terminal_set),
@@ -291,11 +337,20 @@ impl PatternArgs {
                     Ok(pattern)
                 }
             }
-            PatternArgs::Sep(base, del, one, _) => {
+            PatternArgs::Sep {
+                base,
+                delimiter,
+                at_least_one,
+                ..
+            } => {
                 let base = base.into_pattern(grammar, put_exclamation)?;
-                let del = del.into_pattern(grammar, false)?;
+                let delimiter = delimiter.into_pattern(grammar, false)?;
                 let pattern = Pattern {
-                    internal: PatternInternal::Sep(Box::new(base), Box::new(del), one),
+                    internal: PatternInternal::Sep(
+                        Box::new(base),
+                        Box::new(delimiter),
+                        at_least_one,
+                    ),
                     pretty_name: pretty_name.clone(),
                 };
                 Ok(pattern)
@@ -320,25 +375,32 @@ impl PatternArgs {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            PatternArgs::Plus(base, span) => {
-                Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
-            }
-            PatternArgs::Star(base, span) => {
-                Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
-            }
-            PatternArgs::Question(base, span) => {
-                Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span))
-            }
-            PatternArgs::Exclamation(base, _) => base.to_terminal_set(grammar),
-            PatternArgs::Lookaheads(base, _) => {
-                let (span_begin, span_end) = base.span_pair();
+            PatternArgs::Plus {
+                base,
+                op_span: span,
+            } => Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span)),
+            PatternArgs::Star {
+                base,
+                op_span: span,
+            } => Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span)),
+            PatternArgs::Question {
+                base,
+                op_span: span,
+            } => Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span)),
+            PatternArgs::Exclamation { base, .. } => base.to_terminal_set(grammar),
+            PatternArgs::Lookaheads { pattern, .. } => {
+                let (span_begin, span_end) = pattern.span_pair();
                 Err(ParseError::OnlyTerminalSet(span_begin, span_end))
             }
-            PatternArgs::Group(group, span_begin, span_end) => {
-                if group.len() == 1 && group[0].len() == 1 {
-                    group[0][0].to_terminal_set(grammar)
+            PatternArgs::Group {
+                alternatives,
+                open_span: open,
+                close_span: close,
+            } => {
+                if alternatives.len() == 1 && alternatives[0].len() == 1 {
+                    alternatives[0][0].to_terminal_set(grammar)
                 } else {
-                    Err(ParseError::OnlyTerminalSet(*span_begin, *span_end))
+                    Err(ParseError::OnlyTerminalSet(*open, *close))
                 }
             }
             PatternArgs::Literal(literal) => {
@@ -349,7 +411,7 @@ impl PatternArgs {
                 let idx = *grammar.terminals_index.get(&name).unwrap();
                 Ok((false, BTreeSet::from([idx])))
             }
-            PatternArgs::Minus(base, exclude) => {
+            PatternArgs::Minus { base, exclude } => {
                 let (negate_lhs, mut lhs_set) = base.to_terminal_set(grammar)?;
                 let (negate_rhs, mut rhs_set) = exclude.to_terminal_set(grammar)?;
 
@@ -370,7 +432,7 @@ impl PatternArgs {
                     (true, true) => Ok((false, rhs_set.difference(&lhs_set).copied().collect())),
                 }
             }
-            PatternArgs::Sep(_, _, _, span) => {
+            PatternArgs::Sep { span, .. } => {
                 let s = span.span();
                 Err(ParseError::OnlyTerminalSet(s, s))
             }
@@ -382,25 +444,40 @@ impl PatternArgs {
                 let span = ident.span();
                 (span, span)
             }
-            PatternArgs::Plus(base, span) => (base.span_pair().0, *span),
-            PatternArgs::Star(base, span) => (base.span_pair().0, *span),
-            PatternArgs::Question(base, span) => (base.span_pair().0, *span),
-            PatternArgs::Exclamation(base, span) => (base.span_pair().0, *span),
+            PatternArgs::Plus {
+                base,
+                op_span: span,
+            } => (base.span_pair().0, *span),
+            PatternArgs::Star {
+                base,
+                op_span: span,
+            } => (base.span_pair().0, *span),
+            PatternArgs::Question {
+                base,
+                op_span: span,
+            } => (base.span_pair().0, *span),
+            PatternArgs::Exclamation {
+                base,
+                op_span: span,
+            } => (base.span_pair().0, *span),
             PatternArgs::TerminalSet(terminal_set) => {
                 (terminal_set.open_span, terminal_set.close_span)
             }
-            PatternArgs::Lookaheads(base, terminal_set) => {
-                (base.span_pair().0, terminal_set.span_pair().1)
-            }
-            PatternArgs::Group(_, open, close) => (*open, *close),
+            PatternArgs::Lookaheads {
+                pattern,
+                lookaheads,
+            } => (pattern.span_pair().0, lookaheads.span_pair().1),
+            PatternArgs::Group {
+                open_span: open,
+                close_span: close,
+                ..
+            } => (*open, *close),
             PatternArgs::Literal(literal) => {
                 let span = literal.span();
                 (span, span)
             }
-            PatternArgs::Minus(base, terminal_set) => {
-                (base.span_pair().0, terminal_set.span_pair().1)
-            }
-            PatternArgs::Sep(_, _, _, span) => {
+            PatternArgs::Minus { base, exclude } => (base.span_pair().0, exclude.span_pair().1),
+            PatternArgs::Sep { span, .. } => {
                 let s = span.span();
                 (s, s)
             }
@@ -410,18 +487,21 @@ impl PatternArgs {
     pub fn range_resolve(&self, grammar: &mut Grammar) -> Result<(), ParseError> {
         match self {
             PatternArgs::Ident(_) => Ok(()),
-            PatternArgs::Plus(base, _) => base.range_resolve(grammar),
-            PatternArgs::Star(base, _) => base.range_resolve(grammar),
-            PatternArgs::Question(base, _) => base.range_resolve(grammar),
-            PatternArgs::Exclamation(base, _) => base.range_resolve(grammar),
+            PatternArgs::Plus { base, .. } => base.range_resolve(grammar),
+            PatternArgs::Star { base, .. } => base.range_resolve(grammar),
+            PatternArgs::Question { base, .. } => base.range_resolve(grammar),
+            PatternArgs::Exclamation { base, .. } => base.range_resolve(grammar),
             PatternArgs::TerminalSet(terminal_set) => terminal_set.range_resolve(grammar),
-            PatternArgs::Lookaheads(base, terminal_set) => {
-                base.range_resolve(grammar)?;
-                terminal_set.range_resolve(grammar)?;
+            PatternArgs::Lookaheads {
+                pattern,
+                lookaheads,
+            } => {
+                pattern.range_resolve(grammar)?;
+                lookaheads.range_resolve(grammar)?;
                 Ok(())
             }
-            PatternArgs::Group(groups, _, _) => {
-                for line in groups {
+            PatternArgs::Group { alternatives, .. } => {
+                for line in alternatives {
                     for pattern in line {
                         pattern.range_resolve(grammar)?;
                     }
@@ -461,14 +541,16 @@ impl PatternArgs {
                     )),
                 }
             }
-            PatternArgs::Minus(base, terminal_set) => {
+            PatternArgs::Minus { base, exclude } => {
                 base.range_resolve(grammar)?;
-                terminal_set.range_resolve(grammar)?;
+                exclude.range_resolve(grammar)?;
                 Ok(())
             }
-            PatternArgs::Sep(base, del, _, _) => {
+            PatternArgs::Sep {
+                base, delimiter, ..
+            } => {
                 base.range_resolve(grammar)?;
-                del.range_resolve(grammar)?;
+                delimiter.range_resolve(grammar)?;
                 Ok(())
             }
         }
