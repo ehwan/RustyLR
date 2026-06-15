@@ -261,16 +261,16 @@ Pattern(PatternArgs): ident {
     let Lexed::Plus(plus) = plus else {
         unreachable!( "Pattern-Plus" );
     };
-    PatternArgs::Plus { base: Box::new(Pattern), op_span: @plus.span() }
+    PatternArgs::Plus { base: Box::new(Pattern), op_span: @plus }
 }
 | Pattern star {
-    PatternArgs::Star { base: Box::new(Pattern), op_span: @star.span() }
+    PatternArgs::Star { base: Box::new(Pattern), op_span: @star }
 }
 | Pattern question {
-    PatternArgs::Question { base: Box::new(Pattern), op_span: @question.span() }
+    PatternArgs::Question { base: Box::new(Pattern), op_span: @question }
 }
 | Pattern exclamation {
-    PatternArgs::Exclamation { base: Box::new(Pattern), op_span: @exclamation.span() }
+    PatternArgs::Exclamation { base: Box::new(Pattern), op_span: @exclamation }
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
@@ -279,7 +279,7 @@ Pattern(PatternArgs): ident {
     PatternArgs::Lookaheads { pattern: Box::new(p1), lookaheads: Box::new(lh) }
 }
 | lparen $sep( Pattern*, pipe, + ) rparen {
-    PatternArgs::Group { alternatives: Pattern, open_span: @lparen.span(), close_span: @rparen.span() }
+    PatternArgs::Group { alternatives: Pattern, open_span: @lparen, close_span: @rparen }
 }
 | lparen error rparen {
     data.error_recovered.push( RecoveredError {

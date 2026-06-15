@@ -292,14 +292,12 @@ impl Builder {
             Err(e) => {
                 let diag =
                     match e {
-                        ParseArgError::MacroLineParse { span, message } => {
-                            Diagnostic::error()
-                                .with_message("Parse Failed")
-                                .with_labels(vec![
-                                    Label::primary(file_id, span).with_message("Error here")
-                                ])
-                                .with_notes(vec![message])
-                        }
+                        ParseArgError::MacroLineParse { span, message } => Diagnostic::error()
+                            .with_message("Parse Failed")
+                            .with_labels(vec![
+                                Label::primary(file_id, span).with_message("Error here")
+                            ])
+                            .with_notes(vec![message]),
 
                         _ => {
                             let message = e.short_message();
@@ -709,7 +707,7 @@ impl Builder {
                     }
 
                     ParseError::OnlyTerminalSet(span_begin, span_end) => {
-                        let range = span_begin.byte_range().start..span_end.byte_range().end;
+                        let range = span_begin.to_range().start..span_end.to_range().end;
                         Diagnostic::error()
                             .with_message("Only terminal or terminal set is allowed")
                             .with_labels(vec![Label::primary(file_id, range)

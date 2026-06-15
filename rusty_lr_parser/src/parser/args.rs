@@ -73,19 +73,19 @@ pub enum PatternArgs {
     /// span of punctuation('+', '*', ...) after the pattern
     Plus {
         base: Box<PatternArgs>,
-        op_span: Span,
+        op_span: SpanPair,
     },
     Star {
         base: Box<PatternArgs>,
-        op_span: Span,
+        op_span: SpanPair,
     },
     Question {
         base: Box<PatternArgs>,
-        op_span: Span,
+        op_span: SpanPair,
     },
     Exclamation {
         base: Box<PatternArgs>,
-        op_span: Span,
+        op_span: SpanPair,
     },
 
     /// span of '[' and ']' containing terminal set
@@ -106,8 +106,8 @@ pub enum PatternArgs {
     /// open/close are spans of '(' and ')'
     Group {
         alternatives: Vec<Vec<PatternArgs>>,
-        open_span: Span,
-        close_span: Span,
+        open_span: SpanPair,
+        close_span: SpanPair,
     },
 
     /// 'a', b'a', "abc", b"abc"
@@ -377,30 +377,30 @@ impl PatternArgs {
             }
             PatternArgs::Plus {
                 base,
-                op_span: span,
-            } => Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span)),
+                op_span,
+            } => Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span)),
             PatternArgs::Star {
                 base,
-                op_span: span,
-            } => Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span)),
+                op_span,
+            } => Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span)),
             PatternArgs::Question {
                 base,
-                op_span: span,
-            } => Err(ParseError::OnlyTerminalSet(base.span_pair().0, *span)),
+                op_span,
+            } => Err(ParseError::OnlyTerminalSet(base.span_pair(), *op_span)),
             PatternArgs::Exclamation { base, .. } => base.to_terminal_set(grammar),
             PatternArgs::Lookaheads { pattern, .. } => {
-                let (span_begin, span_end) = pattern.span_pair();
-                Err(ParseError::OnlyTerminalSet(span_begin, span_end))
+                let sp = pattern.span_pair();
+                Err(ParseError::OnlyTerminalSet(sp, sp))
             }
             PatternArgs::Group {
                 alternatives,
-                open_span: open,
-                close_span: close,
+                open_span,
+                close_span,
             } => {
                 if alternatives.len() == 1 && alternatives[0].len() == 1 {
                     alternatives[0][0].to_terminal_set(grammar)
                 } else {
-                    Err(ParseError::OnlyTerminalSet(*open, *close))
+                    Err(ParseError::OnlyTerminalSet(*open_span, *close_span))
                 }
             }
             PatternArgs::Literal(literal) => {
@@ -433,54 +433,37 @@ impl PatternArgs {
                 }
             }
             PatternArgs::Sep { span, .. } => {
-                let s = span.span();
-                Err(ParseError::OnlyTerminalSet(s, s))
+                Err(ParseError::OnlyTerminalSet(*span, *span))
             }
         }
     }
-    pub fn span_pair(&self) -> (Span, Span) {
+    pub fn span_pair(&self) -> SpanPair {
         match self {
-            PatternArgs::Ident(ident) => {
-                let span = ident.span();
-                (span, span)
-            }
-            PatternArgs::Plus {
-                base,
-                op_span: span,
-            } => (base.span_pair().0, *span),
-            PatternArgs::Star {
-                base,
-                op_span: span,
-            } => (base.span_pair().0, *span),
-            PatternArgs::Question {
-                base,
-                op_span: span,
-            } => (base.span_pair().0, *span),
-            PatternArgs::Exclamation {
-                base,
-                op_span: span,
-            } => (base.span_pair().0, *span),
-            PatternArgs::TerminalSet(terminal_set) => {
-                (terminal_set.open_span, terminal_set.close_span)
-            }
-            PatternArgs::Lookaheads {
-                pattern,
-                lookaheads,
-            } => (pattern.span_pair().0, lookaheads.span_pair().1),
-            PatternArgs::Group {
-                open_span: open,
-                close_span: close,
-                ..
-            } => (*open, *close),
-            PatternArgs::Literal(literal) => {
-                let span = literal.span();
-                (span, span)
-            }
-            PatternArgs::Minus { base, exclude } => (base.span_pair().0, exclude.span_pair().1),
-            PatternArgs::Sep { span, .. } => {
-                let s = span.span();
-                (s, s)
-            }
+            PatternArgs::Ident(ident) => SpanPair::new_single(ident.span()),
+            PatternArgs::Plus { base, op_span } => SpanPair {
+                pair: (base.span_pair().pair.0, op_span.pair.1),
+            },
+            PatternArgs::Star { base, op_span } => SpanPair {
+                pair: (base.span_pair().pair.0, op_span.pair.1),
+            },
+            PatternArgs::Question { base, op_span } => SpanPair {
+                pair: (base.span_pair().pair.0, op_span.pair.1),
+            },
+            PatternArgs::Exclamation { base, op_span } => SpanPair {
+                pair: (base.span_pair().pair.0, op_span.pair.1),
+            },
+            PatternArgs::TerminalSet(terminal_set) => SpanPair::new_single(terminal_set.open_span),
+            PatternArgs::Lookaheads { pattern, lookaheads } => SpanPair {
+                pair: (pattern.span_pair().pair.0, lookaheads.span_pair().pair.1),
+            },
+            PatternArgs::Group { open_span, close_span, .. } => SpanPair {
+                pair: (open_span.pair.0, close_span.pair.1),
+            },
+            PatternArgs::Literal(literal) => SpanPair::new_single(literal.span()),
+            PatternArgs::Minus { base, exclude } => SpanPair {
+                pair: (base.span_pair().pair.0, exclude.span_pair().pair.1),
+            },
+            PatternArgs::Sep { span, .. } => *span,
         }
     }
 

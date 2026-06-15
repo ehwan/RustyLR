@@ -7,6 +7,7 @@ use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::span_pair::byte_range_to_span;
+use crate::parser::span_pair::SpanPair;
 
 /// failed to feed() the token
 #[non_exhaustive]
@@ -117,7 +118,7 @@ pub enum ParseError {
     },
 
     /// Only terminal or terminal set is allowed
-    OnlyTerminalSet(Span, Span),
+    OnlyTerminalSet(SpanPair, SpanPair),
 
     /// unknown non-terminal symbol name
     NonTerminalNotDefined(Ident),
@@ -269,7 +270,7 @@ impl ParseError {
             ParseError::NonTerminalPrecedenceNotDefined(span, _) => *span,
 
             ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
-            ParseError::OnlyTerminalSet(span_begin, span_end) => *span_begin,
+            ParseError::OnlyTerminalSet(span_begin, span_end) => span_begin.span(),
             ParseError::NonTerminalNotDefined(ident) => ident.span(),
             ParseError::OnlyUsizeLiteral(span) => *span,
         }

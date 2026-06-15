@@ -1724,7 +1724,7 @@ impl GrammarDataStack {
             };
             PatternArgs::Plus {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_plus.span(),
+                op_span: __rustylr_location_plus,
             }
         };
         if __push_data {
@@ -1767,7 +1767,7 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Star {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_star.span(),
+                op_span: __rustylr_location_star,
             }
         };
         if __push_data {
@@ -1810,7 +1810,7 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Question {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_question.span(),
+                op_span: __rustylr_location_question,
             }
         };
         if __push_data {
@@ -1853,7 +1853,7 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Exclamation {
                 base: Box::new(Pattern),
-                op_span: __rustylr_location_exclamation.span(),
+                op_span: __rustylr_location_exclamation,
             }
         };
         if __push_data {
@@ -1980,8 +1980,8 @@ impl GrammarDataStack {
         let __res = {
             PatternArgs::Group {
                 alternatives: Pattern,
-                open_span: __rustylr_location_lparen.span(),
-                close_span: __rustylr_location_rparen.span(),
+                open_span: __rustylr_location_lparen,
+                close_span: __rustylr_location_rparen,
             }
         };
         if __push_data {
