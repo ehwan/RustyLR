@@ -50,7 +50,13 @@ use rusty_lr_core::rule::ReduceType;
 %token dollar Lexed::Dollar(_);
 %token comma Lexed::Comma(_);
 
-%token literal Lexed::Literal(_);
+%token int_literal Lexed::IntLiteral(_);
+%token byte_literal Lexed::ByteLiteral(_);
+%token byte_str_literal Lexed::ByteStrLiteral(_);
+%token char_literal Lexed::CharLiteral(_);
+%token str_literal Lexed::StrLiteral(_);
+%token other_literal Lexed::OtherLiteral(_);
+
 
 %token parengroup Lexed::ParenGroup(_);
 %token bracegroup Lexed::BraceGroup(_);
@@ -140,11 +146,11 @@ PrecDef(PrecDPrecArgs)
         });
         PrecDPrecArgs::None
     }
-    | percent! dprec! literal {
-        let Lexed::Literal(literal) = literal else {
+    | percent! dprec! int_literal {
+        let Lexed::IntLiteral(i) = int_literal else {
             unreachable!( "PrecDPrecArgs-DPrec" );
         };
-        PrecDPrecArgs::DPrec(literal) 
+        PrecDPrecArgs::DPrec(i) 
     }
     | percent! dprec! error {
         data.error_recovered.push( RecoveredError {
@@ -199,24 +205,47 @@ TerminalSetItem(TerminalSetItem): ident {
     });
     TerminalSetItem::Terminal( format_ident!("dummy") )
 }
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "TerminalSetItem-Literal" );
+| char_literal {
+    let Lexed::CharLiteral(ch) = char_literal else {
+        unreachable!( "TerminalSetItem-CharLiteral1" );
     };
-    TerminalSetItem::Literal(literal)
+    TerminalSetItem::Char(ch)
 }
-| first=literal minus last=literal {
-    let Lexed::Literal(first) = first else {
-        unreachable!( "TerminalSetItem-Range1" );
+| first=char_literal minus last=char_literal {
+    let Lexed::CharLiteral(first) = first else {
+        unreachable!( "TerminalSetItem-CharLiteral2" );
     };
-    let Lexed::Literal(last) = last else {
-        unreachable!( "TerminalSetItem-Range3" );
+    let Lexed::CharLiteral(last) = last else {
+        unreachable!( "TerminalSetItem-CharLiteral3" );
     };
-    TerminalSetItem::LiteralRange( first, last )
+    TerminalSetItem::CharRange(first, last)
 }
-| literal minus error {
+| char_literal minus error {
     data.error_recovered.push( RecoveredError {
-        message: "Expected literal for terminal set".to_string(),
+        message: "Expected char literal for terminal set".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        location: @error,
+    });
+    TerminalSetItem::Terminal( format_ident!("dummy") )
+}
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "TerminalSetItem-ByteLiteral1" );
+    };
+    TerminalSetItem::Byte(b)
+}
+| first=byte_literal minus last=byte_literal {
+    let Lexed::ByteLiteral(first) = first else {
+        unreachable!( "TerminalSetItem-ByteLiteral2" );
+    };
+    let Lexed::ByteLiteral(last) = last else {
+        unreachable!( "TerminalSetItem-ByteLiteral3" );
+    };
+    TerminalSetItem::ByteRange(first, last)
+}
+| byte_literal minus error {
+    data.error_recovered.push( RecoveredError {
+        message: "Expected byte literal for terminal set".to_string(),
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
         location: @error,
     });
@@ -285,11 +314,29 @@ Pattern(PatternArgs): ident {
     });
     PatternArgs::Ident(format_ident!("dummy"))
 }
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "Pattern-Literal" );
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "Pattern-ByteLiteral" );
     };
-    PatternArgs::Literal(literal)
+    PatternArgs::Byte(b)
+}
+| byte_str_literal {
+    let Lexed::ByteStrLiteral(b) = byte_str_literal else {
+        unreachable!( "Pattern-ByteStringLiteral" );
+    };
+    PatternArgs::ByteString(b)
+}
+| char_literal {
+    let Lexed::CharLiteral(c) = char_literal else {
+        unreachable!( "Pattern-CharLiteral" );
+    };
+    PatternArgs::Char(c)
+}
+| str_literal {
+    let Lexed::StrLiteral(s) = str_literal else {
+        unreachable!( "Pattern-StringLiteral" );
+    };
+    PatternArgs::String(s)
 }
 | p1=Pattern minus p2=Pattern {
     PatternArgs::Minus { base: Box::new(p1), exclude: Box::new(p2) }
@@ -421,12 +468,19 @@ IdentOrLiteral(IdentOrLiteral): ident {
     };
     IdentOrLiteral::Ident( ident )
 }
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "IdentOrLiteral-Literal" );
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "IdentOrLiteral-ByteLiteral" );
     };
-    IdentOrLiteral::Literal( literal )
-};
+    IdentOrLiteral::Byte(b)
+}
+| char_literal {
+    let Lexed::CharLiteral(c) = char_literal else {
+        unreachable!( "IdentOrLiteral-CharLiteral" );
+    };
+    IdentOrLiteral::Char(c)
+}
+;
 
 RustCode(TokenStream): t=[^semicolon]+ {
     let mut tokens = TokenStream::new();

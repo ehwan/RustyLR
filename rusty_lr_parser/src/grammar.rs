@@ -20,7 +20,7 @@ use crate::nonterminal_info::NonTerminalInfo;
 use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
-use crate::parser::args::IdentOrU32;
+use crate::parser::args::IdentOrLiteral;
 use crate::parser::location::Location;
 use crate::parser::location::SpanManager;
 use crate::parser::parser_expanded::GrammarContext;
@@ -93,7 +93,7 @@ pub struct Grammar {
     pub precedence_types: Vec<(Option<rusty_lr_core::rule::ReduceType>, Location)>,
 
     /// precedence levels; line number of %left, %right, or %precedence directive
-    pub precedence_levels: HashMap<IdentOrU32, (usize, Location)>,
+    pub precedence_levels: HashMap<IdentOrLiteral, (usize, Location)>,
 
     /// rule definitions
     pub nonterminals: Vec<NonTerminalInfo>,
@@ -303,30 +303,11 @@ impl Grammar {
         Ok(())
     }
 
-    pub(crate) fn get_char_value(&self, lit: &syn::Lit) -> Result<u32, ParseError> {
-        if self.is_char {
-            if let syn::Lit::Char(lit) = lit {
-                Ok(lit.value() as u32)
-            } else {
-                Err(ParseError::UnsupportedLiteralType(lit.span().into()))
-            }
-        } else if self.is_u8 {
-            if let syn::Lit::Byte(lit) = lit {
-                Ok(lit.value() as u32)
-            } else {
-                Err(ParseError::UnsupportedLiteralType(lit.span().into()))
-            }
-        } else {
-            Err(ParseError::UnsupportedLiteralType(lit.span().into()))
-        }
-    }
     pub(crate) fn get_terminal_indices_from_char_range(
         &self,
-        start: u32,
-        last: u32,
+        start: char,
+        last: char,
     ) -> impl Iterator<Item = usize> + '_ {
-        let start = unsafe { char::from_u32_unchecked(start) };
-        let last = unsafe { char::from_u32_unchecked(last) };
         self.terminals
             .iter()
             .enumerate()
@@ -558,9 +539,8 @@ impl Grammar {
             grammar.precedence_types.push((reduce_type, span.clone())); // set i'th level's precedence type
             for item in items {
                 let item_location = item.location();
-                let itemu = item.clone().into_ident_or_u32(&grammar)?;
-                match &itemu {
-                    IdentOrU32::Ident(ident) => {
+                match &item {
+                    IdentOrLiteral::Ident(ident) => {
                         if let Some(&term_idx) = grammar.terminals_index.get(&ident.clone().into())
                         {
                             grammar.terminals[term_idx].precedence =
@@ -569,12 +549,18 @@ impl Grammar {
                             grammar.error_precedence = Some(level);
                         }
                     }
-                    &IdentOrU32::U32(ch) => {
-                        let ch = unsafe { char::from_u32_unchecked(ch) };
-                        if let Some(&term_idx) = grammar
-                            .terminals_index
-                            .get(&TerminalName::CharRange(ch, ch))
-                        {
+                    IdentOrLiteral::Byte(b) => {
+                        let ch = b.value();
+                        if let Some(&term_idx) = grammar.terminals_index.get(&(ch, ch).into()) {
+                            grammar.terminals[term_idx].precedence =
+                                Some((level, item_location.clone()));
+                        } else {
+                            unreachable!("unexpected char type in precedence order");
+                        }
+                    }
+                    IdentOrLiteral::Char(ch) => {
+                        let ch = ch.value();
+                        if let Some(&term_idx) = grammar.terminals_index.get(&(ch, ch).into()) {
                             grammar.terminals[term_idx].precedence =
                                 Some((level, item_location.clone()));
                         } else {
@@ -584,7 +570,7 @@ impl Grammar {
                 }
                 if let Some(old) = grammar
                     .precedence_levels
-                    .insert(itemu, (level, item_location.clone()))
+                    .insert(item, (level, item_location.clone()))
                 {
                     return Err(ParseError::MultiplePrecedenceOrderDefinition(vec![
                         item_location,
@@ -621,10 +607,9 @@ impl Grammar {
                 // parse %prec definition
                 let prec = if let Some(prec) = rule.precs().next() {
                     let span = prec.location();
-                    let precu = prec.clone().into_ident_or_u32(&grammar)?;
                     // check if this ident exists in tokens
-                    let from_token = match &precu {
-                        IdentOrU32::Ident(ident) => {
+                    let from_token = match &prec {
+                        IdentOrLiteral::Ident(ident) => {
                             let mut prec = None;
                             for (idx, token) in tokens.iter().enumerate() {
                                 if token.mapto.as_ref() == Some(ident) {
@@ -634,7 +619,7 @@ impl Grammar {
                             }
                             prec
                         }
-                        IdentOrU32::U32(_) => None,
+                        _ => None,
                     };
                     if let Some(from_token) = from_token {
                         // check if from_token'th token is terminal symbol
@@ -663,7 +648,7 @@ impl Grammar {
                         } else {
                             Some((Precedence::Dynamic(from_token), span))
                         }
-                    } else if let Some(&(level, ref loc)) = grammar.precedence_levels.get(&precu) {
+                    } else if let Some(&(level, ref loc)) = grammar.precedence_levels.get(&prec) {
                         Some((Precedence::Fixed(level), loc.clone()))
                     } else {
                         return Err(ParseError::PrecedenceNotDefined(prec.clone()));

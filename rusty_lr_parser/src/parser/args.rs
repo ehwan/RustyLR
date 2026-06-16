@@ -1,5 +1,4 @@
 use proc_macro2::Ident;
-use proc_macro2::Literal;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 
@@ -13,42 +12,55 @@ use crate::pattern::PatternInternal;
 use crate::terminal_info::TerminalName;
 use crate::terminalset::TerminalSet;
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub enum IdentOrU32 {
-    Ident(Ident),
-    U32(u32),
-}
-
 #[derive(Debug, Clone)]
 pub enum IdentOrLiteral {
     Ident(Ident),
-    Literal(Literal),
+    Byte(syn::LitByte),
+    Char(syn::LitChar),
+}
+impl PartialEq for IdentOrLiteral {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (IdentOrLiteral::Ident(ident1), IdentOrLiteral::Ident(ident2)) => ident1 == ident2,
+            (IdentOrLiteral::Byte(b1), IdentOrLiteral::Byte(b2)) => b1.value() == b2.value(),
+            (IdentOrLiteral::Char(c1), IdentOrLiteral::Char(c2)) => c1.value() == c2.value(),
+            _ => false,
+        }
+    }
+}
+impl Eq for IdentOrLiteral {}
+impl std::hash::Hash for IdentOrLiteral {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        match self {
+            IdentOrLiteral::Ident(ident) => {
+                ident.hash(state);
+            }
+            IdentOrLiteral::Byte(b) => {
+                b.value().hash(state);
+            }
+            IdentOrLiteral::Char(c) => {
+                c.value().hash(state);
+            }
+        }
+    }
 }
 impl IdentOrLiteral {
     pub fn location(&self) -> Location {
         match self {
             IdentOrLiteral::Ident(ident) => ident.span().into(),
-            IdentOrLiteral::Literal(literal) => literal.span().into(),
-        }
-    }
-    pub fn into_ident_or_u32(self, grammar: &Grammar) -> Result<IdentOrU32, ParseError> {
-        match self {
-            Self::Ident(ident) => Ok(IdentOrU32::Ident(ident)),
-            Self::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2::<syn::Lit>");
-                let val = grammar.get_char_value(&lit)?;
-                Ok(IdentOrU32::U32(val))
-            }
+            IdentOrLiteral::Byte(l) => l.span().into(),
+            IdentOrLiteral::Char(l) => l.span().into(),
         }
     }
     pub fn range_resolve(&self, grammar: &mut Grammar) -> Result<(), ParseError> {
         match self {
             IdentOrLiteral::Ident(_) => {}
-            IdentOrLiteral::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2::<syn::Lit>");
-                let val = grammar.get_char_value(&lit)?;
+            IdentOrLiteral::Byte(b) => {
+                let val = b.value() as u32;
+                grammar.range_resolver.insert(val, val);
+            }
+            IdentOrLiteral::Char(c) => {
+                let val = c.value() as u32;
                 grammar.range_resolver.insert(val, val);
             }
         }
@@ -59,7 +71,8 @@ impl std::fmt::Display for IdentOrLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             IdentOrLiteral::Ident(ident) => write!(f, "{}", ident),
-            IdentOrLiteral::Literal(literal) => write!(f, "{}", literal),
+            IdentOrLiteral::Byte(literal) => write!(f, "{}", literal.to_token_stream()),
+            IdentOrLiteral::Char(literal) => write!(f, "{}", literal.to_token_stream()),
         }
     }
 }
@@ -106,8 +119,14 @@ pub enum PatternArgs {
         close_location: Location,
     },
 
-    /// 'a', b'a', "abc", b"abc"
-    Literal(Literal),
+    /// b'a'
+    Byte(syn::LitByte),
+    /// b"abc"
+    ByteString(syn::LitByteStr),
+    /// 'a'
+    Char(syn::LitChar),
+    /// "abc"
+    String(syn::LitStr),
 
     /// Pattern - Terminals exclusion
     Minus {
@@ -155,9 +174,11 @@ impl std::fmt::Display for PatternArgs {
                         .join(" | ")
                 )
             }
-            PatternArgs::Literal(literal) => {
-                write!(f, "{}", literal)
-            }
+            PatternArgs::Byte(b) => write!(f, "{}", b.to_token_stream()),
+            PatternArgs::ByteString(s) => write!(f, "{}", s.to_token_stream()),
+            PatternArgs::Char(c) => write!(f, "{}", c.to_token_stream()),
+            PatternArgs::String(s) => write!(f, "{}", s.to_token_stream()),
+
             PatternArgs::Minus { base, exclude } => {
                 write!(f, "{}-{}", base, exclude)
             }
@@ -276,29 +297,63 @@ impl PatternArgs {
                     pretty_name,
                 })
             }
-            PatternArgs::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2::<syn::Lit>");
-                if grammar.is_char {
-                    if !matches!(&lit, syn::Lit::Char(_) | syn::Lit::Str(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
-                    }
-                } else if grammar.is_u8 {
-                    if !matches!(&lit, syn::Lit::Byte(_) | syn::Lit::ByteStr(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
-                    }
-                } else {
-                    return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
+            PatternArgs::Byte(l) => {
+                if !grammar.is_u8 {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
                 }
-                if !matches!(
-                    &lit,
-                    syn::Lit::Char(_) | syn::Lit::Byte(_) | syn::Lit::Str(_) | syn::Lit::ByteStr(_)
-                ) {
-                    return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
-                }
-
                 let pattern = Pattern {
-                    internal: PatternInternal::Literal(lit),
+                    internal: PatternInternal::Byte(l),
+                    pretty_name: pretty_name.clone(),
+                };
+                if put_exclamation {
+                    Ok(Pattern {
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
+                } else {
+                    Ok(pattern)
+                }
+            }
+            PatternArgs::ByteString(l) => {
+                if !grammar.is_u8 {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                let pattern = Pattern {
+                    internal: PatternInternal::ByteString(l),
+                    pretty_name: pretty_name.clone(),
+                };
+                if put_exclamation {
+                    Ok(Pattern {
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
+                } else {
+                    Ok(pattern)
+                }
+            }
+            PatternArgs::Char(l) => {
+                if !grammar.is_char {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                let pattern = Pattern {
+                    internal: PatternInternal::Char(l),
+                    pretty_name: pretty_name.clone(),
+                };
+                if put_exclamation {
+                    Ok(Pattern {
+                        internal: PatternInternal::Exclamation(Box::new(pattern)),
+                        pretty_name,
+                    })
+                } else {
+                    Ok(pattern)
+                }
+            }
+            PatternArgs::String(l) => {
+                if !grammar.is_char {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                let pattern = Pattern {
+                    internal: PatternInternal::String(l),
                     pretty_name: pretty_name.clone(),
                 };
                 if put_exclamation {
@@ -377,14 +432,26 @@ impl PatternArgs {
                     Err(ParseError::OnlyTerminalSet(self.location()))
                 }
             }
-            PatternArgs::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2::<syn::Lit>");
-                let val = grammar.get_char_value(&lit)?;
+            PatternArgs::Byte(l) => {
+                if !grammar.is_u8 {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                let val = l.value();
                 let name: TerminalName = (val, val).into();
                 let idx = *grammar.terminals_index.get(&name).unwrap();
                 Ok((false, BTreeSet::from([idx])))
             }
+            PatternArgs::Char(l) => {
+                if !grammar.is_char {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                let val = l.value();
+                let name: TerminalName = (val, val).into();
+                let idx = *grammar.terminals_index.get(&name).unwrap();
+                Ok((false, BTreeSet::from([idx])))
+            }
+            PatternArgs::ByteString(_) => Err(ParseError::OnlyTerminalSet(self.location())),
+            PatternArgs::String(_) => Err(ParseError::OnlyTerminalSet(self.location())),
             PatternArgs::Minus { base, exclude } => {
                 let (negate_lhs, mut lhs_set) = base.to_terminal_set(grammar)?;
                 let (negate_rhs, mut rhs_set) = exclude.to_terminal_set(grammar)?;
@@ -438,7 +505,10 @@ impl PatternArgs {
                 close_location: close_span,
                 ..
             } => open_span.merge(close_span),
-            PatternArgs::Literal(literal) => literal.span().into(),
+            PatternArgs::Byte(l) => l.span().into(),
+            PatternArgs::ByteString(l) => l.span().into(),
+            PatternArgs::Char(l) => l.span().into(),
+            PatternArgs::String(l) => l.span().into(),
             PatternArgs::Minus { base, exclude } => base.location().merge(&exclude.location()),
             PatternArgs::Sep { location, .. } => *location,
         }
@@ -468,36 +538,41 @@ impl PatternArgs {
                 }
                 Ok(())
             }
-            PatternArgs::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2::<syn::Lit>");
-                match lit {
-                    syn::Lit::Char(lit) => {
-                        let val = lit.value() as u32;
-                        grammar.range_resolver.insert(val, val);
-                        Ok(())
-                    }
-                    syn::Lit::Byte(lit) => {
-                        let val = lit.value() as u32;
-                        grammar.range_resolver.insert(val, val);
-                        Ok(())
-                    }
-                    syn::Lit::Str(s) => {
-                        for ch in s.value().chars() {
-                            let val = ch as u32;
-                            grammar.range_resolver.insert(val, val);
-                        }
-                        Ok(())
-                    }
-                    syn::Lit::ByteStr(s) => {
-                        for ch in s.value() {
-                            let val = ch as u32;
-                            grammar.range_resolver.insert(val, val);
-                        }
-                        Ok(())
-                    }
-                    _ => Err(ParseError::UnsupportedLiteralType(literal.span().into())),
+            PatternArgs::Byte(l) => {
+                if !grammar.is_u8 {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
                 }
+                let val = l.value() as u32;
+                grammar.range_resolver.insert(val, val);
+                Ok(())
+            }
+            PatternArgs::ByteString(l) => {
+                if !grammar.is_u8 {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                for ch in l.value() {
+                    let val = ch as u32;
+                    grammar.range_resolver.insert(val, val);
+                }
+                Ok(())
+            }
+            PatternArgs::Char(l) => {
+                if !grammar.is_char {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                let val = l.value() as u32;
+                grammar.range_resolver.insert(val, val);
+                Ok(())
+            }
+            PatternArgs::String(l) => {
+                if !grammar.is_char {
+                    return Err(ParseError::UnsupportedLiteralType(l.span().into()));
+                }
+                for ch in l.value().chars() {
+                    let val = ch as u32;
+                    grammar.range_resolver.insert(val, val);
+                }
+                Ok(())
             }
             PatternArgs::Minus { base, exclude } => {
                 base.range_resolve(grammar)?;
@@ -534,7 +609,7 @@ impl RuleLineArgs {
             _ => None,
         })
     }
-    pub(crate) fn dprecs(&self) -> impl Iterator<Item = &'_ Literal> + '_ {
+    pub(crate) fn dprecs(&self) -> impl Iterator<Item = &'_ syn::LitInt> + '_ {
         self.precs.iter().filter_map(|p| match p {
             PrecDPrecArgs::DPrec(dprec) => Some(dprec),
             _ => None,
@@ -546,7 +621,7 @@ impl RuleLineArgs {
 #[derive(Clone)]
 pub enum PrecDPrecArgs {
     Prec(IdentOrLiteral),
-    DPrec(Literal),
+    DPrec(syn::LitInt),
     /// for error recovery
     None,
 }

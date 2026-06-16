@@ -90,11 +90,9 @@ impl From<(char, char)> for TerminalName {
         TerminalName::CharRange(c.0, c.1)
     }
 }
-impl From<(u32, u32)> for TerminalName {
-    fn from(c: (u32, u32)) -> Self {
-        let s = unsafe { char::from_u32_unchecked(c.0) };
-        let l = unsafe { char::from_u32_unchecked(c.1) };
-        TerminalName::CharRange(s, l)
+impl From<(u8, u8)> for TerminalName {
+    fn from(c: (u8, u8)) -> Self {
+        TerminalName::CharRange(c.0 as char, c.1 as char)
     }
 }
 

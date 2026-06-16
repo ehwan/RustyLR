@@ -28,7 +28,10 @@ pub enum PatternInternal {
     TerminalSet(bool, BTreeSet<usize>),
     Lookaheads(Box<Pattern>, bool, BTreeSet<usize>),
     Group(Vec<Vec<Pattern>>),
-    Literal(syn::Lit),
+    Byte(syn::LitByte),
+    ByteString(syn::LitByteStr),
+    Char(syn::LitChar),
+    String(syn::LitStr),
     Sep(Box<Pattern>, Box<Pattern>, bool),
 }
 
@@ -790,135 +793,130 @@ impl Pattern {
                 })
             }
 
-            PatternInternal::Literal(literal) => match literal {
-                syn::Lit::Char(ch) => {
-                    let idx = grammar.get_terminal_index_from_char(ch.value());
-                    let info = &grammar.terminals[idx];
+            PatternInternal::Byte(l) => {
+                let idx = grammar.get_terminal_index_from_char(l.value() as char);
+                let info = &grammar.terminals[idx];
 
-                    Ok(PatternToToken {
-                        name: info.name.clone().name(),
-                        token: Token::Term(TerminalSymbol::Term(idx)),
-                        ruletype: Some(grammar.token_typename.clone()),
-                        mapto: None,
-                    })
-                }
-                syn::Lit::Byte(ch) => {
-                    let idx = grammar.get_terminal_index_from_char(ch.value() as char);
-                    let info = &grammar.terminals[idx];
+                Ok(PatternToToken {
+                    name: info.name.clone().name(),
+                    token: Token::Term(TerminalSymbol::Term(idx)),
+                    ruletype: Some(grammar.token_typename.clone()),
+                    mapto: None,
+                })
+            }
+            PatternInternal::ByteString(s) => {
+                let newrule_idx = grammar.nonterminals.len();
+                let str_span = s.span();
+                let newrule_name = Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
+                let vec = s.value();
 
-                    Ok(PatternToToken {
-                        name: info.name.clone().name(),
-                        token: Token::Term(TerminalSymbol::Term(idx)),
-                        ruletype: Some(grammar.token_typename.clone()),
-                        mapto: None,
-                    })
-                }
-                syn::Lit::Str(s) => {
-                    let newrule_idx = grammar.nonterminals.len();
-                    let str_span = s.span();
-                    let newrule_name =
-                        Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
+                let str_span = str_span.into();
 
-                    let str_span = str_span.into();
+                let rule = Rule {
+                    tokens: vec
+                        .iter()
+                        .map(|ch| {
+                            let term_id = grammar.get_terminal_index_from_char(*ch as char);
+                            TokenMapped {
+                                token: Token::Term(TerminalSymbol::Term(term_id)),
+                                mapto: None,
+                                location: str_span,
+                                reduce_action_chains: Vec::new(),
+                            }
+                        })
+                        .collect(),
+                    reduce_action: None,
+                    separator_location: Location::Generated,
+                    lookaheads: None,
+                    prec: None,
+                    dprec: None,
+                    is_used: true,
+                };
 
-                    let rule = Rule {
-                        tokens: s
-                            .value()
-                            .chars()
-                            .map(|ch| {
-                                let term_id = grammar.get_terminal_index_from_char(ch);
-                                TokenMapped {
-                                    token: Token::Term(TerminalSymbol::Term(term_id)),
-                                    mapto: None,
-                                    location: str_span,
-                                    reduce_action_chains: Vec::new(),
-                                }
-                            })
-                            .collect(),
-                        reduce_action: None,
-                        separator_location: Location::Generated,
-                        lookaheads: None,
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
+                let nonterm_info = NonTerminalInfo {
+                    name: newrule_name.clone(),
+                    pretty_name: s.to_token_stream().to_string(),
+                    ruletype: None,
+                    rules: vec![rule],
+                    root_location: Some(str_span),
+                    trace: false,
+                    protected: false,
+                    nonterm_type: Some(NonTerminalType::LiteralString),
+                };
+                grammar.nonterminals.push(nonterm_info);
+                grammar
+                    .nonterminals_index
+                    .insert(newrule_name.clone(), newrule_idx);
 
-                    let nonterm_info = NonTerminalInfo {
-                        name: newrule_name.clone(),
-                        pretty_name: s.to_token_stream().to_string(),
-                        ruletype: None,
-                        rules: vec![rule],
-                        root_location: Some(str_span),
-                        trace: false,
-                        protected: false,
-                        nonterm_type: Some(NonTerminalType::LiteralString),
-                    };
-                    grammar.nonterminals.push(nonterm_info);
-                    grammar
-                        .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                Ok(PatternToToken {
+                    name: newrule_name.clone(),
+                    token: Token::NonTerm(newrule_idx),
+                    ruletype: Some(quote! { &'static [u8] }),
+                    mapto: None,
+                })
+            }
+            PatternInternal::Char(ch) => {
+                let idx = grammar.get_terminal_index_from_char(ch.value());
+                let info = &grammar.terminals[idx];
 
-                    Ok(PatternToToken {
-                        name: newrule_name.clone(),
-                        token: Token::NonTerm(newrule_idx),
-                        ruletype: Some(quote! { &'static str }),
-                        mapto: None,
-                    })
-                }
-                syn::Lit::ByteStr(s) => {
-                    let newrule_idx = grammar.nonterminals.len();
-                    let str_span = s.span();
-                    let newrule_name =
-                        Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
-                    let vec = s.value();
+                Ok(PatternToToken {
+                    name: info.name.clone().name(),
+                    token: Token::Term(TerminalSymbol::Term(idx)),
+                    ruletype: Some(grammar.token_typename.clone()),
+                    mapto: None,
+                })
+            }
+            PatternInternal::String(s) => {
+                let newrule_idx = grammar.nonterminals.len();
+                let str_span = s.span();
+                let newrule_name = Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
 
-                    let str_span = str_span.into();
+                let str_span = str_span.into();
 
-                    let rule = Rule {
-                        tokens: vec
-                            .iter()
-                            .map(|ch| {
-                                let term_id = grammar.get_terminal_index_from_char(*ch as char);
-                                TokenMapped {
-                                    token: Token::Term(TerminalSymbol::Term(term_id)),
-                                    mapto: None,
-                                    location: str_span,
-                                    reduce_action_chains: Vec::new(),
-                                }
-                            })
-                            .collect(),
-                        reduce_action: None,
-                        separator_location: Location::Generated,
-                        lookaheads: None,
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
+                let rule = Rule {
+                    tokens: s
+                        .value()
+                        .chars()
+                        .map(|ch| {
+                            let term_id = grammar.get_terminal_index_from_char(ch);
+                            TokenMapped {
+                                token: Token::Term(TerminalSymbol::Term(term_id)),
+                                mapto: None,
+                                location: str_span,
+                                reduce_action_chains: Vec::new(),
+                            }
+                        })
+                        .collect(),
+                    reduce_action: None,
+                    separator_location: Location::Generated,
+                    lookaheads: None,
+                    prec: None,
+                    dprec: None,
+                    is_used: true,
+                };
 
-                    let nonterm_info = NonTerminalInfo {
-                        name: newrule_name.clone(),
-                        pretty_name: s.to_token_stream().to_string(),
-                        ruletype: None,
-                        rules: vec![rule],
-                        root_location: Some(str_span),
-                        trace: false,
-                        protected: false,
-                        nonterm_type: Some(NonTerminalType::LiteralString),
-                    };
-                    grammar.nonterminals.push(nonterm_info);
-                    grammar
-                        .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                let nonterm_info = NonTerminalInfo {
+                    name: newrule_name.clone(),
+                    pretty_name: s.to_token_stream().to_string(),
+                    ruletype: None,
+                    rules: vec![rule],
+                    root_location: Some(str_span),
+                    trace: false,
+                    protected: false,
+                    nonterm_type: Some(NonTerminalType::LiteralString),
+                };
+                grammar.nonterminals.push(nonterm_info);
+                grammar
+                    .nonterminals_index
+                    .insert(newrule_name.clone(), newrule_idx);
 
-                    Ok(PatternToToken {
-                        name: newrule_name.clone(),
-                        token: Token::NonTerm(newrule_idx),
-                        ruletype: Some(quote! { &'static [u8] }),
-                        mapto: None,
-                    })
-                }
-                _ => unreachable!("Only char, byte, str and bytes are supported"),
-            },
+                Ok(PatternToToken {
+                    name: newrule_name.clone(),
+                    token: Token::NonTerm(newrule_idx),
+                    ruletype: Some(quote! { &'static str }),
+                    mapto: None,
+                })
+            }
 
             PatternInternal::Sep(base, del, true) => {
                 let base_rule = base.to_token(grammar, pattern_cache, root_location)?;

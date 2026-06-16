@@ -1,5 +1,4 @@
 use proc_macro2::Ident;
-use proc_macro2::Literal;
 use quote::ToTokens;
 
 use std::collections::BTreeSet;
@@ -13,8 +12,10 @@ use crate::terminal_info::TerminalName;
 pub enum TerminalSetItem {
     Terminal(Ident),
     Range(Ident, Ident),
-    Literal(Literal),
-    LiteralRange(Literal, Literal),
+    Byte(syn::LitByte),
+    ByteRange(syn::LitByte, syn::LitByte),
+    Char(syn::LitChar),
+    CharRange(syn::LitChar, syn::LitChar),
 }
 
 impl std::fmt::Display for TerminalSetItem {
@@ -22,8 +23,14 @@ impl std::fmt::Display for TerminalSetItem {
         match self {
             TerminalSetItem::Terminal(ident) => write!(f, "{}", ident),
             TerminalSetItem::Range(first, last) => write!(f, "{}-{}", first, last),
-            TerminalSetItem::Literal(literal) => write!(f, "{}", literal),
-            TerminalSetItem::LiteralRange(first, last) => write!(f, "{}-{}", first, last),
+            TerminalSetItem::Byte(literal) => write!(f, "{}", literal.to_token_stream()),
+            TerminalSetItem::ByteRange(first, last) => {
+                write!(f, "{}-{}", first.to_token_stream(), last.to_token_stream())
+            }
+            TerminalSetItem::Char(literal) => write!(f, "{}", literal.to_token_stream()),
+            TerminalSetItem::CharRange(first, last) => {
+                write!(f, "{}-{}", first.to_token_stream(), last.to_token_stream())
+            }
         }
     }
 }
@@ -35,10 +42,14 @@ impl TerminalSetItem {
             TerminalSetItem::Range(first, last) => Location::from(first.span())
                 .merge(&Location::from(last.span()))
                 .into(),
-            TerminalSetItem::Literal(literal) => literal.span().into(),
-            TerminalSetItem::LiteralRange(first, last) => Location::from(first.span())
+            TerminalSetItem::Byte(literal) => literal.span().into(),
+            TerminalSetItem::ByteRange(first, last) => Location::from(first.span())
                 .merge(&Location::from(last.span()))
-                .into(), // TODO: handle merging with Generated
+                .into(),
+            TerminalSetItem::Char(literal) => literal.span().into(),
+            TerminalSetItem::CharRange(first, last) => Location::from(first.span())
+                .merge(&Location::from(last.span()))
+                .into(),
         }
     }
     pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<usize>, ParseError> {
@@ -77,28 +88,39 @@ impl TerminalSetItem {
                 }
                 Ok((*first_index..=*last_index).collect())
             }
-            TerminalSetItem::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2");
-                let val = grammar.get_char_value(&lit)?;
+            TerminalSetItem::Byte(l) => {
+                let val = l.value();
                 let name: TerminalName = (val, val).into();
                 let idx = *grammar.terminals_index.get(&name).unwrap();
                 Ok(BTreeSet::from([idx]))
             }
-            TerminalSetItem::LiteralRange(first_l, last_l) => {
-                let first = syn::parse2::<syn::Lit>(first_l.to_token_stream())
-                    .expect("failed on syn::parse2");
-                let first_ch = grammar.get_char_value(&first)?;
+            TerminalSetItem::ByteRange(first_l, last_l) => {
+                let first_val = first_l.value();
+                let last_val = last_l.value();
 
-                let last = syn::parse2::<syn::Lit>(last_l.to_token_stream())
-                    .expect("failed on syn::parse2");
-                let last_ch = grammar.get_char_value(&last)?;
-                if first_ch > last_ch {
+                if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
 
                 let set: BTreeSet<usize> = grammar
-                    .get_terminal_indices_from_char_range(first_ch, last_ch)
+                    .get_terminal_indices_from_char_range(first_val as char, last_val as char)
+                    .collect();
+                Ok(set)
+            }
+            TerminalSetItem::Char(l) => {
+                let val = l.value();
+                let name: TerminalName = (val, val).into();
+                let idx = *grammar.terminals_index.get(&name).unwrap();
+                Ok(BTreeSet::from([idx]))
+            }
+            TerminalSetItem::CharRange(first_l, last_l) => {
+                let first_val = first_l.value();
+                let last_val = last_l.value();
+                if first_val > last_val {
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
+                }
+                let set: BTreeSet<usize> = grammar
+                    .get_terminal_indices_from_char_range(first_val, last_val)
                     .collect();
                 Ok(set)
             }
@@ -108,25 +130,32 @@ impl TerminalSetItem {
         match self {
             TerminalSetItem::Terminal(_) => Ok(()),
             TerminalSetItem::Range(_, _) => Ok(()),
-            TerminalSetItem::Literal(literal) => {
-                let lit = syn::parse2::<syn::Lit>(literal.to_token_stream())
-                    .expect("failed on syn::parse2");
-                let val = grammar.get_char_value(&lit)?;
+            TerminalSetItem::Byte(l) => {
+                let val = l.value() as u32;
                 grammar.range_resolver.insert(val, val);
                 Ok(())
             }
-            TerminalSetItem::LiteralRange(first_l, last_l) => {
-                let first = syn::parse2::<syn::Lit>(first_l.to_token_stream())
-                    .expect("failed on syn::parse2");
-                let first_ch = grammar.get_char_value(&first)?;
-
-                let last = syn::parse2::<syn::Lit>(last_l.to_token_stream())
-                    .expect("failed on syn::parse2");
-                let last_ch = grammar.get_char_value(&last)?;
-                if first_ch > last_ch {
+            TerminalSetItem::ByteRange(first_l, last_l) => {
+                let first_val = first_l.value() as u32;
+                let last_val = last_l.value() as u32;
+                if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
-                grammar.range_resolver.insert(first_ch, last_ch);
+                grammar.range_resolver.insert(first_val, last_val);
+                Ok(())
+            }
+            TerminalSetItem::Char(l) => {
+                let val = l.value() as u32;
+                grammar.range_resolver.insert(val, val);
+                Ok(())
+            }
+            TerminalSetItem::CharRange(first_l, last_l) => {
+                let first_val = first_l.value() as u32;
+                let last_val = last_l.value() as u32;
+                if first_val > last_val {
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
+                }
+                grammar.range_resolver.insert(first_val, last_val);
                 Ok(())
             }
         }

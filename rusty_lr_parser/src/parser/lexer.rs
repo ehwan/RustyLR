@@ -1,11 +1,11 @@
 use proc_macro2::Delimiter;
 use proc_macro2::Group;
 use proc_macro2::Ident;
-use proc_macro2::Literal;
 use proc_macro2::Punct;
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
 
+use quote::ToTokens;
 use quote::TokenStreamExt;
 
 use super::args::GrammarArgs;
@@ -34,7 +34,12 @@ pub enum Lexed {
     Comma(Punct),
     OtherPunct(Punct),
 
-    Literal(Literal),
+    IntLiteral(syn::LitInt),
+    ByteLiteral(syn::LitByte),
+    ByteStrLiteral(syn::LitByteStr),
+    CharLiteral(syn::LitChar),
+    StrLiteral(syn::LitStr),
+    OtherLiteral(syn::Lit),
 
     ParenGroup(Group),
     BraceGroup(Group),
@@ -87,7 +92,12 @@ impl Lexed {
             Lexed::Comma(punct) => stream.append(punct),
             Lexed::OtherPunct(punct) => stream.append(punct),
 
-            Lexed::Literal(lit) => stream.append(lit),
+            Lexed::IntLiteral(i) => stream.extend(i.into_token_stream()),
+            Lexed::ByteLiteral(b) => stream.extend(b.into_token_stream()),
+            Lexed::ByteStrLiteral(bs) => stream.extend(bs.into_token_stream()),
+            Lexed::CharLiteral(c) => stream.extend(c.into_token_stream()),
+            Lexed::StrLiteral(s) => stream.extend(s.into_token_stream()),
+            Lexed::OtherLiteral(l) => stream.extend(l.into_token_stream()),
 
             Lexed::ParenGroup(group) => stream.append(group),
             Lexed::BraceGroup(group) => stream.append(group),
@@ -166,7 +176,12 @@ impl std::fmt::Display for Lexed {
             Lexed::Semicolon(_) => write!(f, "';'"),
             Lexed::Pipe(_) => write!(f, "'|'"),
             Lexed::Percent(_) => write!(f, "'%'"),
-            Lexed::Literal(_) => write!(f, "<Literal>"),
+            Lexed::IntLiteral(_) => write!(f, "<IntLiteral>"),
+            Lexed::ByteLiteral(_) => write!(f, "<ByteLiteral>"),
+            Lexed::ByteStrLiteral(_) => write!(f, "<ByteStrLiteral>"),
+            Lexed::CharLiteral(_) => write!(f, "<CharLiteral>"),
+            Lexed::StrLiteral(_) => write!(f, "<StrLiteral>"),
+            Lexed::OtherLiteral(_) => write!(f, "<OtherLiteral>"),
             Lexed::Equal(_) => write!(f, "'='"),
             Lexed::Plus(_) => write!(f, "'+'"),
             Lexed::Star(_) => write!(f, "'*'"),
@@ -398,7 +413,25 @@ pub fn feed_recursive(
                 }
             },
             TokenTree::Literal(literal) => {
-                context.feed_location(parser, Lexed::Literal(literal), grammar_args, location)?
+                let lit = match syn::parse2::<syn::Lit>(literal.to_token_stream()) {
+                    Ok(lit) => lit,
+                    Err(e) => {
+                        unreachable!(
+                            "Failed to parse literal token: {}, error: {}",
+                            literal.to_string(),
+                            e
+                        )
+                    }
+                };
+                let term = match lit {
+                    syn::Lit::Int(i) => Lexed::IntLiteral(i),
+                    syn::Lit::Byte(b) => Lexed::ByteLiteral(b),
+                    syn::Lit::ByteStr(bs) => Lexed::ByteStrLiteral(bs),
+                    syn::Lit::Char(c) => Lexed::CharLiteral(c),
+                    syn::Lit::Str(s) => Lexed::StrLiteral(s),
+                    _ => Lexed::OtherLiteral(lit),
+                };
+                context.feed_location(parser, term, grammar_args, location)?
             }
         };
     }
