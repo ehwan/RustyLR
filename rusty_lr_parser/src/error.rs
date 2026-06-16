@@ -5,7 +5,6 @@ use proc_macro2::TokenStream;
 use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
-use crate::parser::location::byte_range_to_span;
 use crate::parser::location::Location;
 
 /// failed to feed() the token
@@ -14,7 +13,7 @@ use crate::parser::location::Location;
 pub enum ParseArgError {
     /// feed() failed; `span` is the byte range `[start, end)` in the source
     MacroLineParse {
-        span: std::ops::Range<usize>,
+        location: Location,
         message: String,
     },
 }
@@ -119,15 +118,16 @@ pub enum ParseError {
 }
 #[allow(unused)]
 impl ArgError {
-    pub fn to_compile_error(&self) -> TokenStream {
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
-            let span = loc.span();
-            output.extend(quote_spanned! {
-                span=>
-                compile_error!(#message);
-            });
+            for span in span_manager.get_spans_in_location(&loc) {
+                output.extend(quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                });
+            }
         }
         output
     }
@@ -168,40 +168,47 @@ impl ArgError {
 }
 #[allow(unused)]
 impl ParseArgError {
-    pub fn to_compile_error(&self) -> TokenStream {
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
+        let mut output = TokenStream::new();
         let message = self.short_message();
-        let span = byte_range_to_span(self.span());
-        quote_spanned! {
-            span=>
-            compile_error!(#message);
+        let location = self.location();
+        for span in span_manager.get_spans_in_location(&location) {
+            output.extend(
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            );
         }
+        output
     }
 
     /// Returns the byte range `[start, end)` of the error location in the source.
-    pub fn span(&self) -> std::ops::Range<usize> {
+    pub fn location(&self) -> Location {
         match self {
-            ParseArgError::MacroLineParse { span, message } => span.clone(),
+            ParseArgError::MacroLineParse { location, message } => location.clone(),
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
-            ParseArgError::MacroLineParse { span, message } => message.clone(),
+            ParseArgError::MacroLineParse { message, .. } => message.clone(),
         }
     }
 }
 
 #[allow(unused)]
 impl ParseError {
-    pub fn to_compile_error(&self) -> TokenStream {
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
-            let span = loc.span();
-            output.extend(quote_spanned! {
-                span=>
-                compile_error!(#message);
-            });
+            for span in span_manager.get_spans_in_location(&loc) {
+                output.extend(quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                });
+            }
         }
         output
     }

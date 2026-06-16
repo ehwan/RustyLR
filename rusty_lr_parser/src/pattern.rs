@@ -12,7 +12,6 @@ use crate::parser::location::Location;
 use std::collections::BTreeSet;
 
 use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
@@ -140,9 +139,10 @@ impl Pattern {
             PatternInternal::Plus(pattern) => {
                 let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
                 let newrule_name = Ident::new(
                     &format!("_{}Plus{}", base_rule.name, newrule_idx),
-                    root_location.span(),
+                    root_span,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -152,7 +152,7 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("A", Span::call_site())),
+                            mapto: Some(Ident::new("A", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
@@ -169,13 +169,13 @@ impl Pattern {
                         tokens: vec![
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
-                                mapto: Some(Ident::new("Ap", Span::call_site())),
+                                mapto: Some(Ident::new("Ap", root_span)),
                                 location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
-                                mapto: Some(Ident::new("A", Span::call_site())),
+                                mapto: Some(Ident::new("A", root_span)),
                                 location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
@@ -284,10 +284,12 @@ impl Pattern {
 
                 let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
 
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
+
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Ident::new(
                     &format!("_{}Star{}", base_rule.name, newrule_idx),
-                    root_location.span(),
+                    root_span,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -297,7 +299,7 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
@@ -394,9 +396,10 @@ impl Pattern {
             PatternInternal::Question(pattern) => {
                 let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
                 let newrule_name = Ident::new(
                     &format!("_{}Question{}", base_rule.name, newrule_idx),
-                    root_location.span(),
+                    root_span,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -406,7 +409,7 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("A", Span::call_site())),
+                            mapto: Some(Ident::new("A", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
@@ -525,14 +528,14 @@ impl Pattern {
                 }
 
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name =
-                    Ident::new(&format!("_TermSet{}", newrule_idx), root_location.span());
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
+                let newrule_name = Ident::new(&format!("_TermSet{}", newrule_idx), root_span);
                 let mut rules = Vec::with_capacity(terminal_set.len());
                 for terminal in terminals {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: Token::Term(TerminalSymbol::Term(terminal)),
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
@@ -576,16 +579,15 @@ impl Pattern {
                 let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}LH{}", base_rule.name, newrule_idx),
-                    root_location.span(),
-                );
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
+                let newrule_name =
+                    Ident::new(&format!("_{}LH{}", base_rule.name, newrule_idx), root_span);
 
                 if let Some(base_typename) = &base_rule.ruletype {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
@@ -922,16 +924,17 @@ impl Pattern {
                 let base_rule = base.to_token(grammar, pattern_cache, root_location)?;
                 let del = del.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
                 let newrule_name = Ident::new(
                     &format!("_{}SepPlus{}", base_rule.name, newrule_idx),
-                    root_location.span(),
+                    root_span,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
                     let rule1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],
@@ -948,7 +951,7 @@ impl Pattern {
                         tokens: vec![
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
-                                mapto: Some(Ident::new("__token0", Span::call_site())),
+                                mapto: Some(Ident::new("__token0", root_span)),
                                 location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
@@ -960,7 +963,7 @@ impl Pattern {
                             },
                             TokenMapped {
                                 token: base_rule.token,
-                                mapto: Some(Ident::new("__token1", Span::call_site())),
+                                mapto: Some(Ident::new("__token1", root_span)),
                                 location: Location::Generated,
                                 reduce_action_chains: Vec::new(),
                             },
@@ -1077,9 +1080,10 @@ impl Pattern {
                 let base_rule = base.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
+                let root_span = grammar.span_manager.get_span_in_location(&root_location);
                 let newrule_name = Ident::new(
                     &format!("_{}SepStar{}", base_rule.name, newrule_idx),
-                    root_location.span(),
+                    root_span,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -1089,7 +1093,7 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
+                            mapto: Some(Ident::new("__token0", root_span)),
                             location: Location::Generated,
                             reduce_action_chains: Vec::new(),
                         }],

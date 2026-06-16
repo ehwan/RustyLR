@@ -30,24 +30,35 @@ impl SpanManager {
     #[allow(dead_code)]
     pub fn get_spans_in_range(&self, start: usize, end: usize) -> Vec<Span> {
         let mut result = Vec::new();
-        // Since it is sorted by key, we look up ranges starting from (start + 1, 0)
+        // Since it is sorted by key, we look up ranges starting from (start, 0)
         // to collect all spans contained within (start, end].
-        for (&(span_start, span_end), span) in self.spans.range((start + 1, 0)..) {
-            if span_start > end {
+        for (&(span_start, span_end), span) in self.spans.range((start, 0)..) {
+            if span_start >= end {
                 break;
             }
             if span_end <= end {
                 result.push(span.clone());
             }
         }
+        if result.is_empty() {
+            // If no spans are found, return the call_site span as a fallback.
+            // result.push(Span::call_site());
+        }
         result
     }
-}
 
-/// Converts a byte range `[start, end)` into a `proc_macro2::Span`.
-/// Currently, byte offsets cannot be mapped back precisely, so this returns `Span::call_site()`.
-pub fn byte_range_to_span(_range: std::ops::Range<usize>) -> Span {
-    Span::call_site()
+    pub fn get_spans_in_location(&self, location: &Location) -> Vec<Span> {
+        match location {
+            Location::Range(start, end) => self.get_spans_in_range(*start, *end),
+            Location::Generated => vec![Span::call_site()], // TODO: handle Generated case
+        }
+    }
+    pub fn get_span_in_location(&self, location: &Location) -> Span {
+        self.get_spans_in_location(location)
+            .first()
+            .copied()
+            .unwrap_or_else(Span::call_site)
+    }
 }
 
 /// type for %location for each token
@@ -77,13 +88,6 @@ impl Location {
             Location::Range(s, e) => *s..*e,
             Location::Generated => 0..0, // TODO
         }
-    }
-    /// Returns a `proc_macro2::Span` for use in proc-macro error reporting.
-    /// Since byte offsets cannot be converted back to `Span`, this falls back to `byte_range_to_span`.
-    pub fn span(&self) -> Span {
-        // TODO
-        // unimplemented!("Cannot convert byte range back to Span, using call_site() instead");
-        byte_range_to_span(self.to_range())
     }
 
     pub fn merge(&self, other: &Location) -> Location {

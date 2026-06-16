@@ -22,6 +22,7 @@ use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrU32;
 use crate::parser::location::Location;
+use crate::parser::location::SpanManager;
 use crate::parser::parser_expanded::GrammarContext;
 use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
@@ -155,6 +156,8 @@ pub struct Grammar {
     /// See `TokenMapped::reduce_action_chains` for more details.
     /// This is actual body of each reduce action in the chain.
     pub custom_reduce_actions: Vec<CustomSingleReduceAction>,
+
+    pub span_manager: crate::parser::location::SpanManager,
 }
 
 impl Grammar {
@@ -175,7 +178,7 @@ impl Grammar {
             .collect()
     }
 
-    pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, ParseArgError> {
+    pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, (ParseArgError, SpanManager)> {
         let parser = GrammarParser::new();
         let mut context = GrammarContext::new();
 
@@ -186,31 +189,40 @@ impl Grammar {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                let span = err.location().map(|loc| loc.to_range()).unwrap_or(0..0);
-                return Err(ParseArgError::MacroLineParse { span, message });
+                return Err((
+                    ParseArgError::MacroLineParse {
+                        location: err.location().unwrap(),
+                        message,
+                    },
+                    grammar_args.span_manager,
+                ));
             }
         }
         match context.accept(&parser, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
-                return Err(ParseArgError::MacroLineParse {
-                    span: 0..0,
-                    message,
-                });
+                return Err((
+                    ParseArgError::MacroLineParse {
+                        location: Location::call_site(),
+                        message,
+                    },
+                    grammar_args.span_manager,
+                ));
             }
         }
 
         Ok(grammar_args)
     }
-    pub fn arg_check_error(grammar_args: GrammarArgs) -> Result<GrammarArgs, ArgError> {
+    pub fn arg_check_error(grammar_args: &GrammarArgs) -> Result<(), ArgError> {
         // %error
         if grammar_args.error_typename.len() > 1 {
             return Err(ArgError::MultipleErrorDefinition(
                 grammar_args
                     .error_typename
-                    .into_iter()
+                    .iter()
                     .map(|(loc, _)| loc)
+                    .cloned()
                     .collect(),
             ));
         }
@@ -220,8 +232,9 @@ impl Grammar {
             return Err(ArgError::MultipleModulePrefixDefinition(
                 grammar_args
                     .module_prefix
-                    .into_iter()
+                    .iter()
                     .map(|(loc, _)| loc)
+                    .cloned()
                     .collect(),
             ));
         }
@@ -231,8 +244,9 @@ impl Grammar {
             return Err(ArgError::MultipleUserDataDefinition(
                 grammar_args
                     .userdata_typename
-                    .into_iter()
+                    .iter()
                     .map(|(loc, _)| loc)
+                    .cloned()
                     .collect(),
             ));
         }
@@ -244,8 +258,9 @@ impl Grammar {
             return Err(ArgError::MultipleTokenTypeDefinition(
                 grammar_args
                     .token_typename
-                    .into_iter()
+                    .iter()
                     .map(|(loc, _)| loc)
+                    .cloned()
                     .collect(),
             ));
         }
@@ -257,7 +272,7 @@ impl Grammar {
             return Err(ArgError::MultipleStartDefinition(
                 grammar_args
                     .start_rule_name
-                    .into_iter()
+                    .iter()
                     .map(|start| start.span().into())
                     .collect(),
             ));
@@ -285,7 +300,7 @@ impl Grammar {
             }
         }
 
-        Ok(grammar_args)
+        Ok(())
     }
 
     pub(crate) fn get_char_value(&self, lit: &syn::Lit) -> Result<u32, ParseError> {
@@ -392,6 +407,8 @@ impl Grammar {
             location_typename: grammar_args.location_typename,
             error_precedence: None,
             custom_reduce_actions: Vec::new(),
+
+            span_manager: grammar_args.span_manager,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";

@@ -289,24 +289,24 @@ impl Builder {
 
         let mut grammar_args = match rusty_lr_parser::grammar::Grammar::parse_args(macro_stream) {
             Ok(grammar_args) => grammar_args,
-            Err(e) => {
-                let diag =
-                    match e {
-                        ParseArgError::MacroLineParse { span, message } => Diagnostic::error()
-                            .with_message("Parse Failed")
-                            .with_labels(vec![
-                                Label::primary(file_id, span).with_message("Error here")
-                            ])
-                            .with_notes(vec![message]),
+            Err((e, _)) => {
+                let diag = match e {
+                    ParseArgError::MacroLineParse { location, message } => Diagnostic::error()
+                        .with_message("Parse Failed")
+                        .with_labels(vec![
+                            Label::primary(file_id, location.to_range()).with_message("Error here")
+                        ])
+                        .with_notes(vec![message]),
 
-                        _ => {
-                            let message = e.short_message();
-                            let span = e.span();
-                            Diagnostic::error().with_message(message).with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here"),
-                            ])
-                        }
-                    };
+                    _ => {
+                        let message = e.short_message();
+                        let location = e.location();
+                        Diagnostic::error()
+                            .with_message(message)
+                            .with_labels(vec![Label::primary(file_id, location.to_range())
+                                .with_message("occured here")])
+                    }
+                };
 
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
@@ -334,8 +334,8 @@ impl Builder {
             return Err("Syntax error in grammar".to_string());
         }
 
-        grammar_args = match rusty_lr_parser::grammar::Grammar::arg_check_error(grammar_args) {
-            Ok(grammar_args) => grammar_args,
+        match rusty_lr_parser::grammar::Grammar::arg_check_error(&grammar_args) {
+            Ok(_) => {}
             Err(e) => {
                 let diag = match e {
                     ArgError::MultipleModulePrefixDefinition(locs) => {
