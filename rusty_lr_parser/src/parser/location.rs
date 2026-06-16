@@ -1,4 +1,48 @@
 use proc_macro2::Span;
+use std::collections::BTreeMap;
+
+/// `SpanManager` is used to map a byte range `(start, end]` back to `proc_macro2::Span`.
+/// Since it is generally impossible to directly instantiate a `Span` from an arbitrary byte range,
+/// `SpanManager` constructs a mapping from `byte_range()` to `Span` for all token spans
+/// collected during the parsing phase (`feed_recursive`). Using this map, it provides
+/// a method to retrieve all `Span`s that are fully contained within a given range `(start, end]`.
+#[derive(Clone, Default, Debug)]
+pub struct SpanManager {
+    pub spans: BTreeMap<(usize, usize), Span>,
+}
+
+impl SpanManager {
+    pub fn new() -> Self {
+        Self {
+            spans: BTreeMap::new(),
+        }
+    }
+
+    pub fn clear(&mut self) {
+        self.spans.clear();
+    }
+
+    pub fn add_span(&mut self, span: Span) {
+        let range = span.byte_range();
+        self.spans.insert((range.start, range.end), span);
+    }
+
+    #[allow(dead_code)]
+    pub fn get_spans_in_range(&self, start: usize, end: usize) -> Vec<Span> {
+        let mut result = Vec::new();
+        // Since it is sorted by key, we look up ranges starting from (start + 1, 0)
+        // to collect all spans contained within (start, end].
+        for (&(span_start, span_end), span) in self.spans.range((start + 1, 0)..) {
+            if span_start > end {
+                break;
+            }
+            if span_end <= end {
+                result.push(span.clone());
+            }
+        }
+        result
+    }
+}
 
 /// Converts a byte range `[start, end)` into a `proc_macro2::Span`.
 /// Currently, byte offsets cannot be mapped back precisely, so this returns `Span::call_site()`.

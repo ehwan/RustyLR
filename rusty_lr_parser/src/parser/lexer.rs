@@ -250,7 +250,9 @@ pub fn feed_recursive(
     let mut input = input.into_iter().peekable();
 
     while let Some(next) = input.next() {
-        let location = next.span().into();
+        let span = next.span();
+        grammar_args.span_manager.add_span(span.clone());
+        let location = span.into();
         match next {
             TokenTree::Ident(ident) => {
                 if let Some(keyword) = ident_to_keyword(ident.clone()) {
@@ -328,19 +330,23 @@ pub fn feed_recursive(
                         let Lexed::ParenGroup(group) = token else {
                             unreachable!();
                         };
+                        let open_span = group.span_open();
+                        let close_span = group.span_close();
+                        grammar_args.span_manager.add_span(open_span.clone());
+                        grammar_args.span_manager.add_span(close_span.clone());
                         // feed the splitted tokens
                         context.feed_location(
                             parser,
                             Lexed::LParen,
                             grammar_args,
-                            group.span_open().into(),
+                            open_span.into(),
                         )?;
                         feed_recursive(group.stream(), parser, context, grammar_args)?;
                         context.feed_location(
                             parser,
                             Lexed::RParen,
                             grammar_args,
-                            group.span_close().into(),
+                            close_span.into(),
                         )?;
                     }
                 }
@@ -361,19 +367,23 @@ pub fn feed_recursive(
                         let Lexed::BracketGroup(group) = token else {
                             unreachable!();
                         };
+                        let open_span = group.span_open();
+                        let close_span = group.span_close();
+                        grammar_args.span_manager.add_span(open_span.clone());
+                        grammar_args.span_manager.add_span(close_span.clone());
                         // feed the splitted tokens
                         context.feed_location(
                             parser,
                             Lexed::LBracket,
                             grammar_args,
-                            group.span_open().into(),
+                            open_span.into(),
                         )?;
                         feed_recursive(group.stream(), parser, context, grammar_args)?;
                         context.feed_location(
                             parser,
                             Lexed::RBracket,
                             grammar_args,
-                            group.span_close().into(),
+                            close_span.into(),
                         )?;
                     }
                 }

@@ -588,6 +588,7 @@ pub struct GrammarArgs {
     pub location_typename: Option<TokenStream>,
 
     pub error_recovered: Vec<RecoveredError>,
+    pub span_manager: crate::parser::location::SpanManager,
 }
 
 impl Default for GrammarArgs {
@@ -609,6 +610,7 @@ impl Default for GrammarArgs {
             filter: None,
             location_typename: None,
             error_recovered: Vec::new(),
+            span_manager: crate::parser::location::SpanManager::default(),
         }
     }
 }
