@@ -13,13 +13,12 @@ use crate::parser::args::PrecDPrecArgs;
 use crate::parser::args::RecoveredError;
 use crate::parser::lexer::Lexed;
 use crate::parser::location::Location;
+use crate::parser::location::Located;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 use proc_macro2::Group;
-use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use quote::format_ident;
 use std::boxed::Box;
 use rusty_lr_core::rule::ReduceType;
 
@@ -668,12 +667,12 @@ pub struct GrammarDataStack {
     __stack3: Vec<Vec<RuleLineArgs>>,
     __stack4: Vec<RuleLineArgs>,
     __stack5: Vec<PrecDPrecArgs>,
-    __stack6: Vec<(Option<Ident>, PatternArgs)>,
+    __stack6: Vec<(Option<Located<String>>, PatternArgs)>,
     __stack7: Vec<TerminalSetItem>,
     __stack8: Vec<TerminalSet>,
     __stack9: Vec<PatternArgs>,
     __stack10: Vec<IdentOrLiteral>,
-    __stack11: Vec<Vec<(Option<Ident>, PatternArgs)>>,
+    __stack11: Vec<Vec<(Option<Located<String>>, PatternArgs)>>,
     __stack12: Vec<Vec<PrecDPrecArgs>>,
     __stack13: Vec<Option<Lexed>>,
     __stack14: Vec<Vec<TerminalSetItem>>,
@@ -777,7 +776,8 @@ impl GrammarDataStack {
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2usize);
         let mut __rustylr_location_colon = __location_stack.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Rule-Ident");
@@ -786,7 +786,7 @@ impl GrammarDataStack {
                 fisrt.separator_location = __rustylr_location_colon;
             }
             RuleDefArgs {
-                name: ident,
+                name: Located::new(ident.to_string(), __rustylr_location_ident),
                 typename: RuleType.map(|t| t.stream()),
                 rule_lines: RuleLines,
             }
@@ -1110,12 +1110,13 @@ impl GrammarDataStack {
         }
         let mut int_literal = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        let mut __rustylr_location_int_literal = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
         let __res = {
             let Lexed::IntLiteral(i) = int_literal else {
                 unreachable!("PrecDPrecArgs-DPrec");
             };
-            PrecDPrecArgs::DPrec(i)
+            PrecDPrecArgs::DPrec(Located::new(i, __rustylr_location_int_literal))
         };
         if __push_data {
             __data_stack.__stack5.push(__res);
@@ -1285,12 +1286,13 @@ impl GrammarDataStack {
         let mut Pattern = __data_stack.__stack9.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut ident = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Token-Ident");
             };
-            (Some(ident), Pattern)
+            (Some(Located::new(ident.to_string(), __rustylr_location_ident)), Pattern)
         };
         if __push_data {
             __data_stack.__stack6.push(__res);
@@ -1322,12 +1324,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut ident = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("TerminalSetItem-Range1");
             };
-            TerminalSetItem::Terminal(ident)
+            TerminalSetItem::Terminal(
+                Located::new(ident.to_string(), __rustylr_location_ident),
+            )
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1369,7 +1373,9 @@ impl GrammarDataStack {
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        let mut __rustylr_location_last = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::Ident(first) = first else {
                 unreachable!("TerminalSetItem-Range1");
@@ -1377,7 +1383,10 @@ impl GrammarDataStack {
             let Lexed::Ident(last) = last else {
                 unreachable!("TerminalSetItem-Range3");
             };
-            TerminalSetItem::Range(first, last)
+            TerminalSetItem::Range(
+                Located::new(first.to_string(), __rustylr_location_first),
+                Located::new(last.to_string(), __rustylr_location_last),
+            )
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1427,7 +1436,7 @@ impl GrammarDataStack {
                         .to_string(),
                     location: __rustylr_location_error,
                 });
-            TerminalSetItem::Terminal(format_ident!("dummy"))
+            TerminalSetItem::Terminal(Default::default())
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1459,12 +1468,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut char_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::CharLiteral(ch) = char_literal else {
                 unreachable!("TerminalSetItem-CharLiteral1");
             };
-            TerminalSetItem::Char(ch)
+            TerminalSetItem::Char(
+                Located::new(ch.value(), __rustylr_location_char_literal),
+            )
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1506,7 +1517,9 @@ impl GrammarDataStack {
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        let mut __rustylr_location_last = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::CharLiteral(first) = first else {
                 unreachable!("TerminalSetItem-CharLiteral2");
@@ -1514,7 +1527,10 @@ impl GrammarDataStack {
             let Lexed::CharLiteral(last) = last else {
                 unreachable!("TerminalSetItem-CharLiteral3");
             };
-            TerminalSetItem::CharRange(first, last)
+            TerminalSetItem::CharRange(
+                Located::new(first.value(), __rustylr_location_first),
+                Located::new(last.value(), __rustylr_location_last),
+            )
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1564,7 +1580,7 @@ impl GrammarDataStack {
                         .to_string(),
                     location: __rustylr_location_error,
                 });
-            TerminalSetItem::Terminal(format_ident!("dummy"))
+            TerminalSetItem::Terminal(Default::default())
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1596,12 +1612,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut byte_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::ByteLiteral(b) = byte_literal else {
                 unreachable!("TerminalSetItem-ByteLiteral1");
             };
-            TerminalSetItem::Byte(b)
+            TerminalSetItem::Byte(
+                Located::new(b.value(), __rustylr_location_byte_literal),
+            )
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1643,7 +1661,9 @@ impl GrammarDataStack {
         let mut last = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 1usize);
         let mut first = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        let mut __rustylr_location_last = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::ByteLiteral(first) = first else {
                 unreachable!("TerminalSetItem-ByteLiteral2");
@@ -1651,7 +1671,10 @@ impl GrammarDataStack {
             let Lexed::ByteLiteral(last) = last else {
                 unreachable!("TerminalSetItem-ByteLiteral3");
             };
-            TerminalSetItem::ByteRange(first, last)
+            TerminalSetItem::ByteRange(
+                Located::new(first.value(), __rustylr_location_first),
+                Located::new(last.value(), __rustylr_location_last),
+            )
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1701,7 +1724,7 @@ impl GrammarDataStack {
                         .to_string(),
                     location: __rustylr_location_error,
                 });
-            TerminalSetItem::Terminal(format_ident!("dummy"))
+            TerminalSetItem::Terminal(Default::default())
         };
         if __push_data {
             __data_stack.__stack7.push(__res);
@@ -1828,12 +1851,12 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut ident = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Ident");
             };
-            PatternArgs::Ident(ident)
+            PatternArgs::Ident(Located::new(ident.to_string(), __rustylr_location_ident))
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2187,7 +2210,7 @@ impl GrammarDataStack {
                         .to_string(),
                     location: __rustylr_location_error,
                 });
-            PatternArgs::Ident(format_ident!("dummy"))
+            PatternArgs::Ident(Default::default())
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2219,12 +2242,12 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut byte_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::ByteLiteral(b) = byte_literal else {
                 unreachable!("Pattern-ByteLiteral");
             };
-            PatternArgs::Byte(b)
+            PatternArgs::Byte(Located::new(b.value(), __rustylr_location_byte_literal))
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2256,12 +2279,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut byte_str_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_byte_str_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::ByteStrLiteral(b) = byte_str_literal else {
                 unreachable!("Pattern-ByteStringLiteral");
             };
-            PatternArgs::ByteString(b)
+            PatternArgs::ByteString(
+                Located::new(b.value(), __rustylr_location_byte_str_literal),
+            )
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2293,12 +2318,12 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut char_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::CharLiteral(c) = char_literal else {
                 unreachable!("Pattern-CharLiteral");
             };
-            PatternArgs::Char(c)
+            PatternArgs::Char(Located::new(c.value(), __rustylr_location_char_literal))
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2330,12 +2355,12 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut str_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_str_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::StrLiteral(s) = str_literal else {
                 unreachable!("Pattern-StringLiteral");
             };
-            PatternArgs::String(s)
+            PatternArgs::String(Located::new(s.value(), __rustylr_location_str_literal))
         };
         if __push_data {
             __data_stack.__stack9.push(__res);
@@ -2929,12 +2954,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut ident = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("IdentOrLiteral-Ident");
             };
-            IdentOrLiteral::Ident(ident)
+            IdentOrLiteral::Ident(
+                Located::new(ident.to_string(), __rustylr_location_ident),
+            )
         };
         if __push_data {
             __data_stack.__stack10.push(__res);
@@ -2966,12 +2993,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut byte_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::ByteLiteral(b) = byte_literal else {
                 unreachable!("IdentOrLiteral-ByteLiteral");
             };
-            IdentOrLiteral::Byte(b)
+            IdentOrLiteral::Byte(
+                Located::new(b.value(), __rustylr_location_byte_literal),
+            )
         };
         if __push_data {
             __data_stack.__stack10.push(__res);
@@ -3003,12 +3032,14 @@ impl GrammarDataStack {
             __data_stack.__tags.push(GrammarTags::Empty);
         }
         let mut char_literal = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let __res = {
             let Lexed::CharLiteral(c) = char_literal else {
                 unreachable!("IdentOrLiteral-CharLiteral");
             };
-            IdentOrLiteral::Char(c)
+            IdentOrLiteral::Char(
+                Located::new(c.value(), __rustylr_location_char_literal),
+            )
         };
         if __push_data {
             __data_stack.__stack10.push(__res);
@@ -3054,7 +3085,9 @@ impl GrammarDataStack {
         let mut __rustylr_data_3 = __data_stack.__stack17.pop().unwrap();
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        __location_stack.truncate(__location_stack.len() - 2usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
         let __rustylr_data_3 = Self::custom_reduce_action_0(
             __rustylr_data_3,
             data,
@@ -3065,7 +3098,11 @@ impl GrammarDataStack {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("TokenDef-Ident");
             };
-            data.terminals.push((ident, RustCode));
+            data.terminals
+                .push((
+                    Located::new(ident.to_string(), __rustylr_location_ident),
+                    RustCode,
+                ));
         };
         Ok(())
     }
@@ -3197,12 +3234,15 @@ impl GrammarDataStack {
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut ident = __data_stack.__terminals.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 4usize);
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
         {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("StartDef-Ident");
             };
-            data.start_rule_name.push(ident);
+            data.start_rule_name
+                .push(Located::new(ident.to_string(), __rustylr_location_ident));
         };
         Ok(())
     }
@@ -4255,7 +4295,9 @@ impl GrammarDataStack {
         __data_stack.__tags.push(GrammarTags::Empty);
         let mut ident = __data_stack.__stack17.pop().unwrap();
         __data_stack.__terminals.truncate(__data_stack.__terminals.len() - 2usize);
-        __location_stack.truncate(__location_stack.len() - 4usize);
+        __location_stack.truncate(__location_stack.len() - 1usize);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2usize);
         {
             let idents = ident
                 .into_iter()
@@ -4263,7 +4305,7 @@ impl GrammarDataStack {
                     let Lexed::Ident(ident) = t else {
                         unreachable!("Trace-Ident");
                     };
-                    ident
+                    Located::new(ident.to_string(), __rustylr_location_ident)
                 });
             data.traces.extend(idents);
         };

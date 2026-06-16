@@ -1,4 +1,3 @@
-use proc_macro2::Ident;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -6,6 +5,7 @@ use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::location::Location;
+use crate::parser::location::Located;
 
 /// failed to feed() the token
 #[non_exhaustive]
@@ -21,11 +21,17 @@ pub enum ParseArgError {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ArgError {
+    /// multiple %moduleprefix in the same grammar
     MultipleModulePrefixDefinition(Vec<Location>),
+    /// multiple %userdata in the same grammar
     MultipleUserDataDefinition(Vec<Location>),
+    /// multiple %error in the same grammar
     MultipleErrorDefinition(Vec<Location>),
+    /// multiple %tokentype in the same grammar
     MultipleTokenTypeDefinition(Vec<Location>),
+    /// multiple %eof in the same grammar
     MultipleEofDefinition(Vec<Location>),
+    /// multiple %start in the same grammar
     MultipleStartDefinition(Vec<Location>),
     /// multiple %prec in the same rule
     MultiplePrecDefinition(Vec<Location>),
@@ -35,6 +41,12 @@ pub enum ArgError {
     StartNotDefined,
     EofNotDefined,
     TokenTypeNotDefined,
+
+    /// duplicated name for terminal symbols or non-terminal symbols
+    MultipleNameDefinition(String, Vec<Location>),
+
+    /// can't use reserved keyword as token name
+    ReservedName(Vec<Located<String>>),
 }
 
 #[non_exhaustive]
@@ -57,31 +69,20 @@ pub enum ConflictError {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
-    MultipleRuleDefinition(Ident, Ident),
 
     /// different reduce type applied to the same terminal symbol
-    MultipleReduceDefinition {
-        terminal: String,
-        old: (Location, rusty_lr_core::rule::ReduceType),
-        new: (Location, rusty_lr_core::rule::ReduceType),
-    },
+    MultipleReduceDefinition(
+        Vec<Located<rusty_lr_core::rule::ReduceType>>,
+    ),
 
-    /// multiple %token definition
-    MultipleTokenDefinition(Ident, Ident),
-
-    /// same name for terminal and non-terminal exists
-    TermNonTermConflict{term: Location, nonterm: Location},
-
-    InvalidTerminalRange{ location: Location, start: (Ident, usize), end: (Ident, usize) },
+    InvalidTerminalRange{ location: Location, start: (Located<String>, usize), end: (Located<String>, usize) },
 
     /// name given to %start not defined
-    StartNonTerminalNotDefined(Ident),
+    StartNonTerminalNotDefined(Location),
 
     /// unknown terminal symbol name
-    TerminalNotDefined(Ident),
+    TerminalNotDefined(Location),
 
-    /// can't use reserved keyword as token name
-    ReservedName(Ident),
 
     /// not supported literal type
     UnsupportedLiteralType(Location),
@@ -90,7 +91,7 @@ pub enum ParseError {
     InvalidLiteralRange(Location),
 
     /// TokenType in Literal mode is not supported
-    TokenInLiteralMode(Location),
+    TokenInLiteralMode(Vec<Location>),
 
     /// conflicts in precedence definition
     MultiplePrecedenceOrderDefinition (Vec<Location>),
@@ -99,7 +100,7 @@ pub enum ParseError {
     PrecedenceNotDefined(IdentOrLiteral),
 
     /// All production rules in this non-terminal must have %prec defined
-    NonTerminalPrecedenceNotDefined(Location, usize),
+    NonTerminalPrecedenceNotDefined(Located<usize>),
 
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
@@ -111,7 +112,7 @@ pub enum ParseError {
     OnlyTerminalSet(Location),
 
     /// unknown non-terminal symbol name
-    NonTerminalNotDefined(Ident),
+    NonTerminalNotDefined(Location),
 
     /// only 'usize' literal is allowed for %dprec
     OnlyUsizeLiteral(Location),
@@ -122,7 +123,7 @@ impl ArgError {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
-            for span in span_manager.get_spans_in_location(&loc) {
+            for &span in span_manager.get_spans_in_location(&loc) {
                 output.extend(quote_spanned! {
                     span=>
                     compile_error!(#message);
@@ -142,7 +143,9 @@ impl ArgError {
             | ArgError::MultipleStartDefinition(locs)
             | ArgError::MultiplePrecDefinition(locs)
             | ArgError::MultipleDPrecDefinition(locs) => locs.clone(),
-            _ => vec![Location::call_site()],
+            ArgError::MultipleNameDefinition(_, locs) => locs.clone(),
+            ArgError::ReservedName(names) => names.iter().map(|name| name.location()).collect(),
+            _ => vec![Location::Eof],
         }
     }
 
@@ -163,6 +166,11 @@ impl ArgError {
             ArgError::TokenTypeNotDefined => {
                 "Token type not defined\n>>> %tokentype <token_type_name>;".into()
             }
+            ArgError::MultipleNameDefinition(name, _) => {
+                format!("Duplicated name for terminal or non-terminal: {}", name)
+            }
+            ArgError::ReservedName(names) =>
+                "This name is reserved and cannot be used".into(),
         }
     }
 }
@@ -172,7 +180,7 @@ impl ParseArgError {
         let mut output = TokenStream::new();
         let message = self.short_message();
         let location = self.location();
-        for span in span_manager.get_spans_in_location(&location) {
+        for &span in span_manager.get_spans_in_location(&location) {
             output.extend(
                 quote_spanned! {
                     span=>
@@ -186,7 +194,7 @@ impl ParseArgError {
     /// Returns the byte range `[start, end)` of the error location in the source.
     pub fn location(&self) -> Location {
         match self {
-            ParseArgError::MacroLineParse { location, message } => location.clone(),
+            ParseArgError::MacroLineParse { location, message } => *location,
         }
     }
 
@@ -203,7 +211,7 @@ impl ParseError {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
-            for span in span_manager.get_spans_in_location(&loc) {
+            for &span in span_manager.get_spans_in_location(&loc) {
                 output.extend(quote_spanned! {
                     span=>
                     compile_error!(#message);
@@ -215,50 +223,36 @@ impl ParseError {
 
     pub fn locations(&self) -> Vec<Location> {
         match self {
-            ParseError::MultipleRuleDefinition(old, new) => vec![old.span().into(), new.span().into()],
+            ParseError::MultipleReduceDefinition(locations) => locations.iter().map(Located::location).collect(),
 
-            ParseError::MultipleReduceDefinition { terminal, old, new } => vec![old.0.clone(), new.0.clone()],
-
-            ParseError::TermNonTermConflict { term, nonterm } => vec![term.clone(), nonterm.clone()],
             ParseError::InvalidTerminalRange { location: range, start, end } => vec![range.clone()],
 
-            ParseError::StartNonTerminalNotDefined(ident) => vec![ident.span().into()],
+            ParseError::StartNonTerminalNotDefined(loc) => vec![*loc],
 
-            ParseError::TerminalNotDefined(ident) => vec![ident.span().into()],
+            ParseError::TerminalNotDefined(loc) => vec![*loc],
 
-            ParseError::MultipleTokenDefinition(old, new) => vec![old.span().into(), new.span().into()],
+            ParseError::UnsupportedLiteralType(loc) => vec![*loc],
 
-            ParseError::ReservedName(ident) => vec![ident.span().into()],
+            ParseError::InvalidLiteralRange(loc) => vec![*loc],
 
-            ParseError::UnsupportedLiteralType(loc) => vec![loc.clone()],
-
-            ParseError::InvalidLiteralRange(loc) => vec![loc.clone()],
-
-            ParseError::TokenInLiteralMode(loc) => vec![loc.clone()],
+            ParseError::TokenInLiteralMode(locs) => locs.clone(),
 
             ParseError::MultiplePrecedenceOrderDefinition(locations) => locations.clone(),
-            ParseError::PrecedenceNotDefined(name) => vec![name.location().clone()],
-            ParseError::NonTerminalPrecedenceNotDefined(loc, _) => vec![loc.clone()],
+            ParseError::PrecedenceNotDefined(name) => vec![name.location()],
+            ParseError::NonTerminalPrecedenceNotDefined(loc) => vec![loc.location()],
 
-            ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule} => vec![nonterm.clone(), rule.clone()],
-            ParseError::OnlyTerminalSet(location) => vec![location.clone()],
-            ParseError::NonTerminalNotDefined(ident) => vec![ident.span().into()],
-            ParseError::OnlyUsizeLiteral(loc) => vec![loc.clone()],
+            ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule} => vec![*nonterm, *rule],
+            ParseError::OnlyTerminalSet(location) => vec![*location],
+            ParseError::NonTerminalNotDefined(loc) => vec![*loc],
+            ParseError::OnlyUsizeLiteral(loc) => vec![*loc],
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
-            ParseError::MultipleRuleDefinition(old, new) => {
-                format!("Multiple rule definition with same name: {}", old)
+            ParseError::MultipleReduceDefinition(_) => {
+                "Different reduce type (%left and %right) applied to the same terminal symbol".to_string()
             }
-
-            ParseError::MultipleReduceDefinition { terminal, old, new } => {
-                format!("Differnt reduce type (%left and %right) applied to the same terminal symbol: {}", terminal)
-            }
-
-            ParseError::TermNonTermConflict { .. } =>
-                "Duplicated name for terminal and non-terminal".to_string(),
 
             ParseError::InvalidTerminalRange { location: range, start, end } => {
                 format!(
@@ -267,20 +261,12 @@ impl ParseError {
                 )
             }
 
-            ParseError::StartNonTerminalNotDefined(ident) => {
-                format!("Name given to %start not defined: {}", ident)
+            ParseError::StartNonTerminalNotDefined(_) => {
+                "Name given to %start not defined".to_string()
             }
 
-            ParseError::TerminalNotDefined(ident) => {
-                format!("Unknown terminal symbol name: {}", ident)
-            }
-
-            ParseError::MultipleTokenDefinition(old, new) => {
-                format!("Multiple %token definition with same name: {}", old)
-            }
-
-            ParseError::ReservedName(ident) => {
-                format!("'{}' is reserved name", ident)
+            ParseError::TerminalNotDefined(_) => {
+                "Unknown terminal symbol name".to_string()
             }
 
             ParseError::UnsupportedLiteralType(_) => {
@@ -295,12 +281,12 @@ impl ParseError {
                     .to_string()
             }
 
-            ParseError::MultiplePrecedenceOrderDefinition(locations) =>
+            ParseError::MultiplePrecedenceOrderDefinition(_) =>
                 "Multiple precedence order definition for the same token".to_string(),
-            ParseError::PrecedenceNotDefined(name) => {
-                format!("Precedence not defined for the given token: {}", name)
+            ParseError::PrecedenceNotDefined(_) => {
+                "Precedence not defined for the given token".to_string()
             }
-            ParseError::NonTerminalPrecedenceNotDefined(span, nonterm_idx) => {
+            ParseError::NonTerminalPrecedenceNotDefined(_) => {
                 "All production rules in this non-terminal must have %prec defined".into()
             }
 
@@ -308,8 +294,8 @@ impl ParseError {
                 "ReduceAction must be defined for this rule".into()
             }
             ParseError::OnlyTerminalSet(_) => "Only terminal or terminal set is allowed".into(),
-            ParseError::NonTerminalNotDefined(ident) => {
-                format!("Unknown non-terminal symbol name: {}", ident)
+            ParseError::NonTerminalNotDefined(_) => {
+                "Unknown non-terminal symbol name".to_string()
             }
             ParseError::OnlyUsizeLiteral(_) => "Only 'usize' literal is allowed for %dprec".into(),
         }

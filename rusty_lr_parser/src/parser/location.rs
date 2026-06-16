@@ -1,5 +1,6 @@
+use std::hash::Hash;
+
 use proc_macro2::Span;
-use std::collections::BTreeMap;
 
 /// `SpanManager` is used to map a byte range `(start, end]` back to `proc_macro2::Span`.
 /// Since it is generally impossible to directly instantiate a `Span` from an arbitrary byte range,
@@ -8,49 +9,25 @@ use std::collections::BTreeMap;
 /// a method to retrieve all `Span`s that are fully contained within a given range `(start, end]`.
 #[derive(Clone, Default, Debug)]
 pub struct SpanManager {
-    pub spans: BTreeMap<(usize, usize), Span>,
+    pub spans: Vec<Span>,
 }
 
 impl SpanManager {
     pub fn new() -> Self {
-        Self {
-            spans: BTreeMap::new(),
-        }
+        Self { spans: Vec::new() }
     }
 
-    pub fn clear(&mut self) {
-        self.spans.clear();
+    pub fn add_span(&mut self, span: Span) -> usize {
+        let i = self.spans.len();
+        self.spans.push(span);
+        i
     }
 
-    pub fn add_span(&mut self, span: Span) {
-        let range = span.byte_range();
-        self.spans.insert((range.start, range.end), span);
-    }
-
-    #[allow(dead_code)]
-    pub fn get_spans_in_range(&self, start: usize, end: usize) -> Vec<Span> {
-        let mut result = Vec::new();
-        // Since it is sorted by key, we look up ranges starting from (start, 0)
-        // to collect all spans contained within (start, end].
-        for (&(span_start, span_end), span) in self.spans.range((start, 0)..) {
-            if span_start >= end {
-                break;
-            }
-            if span_end <= end {
-                result.push(span.clone());
-            }
-        }
-        if result.is_empty() {
-            // If no spans are found, return the call_site span as a fallback.
-            // result.push(Span::call_site());
-        }
-        result
-    }
-
-    pub fn get_spans_in_location(&self, location: &Location) -> Vec<Span> {
+    pub fn get_spans_in_location(&self, location: &Location) -> &'_ [Span] {
         match location {
-            Location::Range(start, end) => self.get_spans_in_range(*start, *end),
-            Location::Generated => vec![Span::call_site()], // TODO: handle Generated case
+            &Location::Range(start, end) => &self.spans[start..end],
+            Location::Generated => &[], // TODO: handle Generated case
+            Location::Eof => &[],       // TODO: handle Eof case
         }
     }
     pub fn get_span_in_location(&self, location: &Location) -> Span {
@@ -59,37 +36,38 @@ impl SpanManager {
             .copied()
             .unwrap_or_else(Span::call_site)
     }
+    pub fn get_byterange(&self, location: &Location) -> Option<std::ops::Range<usize>> {
+        match location {
+            &Location::Range(start, end) => {
+                let start_span = self.spans.get(start)?;
+                let end_span = self.spans.get(end - 1)?;
+                Some((start_span.byte_range().start)..(end_span.byte_range().end))
+            }
+            Location::Generated => None, // TODO: handle Generated case
+            Location::Eof => None,       // TODO: handle Eof case
+        }
+    }
 }
 
 /// type for %location for each token
-/// stores byte offset range [start, end) in the source file.
+/// stores index range `[start, end)` in the `SpanManager::spans` vector, where `start` is the index of the first token in the span and `end` is the index of the last token + 1.
 #[derive(Clone, Debug, Copy)]
 pub enum Location {
-    /// byte range `[start, end)` of the token span.
+    /// index range `[start, end)` of the token span.
     /// zero-length spans are represented with equal values `(pos, pos)`.
     Range(usize, usize),
 
     /// Generated
     Generated,
+
+    Eof,
 }
 impl Default for Location {
     fn default() -> Self {
-        Location::Range(0, 0)
+        Location::Eof
     }
 }
 impl Location {
-    /// Returns a `Location` representing the Span::call_site() of the macro.
-    pub fn call_site() -> Self {
-        Span::call_site().into()
-    }
-    /// Returns the byte range `[start, end)` of this span.
-    pub fn to_range(&self) -> std::ops::Range<usize> {
-        match self {
-            Location::Range(s, e) => *s..*e,
-            Location::Generated => 0..0, // TODO
-        }
-    }
-
     pub fn merge(&self, other: &Location) -> Location {
         match (self, other) {
             (&Location::Range(s1, e1), &Location::Range(s2, e2)) => {
@@ -100,11 +78,14 @@ impl Location {
             _ => Location::Generated, // TODO: handle merging with Generated
         }
     }
-}
-impl From<Span> for Location {
-    fn from(span: Span) -> Self {
-        let range = span.byte_range();
-        Location::Range(range.start, range.end)
+
+    /// only used in `new`, Location must be Range
+    fn to_range(&self) -> std::ops::Range<usize> {
+        match self {
+            Location::Range(start, end) => *start..*end,
+            Location::Generated => 0..0,
+            Location::Eof => 0..0,
+        }
     }
 }
 impl rusty_lr_core::Location for Location {
@@ -130,5 +111,77 @@ impl rusty_lr_core::Location for Location {
             (0, 0)
         };
         Location::Range(pair.0, pair.1)
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Located<T> {
+    pub value: T,
+    location: Location,
+}
+
+impl<T: std::fmt::Display> std::fmt::Display for Located<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.value.fmt(f)
+    }
+}
+impl<T: PartialEq> PartialEq for Located<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+impl<T: Eq> Eq for Located<T> {}
+impl<T: PartialOrd> PartialOrd for Located<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
+impl<T: Ord> Ord for Located<T> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.value.cmp(&other.value)
+    }
+}
+impl<T: Hash> Hash for Located<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.value.hash(state);
+    }
+}
+impl<T> std::ops::Deref for Located<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+impl<T> std::ops::DerefMut for Located<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
+    }
+}
+
+impl<T> Located<T> {
+    pub fn new(value: T, location: Location) -> Self {
+        Self { value, location }
+    }
+    pub fn location(&self) -> Location {
+        self.location
+    }
+    pub fn value(&self) -> &T {
+        &self.value
+    }
+    pub fn into_value(self) -> T {
+        self.value
+    }
+
+    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Located<U> {
+        Located {
+            value: f(self.value),
+            location: self.location,
+        }
+    }
+    pub fn map_location<F: FnOnce(Location) -> Location>(self, f: F) -> Located<T> {
+        Located {
+            value: self.value,
+            location: f(self.location),
+        }
     }
 }

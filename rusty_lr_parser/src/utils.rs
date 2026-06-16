@@ -1,8 +1,7 @@
 // constants and utility functions for macro-generation
 
-use super::error::ParseError;
+use crate::parser::location::Location;
 use proc_macro2::Ident;
-use quote::format_ident;
 
 pub static AUGMENTED_NAME: &str = "Augmented";
 pub static EOF_NAME: &str = "eof";
@@ -12,20 +11,16 @@ pub static TERMINAL_STACK_NAME: &str = "__rustylr_generated_terminal_stack";
 pub static OTHERS_TERMINAL_NAME: &str = "__rustylr_other_terminals";
 pub static LOOKAHEAD_PARAMETER_NAME: &str = "lookahead";
 
-/// check if the given identifier is reserved name
-pub(crate) fn check_reserved_name(ident: &Ident) -> Result<(), ParseError> {
-    if ident == AUGMENTED_NAME {
-        return Err(ParseError::ReservedName(ident.clone()));
-    }
-    if ident == EOF_NAME {
-        return Err(ParseError::ReservedName(ident.clone()));
-    }
-    if ident == ERROR_NAME {
-        return Err(ParseError::ReservedName(ident.clone()));
-    }
-    Ok(())
+pub(crate) fn location_variable_name(varname: &str) -> String {
+    format!("__rustylr_location_{}", varname)
 }
 
-pub(crate) fn location_variable_name(varname: &Ident) -> Ident {
-    format_ident!("__rustylr_location_{}", varname)
+/// Build an Ident from a string and Location using the SpanManager.
+pub(crate) fn ident_from_located(
+    name: &str,
+    location: &Location,
+    span_manager: &crate::parser::location::SpanManager,
+) -> Ident {
+    let span = span_manager.get_span_in_location(location);
+    Ident::new(name, span)
 }

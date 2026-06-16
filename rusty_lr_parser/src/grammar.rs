@@ -2,11 +2,9 @@ use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
 use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
-use quote::ToTokens;
 use rusty_lr_core::hash::HashMap;
 use rusty_lr_core::rule::Precedence;
 use rusty_lr_core::TerminalSymbol;
@@ -21,6 +19,7 @@ use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::location::Located;
 use crate::parser::location::Location;
 use crate::parser::location::SpanManager;
 use crate::parser::parser_expanded::GrammarContext;
@@ -48,9 +47,9 @@ pub struct TerminalClassDefinition {
 
 pub enum OptimizeRemove {
     TerminalClassRuleMerge(Rule),
-    SingleNonTerminalRule(Rule, Span),
-    NonTermNotUsed(Span),
-    Cycle(Span),
+    SingleNonTerminalRule(Rule, Location),
+    NonTermNotUsed(Location),
+    Cycle(Location),
     NonTermDataNotUsed(usize),
 }
 pub struct OptimizeDiag {
@@ -64,8 +63,8 @@ type TerminalIndex = usize;
 
 pub struct CustomSingleReduceAction {
     pub body: CustomReduceAction,
-    pub input_type: Option<(Ident, TokenStream)>,
-    pub input_location: Option<Ident>,
+    pub input_type: Option<(String, TokenStream)>,
+    pub input_location: Option<String>,
     pub output_type: Option<TokenStream>,
 }
 
@@ -83,22 +82,22 @@ pub struct Grammar {
     pub(crate) error_typename: TokenStream,
 
     /// %start
-    pub(crate) start_rule_name: Ident,
+    pub(crate) start_rule_name: Located<String>,
 
     pub terminals: Vec<TerminalInfo>,
     /// ident -> index map for terminals
     pub terminals_index: HashMap<TerminalName, TerminalIndex>,
 
     /// %left, %right, or %precedence for each precedence level
-    pub precedence_types: Vec<(Option<rusty_lr_core::rule::ReduceType>, Location)>,
+    pub precedence_types: Vec<Located<Option<rusty_lr_core::rule::ReduceType>>>,
 
     /// precedence levels; line number of %left, %right, or %precedence directive
-    pub precedence_levels: HashMap<IdentOrLiteral, (usize, Location)>,
+    pub precedence_levels: HashMap<IdentOrLiteral, Located<usize>>,
 
     /// rule definitions
     pub nonterminals: Vec<NonTerminalInfo>,
     /// ident - index map for non-terminals
-    pub nonterminals_index: HashMap<Ident, usize>,
+    pub nonterminals_index: HashMap<String, usize>,
 
     /// whether to generate LALR parser
     pub lalr: bool,
@@ -204,7 +203,7 @@ impl Grammar {
                 let message = err.to_string();
                 return Err((
                     ParseArgError::MacroLineParse {
-                        location: Location::call_site(),
+                        location: Location::Eof,
                         message,
                     },
                     grammar_args.span_manager,
@@ -273,7 +272,7 @@ impl Grammar {
                 grammar_args
                     .start_rule_name
                     .iter()
-                    .map(|start| start.span().into())
+                    .map(|start| start.location())
                     .collect(),
             ));
         }
@@ -291,12 +290,67 @@ impl Grammar {
                 }
                 if dprecs.len() > 1 {
                     return Err(ArgError::MultipleDPrecDefinition(
-                        dprecs
-                            .into_iter()
-                            .map(|dprec| dprec.span().into())
-                            .collect(),
+                        dprecs.into_iter().map(|dprec| dprec.location()).collect(),
                     ));
                 }
+            }
+        }
+
+        // check duplicated names for terminals and non-terminals
+        {
+            let mut name_locations = BTreeMap::<String, Vec<Location>>::new();
+            // collect locations in terminal definitions
+            for (name, _) in grammar_args.terminals.iter() {
+                name_locations
+                    .entry(name.value().clone())
+                    .or_default()
+                    .push(name.location());
+            }
+            // collect locations in non-terminal definitions
+            for rules in grammar_args.rules.iter() {
+                name_locations
+                    .entry(rules.name.value().clone())
+                    .or_default()
+                    .push(rules.name.location());
+            }
+
+            for (name, locations) in name_locations.into_iter() {
+                if locations.len() > 1 {
+                    return Err(ArgError::MultipleNameDefinition(name, locations));
+                }
+            }
+        }
+
+        // check reserved names for terminals and non-terminals
+        {
+            /// check if the given identifier name string is reserved
+            fn is_reserved_name(name: &str) -> bool {
+                if name == utils::AUGMENTED_NAME {
+                    return true;
+                }
+                if name == utils::EOF_NAME {
+                    return true;
+                }
+                if name == utils::ERROR_NAME {
+                    return true;
+                }
+                false
+            }
+
+            let mut reserved_names = Vec::new();
+            for (name, _) in grammar_args.terminals.iter() {
+                if is_reserved_name(name) {
+                    reserved_names.push(name.clone());
+                }
+            }
+            for rules in grammar_args.rules.iter() {
+                if is_reserved_name(&rules.name) {
+                    reserved_names.push(rules.name.clone());
+                }
+            }
+
+            if !reserved_names.is_empty() {
+                return Err(ArgError::ReservedName(reserved_names));
             }
         }
 
@@ -445,23 +499,17 @@ impl Grammar {
             }
             if !grammar_args.terminals.is_empty() {
                 return Err(ParseError::TokenInLiteralMode(
-                    grammar_args.terminals.first().unwrap().0.span().into(),
+                    grammar_args
+                        .terminals
+                        .iter()
+                        .map(|(name, _)| name.location())
+                        .collect(),
                 ));
             }
         } else {
             // add %token terminals
             for (index, (ident, token_expr)) in grammar_args.terminals.into_iter().enumerate() {
-                // check reserved name
-                utils::check_reserved_name(&ident)?;
-                let name = ident.into();
-
-                // check duplicate
-                if let Some((k, _)) = grammar.terminals_index.get_key_value(&name) {
-                    return Err(ParseError::MultipleTokenDefinition(
-                        k.ident().unwrap().clone(),
-                        name.into_ident().unwrap(),
-                    ));
-                }
+                let name = TerminalName::Ident(ident.value().clone());
 
                 let terminal_info = TerminalInfo {
                     name: name.clone(),
@@ -475,8 +523,7 @@ impl Grammar {
 
         // add other_terminals
         {
-            let ident = Ident::new(utils::OTHERS_TERMINAL_NAME, Span::call_site());
-            let name: TerminalName = ident.into();
+            let name = TerminalName::Ident(utils::OTHERS_TERMINAL_NAME.to_string());
 
             let terminal_info = TerminalInfo {
                 name: name.clone(),
@@ -491,12 +538,9 @@ impl Grammar {
 
         // insert rule typenames first, since it will be used when inserting rule definitions below
         for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
-            // check reserved name
-            utils::check_reserved_name(&rules_arg.name)?;
-
             let nonterminal = NonTerminalInfo {
                 name: rules_arg.name.clone(),
-                pretty_name: rules_arg.name.to_string(),
+                pretty_name: rules_arg.name.value().clone(),
                 ruletype: rules_arg.typename.clone(),
                 rules: Vec::new(), // production rules will be added later
                 root_location: None,
@@ -507,74 +551,54 @@ impl Grammar {
 
             grammar.nonterminals.push(nonterminal);
 
-            // check duplicate
-            if let Some(old) = grammar
+            grammar
                 .nonterminals_index
-                .insert(rules_arg.name.clone(), rule_idx)
-            {
-                return Err(ParseError::MultipleRuleDefinition(
-                    grammar.nonterminals[old].name.clone(),
-                    rules_arg.name.clone(),
-                ));
-            }
-
-            let term_name = rules_arg.name.clone().into();
-            if let Some(&old_term) = grammar.terminals_index.get(&term_name) {
-                let term_loc = grammar.terminals[old_term]
-                    .name
-                    .ident()
-                    .unwrap()
-                    .span()
-                    .into();
-                return Err(ParseError::TermNonTermConflict {
-                    term: term_loc,
-                    nonterm: grammar.nonterminals[rule_idx].name.span().into(),
-                });
-            }
+                .insert(rules_arg.name.value().clone(), rule_idx);
         }
 
         // precedence orders
-        for (level, (span, reduce_type, items)) in grammar_args.precedences.into_iter().enumerate()
+        for (level, (location, reduce_type, items)) in
+            grammar_args.precedences.into_iter().enumerate()
         {
-            grammar.precedence_types.push((reduce_type, span.clone())); // set i'th level's precedence type
+            grammar
+                .precedence_types
+                .push(Located::new(reduce_type, location)); // set i'th level's precedence type
             for item in items {
                 let item_location = item.location();
+                let item_prec = Located::new(level, item_location);
                 match &item {
                     IdentOrLiteral::Ident(ident) => {
-                        if let Some(&term_idx) = grammar.terminals_index.get(&ident.clone().into())
+                        if let Some(&term_idx) = grammar
+                            .terminals_index
+                            .get(&TerminalName::Ident(ident.value().clone()))
+                        // TODO do not clone ident.value() here, use &str instead
                         {
-                            grammar.terminals[term_idx].precedence =
-                                Some((level, item_location.clone()));
-                        } else if ident == utils::ERROR_NAME {
+                            grammar.terminals[term_idx].precedence = Some(item_prec);
+                        } else if ident.value().as_str() == utils::ERROR_NAME {
                             grammar.error_precedence = Some(level);
                         }
                     }
                     IdentOrLiteral::Byte(b) => {
-                        let ch = b.value();
+                        let ch = *b.value();
                         if let Some(&term_idx) = grammar.terminals_index.get(&(ch, ch).into()) {
-                            grammar.terminals[term_idx].precedence =
-                                Some((level, item_location.clone()));
+                            grammar.terminals[term_idx].precedence = Some(item_prec);
                         } else {
                             unreachable!("unexpected char type in precedence order");
                         }
                     }
                     IdentOrLiteral::Char(ch) => {
-                        let ch = ch.value();
+                        let ch = *ch.value();
                         if let Some(&term_idx) = grammar.terminals_index.get(&(ch, ch).into()) {
-                            grammar.terminals[term_idx].precedence =
-                                Some((level, item_location.clone()));
+                            grammar.terminals[term_idx].precedence = Some(item_prec);
                         } else {
                             unreachable!("unexpected char type in precedence order");
                         }
                     }
                 }
-                if let Some(old) = grammar
-                    .precedence_levels
-                    .insert(item, (level, item_location.clone()))
-                {
+                if let Some(old) = grammar.precedence_levels.insert(item, item_prec) {
                     return Err(ParseError::MultiplePrecedenceOrderDefinition(vec![
                         item_location,
-                        old.1,
+                        old.location(),
                     ]));
                 }
             }
@@ -606,13 +630,12 @@ impl Grammar {
 
                 // parse %prec definition
                 let prec = if let Some(prec) = rule.precs().next() {
-                    let span = prec.location();
                     // check if this ident exists in tokens
-                    let from_token = match &prec {
+                    let from_token = match prec {
                         IdentOrLiteral::Ident(ident) => {
                             let mut prec = None;
                             for (idx, token) in tokens.iter().enumerate() {
-                                if token.mapto.as_ref() == Some(ident) {
+                                if token.mapto.as_ref().map(|m| m) == Some(ident) {
                                     prec = Some(idx);
                                     break;
                                 }
@@ -622,21 +645,26 @@ impl Grammar {
                         _ => None,
                     };
                     if let Some(from_token) = from_token {
+                        let from_token_location = tokens[from_token].location;
                         // check if from_token'th token is terminal symbol
                         if let Token::Term(term) = tokens[from_token].token {
                             match term {
                                 TerminalSymbol::Term(term_idx) => {
-                                    if let Some((level, _)) = grammar.terminals[term_idx].precedence
-                                    {
-                                        let loc = tokens[from_token].location.clone();
-                                        Some((Precedence::Fixed(level), loc))
+                                    if let Some(level) = grammar.terminals[term_idx].precedence {
+                                        Some(Located::new(
+                                            Precedence::Fixed(level.into_value()),
+                                            from_token_location,
+                                        ))
                                     } else {
                                         return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
-                                        Some((Precedence::Fixed(error_prec), span))
+                                        Some(Located::new(
+                                            Precedence::Fixed(error_prec),
+                                            from_token_location,
+                                        ))
                                     } else {
                                         return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                                     }
@@ -646,10 +674,13 @@ impl Grammar {
                                 }
                             }
                         } else {
-                            Some((Precedence::Dynamic(from_token), span))
+                            Some(Located::new(
+                                Precedence::Dynamic(from_token),
+                                from_token_location,
+                            ))
                         }
-                    } else if let Some(&(level, ref loc)) = grammar.precedence_levels.get(&prec) {
-                        Some((Precedence::Fixed(level), loc.clone()))
+                    } else if let Some(&level) = grammar.precedence_levels.get(&prec) {
+                        Some(level.map(Precedence::Fixed))
                     } else {
                         return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                     }
@@ -661,26 +692,25 @@ impl Grammar {
                         if let Token::Term(term) = token.token {
                             match term {
                                 TerminalSymbol::Term(term_idx) => {
-                                    if let Some((level, _)) = grammar.terminals[term_idx].precedence
-                                    {
-                                        op = Some((
-                                            Precedence::Fixed(level),
-                                            token.location.clone(),
+                                    if let Some(level) = grammar.terminals[term_idx].precedence {
+                                        op = Some(Located::new(
+                                            Precedence::Fixed(level.into_value()),
+                                            token.location,
                                         ));
                                         break;
                                     }
                                 }
                                 TerminalSymbol::Error => {
                                     if let Some(error_prec) = grammar.error_precedence {
-                                        op = Some((
+                                        op = Some(Located::new(
                                             Precedence::Fixed(error_prec),
-                                            token.location.clone(),
+                                            token.location,
                                         ));
                                         break;
                                     }
                                 }
                                 TerminalSymbol::Eof => {
-                                    unreachable!("eof token cannot be used in %prec, nor cannot be used in production rules")
+                                    unreachable!("eof token cannot be used in %prec, nor cannot be used in production rules, this case must be filtered out in parsing stage")
                                 }
                             }
                         }
@@ -690,24 +720,13 @@ impl Grammar {
 
                 // parse %dprec literal value
                 let dprec = if let Some(dprec) = rule.dprecs().next() {
-                    let lit = match syn::parse2::<syn::Lit>(dprec.to_token_stream()) {
-                        Ok(lit) => lit,
+                    let val = match dprec.base10_parse::<usize>() {
+                        Ok(val) => val,
                         Err(_) => {
-                            unreachable!("dprec parse error");
+                            return Err(ParseError::OnlyUsizeLiteral(dprec.location()));
                         }
                     };
-                    let val = match lit {
-                        syn::Lit::Int(lit) => match lit.base10_parse::<usize>() {
-                            Ok(val) => val,
-                            Err(_) => {
-                                return Err(ParseError::OnlyUsizeLiteral(dprec.span().into()));
-                            }
-                        },
-                        _ => {
-                            return Err(ParseError::OnlyUsizeLiteral(dprec.span().into()));
-                        }
-                    };
-                    Some((val, dprec.span().into()))
+                    Some(Located::new(val, dprec.location()))
                 } else {
                     None
                 };
@@ -805,7 +824,10 @@ impl Grammar {
                             .iter()
                             .enumerate()
                             .rev()
-                            .find(move |(_, token)| token.mapto.as_ref() == Some(&unique_ident))
+                            .find(move |(_, token)| {
+                                token.mapto.as_ref().map(|m| m.value().as_str())
+                                    == Some(unique_ident.to_string().as_str())
+                            })
                             .map(|(idx, _)| idx)
                         {
                             Some(ReduceAction::Identity(unique_idx))
@@ -853,7 +875,7 @@ impl Grammar {
                             };
 
                             return Err(ParseError::RuleTypeDefinedButActionNotDefined {
-                                nonterm: rules.name.span().into(),
+                                nonterm: rules.name.location(),
                                 rule: loc,
                             });
                         }
@@ -864,7 +886,10 @@ impl Grammar {
 
                 if let Some(ReduceAction::Identity(idx)) = &reduce_action {
                     if tokens[*idx].mapto.is_none() {
-                        tokens[*idx].mapto = Some(format_ident!("__rustylr_token{}", idx));
+                        tokens[*idx].mapto = Some(Located::new(
+                            format!("__rustylr_token{}", idx),
+                            Location::Generated,
+                        ));
                     }
                 }
 
@@ -874,9 +899,13 @@ impl Grammar {
                 for right_token in 0..tokens.len() {
                     if let Some(right_mapto) = tokens[right_token].mapto.as_ref().cloned() {
                         for left_token in 0..right_token {
-                            if tokens[left_token].mapto.as_ref() == Some(&right_mapto) {
-                                tokens[left_token].mapto =
-                                    Some(format_ident!("__rustylr_token{}", left_token));
+                            if tokens[left_token].mapto.as_ref().map(|m| m.value())
+                                == Some(right_mapto.value())
+                            {
+                                tokens[left_token].mapto = Some(Located::new(
+                                    format!("__rustylr_token{}", left_token),
+                                    Location::Generated,
+                                ));
                             }
                         }
                     }
@@ -907,7 +936,7 @@ impl Grammar {
             for (nonterm_idx, nonterm) in grammar.nonterminals.iter().enumerate() {
                 for rule in &nonterm.rules {
                     match rule.prec {
-                        Some(prec) => match prec.0 {
+                        Some(prec) => match *prec.value() {
                             Precedence::Dynamic(token_idx) => {
                                 if let Token::NonTerm(token_nonterm_idx) =
                                     rule.tokens[token_idx].token
@@ -944,21 +973,20 @@ impl Grammar {
         for nonterm in &mut grammar.nonterminals {
             for rule in &mut nonterm.rules {
                 if let Some(prec) = &mut rule.prec {
-                    if let Precedence::Dynamic(token_idx) = prec.0 {
+                    if let Precedence::Dynamic(token_idx) = *prec.value() {
                         if let Token::NonTerm(token_nonterm_idx) = rule.tokens[token_idx].token {
                             let target_candidates = &nonterm_prec_candidates[token_nonterm_idx];
                             if target_candidates.contains(&None) {
                                 // TODO
                                 // no need to be an error on GLR parser?
                                 return Err(ParseError::NonTerminalPrecedenceNotDefined(
-                                    prec.1.clone(),
-                                    token_nonterm_idx,
+                                    Located::new(token_nonterm_idx, prec.location()),
                                 ));
                             }
 
                             if target_candidates.len() == 1 {
                                 let fixed = target_candidates.iter().next().unwrap().unwrap();
-                                prec.0 = Precedence::Fixed(fixed);
+                                *prec = Located::new(Precedence::Fixed(fixed), prec.location());
                             }
                         }
                     }
@@ -969,19 +997,20 @@ impl Grammar {
         // check start rule is valid
         if !grammar
             .nonterminals_index
-            .contains_key(&grammar.start_rule_name)
+            .contains_key(grammar.start_rule_name.value())
         {
             return Err(ParseError::StartNonTerminalNotDefined(
-                grammar.start_rule_name.clone(),
+                grammar.start_rule_name.location(),
             ));
         }
 
         // insert augmented rule
         {
-            let augmented_ident = Ident::new(utils::AUGMENTED_NAME, Span::call_site());
+            let augmented_name =
+                Located::new(utils::AUGMENTED_NAME.to_string(), Location::Generated);
             let start_idx = grammar
                 .nonterminals_index
-                .get(&grammar.start_rule_name)
+                .get(grammar.start_rule_name.value())
                 .unwrap();
             let augmented_rule = Rule {
                 tokens: vec![
@@ -1006,7 +1035,7 @@ impl Grammar {
                 is_used: true,
             };
             let nonterminal_info = NonTerminalInfo {
-                name: augmented_ident.clone(),
+                name: augmented_name.clone(),
                 pretty_name: utils::AUGMENTED_NAME.to_string(),
                 ruletype: None,
                 root_location: None,
@@ -1022,16 +1051,16 @@ impl Grammar {
             grammar.nonterminals.push(nonterminal_info);
             grammar
                 .nonterminals_index
-                .insert(augmented_ident, augmented_idx);
+                .insert(augmented_name.into_value(), augmented_idx);
         }
 
         // set `%trace`
         for trace in grammar_args.traces.into_iter() {
-            if let Some(&nonterm_idx) = grammar.nonterminals_index.get(&trace) {
+            if let Some(&nonterm_idx) = grammar.nonterminals_index.get(trace.value().as_str()) {
                 grammar.nonterminals[nonterm_idx].trace = true;
                 grammar.nonterminals[nonterm_idx].protected = true;
             } else {
-                return Err(ParseError::NonTerminalNotDefined(trace));
+                return Err(ParseError::NonTerminalNotDefined(trace.location()));
                 // no such rule
             }
         }
@@ -1103,7 +1132,7 @@ impl Grammar {
         let mut precedence_sets: BTreeMap<_, BTreeSet<usize>> = Default::default();
         for (term_idx, term) in self.terminals.iter().enumerate() {
             let class = self.terminal_class_id[term_idx];
-            let level = term.precedence.map(|(op, _)| op);
+            let level = term.precedence.map(Located::into_value);
             precedence_sets.entry(level).or_default().insert(class);
         }
         term_sets.extend(precedence_sets.into_values());
@@ -1148,8 +1177,8 @@ impl Grammar {
                             .collect::<Vec<_>>();
                         let reduce_chains = &term_mapped.reduce_action_chains;
                         let lookaheads = &rule.lookaheads;
-                        let prec = rule.prec.map(|(op, _)| op);
-                        let dprec = rule.dprec.map_or(0, |(val, _)| val);
+                        let prec = rule.prec.map(Located::into_value);
+                        let dprec = rule.dprec.map_or(0, Located::into_value);
                         let reduce_action_token_index =
                             rule.reduce_action
                                 .as_ref()
@@ -1263,8 +1292,8 @@ impl Grammar {
                     // this rule was not used
                     nonterm.rules.clear();
                     if !nonterm.is_auto_generated() {
-                        let span = nonterm.name.span();
-                        removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(span));
+                        let loc = nonterm.name.location();
+                        removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(loc));
                     }
                 }
             }
@@ -1375,17 +1404,14 @@ impl Grammar {
             let mut reduce_action_chain = rule.tokens[0].reduce_action_chains.clone();
 
             if let Some(ReduceAction::Custom(body)) = &rule.reduce_action {
-                if rule.reduce_action_contains_ident(&format_ident!(
-                    "{}",
-                    utils::LOOKAHEAD_PARAMETER_NAME
-                )) {
+                if rule.reduce_action_contains_ident(utils::LOOKAHEAD_PARAMETER_NAME) {
                     continue;
                 }
                 // if this rule has custom reduce action, save it
                 let output_type = nonterm.ruletype.clone();
                 let mapto = &rule.tokens[0].mapto;
                 let location_mapto = if let Some(mapto) = mapto {
-                    let location_varname = utils::location_variable_name(mapto);
+                    let location_varname = utils::location_variable_name(mapto.value().as_str());
                     if rule.reduce_action_contains_ident(&location_varname) {
                         Some(location_varname)
                     } else {
@@ -1404,8 +1430,8 @@ impl Grammar {
                     };
 
                     if let Some(ruletype) = ruletype {
-                        if rule.reduce_action_contains_ident(&mapto) {
-                            Some((mapto.clone(), ruletype))
+                        if rule.reduce_action_contains_ident(mapto.value().as_str()) {
+                            Some((mapto.value().clone(), ruletype))
                         } else {
                             None
                         }
@@ -1460,7 +1486,8 @@ impl Grammar {
             let rule = rules.into_iter().next().unwrap();
             // add to diags only if it was not auto-generated
             if !nonterm.is_auto_generated() {
-                let diag = OptimizeRemove::SingleNonTerminalRule(rule, nonterm.name.span());
+                let loc = nonterm.name.location();
+                let diag = OptimizeRemove::SingleNonTerminalRule(rule, loc);
                 removed_rules_diag.push(diag);
             }
         }
@@ -1482,7 +1509,10 @@ impl Grammar {
         // check if RuleType and ReduceAction can be removed from certain non-terminals
         let mut add_to_diags = BTreeSet::new();
         loop {
-            let start_rule_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
+            let start_rule_idx = *self
+                .nonterminals_index
+                .get(self.start_rule_name.value())
+                .unwrap();
             let mut changed = false;
             let mut can_removes = Vec::new();
 
@@ -1516,7 +1546,7 @@ impl Grammar {
 
                             // nonterm_i's data was used in this rule
                             let used = if let Some(mapto) = &token.mapto {
-                                rule.reduce_action_contains_ident(mapto)
+                                rule.reduce_action_contains_ident(mapto.value().as_str())
                             } else {
                                 false
                             };
@@ -1590,7 +1620,7 @@ impl Grammar {
                 for token in &rule.tokens {
                     if let Token::Term(TerminalSymbol::Term(term)) = token.token {
                         if let Some(mapto) = &token.mapto {
-                            if rule.reduce_action_contains_ident(mapto) {
+                            if rule.reduce_action_contains_ident(mapto.value().as_str()) {
                                 self.terminal_classes[term].data_used = true;
                             }
                         }
@@ -1628,7 +1658,8 @@ impl Grammar {
             .collect();
         self.nonterminals_index.clear();
         for (idx, nonterm) in self.nonterminals.iter().enumerate() {
-            self.nonterminals_index.insert(nonterm.name.clone(), idx);
+            self.nonterminals_index
+                .insert(nonterm.name.value().clone(), idx);
         }
         for nonterm in &mut self.nonterminals {
             for rule in &mut nonterm.rules {
@@ -1759,14 +1790,14 @@ impl Grammar {
         }
 
         for (term_idx, term_info) in self.terminals.iter().enumerate() {
-            if let Some((level, _)) = &term_info.precedence {
+            if let Some(level) = &term_info.precedence {
                 let class = self.terminal_class_id[term_idx];
-                if !grammar.add_precedence(TerminalSymbol::Term(class), *level) {
+                if !grammar.add_precedence(TerminalSymbol::Term(class), *level.value()) {
                     unreachable!("set_reduce_type error");
                 }
             }
         }
-        grammar.set_precedence_types(self.precedence_types.iter().map(|(op, _)| *op).collect());
+        grammar.set_precedence_types(self.precedence_types.iter().map(|op| *op.value()).collect());
 
         // add rules
         for (nonterm_id, nonterm) in self.nonterminals.iter().enumerate() {
@@ -1786,8 +1817,8 @@ impl Grammar {
                             .map(|&t| TerminalSymbol::Term(t))
                             .collect()
                     }),
-                    rule.prec.map(|(op, _)| op),
-                    rule.dprec.map_or(0, |(p, _)| p),
+                    rule.prec.map(Located::into_value),
+                    rule.dprec.map_or(0, Located::into_value),
                 );
             }
         }
@@ -1798,10 +1829,7 @@ impl Grammar {
     pub fn build_grammar(
         &mut self,
     ) -> rusty_lr_core::builder::DiagnosticCollector<TerminalSymbol<usize>> {
-        let augmented_idx = *self
-            .nonterminals_index
-            .get(&Ident::new(utils::AUGMENTED_NAME, Span::call_site()))
-            .unwrap();
+        let augmented_idx = *self.nonterminals_index.get(utils::AUGMENTED_NAME).unwrap();
         let mut collector = rusty_lr_core::builder::DiagnosticCollector::new(true);
         let states = if self.lalr {
             self.builder.build_lalr(augmented_idx, &mut collector)
@@ -1855,7 +1883,7 @@ impl Grammar {
                 continue;
             }
 
-            let nonterm_idx = self.nonterminals_index[&nonterm.name];
+            let nonterm_idx = self.nonterminals_index[nonterm.name.value().as_str()];
             reduce_states.push(Some((nonterm_idx, local_rule_id)));
         }
 

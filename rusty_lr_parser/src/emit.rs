@@ -62,14 +62,29 @@ impl Grammar {
     /// write type alias Context, Rule, State, Error...
     fn emit_type_alises(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
-        let start_rule_name = &self.start_rule_name;
-        let rule_typename = format_ident!("{}Rule", start_rule_name);
-        let state_typename = format_ident!("{}State", start_rule_name);
-        let nonterm_typename = format_ident!("{}NonTerminals", start_rule_name);
-        let parse_error_typename = format_ident!("{}ParseError", start_rule_name);
-        let context_struct_name = format_ident!("{}Context", start_rule_name);
-        let data_stack_typename = format_ident!("{}DataStack", start_rule_name);
-        let termclass_typename = format_ident!("{}TerminalClasses", start_rule_name);
+        let start_rule_span = self
+            .span_manager
+            .get_span_in_location(&self.start_rule_name.location());
+        let rule_typename = Ident::new(&format!("{}Rule", self.start_rule_name), start_rule_span);
+        let state_typename = Ident::new(&format!("{}State", self.start_rule_name), start_rule_span);
+        let nonterm_typename = Ident::new(
+            &format!("{}NonTerminals", self.start_rule_name),
+            start_rule_span,
+        );
+        let parse_error_typename = Ident::new(
+            &format!("{}ParseError", self.start_rule_name),
+            start_rule_span,
+        );
+        let context_struct_name =
+            Ident::new(&format!("{}Context", self.start_rule_name), start_rule_span);
+        let data_stack_typename = Ident::new(
+            &format!("{}DataStack", self.start_rule_name),
+            start_rule_span,
+        );
+        let termclass_typename = Ident::new(
+            &format!("{}TerminalClasses", self.start_rule_name),
+            start_rule_span,
+        );
         let location_typename = self
             .location_typename
             .as_ref()
@@ -155,8 +170,13 @@ impl Grammar {
     }
 
     fn emit_termclass_enum(&self, stream: &mut TokenStream) {
-        let start_rule_name = &self.start_rule_name;
-        let termclass_typename = format_ident!("{}TerminalClasses", start_rule_name);
+        let start_rule_span = self
+            .span_manager
+            .get_span_in_location(&self.start_rule_name.location());
+        let termclass_typename = Ident::new(
+            &format!("{}TerminalClasses", self.start_rule_name),
+            start_rule_span,
+        );
         let module_prefix = &self.module_prefix;
         let error_name = format_ident!("{}", utils::ERROR_NAME);
         let eof_name = format_ident!("{}", utils::EOF_NAME);
@@ -173,7 +193,8 @@ impl Grammar {
             } else {
                 if class_def.terminals.len() == 1 {
                     let term_idx = class_def.terminals[0];
-                    let term = self.terminals[term_idx].name.ident().unwrap();
+                    let term_str = self.terminals[term_idx].name.ident_str().unwrap();
+                    let term = Ident::new(term_str, Span::call_site());
                     (term.clone(), term.to_string())
                 } else {
                     let name = format_ident!("TermClass{}", class_id);
@@ -398,8 +419,11 @@ impl Grammar {
         // =====================Writing NonTerminal Enum========================
         // =====================================================================
 
-        let start_rule_name = &self.start_rule_name;
-        let enum_typename = format_ident!("{}NonTerminals", start_rule_name);
+        let start_rule_span = self
+            .span_manager
+            .get_span_in_location(&self.start_rule_name.location());
+        let start_rule_ident = Ident::new(&self.start_rule_name, start_rule_span);
+        let enum_typename = format_ident!("{}NonTerminals", start_rule_ident);
         let module_prefix = &self.module_prefix;
 
         let mut comma_separated_variants = TokenStream::new();
@@ -407,7 +431,11 @@ impl Grammar {
         let mut nonterm_trait_is_trace_case = TokenStream::new();
         let mut nonterm_type_case = TokenStream::new();
         for nonterm in self.nonterminals.iter() {
-            let name = &nonterm.name;
+            let name = utils::ident_from_located(
+                nonterm.name.value().as_str(),
+                &nonterm.name.location(),
+                &self.span_manager,
+            );
             // enum variants definition
             comma_separated_variants.extend(quote! {
                 #name,
@@ -419,7 +447,7 @@ impl Grammar {
                 #enum_typename::#name => #display_str,
             });
 
-            let is_trace = if name == utils::AUGMENTED_NAME {
+            let is_trace = if nonterm.name.value().as_str() == utils::AUGMENTED_NAME {
                 false
             } else {
                 // non-term is auto-generated if nonterm.regex_span.is_some()
@@ -489,12 +517,17 @@ impl Grammar {
 
     fn emit_parser(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
-        let rule_typename = format_ident!("{}Rule", self.start_rule_name);
-        let state_typename = format_ident!("{}State", self.start_rule_name);
-        let parser_struct_name = format_ident!("{}Parser", self.start_rule_name);
+        let start_rule_ident = Ident::new(
+            &self.start_rule_name,
+            self.span_manager
+                .get_span_in_location(&self.start_rule_name.location()),
+        );
+        let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
+        let rule_typename = format_ident!("{}Rule", start_rule_ident);
+        let state_typename = format_ident!("{}State", start_rule_ident);
+        let parser_struct_name = format_ident!("{}Parser", start_rule_ident);
         let token_typename = &self.token_typename;
-        let termclass_typename = format_ident!("{}TerminalClasses", &self.start_rule_name);
+        let termclass_typename = format_ident!("{}TerminalClasses", &start_rule_ident);
 
         let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
         for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
@@ -504,8 +537,8 @@ impl Grammar {
             } else {
                 if class_def.terminals.len() == 1 {
                     let term_idx = class_def.terminals[0];
-                    let term = self.terminals[term_idx].name.ident().unwrap();
-                    term.clone()
+                    let term_str = self.terminals[term_idx].name.ident_str().unwrap();
+                    Ident::new(term_str, Span::call_site())
                 } else {
                     let name = format_ident!("TermClass{}", class_id);
                     name
@@ -535,7 +568,11 @@ impl Grammar {
             .nonterminals
             .iter()
             .map(|nonterm| {
-                let name = &nonterm.name;
+                let name = utils::ident_from_located(
+                    nonterm.name.value().as_str(),
+                    &nonterm.name.location(),
+                    &self.span_manager,
+                );
                 quote! {
                     #nonterminals_enum_name::#name
                 }
@@ -912,9 +949,14 @@ impl Grammar {
         use rusty_lr_core::Token;
 
         let module_prefix = &self.module_prefix;
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &self.start_rule_name);
+        let start_rule_ident = Ident::new(
+            &self.start_rule_name,
+            self.span_manager
+                .get_span_in_location(&self.start_rule_name.location()),
+        );
+        let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
         let reduce_error_typename = &self.error_typename;
-        let data_stack_typename = format_ident!("{}DataStack", self.start_rule_name);
+        let data_stack_typename = format_ident!("{}DataStack", start_rule_ident);
         let token_typename = &self.token_typename;
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
@@ -927,7 +969,7 @@ impl Grammar {
 
         // stack name for tags
         let tag_stack_name = format_ident!("__tags");
-        let tag_enum_name = format_ident!("{}Tags", &self.start_rule_name);
+        let tag_enum_name = format_ident!("{}Tags", &start_rule_ident);
 
         // empty tag
         let empty_tag_name = format_ident!("Empty");
@@ -1016,7 +1058,8 @@ impl Grammar {
                 .input_type
                 .as_ref()
                 .map(|(name, ty)| {
-                    quote! { mut #name: #ty, }
+                    let name_ident = format_ident!("{}", name);
+                    quote! { mut #name_ident: #ty, }
                 })
                 .unwrap_or_default();
 
@@ -1024,7 +1067,8 @@ impl Grammar {
                 .input_location
                 .as_ref()
                 .map(|name| {
-                    quote! { mut #name: #location_typename, }
+                    let name_ident = format_ident!("{}", name);
+                    quote! { mut #name_ident: #location_typename, }
                 })
                 .unwrap_or_default();
 
@@ -1051,7 +1095,8 @@ impl Grammar {
         let mut rule_index: usize = 0;
         for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
             for (rule_local_id, rule) in nonterm.rules.iter().enumerate() {
-                let reduce_fn_ident = format_ident!("reduce_{}_{}", nonterm.name, rule_local_id);
+                let reduce_fn_ident =
+                    format_ident!("reduce_{}_{}", nonterm.name.value(), rule_local_id);
 
                 let rule_debug_str = format!(
                     "{} -> {}",
@@ -1095,28 +1140,29 @@ impl Grammar {
                         let tag_name = stack_name.unwrap_or(&empty_tag_name);
 
                         if let Some(stack_name) = stack_name {
-                            let mapto =
-                                if let Some(first_chain) = token.reduce_action_chains.first() {
-                                    let first_chain = &self.custom_reduce_actions[*first_chain];
-                                    if first_chain.input_type.is_some() {
-                                        Some(format_ident!("__rustylr_data_{}", token_idx))
+                            let mapto = if let Some(first_chain) =
+                                token.reduce_action_chains.first()
+                            {
+                                let first_chain = &self.custom_reduce_actions[*first_chain];
+                                if first_chain.input_type.is_some() {
+                                    Some(format_ident!("__rustylr_data_{}", token_idx))
+                                } else {
+                                    None
+                                }
+                            } else {
+                                // if variable was not used at this reduce action,
+                                // we can use `truncate` instead of `pop` for optimization
+                                // so check it here
+                                if let Some(mapto) = &token.mapto {
+                                    if rule.reduce_action_contains_ident(mapto.value().as_str()) {
+                                        Some(format_ident!("{}", mapto.value()))
                                     } else {
                                         None
                                     }
                                 } else {
-                                    // if variable was not used at this reduce action,
-                                    // we can use `truncate` instead of `pop` for optimization
-                                    // so check it here
-                                    if let Some(mapto) = &token.mapto {
-                                        if rule.reduce_action_contains_ident(mapto) {
-                                            Some(mapto.clone())
-                                        } else {
-                                            None
-                                        }
-                                    } else {
-                                        None
-                                    }
-                                };
+                                    None
+                                }
+                            };
                             stack_mapto_map
                                 .entry(StackName::DataStack(stack_name.clone()))
                                 .or_insert_with(Vec::new)
@@ -1125,12 +1171,14 @@ impl Grammar {
                         let location_mapto = if token.reduce_action_chains.is_empty() {
                             if let Some(mapto) = &token.mapto {
                                 let location_varname =
-                                    format_ident!("__rustylr_location_{}", mapto);
+                                    format_ident!("__rustylr_location_{}", mapto.value());
 
                                 // if variable was not used at this reduce action,
                                 // we can use `truncate` instead of `pop` for optimization
                                 // so check it here
-                                if rule.reduce_action_contains_ident(&location_varname) {
+                                let location_varname_str =
+                                    format!("__rustylr_location_{}", mapto.value());
+                                if rule.reduce_action_contains_ident(&location_varname_str) {
                                     Some(location_varname)
                                 } else {
                                     None
@@ -1307,9 +1355,9 @@ impl Grammar {
                         let data_varname = format_ident!("__rustylr_data_{}", token_idx);
                         let location_varname = format_ident!("__rustylr_location_{}", token_idx);
                         let location_used_in_this_action = if let Some(mapto) = &token.mapto {
-                            let location_mapto_varname =
-                                format_ident!("__rustylr_location_{}", mapto);
-                            rule.reduce_action_contains_ident(&location_mapto_varname)
+                            let location_mapto_str =
+                                format!("__rustylr_location_{}", mapto.value());
+                            rule.reduce_action_contains_ident(&location_mapto_str)
                         } else {
                             false
                         };
@@ -1357,15 +1405,18 @@ impl Grammar {
                         }
 
                         if let Some(mapto) = &token.mapto {
-                            if rule.reduce_action_contains_ident(mapto) {
+                            let mapto_ident = format_ident!("{}", mapto.value());
+                            if rule.reduce_action_contains_ident(mapto.value().as_str()) {
                                 custom_reduce_action_stream.extend(quote! {
-                                    let mut #mapto = #data_varname;
+                                    let mut #mapto_ident = #data_varname;
                                 });
                             }
                             let location_mapto_varname =
-                                format_ident!("__rustylr_location_{}", mapto);
+                                format_ident!("__rustylr_location_{}", mapto.value());
+                            let location_mapto_str =
+                                format!("__rustylr_location_{}", mapto.value());
 
-                            if rule.reduce_action_contains_ident(&location_mapto_varname) {
+                            if rule.reduce_action_contains_ident(&location_mapto_str) {
                                 custom_reduce_action_stream.extend(quote! {
                                     let mut #location_mapto_varname = #location_varname;
                                 });
@@ -1383,7 +1434,10 @@ impl Grammar {
                             quote! { #body; }
                         }
                         Some(ReduceAction::Identity(identity_idx)) => {
-                            let ith_ident = rule.tokens[*identity_idx].mapto.as_ref().unwrap();
+                            let ith_ident = format_ident!(
+                                "{}",
+                                rule.tokens[*identity_idx].mapto.as_ref().unwrap().value()
+                            );
                             quote! { #ith_ident; }
                         }
                         None => TokenStream::new(),
@@ -1451,7 +1505,10 @@ impl Grammar {
             }
         }
 
-        let start_idx = *self.nonterminals_index.get(&self.start_rule_name).unwrap();
+        let start_idx = *self
+            .nonterminals_index
+            .get(self.start_rule_name.value())
+            .unwrap();
         let start_stack_name = &stack_names_for_nonterm[start_idx];
         let tag_name = start_stack_name.as_ref().unwrap_or(&empty_tag_name);
         let tag_check_stream = if unique_tag {

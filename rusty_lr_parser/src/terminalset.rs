@@ -1,21 +1,21 @@
-use proc_macro2::Ident;
 use quote::ToTokens;
 
 use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
+use crate::parser::location::Located;
 use crate::parser::location::Location;
 use crate::terminal_info::TerminalName;
 
 #[derive(Debug, Clone)]
 pub enum TerminalSetItem {
-    Terminal(Ident),
-    Range(Ident, Ident),
-    Byte(syn::LitByte),
-    ByteRange(syn::LitByte, syn::LitByte),
-    Char(syn::LitChar),
-    CharRange(syn::LitChar, syn::LitChar),
+    Terminal(Located<String>),
+    Range(Located<String>, Located<String>),
+    Byte(Located<u8>),
+    ByteRange(Located<u8>, Located<u8>),
+    Char(Located<char>),
+    CharRange(Located<char>, Located<char>),
 }
 
 impl std::fmt::Display for TerminalSetItem {
@@ -38,18 +38,12 @@ impl std::fmt::Display for TerminalSetItem {
 impl TerminalSetItem {
     pub fn location(&self) -> Location {
         match self {
-            TerminalSetItem::Terminal(ident) => ident.span().into(),
-            TerminalSetItem::Range(first, last) => Location::from(first.span())
-                .merge(&Location::from(last.span()))
-                .into(),
-            TerminalSetItem::Byte(literal) => literal.span().into(),
-            TerminalSetItem::ByteRange(first, last) => Location::from(first.span())
-                .merge(&Location::from(last.span()))
-                .into(),
-            TerminalSetItem::Char(literal) => literal.span().into(),
-            TerminalSetItem::CharRange(first, last) => Location::from(first.span())
-                .merge(&Location::from(last.span()))
-                .into(),
+            TerminalSetItem::Terminal(ident) => ident.location(),
+            TerminalSetItem::Range(first, last) => first.location().merge(&last.location()),
+            TerminalSetItem::Byte(literal) => literal.location(),
+            TerminalSetItem::ByteRange(first, last) => first.location().merge(&last.location()),
+            TerminalSetItem::Char(literal) => literal.location(),
+            TerminalSetItem::CharRange(first, last) => first.location().merge(&last.location()),
         }
     }
     pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<usize>, ParseError> {
@@ -57,27 +51,27 @@ impl TerminalSetItem {
             TerminalSetItem::Terminal(terminal) => {
                 if let Some(idx) = grammar
                     .terminals_index
-                    .get(&TerminalName::Ident(terminal.clone()))
+                    .get(&TerminalName::Ident(terminal.value().clone()))
                 {
                     Ok(BTreeSet::from([*idx]))
                 } else {
-                    Err(ParseError::TerminalNotDefined(terminal.clone()))
+                    Err(ParseError::TerminalNotDefined(terminal.location()))
                 }
             }
             TerminalSetItem::Range(first, last) => {
                 let first_index = match grammar
                     .terminals_index
-                    .get(&TerminalName::Ident(first.clone()))
+                    .get(&TerminalName::Ident(first.value().clone()))
                 {
                     Some(f) => f,
-                    None => return Err(ParseError::TerminalNotDefined(first.clone())),
+                    None => return Err(ParseError::TerminalNotDefined(first.location())),
                 };
                 let last_index = match grammar
                     .terminals_index
-                    .get(&TerminalName::Ident(last.clone()))
+                    .get(&TerminalName::Ident(last.value().clone()))
                 {
                     Some(l) => l,
-                    None => return Err(ParseError::TerminalNotDefined(last.clone())),
+                    None => return Err(ParseError::TerminalNotDefined(last.location())),
                 };
                 if last_index < first_index {
                     return Err(ParseError::InvalidTerminalRange {
@@ -89,14 +83,14 @@ impl TerminalSetItem {
                 Ok((*first_index..=*last_index).collect())
             }
             TerminalSetItem::Byte(l) => {
-                let val = l.value();
+                let val = *l.value();
                 let name: TerminalName = (val, val).into();
                 let idx = *grammar.terminals_index.get(&name).unwrap();
                 Ok(BTreeSet::from([idx]))
             }
             TerminalSetItem::ByteRange(first_l, last_l) => {
-                let first_val = first_l.value();
-                let last_val = last_l.value();
+                let first_val = *first_l.value();
+                let last_val = *last_l.value();
 
                 if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
@@ -108,14 +102,14 @@ impl TerminalSetItem {
                 Ok(set)
             }
             TerminalSetItem::Char(l) => {
-                let val = l.value();
+                let val = *l.value();
                 let name: TerminalName = (val, val).into();
                 let idx = *grammar.terminals_index.get(&name).unwrap();
                 Ok(BTreeSet::from([idx]))
             }
             TerminalSetItem::CharRange(first_l, last_l) => {
-                let first_val = first_l.value();
-                let last_val = last_l.value();
+                let first_val = *first_l.value();
+                let last_val = *last_l.value();
                 if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
@@ -131,13 +125,13 @@ impl TerminalSetItem {
             TerminalSetItem::Terminal(_) => Ok(()),
             TerminalSetItem::Range(_, _) => Ok(()),
             TerminalSetItem::Byte(l) => {
-                let val = l.value() as u32;
+                let val = *l.value() as u32;
                 grammar.range_resolver.insert(val, val);
                 Ok(())
             }
             TerminalSetItem::ByteRange(first_l, last_l) => {
-                let first_val = first_l.value() as u32;
-                let last_val = last_l.value() as u32;
+                let first_val = *first_l.value() as u32;
+                let last_val = *last_l.value() as u32;
                 if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
@@ -145,13 +139,13 @@ impl TerminalSetItem {
                 Ok(())
             }
             TerminalSetItem::Char(l) => {
-                let val = l.value() as u32;
+                let val = *l.value() as u32;
                 grammar.range_resolver.insert(val, val);
                 Ok(())
             }
             TerminalSetItem::CharRange(first_l, last_l) => {
-                let first_val = first_l.value() as u32;
-                let last_val = last_l.value() as u32;
+                let first_val = *first_l.value() as u32;
+                let last_val = *last_l.value() as u32;
                 if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }

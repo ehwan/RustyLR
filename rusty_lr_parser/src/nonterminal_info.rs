@@ -1,25 +1,25 @@
 use std::collections::BTreeSet;
 
 use super::token::TokenMapped;
+use crate::parser::location::Located;
 use crate::parser::location::Location;
-use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 
 #[derive(Clone)]
 pub struct CustomReduceAction {
     pub body: TokenStream,
-    idents_used: BTreeSet<Ident>,
+    idents_used: BTreeSet<String>,
 }
 
 impl CustomReduceAction {
-    fn fetch_idents(set: &mut BTreeSet<Ident>, ts: TokenStream) {
+    fn fetch_idents(set: &mut BTreeSet<String>, ts: TokenStream) {
         for token in ts {
             match token {
                 proc_macro2::TokenTree::Group(g) => {
                     Self::fetch_idents(set, g.stream());
                 }
                 proc_macro2::TokenTree::Ident(i) => {
-                    set.insert(i);
+                    set.insert(i.to_string());
                 }
                 _ => {}
             }
@@ -30,8 +30,8 @@ impl CustomReduceAction {
         Self::fetch_idents(&mut idents_used, body.clone());
         Self { body, idents_used }
     }
-    fn contains_ident(&self, ident: &Ident) -> bool {
-        self.idents_used.contains(ident)
+    fn contains_ident(&self, name: &str) -> bool {
+        self.idents_used.contains(name)
     }
 }
 
@@ -63,9 +63,9 @@ pub struct Rule {
     /// force lookahead tokens for this pattern.
     pub lookaheads: Option<BTreeSet<usize>>,
     /// %prec definition
-    pub prec: Option<(rusty_lr_core::rule::Precedence, Location)>,
+    pub prec: Option<Located<rusty_lr_core::rule::Precedence>>,
     /// %dprec definition
-    pub dprec: Option<(usize, Location)>,
+    pub dprec: Option<Located<usize>>,
 
     /// in `Grammar::build_grammar()`, some production rules will be optimized out and deleted
     pub(crate) is_used: bool,
@@ -81,11 +81,15 @@ impl Rule {
             begin
         }
     }
-    pub fn reduce_action_contains_ident(&self, ident: &Ident) -> bool {
+    pub fn reduce_action_contains_ident(&self, name: &str) -> bool {
         match self.reduce_action.as_ref() {
-            Some(ReduceAction::Custom(custom)) => custom.contains_ident(ident),
+            Some(ReduceAction::Custom(custom)) => custom.contains_ident(name),
             Some(ReduceAction::Identity(identity_idx)) => {
-                self.tokens[*identity_idx].mapto.as_ref() == Some(ident)
+                self.tokens[*identity_idx]
+                    .mapto
+                    .as_ref()
+                    .map(|m| m.value().as_str())
+                    == Some(name)
             }
             None => false,
         }
@@ -93,7 +97,7 @@ impl Rule {
 }
 
 pub struct NonTerminalInfo {
-    pub name: Ident,
+    pub name: Located<String>,
 
     /// Name of auto generated rule are in the format of `__AutoRule ...`
     /// So we need other abbreviation for auto generated rules.

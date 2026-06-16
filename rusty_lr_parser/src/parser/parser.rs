@@ -7,14 +7,13 @@ use crate::parser::args::PrecDPrecArgs;
 use crate::parser::args::RecoveredError;
 use crate::parser::lexer::Lexed;
 use crate::parser::location::Location;
+use crate::parser::location::Located;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
 use proc_macro2::Group;
-use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use quote::format_ident;
 
 use std::boxed::Box;
 
@@ -95,7 +94,7 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
         fisrt.separator_location = @colon;
     }
     RuleDefArgs {
-        name: ident,
+        name: Located::new(ident.to_string(), @ident),
         typename: RuleType.map(|t| t.stream()),
         rule_lines: RuleLines,
     }
@@ -150,7 +149,7 @@ PrecDef(PrecDPrecArgs)
         let Lexed::IntLiteral(i) = int_literal else {
             unreachable!( "PrecDPrecArgs-DPrec" );
         };
-        PrecDPrecArgs::DPrec(i) 
+        PrecDPrecArgs::DPrec(Located::new(i, @int_literal)) 
     }
     | percent! dprec! error {
         data.error_recovered.push( RecoveredError {
@@ -170,14 +169,14 @@ PrecDef(PrecDPrecArgs)
     }
     ;
 
-TokenMapped((Option<Ident>, PatternArgs)): Pattern {
+TokenMapped((Option<Located<String>>, PatternArgs)): Pattern {
     ( None, Pattern )
 }
 | ident equal Pattern {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "Token-Ident" );
     };
-    ( Some(ident), Pattern )
+    ( Some(Located::new(ident.to_string(), @ident)), Pattern )
 }
 ;
 
@@ -185,7 +184,7 @@ TerminalSetItem(TerminalSetItem): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "TerminalSetItem-Range1" );
     };
-    TerminalSetItem::Terminal( ident )
+    TerminalSetItem::Terminal( Located::new(ident.to_string(), @ident) )
 }
 | first=ident minus last=ident {
     let Lexed::Ident(first) = first else {
@@ -195,7 +194,7 @@ TerminalSetItem(TerminalSetItem): ident {
         unreachable!( "TerminalSetItem-Range3" );
     };
 
-    TerminalSetItem::Range( first, last )
+    TerminalSetItem::Range( Located::new(first.to_string(), @first), Located::new(last.to_string(), @last) )
 }
 | ident minus error {
     data.error_recovered.push( RecoveredError {
@@ -203,13 +202,13 @@ TerminalSetItem(TerminalSetItem): ident {
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
         location: @error,
     });
-    TerminalSetItem::Terminal( format_ident!("dummy") )
+    TerminalSetItem::Terminal( Default::default() )
 }
 | char_literal {
     let Lexed::CharLiteral(ch) = char_literal else {
         unreachable!( "TerminalSetItem-CharLiteral1" );
     };
-    TerminalSetItem::Char(ch)
+    TerminalSetItem::Char(Located::new(ch.value(), @char_literal))
 }
 | first=char_literal minus last=char_literal {
     let Lexed::CharLiteral(first) = first else {
@@ -218,7 +217,7 @@ TerminalSetItem(TerminalSetItem): ident {
     let Lexed::CharLiteral(last) = last else {
         unreachable!( "TerminalSetItem-CharLiteral3" );
     };
-    TerminalSetItem::CharRange(first, last)
+    TerminalSetItem::CharRange(Located::new(first.value(), @first), Located::new(last.value(), @last))
 }
 | char_literal minus error {
     data.error_recovered.push( RecoveredError {
@@ -226,13 +225,13 @@ TerminalSetItem(TerminalSetItem): ident {
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
         location: @error,
     });
-    TerminalSetItem::Terminal( format_ident!("dummy") )
+    TerminalSetItem::Terminal( Default::default() )
 }
 | byte_literal {
     let Lexed::ByteLiteral(b) = byte_literal else {
         unreachable!( "TerminalSetItem-ByteLiteral1" );
     };
-    TerminalSetItem::Byte(b)
+    TerminalSetItem::Byte(Located::new(b.value(), @byte_literal))
 }
 | first=byte_literal minus last=byte_literal {
     let Lexed::ByteLiteral(first) = first else {
@@ -241,7 +240,7 @@ TerminalSetItem(TerminalSetItem): ident {
     let Lexed::ByteLiteral(last) = last else {
         unreachable!( "TerminalSetItem-ByteLiteral3" );
     };
-    TerminalSetItem::ByteRange(first, last)
+    TerminalSetItem::ByteRange(Located::new(first.value(), @first), Located::new(last.value(), @last))
 }
 | byte_literal minus error {
     data.error_recovered.push( RecoveredError {
@@ -249,7 +248,7 @@ TerminalSetItem(TerminalSetItem): ident {
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
         location: @error,
     });
-    TerminalSetItem::Terminal( format_ident!("dummy") )
+    TerminalSetItem::Terminal( Default::default() )
 }
 ;
 
@@ -280,7 +279,7 @@ Pattern(PatternArgs): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "Pattern-Ident" );
     };
-    PatternArgs::Ident( ident )
+    PatternArgs::Ident( Located::new(ident.to_string(), @ident) )
 }
 | Pattern plus {
     let Lexed::Plus(plus) = plus else {
@@ -312,31 +311,31 @@ Pattern(PatternArgs): ident {
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
         location: @error,
     });
-    PatternArgs::Ident(format_ident!("dummy"))
+    PatternArgs::Ident( Default::default() )
 }
 | byte_literal {
     let Lexed::ByteLiteral(b) = byte_literal else {
         unreachable!( "Pattern-ByteLiteral" );
     };
-    PatternArgs::Byte(b)
+    PatternArgs::Byte(Located::new(b.value(), @byte_literal))
 }
 | byte_str_literal {
     let Lexed::ByteStrLiteral(b) = byte_str_literal else {
         unreachable!( "Pattern-ByteStringLiteral" );
     };
-    PatternArgs::ByteString(b)
+    PatternArgs::ByteString(Located::new(b.value(), @byte_str_literal))
 }
 | char_literal {
     let Lexed::CharLiteral(c) = char_literal else {
         unreachable!( "Pattern-CharLiteral" );
     };
-    PatternArgs::Char(c)
+    PatternArgs::Char(Located::new(c.value(), @char_literal))
 }
 | str_literal {
     let Lexed::StrLiteral(s) = str_literal else {
         unreachable!( "Pattern-StringLiteral" );
     };
-    PatternArgs::String(s)
+    PatternArgs::String(Located::new(s.value(), @str_literal))
 }
 | p1=Pattern minus p2=Pattern {
     PatternArgs::Minus { base: Box::new(p1), exclude: Box::new(p2) }
@@ -466,19 +465,19 @@ IdentOrLiteral(IdentOrLiteral): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "IdentOrLiteral-Ident" );
     };
-    IdentOrLiteral::Ident( ident )
+    IdentOrLiteral::Ident( Located::new(ident.to_string(), @ident) )
 }
 | byte_literal {
     let Lexed::ByteLiteral(b) = byte_literal else {
         unreachable!( "IdentOrLiteral-ByteLiteral" );
     };
-    IdentOrLiteral::Byte(b)
+    IdentOrLiteral::Byte(Located::new(b.value(), @byte_literal))
 }
 | char_literal {
     let Lexed::CharLiteral(c) = char_literal else {
         unreachable!( "IdentOrLiteral-CharLiteral" );
     };
-    IdentOrLiteral::Char(c)
+    IdentOrLiteral::Char(Located::new(c.value(), @char_literal))
 }
 ;
 
@@ -495,7 +494,7 @@ Directive
         let Lexed::Ident(ident) = ident else {
             unreachable!( "TokenDef-Ident" );
         };
-        data.terminals.push( (ident, RustCode) );
+        data.terminals.push( (Located::new(ident.to_string(), @ident), RustCode) );
     }
     | percent token ident semicolon {
         data.error_recovered.push( RecoveredError {
@@ -515,7 +514,7 @@ Directive
         let Lexed::Ident(ident) = ident else {
             unreachable!( "StartDef-Ident" );
         };
-        data.start_rule_name.push(ident);
+        data.start_rule_name.push(Located::new(ident.to_string(), @ident));
     }
     | percent start error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -639,7 +638,7 @@ Directive
             let Lexed::Ident(ident) = t else {
                 unreachable!( "Trace-Ident" );
             };
-            ident
+            Located::new(ident.to_string(), @ident)
         });
         data.traces.extend( idents );
     }
