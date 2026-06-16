@@ -293,16 +293,16 @@ impl Grammar {
             if let syn::Lit::Char(lit) = lit {
                 Ok(lit.value() as u32)
             } else {
-                Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
+                Err(ParseError::UnsupportedLiteralType(lit.span().into()))
             }
         } else if self.is_u8 {
             if let syn::Lit::Byte(lit) = lit {
                 Ok(lit.value() as u32)
             } else {
-                Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
+                Err(ParseError::UnsupportedLiteralType(lit.span().into()))
             }
         } else {
-            Err(ParseError::UnsupportedLiteralType(lit.to_token_stream()))
+            Err(ParseError::UnsupportedLiteralType(lit.span().into()))
         }
     }
     pub(crate) fn get_terminal_indices_from_char_range(
@@ -519,6 +519,20 @@ impl Grammar {
                     rules_arg.name.clone(),
                 ));
             }
+
+            let term_name = rules_arg.name.clone().into();
+            if let Some(&old_term) = grammar.terminals_index.get(&term_name) {
+                let term_loc = grammar.terminals[old_term]
+                    .name
+                    .ident()
+                    .unwrap()
+                    .span()
+                    .into();
+                return Err(ParseError::TermNonTermConflict {
+                    term: term_loc,
+                    nonterm: grammar.nonterminals[rule_idx].name.span().into(),
+                });
+            }
         }
 
         // precedence orders
@@ -555,10 +569,10 @@ impl Grammar {
                     .precedence_levels
                     .insert(itemu, (level, item_location.clone()))
                 {
-                    return Err(ParseError::MultiplePrecedenceOrderDefinition {
-                        cur: item,
-                        old: old.1,
-                    });
+                    return Err(ParseError::MultiplePrecedenceOrderDefinition(vec![
+                        item_location,
+                        old.1,
+                    ]));
                 }
             }
         }
@@ -837,8 +851,8 @@ impl Grammar {
                             };
 
                             return Err(ParseError::RuleTypeDefinedButActionNotDefined {
-                                name: rules.name.clone(),
-                                span: loc,
+                                nonterm: rules.name.span().into(),
+                                rule: loc,
                             });
                         }
                     } else {

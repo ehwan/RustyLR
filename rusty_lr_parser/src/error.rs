@@ -1,5 +1,4 @@
 use proc_macro2::Ident;
-use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
@@ -64,21 +63,17 @@ pub enum ParseError {
     /// different reduce type applied to the same terminal symbol
     MultipleReduceDefinition {
         terminal: String,
-        old: (Span, rusty_lr_core::rule::ReduceType),
-        new: (Span, rusty_lr_core::rule::ReduceType),
+        old: (Location, rusty_lr_core::rule::ReduceType),
+        new: (Location, rusty_lr_core::rule::ReduceType),
     },
 
     /// multiple %token definition
     MultipleTokenDefinition(Ident, Ident),
 
     /// same name for terminal and non-terminal exists
-    TermNonTermConflict {
-        name: Ident,
-        terminal: Ident,
-        non_terminal: Ident,
-    },
+    TermNonTermConflict{term: Location, nonterm: Location},
 
-    InvalidTerminalRange((Ident, usize, TokenStream), (Ident, usize, TokenStream)),
+    InvalidTerminalRange{ location: Location, start: (Ident, usize), end: (Ident, usize) },
 
     /// name given to %start not defined
     StartNonTerminalNotDefined(Ident),
@@ -90,19 +85,16 @@ pub enum ParseError {
     ReservedName(Ident),
 
     /// not supported literal type
-    UnsupportedLiteralType(TokenStream),
+    UnsupportedLiteralType(Location),
 
-    /// range in literal terminal set is not valid
-    InvalidLiteralRange(Literal, Literal),
+    /// range in literal terminal set is not valid; [first, last] with first > last
+    InvalidLiteralRange(Location),
 
     /// TokenType in Literal mode is not supported
     TokenInLiteralMode(Location),
 
     /// conflicts in precedence definition
-    MultiplePrecedenceOrderDefinition {
-        cur: IdentOrLiteral,
-        old: Location,
-    },
+    MultiplePrecedenceOrderDefinition (Vec<Location>),
 
     /// Precedence not defined for the given token
     PrecedenceNotDefined(IdentOrLiteral),
@@ -112,12 +104,12 @@ pub enum ParseError {
 
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
-        name: Ident,
-        span: Location,
+        nonterm: Location,
+        rule: Location
     },
 
     /// Only terminal or terminal set is allowed
-    OnlyTerminalSet(Location, Location),
+    OnlyTerminalSet(Location),
 
     /// unknown non-terminal symbol name
     NonTerminalNotDefined(Ident),
@@ -202,54 +194,49 @@ impl ParseArgError {
 #[allow(unused)]
 impl ParseError {
     pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
+        let mut output = TokenStream::new();
         let message = self.short_message();
-        quote_spanned! {
-            span=>
-            compile_error!(#message);
+        for loc in self.locations() {
+            let span = loc.span();
+            output.extend(quote_spanned! {
+                span=>
+                compile_error!(#message);
+            });
         }
+        output
     }
 
-    pub fn span(&self) -> Span {
+    pub fn locations(&self) -> Vec<Location> {
         match self {
-            ParseError::MultipleRuleDefinition(old, new) => new.span(),
+            ParseError::MultipleRuleDefinition(old, new) => vec![old.span().into(), new.span().into()],
 
-            ParseError::MultipleReduceDefinition { terminal, old, new } => new.0,
+            ParseError::MultipleReduceDefinition { terminal, old, new } => vec![old.0.clone(), new.0.clone()],
 
-            ParseError::TermNonTermConflict {
-                name,
-                terminal,
-                non_terminal,
-            } => name.span(),
+            ParseError::TermNonTermConflict { term, nonterm } => vec![term.clone(), nonterm.clone()],
+            ParseError::InvalidTerminalRange { location: range, start, end } => vec![range.clone()],
 
-            ParseError::InvalidTerminalRange((first, first_index, _), (last, last_index, _)) => {
-                first.span()
-            }
+            ParseError::StartNonTerminalNotDefined(ident) => vec![ident.span().into()],
 
-            ParseError::StartNonTerminalNotDefined(ident) => ident.span(),
+            ParseError::TerminalNotDefined(ident) => vec![ident.span().into()],
 
-            ParseError::TerminalNotDefined(ident) => ident.span(),
+            ParseError::MultipleTokenDefinition(old, new) => vec![old.span().into(), new.span().into()],
 
-            ParseError::MultipleTokenDefinition(old, new) => new.span(),
+            ParseError::ReservedName(ident) => vec![ident.span().into()],
 
-            ParseError::ReservedName(ident) => ident.span(),
+            ParseError::UnsupportedLiteralType(loc) => vec![loc.clone()],
 
-            ParseError::UnsupportedLiteralType(stream) => {
-                stream.clone().into_iter().next().unwrap().span()
-            }
+            ParseError::InvalidLiteralRange(loc) => vec![loc.clone()],
 
-            ParseError::InvalidLiteralRange(first, last) => first.span(),
+            ParseError::TokenInLiteralMode(loc) => vec![loc.clone()],
 
-            ParseError::TokenInLiteralMode(loc) => loc.span(),
+            ParseError::MultiplePrecedenceOrderDefinition(locations) => locations.clone(),
+            ParseError::PrecedenceNotDefined(name) => vec![name.location().clone()],
+            ParseError::NonTerminalPrecedenceNotDefined(loc, _) => vec![loc.clone()],
 
-            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.location().span(),
-            ParseError::PrecedenceNotDefined(name) => name.location().span(),
-            ParseError::NonTerminalPrecedenceNotDefined(loc, _) => loc.span(),
-
-            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.span(),
-            ParseError::OnlyTerminalSet(span_begin, span_end) => span_begin.span(),
-            ParseError::NonTerminalNotDefined(ident) => ident.span(),
-            ParseError::OnlyUsizeLiteral(loc) => loc.span(),
+            ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule} => vec![nonterm.clone(), rule.clone()],
+            ParseError::OnlyTerminalSet(location) => vec![location.clone()],
+            ParseError::NonTerminalNotDefined(ident) => vec![ident.span().into()],
+            ParseError::OnlyUsizeLiteral(loc) => vec![loc.clone()],
         }
     }
 
@@ -263,18 +250,13 @@ impl ParseError {
                 format!("Differnt reduce type (%left and %right) applied to the same terminal symbol: {}", terminal)
             }
 
-            ParseError::TermNonTermConflict {
-                name,
-                terminal,
-                non_terminal,
-            } => {
-                format!("Same name for terminal and non-terminal exists: {}", name)
-            }
+            ParseError::TermNonTermConflict { .. } =>
+                "Duplicated name for terminal and non-terminal".to_string(),
 
-            ParseError::InvalidTerminalRange((first, first_index, _), (last, last_index, _)) => {
+            ParseError::InvalidTerminalRange { location: range, start, end } => {
                 format!(
                     "Invalid terminal range: [{}({}) - {}({})]",
-                    first, first_index, last, last_index
+                    start.0, start.1, end.0, end.1
                 )
             }
 
@@ -294,25 +276,20 @@ impl ParseError {
                 format!("'{}' is reserved name", ident)
             }
 
-            ParseError::UnsupportedLiteralType(literal) => {
-                format!("Not supported literal type: {}", literal)
+            ParseError::UnsupportedLiteralType(_) => {
+                format!("This literal type is not supported. Use string literal (e.g. 'a', \"abc\", b'a' or b\"abc\") instead")
             }
 
-            ParseError::InvalidLiteralRange(first, last) => {
-                format!(
-                    "Range in literal terminal set is not valid: [{} - {}]",
-                    first, last
-                )
-            }
+            ParseError::InvalidLiteralRange(_) => 
+                    "Invalid literal range: [first, last] with first > last".to_string(),
 
             ParseError::TokenInLiteralMode(_) => {
-                "%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead"
+                "%token with %tokentype `char` or `u8` is not supported. Use character literal (e.g. 'a' or b'a') instead"
                     .to_string()
             }
 
-            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
-                format!("Conflicts with precedence definition: {}", cur)
-            }
+            ParseError::MultiplePrecedenceOrderDefinition(locations) =>
+                "Multiple precedence order definition for the same token".to_string(),
             ParseError::PrecedenceNotDefined(name) => {
                 format!("Precedence not defined for the given token: {}", name)
             }
@@ -320,10 +297,10 @@ impl ParseError {
                 "All production rules in this non-terminal must have %prec defined".into()
             }
 
-            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
+            ParseError::RuleTypeDefinedButActionNotDefined { .. } => {
                 "ReduceAction must be defined for this rule".into()
             }
-            ParseError::OnlyTerminalSet(_, _) => "Only terminal or terminal set is allowed".into(),
+            ParseError::OnlyTerminalSet(_) => "Only terminal or terminal set is allowed".into(),
             ParseError::NonTerminalNotDefined(ident) => {
                 format!("Unknown non-terminal symbol name: {}", ident)
             }

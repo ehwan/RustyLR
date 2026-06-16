@@ -281,28 +281,20 @@ impl PatternArgs {
                     .expect("failed on syn::parse2::<syn::Lit>");
                 if grammar.is_char {
                     if !matches!(&lit, syn::Lit::Char(_) | syn::Lit::Str(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
+                        return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
                     }
                 } else if grammar.is_u8 {
                     if !matches!(&lit, syn::Lit::Byte(_) | syn::Lit::ByteStr(_)) {
-                        return Err(ParseError::UnsupportedLiteralType(
-                            literal.to_token_stream(),
-                        ));
+                        return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
                     }
                 } else {
-                    return Err(ParseError::UnsupportedLiteralType(
-                        literal.to_token_stream(),
-                    ));
+                    return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
                 }
                 if !matches!(
                     &lit,
                     syn::Lit::Char(_) | syn::Lit::Byte(_) | syn::Lit::Str(_) | syn::Lit::ByteStr(_)
                 ) {
-                    return Err(ParseError::UnsupportedLiteralType(
-                        literal.to_token_stream(),
-                    ));
+                    return Err(ParseError::UnsupportedLiteralType(literal.span().into()));
                 }
 
                 let pattern = Pattern {
@@ -371,32 +363,18 @@ impl PatternArgs {
                     Err(ParseError::TerminalNotDefined(ident.clone()))
                 }
             }
-            PatternArgs::Plus {
-                base,
-                op_location: op_span,
-            } => Err(ParseError::OnlyTerminalSet(base.location(), *op_span)),
-            PatternArgs::Star {
-                base,
-                op_location: op_span,
-            } => Err(ParseError::OnlyTerminalSet(base.location(), *op_span)),
-            PatternArgs::Question {
-                base,
-                op_location: op_span,
-            } => Err(ParseError::OnlyTerminalSet(base.location(), *op_span)),
+            PatternArgs::Plus { .. } => Err(ParseError::OnlyTerminalSet(self.location())),
+            PatternArgs::Star { .. } => Err(ParseError::OnlyTerminalSet(self.location())),
+            PatternArgs::Question { .. } => Err(ParseError::OnlyTerminalSet(self.location())),
             PatternArgs::Exclamation { base, .. } => base.to_terminal_set(grammar),
             PatternArgs::Lookaheads { pattern, .. } => {
-                let sp = pattern.location();
-                Err(ParseError::OnlyTerminalSet(sp, sp))
+                Err(ParseError::OnlyTerminalSet(pattern.location()))
             }
-            PatternArgs::Group {
-                alternatives,
-                open_location: open_span,
-                close_location: close_span,
-            } => {
+            PatternArgs::Group { alternatives, .. } => {
                 if alternatives.len() == 1 && alternatives[0].len() == 1 {
                     alternatives[0][0].to_terminal_set(grammar)
                 } else {
-                    Err(ParseError::OnlyTerminalSet(*open_span, *close_span))
+                    Err(ParseError::OnlyTerminalSet(self.location()))
                 }
             }
             PatternArgs::Literal(literal) => {
@@ -428,9 +406,7 @@ impl PatternArgs {
                     (true, true) => Ok((false, rhs_set.difference(&lhs_set).copied().collect())),
                 }
             }
-            PatternArgs::Sep { location: span, .. } => {
-                Err(ParseError::OnlyTerminalSet(*span, *span))
-            }
+            PatternArgs::Sep { location, .. } => Err(ParseError::OnlyTerminalSet(*location)),
         }
     }
     pub fn location(&self) -> Location {
@@ -464,7 +440,7 @@ impl PatternArgs {
             } => open_span.merge(close_span),
             PatternArgs::Literal(literal) => literal.span().into(),
             PatternArgs::Minus { base, exclude } => base.location().merge(&exclude.location()),
-            PatternArgs::Sep { location: span, .. } => *span,
+            PatternArgs::Sep { location, .. } => *location,
         }
     }
 
@@ -520,9 +496,7 @@ impl PatternArgs {
                         }
                         Ok(())
                     }
-                    _ => Err(ParseError::UnsupportedLiteralType(
-                        literal.to_token_stream(),
-                    )),
+                    _ => Err(ParseError::UnsupportedLiteralType(literal.span().into())),
                 }
             }
             PatternArgs::Minus { base, exclude } => {

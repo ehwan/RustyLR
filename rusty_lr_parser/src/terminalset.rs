@@ -29,6 +29,18 @@ impl std::fmt::Display for TerminalSetItem {
 }
 
 impl TerminalSetItem {
+    pub fn location(&self) -> Location {
+        match self {
+            TerminalSetItem::Terminal(ident) => ident.span().into(),
+            TerminalSetItem::Range(first, last) => Location::from(first.span())
+                .merge(&Location::from(last.span()))
+                .into(),
+            TerminalSetItem::Literal(literal) => literal.span().into(),
+            TerminalSetItem::LiteralRange(first, last) => Location::from(first.span())
+                .merge(&Location::from(last.span()))
+                .into(), // TODO: handle merging with Generated
+        }
+    }
     pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<usize>, ParseError> {
         match self {
             TerminalSetItem::Terminal(terminal) => {
@@ -57,18 +69,11 @@ impl TerminalSetItem {
                     None => return Err(ParseError::TerminalNotDefined(last.clone())),
                 };
                 if last_index < first_index {
-                    return Err(ParseError::InvalidTerminalRange(
-                        (
-                            first.clone(),
-                            *first_index,
-                            grammar.terminals[*first_index].body.clone(),
-                        ),
-                        (
-                            last.clone(),
-                            *last_index,
-                            grammar.terminals[*last_index].body.clone(),
-                        ),
-                    ));
+                    return Err(ParseError::InvalidTerminalRange {
+                        location: self.location(),
+                        start: (first.clone(), *first_index),
+                        end: (last.clone(), *last_index),
+                    });
                 }
                 Ok((*first_index..=*last_index).collect())
             }
@@ -89,10 +94,7 @@ impl TerminalSetItem {
                     .expect("failed on syn::parse2");
                 let last_ch = grammar.get_char_value(&last)?;
                 if first_ch > last_ch {
-                    return Err(ParseError::InvalidLiteralRange(
-                        first_l.clone(),
-                        last_l.clone(),
-                    ));
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
 
                 let set: BTreeSet<usize> = grammar
@@ -122,10 +124,7 @@ impl TerminalSetItem {
                     .expect("failed on syn::parse2");
                 let last_ch = grammar.get_char_value(&last)?;
                 if first_ch > last_ch {
-                    return Err(ParseError::InvalidLiteralRange(
-                        first_l.clone(),
-                        last_l.clone(),
-                    ));
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
                 grammar.range_resolver.insert(first_ch, last_ch);
                 Ok(())

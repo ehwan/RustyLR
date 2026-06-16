@@ -550,12 +550,12 @@ impl Builder {
                     }
 
                     ParseError::MultipleReduceDefinition { terminal, old, new } => {
-                        let old_range = old.0.byte_range();
+                        let old_range = old.0.to_range();
                         let old_string = match old.1 {
                             rusty_lr_core::rule::ReduceType::Left => "%left",
                             rusty_lr_core::rule::ReduceType::Right => "%right",
                         };
-                        let new_range = new.0.byte_range();
+                        let new_range = new.0.to_range();
                         let new_string = match new.1 {
                             rusty_lr_core::rule::ReduceType::Left => "%left",
                             rusty_lr_core::rule::ReduceType::Right => "%right",
@@ -574,45 +574,32 @@ impl Builder {
                             ])
                     }
 
-                    ParseError::TermNonTermConflict {
-                        name,
-                        terminal,
-                        non_terminal,
+                    ParseError::TermNonTermConflict { term, nonterm } => Diagnostic::error()
+                        .with_message("Ambiguous token name")
+                        .with_labels(vec![
+                            Label::primary(file_id, term.to_range())
+                                .with_message("Terminal definition here"),
+                            Label::primary(file_id, nonterm.to_range())
+                                .with_message("Non-terminal definition here"),
+                        ])
+                        .with_notes(vec![
+                            "Terminal and non-terminal name must be unique".to_string()
+                        ]),
+
+                    ParseError::InvalidTerminalRange {
+                        location,
+                        start,
+                        end,
                     } => {
-                        let range = name.span().byte_range();
-
-                        Diagnostic::error()
-                            .with_message("Ambiguous token name")
-                            .with_labels(vec![
-                                Label::primary(file_id, range).with_message(
-                                    "This name is used for both terminal and non-terminal",
-                                ),
-                                Label::secondary(file_id, terminal.span().byte_range())
-                                    .with_message("Terminal definition here"),
-                                Label::secondary(file_id, non_terminal.span().byte_range())
-                                    .with_message("Non-terminal definition here"),
-                            ])
-                            .with_notes(vec![
-                                "Terminal and non-terminal name must be unique".to_string()
-                            ])
-                    }
-
-                    ParseError::InvalidTerminalRange(
-                        (first, first_index, first_stream),
-                        (last, last_index, last_stream),
-                    ) => {
-                        let range1 = first.span().byte_range();
-                        let range2 = last.span().byte_range();
-                        let range = range1.start..range2.end;
-                        let range1 = utils::tokenstream_range(first_stream);
-                        let range2 = utils::tokenstream_range(last_stream);
+                        let range1 = start.0.span().byte_range();
+                        let range2 = end.0.span().byte_range();
 
                         Diagnostic::error()
                         .with_message("Invalid terminal range")
                         .with_labels(vec![
-                            Label::primary(file_id, range).with_message("Invalid range here"),
-                            Label::secondary(file_id, range1).with_message(format!("First terminal symbol (index {})", first_index)),
-                            Label::secondary(file_id, range2).with_message(format!("Last terminal symbol (index {})", last_index)),
+                            Label::primary(file_id, location.to_range()).with_message("Invalid range here"),
+                            Label::secondary(file_id, range1).with_message(format!("First terminal symbol (index {})", start.1)),
+                            Label::secondary(file_id, range2).with_message(format!("Last terminal symbol (index {})", end.1)),
                         ]).with_notes(vec![
                             "First terminal symbol has to be less than or equal to the last terminal symbol".to_string()
                         ])
@@ -659,8 +646,8 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This name is reserved")])
                     }
-                    ParseError::UnsupportedLiteralType(literal) => {
-                        let range = literal.into_iter().next().unwrap().span().byte_range();
+                    ParseError::UnsupportedLiteralType(loc) => {
+                        let range = loc.to_range();
 
                         Diagnostic::error()
                             .with_message("Unsupported literal type")
@@ -673,10 +660,8 @@ impl Builder {
                                     .to_string(),
                             ])
                     }
-                    ParseError::InvalidLiteralRange(first, last) => {
-                        let first_range = first.span().byte_range();
-                        let last_range = last.span().byte_range();
-                        let range = first_range.start..last_range.end;
+                    ParseError::InvalidLiteralRange(loc) => {
+                        let range = loc.to_range();
 
                         Diagnostic::error()
                             .with_message("Invalid literal range")
@@ -694,15 +679,21 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("use the literal value directly")])
                     }
-                    ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
+                    ParseError::MultiplePrecedenceOrderDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = loc.to_range();
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
                         Diagnostic::error()
                             .with_message("Multiple operator precedence defined")
-                            .with_labels(vec![
-                                Label::primary(file_id, cur.location().to_range())
-                                    .with_message("defined here"),
-                                Label::secondary(file_id, old.to_range())
-                                    .with_message("first defined here"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["%prec name must be unique".to_string()])
                     }
                     ParseError::PrecedenceNotDefined(ident) => {
@@ -731,23 +722,22 @@ impl Builder {
                                     .to_string(),
                             ])
                     }
-                    ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
+                    ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule } => {
                         // `name` must not be generated rule,
                         // since it is programmically generated, it must have a proper reduce action
-                        let span = span.to_range();
                         Diagnostic::error()
                             .with_message("Reduce action not defined")
                             .with_labels(vec![
-                                Label::secondary(file_id, name.span().byte_range())
-                                    .with_message("This rule has a type definition"),
-                                Label::primary(file_id, span)
+                                Label::secondary(file_id, nonterm.to_range())
+                                    .with_message("This non-terminal has a type definition"),
+                                Label::primary(file_id, rule.to_range())
                                     .with_message("This rule line has no reduce action"),
                             ])
                             .with_notes(vec!["".to_string()])
                     }
 
-                    ParseError::OnlyTerminalSet(span_begin, span_end) => {
-                        let range = span_begin.to_range().start..span_end.to_range().end;
+                    ParseError::OnlyTerminalSet(loc) => {
+                        let range = loc.to_range();
                         Diagnostic::error()
                             .with_message("Only terminal or terminal set is allowed")
                             .with_labels(vec![Label::primary(file_id, range)
@@ -770,12 +760,15 @@ impl Builder {
 
                     _ => {
                         let message = e.short_message();
-                        let span = e.span().byte_range();
+                        let mut labels = Vec::new();
+                        for loc in e.locations() {
+                            let range = loc.to_range();
+                            labels
+                                .push(Label::primary(file_id, range).with_message("occured here"));
+                        }
                         Diagnostic::error()
                             .with_message(message)
-                            .with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here")
-                            ])
+                            .with_labels(labels)
                     }
                 };
 
