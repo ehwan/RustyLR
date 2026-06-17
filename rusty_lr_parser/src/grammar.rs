@@ -140,10 +140,11 @@ pub struct Grammar {
     /// the filter function for the parser feed();
     /// every terminal will be filtered by this function on classification.
     /// the actual code will be:
-    /// ```rust
+    /// ```text
     /// let terminal_class: usize = match filter( terminal ) {
     ///     ...
     /// };
+    /// ```
     pub filter: Option<TokenStream>,
 
     /// type for location
@@ -2054,5 +2055,133 @@ impl Grammar {
         self.states = new_states;
 
         collector
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quote::quote;
+    use crate::parser::args::PatternArgs;
+
+    #[test]
+    fn test_parse_simple_grammar() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : 'a';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+
+        assert!(grammar_args.error_recovered.is_empty());
+        
+        // Check token type
+        assert_eq!(grammar_args.token_typename.len(), 1);
+        let (_, typename) = &grammar_args.token_typename[0];
+        assert_eq!(typename.to_string(), "char");
+
+        // Check start rule
+        assert_eq!(grammar_args.start_rule_name.len(), 1);
+        assert_eq!(grammar_args.start_rule_name[0].value(), "Expr");
+
+        // Check rules
+        assert_eq!(grammar_args.rules.len(), 1);
+        let rule = &grammar_args.rules[0];
+        assert_eq!(rule.name.value(), "Expr");
+        assert_eq!(rule.rule_lines.len(), 1);
+        
+        let line = &rule.rule_lines[0];
+        assert_eq!(line.tokens.len(), 1);
+        let (name, pattern) = &line.tokens[0];
+        assert!(name.is_none());
+        
+        if let PatternArgs::Char(c) = pattern {
+            assert_eq!(*c.value(), 'a');
+        } else {
+            panic!("Expected PatternArgs::Char");
+        }
+    }
+
+    #[test]
+    fn test_parse_complex_grammar_directives_userdata() {
+        let input = quote! {
+            %tokentype u8;
+            %start Expr;
+            %userdata UserData;
+            %error MyError;
+            Expr : b'a';
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed userdata");
+        assert!(grammar_args.error_recovered.is_empty());
+    }
+
+    #[test]
+    fn test_parse_complex_grammar_directives_prefix() {
+        let input = quote! {
+            %tokentype u8;
+            %start Expr;
+            %moduleprefix ::my_prefix;
+            Expr : b'a';
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed prefix");
+        assert!(grammar_args.error_recovered.is_empty());
+    }
+
+    #[test]
+    fn test_parse_complex_grammar_directives_prec() {
+        let input = quote! {
+            %tokentype u8;
+            %start Expr;
+            %left b'+' b'-';
+            Expr : b'a';
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed prec");
+        assert!(grammar_args.error_recovered.is_empty());
+    }
+
+    #[test]
+    fn test_parse_complex_grammar_directives_glr() {
+        let input = quote! {
+            %tokentype u8;
+            %start Expr;
+            %glr;
+            %dense;
+            Expr : b'a';
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed glr");
+        assert!(grammar_args.error_recovered.is_empty());
+        assert!(grammar_args.glr);
+        assert!(grammar_args.dense);
+    }
+
+    #[test]
+    fn test_parse_complex_grammar_rules() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : Term
+                 | Expr '+' Term
+                 ;
+            Term : 'a'*
+                 | dollar_ident=ident
+                 ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse complex grammar rules");
+        assert!(grammar_args.error_recovered.is_empty());
+    }
+
+    #[test]
+    fn test_parse_complex_grammar_sep() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : $sep(Term, ',', +);
+            Term : 'a';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse complex grammar sep");
+        assert!(grammar_args.error_recovered.is_empty());
     }
 }

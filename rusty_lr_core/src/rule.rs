@@ -104,9 +104,11 @@ impl<Term, NonTerm> ProductionRule<Term, NonTerm> {
 
 /// A struct for single shifted named production rule.
 ///
+/// ```text
 /// name -> Token1 Token2 . Token3
 ///
 ///         ^^^^^^^^^^^^^ shifted = 2
+/// ```
 ///
 /// This struct has index of the Rule in Grammar::rules
 /// and it will be used for Eq, Ord, Hash

@@ -185,3 +185,111 @@ impl<T> Located<T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use proc_macro2::Span;
+    use rusty_lr_core::Location as CoreLocation;
+
+    #[test]
+    fn test_location_default() {
+        let loc = Location::default();
+        assert!(matches!(loc, Location::Eof));
+    }
+
+    #[test]
+    fn test_location_merge() {
+        let loc1 = Location::Range(1, 3);
+        let loc2 = Location::Range(2, 5);
+        let merged = loc1.merge(&loc2);
+        if let Location::Range(start, end) = merged {
+            assert_eq!(start, 1);
+            assert_eq!(end, 5);
+        } else {
+            panic!("Expected Location::Range");
+        }
+
+        let loc3 = Location::Range(1, 3);
+        let loc4 = Location::Generated;
+        let merged_gen = loc3.merge(&loc4);
+        assert!(matches!(merged_gen, Location::Generated));
+    }
+
+    #[test]
+    fn test_location_new_empty_stack() {
+        let stack: Vec<Location> = vec![];
+        let loc = Location::new(stack.iter(), 0);
+        assert!(matches!(loc, Location::Eof));
+    }
+
+    #[test]
+    fn test_location_new_zero_len() {
+        let stack = vec![Location::Range(2, 4)];
+        let loc = Location::new(stack.iter(), 0);
+        if let Location::Range(start, end) = loc {
+            assert_eq!(start, 4);
+            assert_eq!(end, 4);
+        } else {
+            panic!("Expected Location::Range");
+        }
+    }
+
+    #[test]
+    fn test_location_new_with_len() {
+        let stack = vec![Location::Range(4, 6), Location::Range(1, 3)];
+        let loc = Location::new(stack.iter(), 2);
+        if let Location::Range(start, end) = loc {
+            assert_eq!(start, 1);
+            assert_eq!(end, 6);
+        } else {
+            panic!("Expected Location::Range");
+        }
+    }
+
+    #[test]
+    fn test_location_new_single_item() {
+        let stack = vec![Location::Range(1, 3)];
+        let loc = Location::new(stack.iter(), 1);
+        if let Location::Range(start, end) = loc {
+            assert_eq!(start, 1);
+            assert_eq!(end, 3);
+        } else {
+            panic!("Expected Location::Range");
+        }
+    }
+
+    #[test]
+    fn test_span_manager() {
+        let mut manager = SpanManager::new();
+        let span1 = Span::call_site();
+        let span2 = Span::call_site();
+
+        let idx1 = manager.add_span(span1);
+        let idx2 = manager.add_span(span2);
+
+        assert_eq!(idx1, 0);
+        assert_eq!(idx2, 1);
+
+        let loc = Location::Range(0, 2);
+        let spans = manager.get_spans_in_location(&loc);
+        assert_eq!(spans.len(), 2);
+
+        let single_span = manager.get_span_in_location(&loc);
+        assert_eq!(manager.spans.first().unwrap().byte_range(), single_span.byte_range());
+
+        let empty_loc = Location::Generated;
+        assert!(manager.get_spans_in_location(&empty_loc).is_empty());
+    }
+
+    #[test]
+    fn test_span_manager_byterange() {
+        let mut manager = SpanManager::new();
+        let span = Span::call_site();
+        manager.add_span(span);
+
+        let loc = Location::Range(0, 1);
+        let byte_range = manager.get_byterange(&loc);
+        assert!(byte_range.is_some());
+    }
+}
