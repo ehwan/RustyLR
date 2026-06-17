@@ -153,8 +153,8 @@ pub enum ENonTerminals {
     P,
     E,
     Op,
-    __Terminal32Plus6,
-    __Terminal32Star7,
+    __LiteralChar0Plus6,
+    __LiteralChar0Star7,
     _DigitPlus9,
     Augmented,
 }
@@ -178,8 +178,8 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::P => "P",
             ENonTerminals::E => "E",
             ENonTerminals::Op => "Op",
-            ENonTerminals::__Terminal32Plus6 => "' '+",
-            ENonTerminals::__Terminal32Star7 => "' '*",
+            ENonTerminals::__LiteralChar0Plus6 => "' '+",
+            ENonTerminals::__LiteralChar0Star7 => "' '*",
             ENonTerminals::_DigitPlus9 => "Digit+",
             ENonTerminals::Augmented => "Augmented",
         }
@@ -191,8 +191,8 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::P => false,
             ENonTerminals::E => false,
             ENonTerminals::Op => false,
-            ENonTerminals::__Terminal32Plus6 => false,
-            ENonTerminals::__Terminal32Star7 => false,
+            ENonTerminals::__LiteralChar0Plus6 => false,
+            ENonTerminals::__LiteralChar0Star7 => false,
             ENonTerminals::_DigitPlus9 => false,
             ENonTerminals::Augmented => false,
         }
@@ -204,10 +204,10 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::P => None,
             ENonTerminals::E => None,
             ENonTerminals::Op => None,
-            ENonTerminals::__Terminal32Plus6 => {
+            ENonTerminals::__LiteralChar0Plus6 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            ENonTerminals::__Terminal32Star7 => {
+            ENonTerminals::__LiteralChar0Star7 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
             ENonTerminals::_DigitPlus9 => {
@@ -505,7 +505,7 @@ impl EDataStack {
     }
     ///' '+ -> ' '+ ' '
     #[inline]
-    fn reduce___Terminal32Plus6_1(
+    fn reduce___LiteralChar0Plus6_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -531,7 +531,7 @@ impl EDataStack {
     }
     ///' '* -> ' '+
     #[inline]
-    fn reduce___Terminal32Star7_0(
+    fn reduce___LiteralChar0Star7_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -552,7 +552,7 @@ impl EDataStack {
     }
     ///' '* ->
     #[inline]
-    fn reduce___Terminal32Star7_1(
+    fn reduce___LiteralChar0Star7_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -814,7 +814,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 )
             }
             11usize => {
-                Self::reduce___Terminal32Plus6_1(
+                Self::reduce___LiteralChar0Plus6_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -825,7 +825,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 )
             }
             12usize => {
-                Self::reduce___Terminal32Star7_0(
+                Self::reduce___LiteralChar0Star7_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -836,7 +836,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 )
             }
             13usize => {
-                Self::reduce___Terminal32Star7_1(
+                Self::reduce___LiteralChar0Star7_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -918,24 +918,24 @@ impl EParser {
             None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Digit, rule
             : vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass6),], precedence :
             None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Number,
-            rule : vec![::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Star7),
+            rule : vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),
             ::rusty_lr::Token::NonTerm(ENonTerminals::_DigitPlus9),
-            ::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Star7),], precedence :
-            None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::P, rule :
+            ::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),], precedence
+            : None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::P, rule :
             vec![::rusty_lr::Token::NonTerm(ENonTerminals::Number),], precedence : None,
             }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::P, rule :
-            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Star7),
+            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),
             ::rusty_lr::Token::Term(ETerminalClasses::TermClass2),
             ::rusty_lr::Token::NonTerm(ENonTerminals::E),
             ::rusty_lr::Token::Term(ETerminalClasses::TermClass3),
-            ::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Star7),], precedence :
-            None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::E, rule :
+            ::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),], precedence
+            : None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::E, rule :
             vec![::rusty_lr::Token::NonTerm(ENonTerminals::E),
             ::rusty_lr::Token::NonTerm(ENonTerminals::Op),
             ::rusty_lr::Token::NonTerm(ENonTerminals::E),], precedence :
             Some(::rusty_lr::rule::Precedence::Dynamic(1usize)), },
             ::rusty_lr::rule::ProductionRule { name : ENonTerminals::E, rule :
-            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Star7),
+            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),
             ::rusty_lr::Token::Term(ETerminalClasses::TermClass4),
             ::rusty_lr::Token::NonTerm(ENonTerminals::E),], precedence :
             Some(::rusty_lr::rule::Precedence::Fixed(2usize)), },
@@ -947,17 +947,17 @@ impl EParser {
             ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Op, rule :
             vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass7),], precedence :
             Some(::rusty_lr::rule::Precedence::Fixed(1usize)), },
-            ::rusty_lr::rule::ProductionRule { name : ENonTerminals::__Terminal32Plus6,
+            ::rusty_lr::rule::ProductionRule { name : ENonTerminals::__LiteralChar0Plus6,
             rule : vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass0),],
             precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-            ENonTerminals::__Terminal32Plus6, rule :
-            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Plus6),
+            ENonTerminals::__LiteralChar0Plus6, rule :
+            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Plus6),
             ::rusty_lr::Token::Term(ETerminalClasses::TermClass0),], precedence : None,
             }, ::rusty_lr::rule::ProductionRule { name :
-            ENonTerminals::__Terminal32Star7, rule :
-            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__Terminal32Plus6),],
+            ENonTerminals::__LiteralChar0Star7, rule :
+            vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Plus6),],
             precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-            ENonTerminals::__Terminal32Star7, rule : vec![], precedence : None, },
+            ENonTerminals::__LiteralChar0Star7, rule : vec![], precedence : None, },
             ::rusty_lr::rule::ProductionRule { name : ENonTerminals::_DigitPlus9, rule :
             vec![::rusty_lr::Token::NonTerm(ENonTerminals::Digit),], precedence : None,
             }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::_DigitPlus9, rule
@@ -1034,9 +1034,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(1, true)), (ENonTerminals::P,
             ::rusty_lr::parser::state::ShiftTarget::new(2, true)), (ENonTerminals::E,
             ::rusty_lr::parser::state::ShiftTarget::new(2, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term
@@ -1081,9 +1081,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(1, true)), (ENonTerminals::P,
             ::rusty_lr::parser::state::ShiftTarget::new(5, true)), (ENonTerminals::E,
             ::rusty_lr::parser::state::ShiftTarget::new(5, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term
@@ -1150,9 +1150,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(1, true)), (ENonTerminals::P,
             ::rusty_lr::parser::state::ShiftTarget::new(10, true)), (ENonTerminals::E,
             ::rusty_lr::parser::state::ShiftTarget::new(10, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term
@@ -1179,9 +1179,9 @@ impl EParser {
             ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
             vec![(ETerminalClasses::TermClass0,
             ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-            shift_goto_map_nonterm : vec![(ENonTerminals::__Terminal32Plus6,
+            shift_goto_map_nonterm : vec![(ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(12, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term
@@ -1207,9 +1207,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(1, true)), (ENonTerminals::P,
             ::rusty_lr::parser::state::ShiftTarget::new(14, true)), (ENonTerminals::E,
             ::rusty_lr::parser::state::ShiftTarget::new(14, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term
@@ -1257,9 +1257,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(1, true)), (ENonTerminals::P,
             ::rusty_lr::parser::state::ShiftTarget::new(17, true)), (ENonTerminals::E,
             ::rusty_lr::parser::state::ShiftTarget::new(17, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term
@@ -1306,9 +1306,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(21, true)),],
             shift_goto_map_nonterm : vec![(ENonTerminals::Digit,
             ::rusty_lr::parser::state::ShiftTarget::new(21, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(22, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET1.iter().map(| term
@@ -1343,9 +1343,9 @@ impl EParser {
             ::rusty_lr::parser::state::ShiftTarget::new(1, true)), (ENonTerminals::P,
             ::rusty_lr::parser::state::ShiftTarget::new(24, true)), (ENonTerminals::E,
             ::rusty_lr::parser::state::ShiftTarget::new(24, true)),
-            (ENonTerminals::__Terminal32Plus6,
+            (ENonTerminals::__LiteralChar0Plus6,
             ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-            (ENonTerminals::__Terminal32Star7,
+            (ENonTerminals::__LiteralChar0Star7,
             ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map : { let
             mut __reduce_map = std::collections::BTreeMap::new(); { static __REDUCE_RULES
             : [u8; 1usize] = [13]; __reduce_map.extend(__RUSTYLR_TSET0.iter().map(| term
