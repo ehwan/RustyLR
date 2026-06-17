@@ -7,8 +7,7 @@ pub struct ParseError<Term, Location, ReduceActionError> {
     /// The terminal symbol that caused the error.
     pub term: crate::TerminalSymbol<Term>,
     /// Location of the terminal symbol.
-    /// location will be `None` if the terminal was eof.
-    pub location: Option<Location>,
+    pub location: Location,
     /// Error from reduce action (from every diverged paths)
     pub reduce_action_errors: Vec<ReduceActionError>,
     /// Rule indices when shift/reduce conflict occur with no shift/reduce precedence defined.
@@ -20,8 +19,7 @@ pub struct ParseError<Term, Location, ReduceActionError> {
 }
 
 impl<Term, Location, ReduceActionError> ParseError<Term, Location, ReduceActionError> {
-    /// location will be `None` if the terminal was eof.
-    pub fn location(&self) -> &Option<Location> {
+    pub fn location(&self) -> &Location {
         &self.location
     }
     pub fn term(&self) -> &crate::TerminalSymbol<Term> {

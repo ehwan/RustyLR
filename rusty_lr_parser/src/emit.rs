@@ -1527,9 +1527,18 @@ impl Grammar {
                     .unwrap()
                     .clone();
 
+                let discard_empty_tag = if unique_tag {
+                    TokenStream::new()
+                } else {
+                    quote! {
+                        self.#tag_stack_name.pop();
+                    }
+                };
+
                 (
                     ruletype,
                     quote! {
+                        #discard_empty_tag
                         #tag_check_stream
                         self.#stack_name.pop()
                     },
@@ -1661,7 +1670,7 @@ impl Grammar {
                 for &tag in &self.#tag_stack_name[at..] {
                     __counts[ tag as usize ] += 1;
                 }
-                self.#tag_stack_name.truncate( self.#tag_stack_name.len() - at );
+                self.#tag_stack_name.truncate( at );
             }
         };
 

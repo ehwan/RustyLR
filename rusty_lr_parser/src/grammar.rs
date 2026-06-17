@@ -191,7 +191,7 @@ impl Grammar {
                 let message = err.to_string();
                 return Err((
                     ParseArgError::MacroLineParse {
-                        location: err.location().unwrap(),
+                        location: err.location().clone(),
                         message,
                     },
                     grammar_args.span_manager,
@@ -2183,5 +2183,27 @@ mod tests {
 
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse complex grammar sep");
         assert!(grammar_args.error_recovered.is_empty());
+    }
+
+    #[test]
+    fn test_parse_grammar_error_recovery() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %error MyError;
+            %left; // Missing precedence arguments
+            Expr : 'a';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Should recover and return grammar args");
+        
+        assert!(!grammar_args.error_recovered.is_empty());
+        
+        let err = &grammar_args.error_recovered[0];
+        assert!(err.message.contains("Expected <ident>") || err.message.contains("precedence"));
+        
+        assert_eq!(grammar_args.start_rule_name[0].value(), "Expr");
+        assert_eq!(grammar_args.rules.len(), 1);
+        assert_eq!(grammar_args.rules[0].name.value(), "Expr");
     }
 }

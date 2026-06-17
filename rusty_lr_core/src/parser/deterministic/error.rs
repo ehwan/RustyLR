@@ -6,13 +6,13 @@ use crate::TerminalSymbol;
 #[derive(Clone, Debug)]
 pub struct NoActionError<Term, Location> {
     pub term: TerminalSymbol<Term>,
-    pub location: Option<Location>,
+    pub location: Location,
     pub state: usize,
 }
 #[derive(Clone, Debug)]
 pub struct ReduceActionError<Term, Location, Source> {
     pub term: TerminalSymbol<Term>,
-    pub location: Option<Location>,
+    pub location: Location,
     pub state: usize,
     pub source: Source,
 }
@@ -20,7 +20,7 @@ pub struct ReduceActionError<Term, Location, Source> {
 #[derive(Clone, Debug)]
 pub struct NoPrecedenceError<Term, Location> {
     pub term: TerminalSymbol<Term>,
-    pub location: Option<Location>,
+    pub location: Location,
     pub state: usize,
     pub rule: usize,
 }
@@ -29,22 +29,18 @@ pub struct NoPrecedenceError<Term, Location> {
 #[derive(Clone, Debug)]
 pub enum ParseError<Term, Location, ReduceAction> {
     /// No action defined for the given terminal in the parser table.
-    /// location will be `None` if the terminal was eof.
     NoAction(NoActionError<Term, Location>),
 
     /// Error from reduce action.
-    /// location will be `None` if the terminal was eof.
     ReduceAction(ReduceActionError<Term, Location, ReduceAction>),
 
     /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
     /// This is same as when setting %nonassoc in Bison.
-    /// location will be `None` if the terminal was eof.
     NoPrecedence(NoPrecedenceError<Term, Location>),
 }
 
 impl<Term, Location, ReduceAction> ParseError<Term, Location, ReduceAction> {
-    /// location will be `None` if the terminal was eof.
-    pub fn location(&self) -> &Option<Location> {
+    pub fn location(&self) -> &Location {
         match self {
             ParseError::NoAction(err) => &err.location,
             ParseError::ReduceAction(err) => &err.location,
