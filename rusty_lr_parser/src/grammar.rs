@@ -204,7 +204,7 @@ impl Grammar {
                 let message = err.to_string();
                 return Err((
                     ParseArgError::MacroLineParse {
-                        location: Location::Eof,
+                        location: *err.location(),
                         message,
                     },
                     grammar_args.span_manager,
@@ -2061,8 +2061,8 @@ impl Grammar {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quote::quote;
     use crate::parser::args::PatternArgs;
+    use quote::quote;
 
     #[test]
     fn test_parse_simple_grammar() {
@@ -2075,7 +2075,7 @@ mod tests {
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
 
         assert!(grammar_args.error_recovered.is_empty());
-        
+
         // Check token type
         assert_eq!(grammar_args.token_typename.len(), 1);
         let (_, typename) = &grammar_args.token_typename[0];
@@ -2090,12 +2090,12 @@ mod tests {
         let rule = &grammar_args.rules[0];
         assert_eq!(rule.name.value(), "Expr");
         assert_eq!(rule.rule_lines.len(), 1);
-        
+
         let line = &rule.rule_lines[0];
         assert_eq!(line.tokens.len(), 1);
         let (name, pattern) = &line.tokens[0];
         assert!(name.is_none());
-        
+
         if let PatternArgs::Char(c) = pattern {
             assert_eq!(*c.value(), 'a');
         } else {
@@ -2168,7 +2168,8 @@ mod tests {
                  ;
         };
 
-        let grammar_args = Grammar::parse_args(input).expect("Failed to parse complex grammar rules");
+        let grammar_args =
+            Grammar::parse_args(input).expect("Failed to parse complex grammar rules");
         assert!(grammar_args.error_recovered.is_empty());
     }
 
@@ -2195,13 +2196,14 @@ mod tests {
             Expr : 'a';
         };
 
-        let grammar_args = Grammar::parse_args(input).expect("Should recover and return grammar args");
-        
+        let grammar_args =
+            Grammar::parse_args(input).expect("Should recover and return grammar args");
+
         assert!(!grammar_args.error_recovered.is_empty());
-        
+
         let err = &grammar_args.error_recovered[0];
         assert!(err.message.contains("Expected <ident>") || err.message.contains("precedence"));
-        
+
         assert_eq!(grammar_args.start_rule_name[0].value(), "Expr");
         assert_eq!(grammar_args.rules.len(), 1);
         assert_eq!(grammar_args.rules[0].name.value(), "Expr");

@@ -28,7 +28,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
     if !grammar_args.error_recovered.is_empty() {
         let mut output = proc_macro2::TokenStream::new();
         for error in &grammar_args.error_recovered {
-            for &span in span_manager.get_spans_in_location(&error.location) {
+            for span in span_manager.get_spans_in_location(&error.location) {
                 let message = format!("{}\n >>> refer to: {}", error.message, error.link,);
                 output.extend(quote::quote_spanned! {
                     span=>

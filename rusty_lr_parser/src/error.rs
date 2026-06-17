@@ -123,7 +123,7 @@ impl ArgError {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
-            for &span in span_manager.get_spans_in_location(&loc) {
+            for span in span_manager.get_spans_in_location(&loc) {
                 output.extend(quote_spanned! {
                     span=>
                     compile_error!(#message);
@@ -145,7 +145,7 @@ impl ArgError {
             | ArgError::MultipleDPrecDefinition(locs) => locs.clone(),
             ArgError::MultipleNameDefinition(_, locs) => locs.clone(),
             ArgError::ReservedName(names) => names.iter().map(|name| name.location()).collect(),
-            _ => vec![Location::Eof],
+            _ => vec![Location::default()],
         }
     }
 
@@ -180,7 +180,7 @@ impl ParseArgError {
         let mut output = TokenStream::new();
         let message = self.short_message();
         let location = self.location();
-        for &span in span_manager.get_spans_in_location(&location) {
+        for span in span_manager.get_spans_in_location(&location) {
             output.extend(
                 quote_spanned! {
                     span=>
@@ -211,7 +211,7 @@ impl ParseError {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
-            for &span in span_manager.get_spans_in_location(&loc) {
+            for span in span_manager.get_spans_in_location(&loc) {
                 output.extend(quote_spanned! {
                     span=>
                     compile_error!(#message);

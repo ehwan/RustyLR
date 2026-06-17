@@ -23,11 +23,11 @@ impl SpanManager {
         i
     }
 
-    pub fn get_spans_in_location(&self, location: &Location) -> &'_ [Span] {
+    pub fn get_spans_in_location(&self, location: &Location) -> Vec<Span> {
         match location {
-            &Location::Range(start, end) => &self.spans[start..end],
-            Location::Generated => &[], // TODO: handle Generated case
-            Location::Eof => &[],       // TODO: handle Eof case
+            &Location::Range(start, end) => self.spans[start..end].to_vec(),
+            Location::Generated => vec![], // TODO: handle Generated case
+            Location::CallSite => vec![Span::call_site()], // TODO: handle CallSite case
         }
     }
     pub fn get_span_in_location(&self, location: &Location) -> Span {
@@ -55,8 +55,11 @@ impl SpanManager {
                 let end_span = self.spans.get(end - 1)?;
                 Some((start_span.byte_range().start)..(end_span.byte_range().end))
             }
+            Location::CallSite => {
+                let span = Span::call_site();
+                Some(span.byte_range().start..span.byte_range().end)
+            }
             Location::Generated => None, // TODO: handle Generated case
-            Location::Eof => None,       // TODO: handle Eof case
         }
     }
 }
@@ -69,14 +72,14 @@ pub enum Location {
     /// zero-length spans are represented with equal values `(pos, pos)`.
     Range(usize, usize),
 
+    CallSite,
+
     /// Generated
     Generated,
-
-    Eof,
 }
 impl Default for Location {
     fn default() -> Self {
-        Location::Eof
+        Location::CallSite
     }
 }
 impl Location {
@@ -95,8 +98,7 @@ impl Location {
     fn to_range(&self) -> std::ops::Range<usize> {
         match self {
             Location::Range(start, end) => *start..*end,
-            Location::Generated => 0..0,
-            Location::Eof => 0..0,
+            _ => 0..0, // this should not happen, but we return a dummy range for simplicity
         }
     }
 }
@@ -207,7 +209,7 @@ mod tests {
     #[test]
     fn test_location_default() {
         let loc = Location::default();
-        assert!(matches!(loc, Location::Eof));
+        assert!(matches!(loc, Location::CallSite));
     }
 
     #[test]
@@ -232,7 +234,7 @@ mod tests {
     fn test_location_new_empty_stack() {
         let stack: Vec<Location> = vec![];
         let loc = Location::new(stack.iter(), 0);
-        assert!(matches!(loc, Location::Eof));
+        assert!(matches!(loc, Location::CallSite));
     }
 
     #[test]
