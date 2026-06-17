@@ -13,32 +13,35 @@ use quote::quote;
 pub fn lr1(input: TokenStream) -> TokenStream {
     let input = input.into();
     use rusty_lr_parser::grammar::Grammar;
-    let mut grammar_args = match Grammar::parse_args(input) {
+    let grammar_args = match Grammar::parse_args(input) {
         Ok(grammar_args) => grammar_args,
-        Err(e) => return e.to_compile_error().into(),
+        Err((e, span_manager)) => return e.to_compile_error(&span_manager).into(),
     };
-    match Grammar::arg_check_error(&mut grammar_args) {
+
+    let span_manager = grammar_args.span_manager.clone();
+    match Grammar::arg_check_error(&grammar_args) {
         Ok(_) => {}
-        Err(e) => return e.to_compile_error().into(),
-    }
+        Err(e) => return e.to_compile_error(&span_manager).into(),
+    };
 
     // If there are any errors in the grammar arguments, emit compile errors.
     if !grammar_args.error_recovered.is_empty() {
         let mut output = proc_macro2::TokenStream::new();
         for error in &grammar_args.error_recovered {
-            let span = error.span.span();
-            let message = format!("{}\n >>> refer to: {}", error.message, error.link,);
-            output.extend(quote::quote_spanned! {
-                span=>
-                compile_error!(#message);
-            });
+            for span in span_manager.get_spans_in_location(&error.location) {
+                let message = format!("{}\n >>> refer to: {}", error.message, error.link,);
+                output.extend(quote::quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                });
+            }
         }
         return output.into();
     }
 
     let mut grammar = match Grammar::from_grammar_args(grammar_args) {
         Ok(grammar) => grammar,
-        Err(e) => return e.to_compile_error().into(),
+        Err(e) => return e.to_compile_error(&span_manager).into(),
     };
     if grammar.optimize {
         grammar.optimize(15);

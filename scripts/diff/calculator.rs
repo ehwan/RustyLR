@@ -490,6 +490,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
     type StartType = i32;
     type Location = ::rusty_lr::DefaultLocation;
     fn pop_start(&mut self) -> Option<Self::StartType> {
+        self.__tags.pop();
         let tag = self.__tags.pop();
         debug_assert!(tag == Some(ETags::__stack1));
         self.__stack1.pop()
@@ -543,7 +544,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
         for &tag in &self.__tags[at..] {
             __counts[tag as usize] += 1;
         }
-        self.__tags.truncate(self.__tags.len() - at);
+        self.__tags.truncate(at);
         self.__terminals.truncate(self.__terminals.len() - (__counts[0usize] as usize));
         self.__stack1.truncate(self.__stack1.len() - (__counts[1usize] as usize));
     }

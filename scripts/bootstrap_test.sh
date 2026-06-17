@@ -49,6 +49,11 @@ process_and_compare() {
     if [ $? -ne 0 ]; then
         exit 1
     fi
+    cargo test
+    if [ $? -ne 0 ]; then
+        echo "Error: cargo test failed with config '$config'"
+        exit 1
+    fi
 }
 
 echo "RustyLR path: $rustylr_path"

@@ -1,4 +1,5 @@
-use proc_macro2::{Ident, Span};
+use crate::parser::location::Located;
+use crate::parser::location::Location;
 
 /// for syntax <Ident> '=' <Token>
 #[derive(Debug, Clone)]
@@ -7,7 +8,7 @@ pub struct TokenMapped {
     pub token: rusty_lr_core::Token<rusty_lr_core::TerminalSymbol<usize>, usize>,
 
     /// variable name that the token's data will be mapped to
-    pub mapto: Option<Ident>,
+    pub mapto: Option<Located<String>>,
 
     /// When optimizing out single-token production rules like A -> B { ... },
     /// All occurrences of A will be replaced with B, but the reduce action `{ ... }` still needs to be called.
@@ -21,7 +22,6 @@ pub struct TokenMapped {
     /// where r_i is the i'th reduce action in the chain.
     pub reduce_action_chains: Vec<usize>,
 
-    /// span of the token
-    pub begin_span: Span,
-    pub end_span: Span,
+    /// location of the token
+    pub location: Location,
 }

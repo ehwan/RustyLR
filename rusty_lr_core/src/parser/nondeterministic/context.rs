@@ -956,9 +956,119 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
         Data: Clone,
-        Data::Location: Default,
     {
-        self.feed_location(parser, term, userdata, Default::default())
+        use crate::parser::State;
+        use crate::Location;
+
+        self.reduce_errors.clear();
+        self.no_precedences.clear();
+        self.fallback_nodes.clear();
+        self.next_nodes.clear();
+
+        let class = P::TermClass::from_term(&term);
+        let shift_prec = class.precedence();
+
+        let mut current_nodes = std::mem::take(&mut self.current_nodes);
+        for node in current_nodes.drain(..) {
+            let location = Data::Location::new(self.location_iter(node), 0);
+            if let Err((node, _, _)) = self.feed_location_impl(
+                parser,
+                node,
+                TerminalSymbol::Term(term.clone()),
+                class,
+                shift_prec,
+                location,
+                userdata,
+            ) {
+                self.fallback_nodes.push(node);
+            }
+        }
+        self.current_nodes = current_nodes;
+
+        if self.next_nodes.is_empty() {
+            if !P::ERROR_USED {
+                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+
+                let err_location = if let Some(&first_node) = self.fallback_nodes.first() {
+                    Data::Location::new(self.location_iter(first_node), 0)
+                } else {
+                    Data::Location::new(std::iter::empty(), 0)
+                };
+
+                return Err(ParseError {
+                    term: TerminalSymbol::Term(term),
+                    location: err_location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    no_precedences: std::mem::take(&mut self.no_precedences),
+                    states: self.states().collect(),
+                });
+            }
+
+            let error_prec = P::TermClass::ERROR.precedence();
+
+            let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
+            let mut extra_state_stack = Vec::new();
+            let mut extra_precedence_stack = Vec::new();
+            let mut error_location = if let Some(&first_node) = fallback_nodes.first() {
+                Data::Location::new(self.location_iter(first_node), 0)
+            } else {
+                Data::Location::new(std::iter::empty(), 0)
+            };
+            for node in fallback_nodes.drain(..) {
+                error_location = self.panic_mode(
+                    parser,
+                    node,
+                    error_prec,
+                    userdata,
+                    &mut extra_state_stack,
+                    &mut extra_precedence_stack,
+                );
+            }
+            self.fallback_nodes = fallback_nodes;
+
+            if self.next_nodes.is_empty() {
+                if parser.get_states()[0].can_accept_error() == crate::TriState::True {
+                    let node = self.new_node();
+                    if let Err(_) = self.feed_location_impl(
+                        parser,
+                        node,
+                        TerminalSymbol::Error,
+                        P::TermClass::ERROR,
+                        error_prec,
+                        error_location,
+                        userdata,
+                    ) {
+                        return Err(ParseError {
+                            term: TerminalSymbol::Term(term),
+                            location: Data::Location::new(std::iter::empty(), 0),
+                            reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                            no_precedences: std::mem::take(&mut self.no_precedences),
+                            states: self.states().collect(),
+                        });
+                    }
+                }
+            }
+
+            if self.next_nodes.is_empty() {
+                let err_location = if let Some(&first_node) = self.fallback_nodes.first() {
+                    Data::Location::new(self.location_iter(first_node), 0)
+                } else {
+                    Data::Location::new(std::iter::empty(), 0)
+                };
+
+                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+                return Err(ParseError {
+                    term: TerminalSymbol::Term(term),
+                    location: err_location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    no_precedences: std::mem::take(&mut self.no_precedences),
+                    states: self.states().collect(),
+                });
+            }
+        }
+
+        self.current_nodes = std::mem::take(&mut self.next_nodes);
+        Ok(())
     }
 
     fn skip_last_n(&self, mut node: usize, mut count: usize) -> Option<(usize, usize)> {
@@ -984,18 +1094,15 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
         shift_prec: Precedence,
-        location: Option<Data::Location>,
+        location: Data::Location,
         userdata: &mut Data::UserData,
-    ) -> Result<(), (usize, TerminalSymbol<P::Term>, Option<Data::Location>)>
+    ) -> Result<(), (usize, TerminalSymbol<P::Term>, Data::Location)>
     where
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        debug_assert!(
-            (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
-        );
         debug_assert!(self.node(node).is_leaf());
         use crate::parser::state::ReduceRules;
         use crate::parser::State;
@@ -1135,9 +1242,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 let node_ = self.node_mut(node);
                 node_.state_stack.push(shift.state);
                 node_.precedence_stack.push(shift_prec);
-                if let Some(location) = &location {
-                    node_.location_stack.push(location.clone());
-                }
+                node_.location_stack.push(location.clone());
                 #[cfg(feature = "tree")]
                 node_
                     .tree_stack
@@ -1148,17 +1253,15 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                         TerminalSymbol::Term(term) => {
                             node_.data_stack.push_terminal(term);
                         }
-                        TerminalSymbol::Error => {
+                        TerminalSymbol::Error | TerminalSymbol::Eof => {
                             node_.data_stack.push_empty();
                         }
-                        TerminalSymbol::Eof => {} // do not push for eof
                     }
                 } else {
                     match term {
-                        TerminalSymbol::Term(_) | TerminalSymbol::Error => {
+                        TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
                             node_.data_stack.push_empty();
                         }
-                        TerminalSymbol::Eof => {} // do not push for eof
                     }
                 }
 
@@ -1175,9 +1278,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             let node_ = self.node_mut(node);
             node_.state_stack.push(shift.state);
             node_.precedence_stack.push(shift_prec);
-            if let Some(location) = location {
-                node_.location_stack.push(location);
-            }
+            node_.location_stack.push(location);
             #[cfg(feature = "tree")]
             node_
                 .tree_stack
@@ -1188,17 +1289,15 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                     TerminalSymbol::Term(term) => {
                         node_.data_stack.push_terminal(term);
                     }
-                    TerminalSymbol::Error => {
+                    TerminalSymbol::Error | TerminalSymbol::Eof => {
                         node_.data_stack.push_empty();
                     }
-                    TerminalSymbol::Eof => {} // no push for eof
                 }
             } else {
                 match term {
-                    TerminalSymbol::Term(_) | TerminalSymbol::Error => {
+                    TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
                         node_.data_stack.push_empty();
                     }
-                    TerminalSymbol::Eof => {} // no push for eof
                 }
             }
 
@@ -1218,7 +1317,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         userdata: &mut Data::UserData,
         extra_state_stack: &mut Vec<StateIndex>,
         extra_precedence_stack: &mut Vec<Precedence>,
-    ) -> Option<Data::Location>
+    ) -> Data::Location
     where
         Data: Clone,
         P::Term: Clone,
@@ -1233,8 +1332,9 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         let pop_count = loop {
             let node_ = self.node(node);
             if !node_.is_leaf() {
+                let loc = error_location_preserved.unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
                 self.try_remove_node(node);
-                return error_location_preserved;
+                return loc;
             }
 
             let mut pop_count = 0;
@@ -1279,11 +1379,12 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                     Data::Location::new(self.location_iter(node), pop_count)
                 });
 
+                let loc = error_location_preserved.clone().unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
                 if let Some(parent) = self.try_remove_node(node) {
                     node = parent;
                     continue;
                 } else {
-                    return error_location_preserved;
+                    return loc;
                 }
             } else {
                 break pop_count;
@@ -1315,7 +1416,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             TerminalSymbol::Error,
             P::TermClass::ERROR,
             error_prec,
-            Some(error_location),
+            error_location.clone(),
             userdata,
         ) {
             Ok(()) => {}
@@ -1323,7 +1424,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 self.try_remove_node(err_node);
             } // other errors
         }
-        None
+        error_location
     }
 
     /// Feed one terminal with location to parser, and update state stack.
@@ -1359,7 +1460,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 TerminalSymbol::Term(term.clone()),
                 class,
                 shift_prec,
-                Some(location.clone()),
+                location.clone(),
                 userdata,
             ) {
                 // store to fallback nodes in case of all nodes failed to shift
@@ -1379,7 +1480,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
 
                 return Err(ParseError {
                     term: TerminalSymbol::Term(term),
-                    location: Some(location),
+                    location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
@@ -1391,7 +1492,11 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
             let mut extra_state_stack = Vec::new();
             let mut extra_precedence_stack = Vec::new();
-            let mut error_location = None;
+            let mut error_location = if let Some(&first_node) = fallback_nodes.first() {
+                Data::Location::new(self.location_iter(first_node), 0)
+            } else {
+                location.clone()
+            };
             // try enter panic mode and store error nodes to next_nodes
             for node in fallback_nodes.drain(..) {
                 error_location = self.panic_mode(
@@ -1410,10 +1515,6 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                 // for-loop above doesn't check for root state (0).
                 // check for 0 state here
                 if parser.get_states()[0].can_accept_error() == crate::TriState::True {
-                    if error_location.is_none() {
-                        error_location = Some(Data::Location::new(std::iter::empty(), 0));
-                    }
-
                     // all nodes were deleted, so create new
                     let node = self.new_node();
                     if let Err(_) = self.feed_location_impl(
@@ -1427,7 +1528,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                     ) {
                         return Err(ParseError {
                             term: TerminalSymbol::Term(term),
-                            location: Some(location),
+                            location,
                             reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                             no_precedences: std::mem::take(&mut self.no_precedences),
                             states: self.states().collect(),
@@ -1441,7 +1542,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
             if self.next_nodes.is_empty() {
                 Err(ParseError {
                     term: TerminalSymbol::Term(term),
-                    location: Some(location),
+                    location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
@@ -1871,20 +1972,29 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         P::State: State<StateIndex = StateIndex>,
         Data: Clone,
     {
+        use crate::location::Location;
+
         self.reduce_errors.clear();
         self.no_precedences.clear();
         self.fallback_nodes.clear();
         self.next_nodes.clear();
 
+        let eof_location = if let Some(&node) = self.current_nodes.first() {
+            Data::Location::new(self.location_iter(node), 0)
+        } else {
+            Data::Location::new(std::iter::empty(), 0)
+        };
+
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
         for node in current_nodes.drain(..) {
+            let node_eof_location = Data::Location::new(self.location_iter(node), 0);
             if let Err((node, _, _)) = self.feed_location_impl(
                 parser,
                 node,
                 TerminalSymbol::Eof,
                 P::TermClass::EOF,
                 Precedence::none(),
-                None,
+                node_eof_location,
                 userdata,
             ) {
                 self.fallback_nodes.push(node);
@@ -1900,7 +2010,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
             Err(ParseError {
                 term: TerminalSymbol::Eof,
-                location: None,
+                location: eof_location,
                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                 no_precedences: std::mem::take(&mut self.no_precedences),
                 states: self.states().collect(),

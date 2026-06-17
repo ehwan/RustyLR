@@ -176,8 +176,11 @@ impl Builder {
         message_secondary: &str,
     ) {
         let (nonterm, local_rule) = grammar.get_rule_by_id(ruleid).expect("Rule not found");
-        if let Some(origin_span) = nonterm.origin_span() {
-            let origin_range = origin_span.0.byte_range().start..origin_span.1.byte_range().end;
+        if let Some(root_location) = nonterm.root_location() {
+            let origin_range = grammar
+                .span_manager
+                .get_byterange(&root_location)
+                .unwrap_or(0..0);
             let message = format!("{}{} was generated here", prefix_str, nonterm.pretty_name,);
             let mut duplicated_primary = false;
             for label in labels.iter() {
@@ -190,9 +193,15 @@ impl Builder {
                 labels.push(Label::primary(fileid, origin_range).with_message(message));
             }
         } else {
-            let (rule_begin, rule_end) = nonterm.rules[local_rule].span_pair();
-            let rule_range = rule_begin.byte_range().start..rule_end.byte_range().end;
-            let origin_range = nonterm.name.span().byte_range();
+            let rule_location = nonterm.rules[local_rule].location();
+            let rule_range = grammar
+                .span_manager
+                .get_byterange(&rule_location)
+                .unwrap_or(0..0);
+            let origin_range = grammar
+                .span_manager
+                .get_byterange(&nonterm.name.location())
+                .unwrap_or(0..0);
 
             let primary_message = format!("{}{} was defined here", prefix_str, nonterm.pretty_name);
             let mut duplicated_primary = false;
@@ -289,28 +298,29 @@ impl Builder {
 
         let mut grammar_args = match rusty_lr_parser::grammar::Grammar::parse_args(macro_stream) {
             Ok(grammar_args) => grammar_args,
-            Err(e) => {
-                let diag =
-                    match e {
-                        ParseArgError::MacroLineParse { span, message } => {
-                            let range = span.byte_range();
+            Err((e, sm)) => {
+                let diag = match e {
+                    ParseArgError::MacroLineParse { location, message } => Diagnostic::error()
+                        .with_message("Parse Failed")
+                        .with_labels(vec![Label::primary(
+                            file_id,
+                            sm.get_byterange(&location).unwrap_or(0..0),
+                        )
+                        .with_message("Error here")])
+                        .with_notes(vec![message]),
 
-                            Diagnostic::error()
-                                .with_message("Parse Failed")
-                                .with_labels(vec![
-                                    Label::primary(file_id, range).with_message("Error here")
-                                ])
-                                .with_notes(vec![message])
-                        }
-
-                        _ => {
-                            let message = e.short_message();
-                            let span = e.span().byte_range();
-                            Diagnostic::error().with_message(message).with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here"),
-                            ])
-                        }
-                    };
+                    _ => {
+                        let message = e.short_message();
+                        let location = e.location();
+                        Diagnostic::error()
+                            .with_message(message)
+                            .with_labels(vec![Label::primary(
+                                file_id,
+                                sm.get_byterange(&location).unwrap_or(0..0),
+                            )
+                            .with_message("occured here")])
+                    }
+                };
 
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
@@ -321,13 +331,10 @@ impl Builder {
         };
 
         for error in &grammar_args.error_recovered {
-            let range = if let Some((first, last)) = error.span.pair {
-                let first_range = first.byte_range();
-                let last_range = last.byte_range();
-                first_range.start..last_range.end
-            } else {
-                0..1 // default range if span is not defined
-            };
+            let range = grammar_args
+                .span_manager
+                .get_byterange(&error.location)
+                .unwrap_or(0..0);
             let diag = Diagnostic::error()
                 .with_message("Syntax error in grammar")
                 .with_labels(vec![
@@ -344,102 +351,174 @@ impl Builder {
             return Err("Syntax error in grammar".to_string());
         }
 
-        match rusty_lr_parser::grammar::Grammar::arg_check_error(&mut grammar_args) {
+        match rusty_lr_parser::grammar::Grammar::arg_check_error(&grammar_args) {
             Ok(_) => {}
             Err(e) => {
                 let diag = match e {
-                    ArgError::MultipleModulePrefixDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleModulePrefixDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %moduleprefix definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec![
                                 "Only one %moduleprefix definition is allowed".to_string()
                             ])
                     }
-                    ArgError::MultipleUserDataDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
-
+                    ArgError::MultipleUserDataDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
                         Diagnostic::error()
                             .with_message("Multiple %userdata definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(
                                 vec!["Only one %userdata definition is allowed".to_string()],
                             )
                     }
-                    ArgError::MultipleErrorDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleErrorDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %error definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["Only one %error definition is allowed".to_string()])
                     }
-                    ArgError::MultipleTokenTypeDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleTokenTypeDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %tokentype definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec![
                                 "Only one %tokentype definition is allowed".to_string()
                             ])
                     }
-                    ArgError::MultipleEofDefinition(
-                        (span1, tokenstream1),
-                        (span2, tokenstream2),
-                    ) => {
-                        let range1 = utils::span_stream_range(span1, tokenstream1);
-                        let range2 = utils::span_stream_range(span2, tokenstream2);
+                    ArgError::MultipleEofDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %eof definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["Only one %eof definition is allowed".to_string()])
                     }
-                    ArgError::MultipleStartDefinition(ident1, ident2) => {
-                        let range1 = ident1.span().byte_range();
-                        let range2 = ident2.span().byte_range();
+                    ArgError::MultipleStartDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
                         Diagnostic::error()
                             .with_message("Multiple %start definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["Only one %start definition is allowed".to_string()])
+                    }
+                    ArgError::MultiplePrecDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Multiple %prec definition")
+                            .with_labels(labels)
+                            .with_notes(vec!["%prec must be unique".to_string()])
+                    }
+                    ArgError::MultipleDPrecDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Multiple %dprec definition")
+                            .with_labels(labels)
+                            .with_notes(vec!["%dprec must be unique".to_string()])
                     }
 
                     ArgError::StartNotDefined => Diagnostic::error()
@@ -464,25 +543,57 @@ impl Builder {
                             ">>> %tokentype <TokenType>".to_string(),
                         ]),
 
-                    ArgError::MultiplePrecDefinition(span) => Diagnostic::error()
-                        .with_message("multiple %prec definition")
-                        .with_labels(vec![Label::primary(file_id, span.byte_range())
-                            .with_message("This %prec is defined here")])
-                        .with_notes(vec!["%prec must be unique".to_string()]),
+                    ArgError::MultipleNameDefinition(name, locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
 
-                    ArgError::MultipleDPrecDefinition(span) => Diagnostic::error()
-                        .with_message("multiple %dprec definition")
-                        .with_labels(vec![Label::primary(file_id, span.byte_range())
-                            .with_message("This %dprec is defined here")])
-                        .with_notes(vec!["%dprec must be unique".to_string()]),
+                        Diagnostic::error()
+                            .with_message(format!("Multiple name definition: {}", name))
+                            .with_labels(labels)
+                            .with_notes(vec!["Name must be unique".to_string()])
+                    }
+                    ArgError::ReservedName(names) => {
+                        let mut labels = Vec::new();
+                        for name in names.iter() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&name.location())
+                                .unwrap_or(0..0);
+                            let message = "used here";
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Reserved name used")
+                            .with_labels(labels)
+                            .with_notes(vec!["Name is reserved and cannot be used".to_string()])
+                    }
+
                     _ => {
                         let message = e.short_message();
-                        let span = e.span().byte_range();
+                        let mut labels = Vec::new();
+                        for loc in e.locations() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            labels
+                                .push(Label::primary(file_id, range).with_message("occured here"));
+                        }
                         Diagnostic::error()
                             .with_message(message)
-                            .with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here")
-                            ])
+                            .with_labels(labels)
                     }
                 };
 
@@ -492,7 +603,7 @@ impl Builder {
                     .expect("Failed to write to stderr");
                 return Err(diag.message);
             }
-        }
+        };
 
         if let Some(glr) = self.glr {
             grammar_args.glr = glr;
@@ -501,95 +612,60 @@ impl Builder {
             grammar_args.dense = dense;
         }
 
+        let span_manager = grammar_args.span_manager.clone();
+
         // parse lines
         let mut grammar = match rusty_lr_parser::grammar::Grammar::from_grammar_args(grammar_args) {
             Ok(grammar) => grammar,
             Err(e) => {
                 let diag = match e {
-                    ParseError::MultipleRuleDefinition(ident1, ident2) => {
-                        let range1 = ident1.span().byte_range();
-                        let range2 = ident2.span().byte_range();
+                    ParseError::MultipleReduceDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for loc in locs {
+                            let range = span_manager.get_byterange(&loc.location()).unwrap_or(0..0);
+                            let reduce_type = match loc.value() {
+                                rusty_lr_core::rule::ReduceType::Left => "%left",
+                                rusty_lr_core::rule::ReduceType::Right => "%right",
+                            };
+                            labels.push(
+                                Label::primary(file_id, range)
+                                    .with_message(format!("was set as {} here", reduce_type)),
+                            );
+                        }
 
                         Diagnostic::error()
-                            .with_message("Multiple rule definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
-                            .with_notes(vec!["Rule name must be unique".to_string()])
-                    }
-
-                    ParseError::MultipleReduceDefinition { terminal, old, new } => {
-                        let old_range = old.0.byte_range();
-                        let old_string = match old.1 {
-                            rusty_lr_core::rule::ReduceType::Left => "%left",
-                            rusty_lr_core::rule::ReduceType::Right => "%right",
-                        };
-                        let new_range = new.0.byte_range();
-                        let new_string = match new.1 {
-                            rusty_lr_core::rule::ReduceType::Left => "%left",
-                            rusty_lr_core::rule::ReduceType::Right => "%right",
-                        };
-
-                        Diagnostic::error()
-                            .with_message(format!("Multiple reduce definition: {}", terminal))
-                            .with_labels(vec![
-                                Label::primary(file_id, old_range)
-                                    .with_message(format!("was set as {} here", old_string)),
-                                Label::primary(file_id, new_range)
-                                    .with_message(format!("was set as {} here", new_string)),
-                            ])
+                            .with_message(format!("Multiple reduce definition"))
+                            .with_labels(labels)
                             .with_notes(vec![
                                 "Reduce type must be unique, either %left or %right".to_string()
                             ])
                     }
 
-                    ParseError::TermNonTermConflict {
-                        name,
-                        terminal,
-                        non_terminal,
+                    ParseError::InvalidTerminalRange {
+                        location,
+                        start,
+                        end,
                     } => {
-                        let range = name.span().byte_range();
-
-                        Diagnostic::error()
-                            .with_message("Ambiguous token name")
-                            .with_labels(vec![
-                                Label::primary(file_id, range).with_message(
-                                    "This name is used for both terminal and non-terminal",
-                                ),
-                                Label::secondary(file_id, terminal.span().byte_range())
-                                    .with_message("Terminal definition here"),
-                                Label::secondary(file_id, non_terminal.span().byte_range())
-                                    .with_message("Non-terminal definition here"),
-                            ])
-                            .with_notes(vec![
-                                "Terminal and non-terminal name must be unique".to_string()
-                            ])
-                    }
-
-                    ParseError::InvalidTerminalRange(
-                        (first, first_index, first_stream),
-                        (last, last_index, last_stream),
-                    ) => {
-                        let range1 = first.span().byte_range();
-                        let range2 = last.span().byte_range();
-                        let range = range1.start..range2.end;
-                        let range1 = utils::tokenstream_range(first_stream);
-                        let range2 = utils::tokenstream_range(last_stream);
+                        let range1 = span_manager
+                            .get_byterange(&start.0.location())
+                            .unwrap_or(0..0);
+                        let range2 = span_manager
+                            .get_byterange(&end.0.location())
+                            .unwrap_or(0..0);
 
                         Diagnostic::error()
                         .with_message("Invalid terminal range")
                         .with_labels(vec![
-                            Label::primary(file_id, range).with_message("Invalid range here"),
-                            Label::secondary(file_id, range1).with_message(format!("First terminal symbol (index {})", first_index)),
-                            Label::secondary(file_id, range2).with_message(format!("Last terminal symbol (index {})", last_index)),
+                            Label::primary(file_id, span_manager.get_byterange(&location).unwrap_or(0..0)).with_message("Invalid range here"),
+                            Label::secondary(file_id, range1).with_message(format!("First terminal symbol (index {})", start.1)),
+                            Label::secondary(file_id, range2).with_message(format!("Last terminal symbol (index {})", end.1)),
                         ]).with_notes(vec![
                             "First terminal symbol has to be less than or equal to the last terminal symbol".to_string()
                         ])
                     }
 
-                    ParseError::StartNonTerminalNotDefined(ident) => {
-                        let range = ident.span().byte_range();
+                    ParseError::StartNonTerminalNotDefined(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
 
                         Diagnostic::error()
                             .with_message("Start non-terminal not defined")
@@ -598,8 +674,8 @@ impl Builder {
                             .with_notes(vec!["Non-terminal name must be defined".to_string()])
                     }
 
-                    ParseError::TerminalNotDefined(ident) => {
-                        let range = ident.span().byte_range();
+                    ParseError::TerminalNotDefined(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
 
                         Diagnostic::error()
                             .with_message("Terminal symbol not defined")
@@ -608,29 +684,8 @@ impl Builder {
                             .with_notes(vec!["Terminal symbol must be defined".to_string()])
                     }
 
-                    ParseError::MultipleTokenDefinition(ident1, ident2) => {
-                        let range1 = ident1.span().byte_range();
-                        let range2 = ident2.span().byte_range();
-
-                        Diagnostic::error()
-                            .with_message("Multiple %token definition")
-                            .with_labels(vec![
-                                Label::primary(file_id, range1).with_message("First definition"),
-                                Label::primary(file_id, range2).with_message("Other definition"),
-                            ])
-                            .with_notes(vec!["Token name must be unique".to_string()])
-                    }
-
-                    ParseError::ReservedName(ident) => {
-                        let range = ident.span().byte_range();
-
-                        Diagnostic::error()
-                            .with_message(format!("'{ident}' is reserved name"))
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This name is reserved")])
-                    }
-                    ParseError::UnsupportedLiteralType(literal) => {
-                        let range = literal.into_iter().next().unwrap().span().byte_range();
+                    ParseError::UnsupportedLiteralType(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
 
                         Diagnostic::error()
                             .with_message("Unsupported literal type")
@@ -643,10 +698,8 @@ impl Builder {
                                     .to_string(),
                             ])
                     }
-                    ParseError::InvalidLiteralRange(first, last) => {
-                        let first_range = first.span().byte_range();
-                        let last_range = last.span().byte_range();
-                        let range = first_range.start..last_range.end;
+                    ParseError::InvalidLiteralRange(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
 
                         Diagnostic::error()
                             .with_message("Invalid literal range")
@@ -657,26 +710,38 @@ impl Builder {
                                 "First terminal symbol has to be less than or equal to the last terminal symbol".to_string()
                             ])
                     }
-                    ParseError::TokenInLiteralMode(span) => {
-                        let range = span.byte_range();
+                    ParseError::TokenInLiteralMode(locs) => {
+                        let mut labels = Vec::new();
+                        for loc in locs.iter() {
+                            let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
+                            let message = "%token cannot be used in literal mode";
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
                         Diagnostic::error()
                             .with_message("%token with %tokentype `char` or `u8` is not supported")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("use the literal value directly")])
+                            .with_labels(labels)
                     }
-                    ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
+                    ParseError::MultiplePrecedenceOrderDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
                         Diagnostic::error()
                             .with_message("Multiple operator precedence defined")
-                            .with_labels(vec![
-                                Label::primary(file_id, cur.span().byte_range())
-                                    .with_message("defined here"),
-                                Label::secondary(file_id, old.byte_range())
-                                    .with_message("first defined here"),
-                            ])
+                            .with_labels(labels)
                             .with_notes(vec!["%prec name must be unique".to_string()])
                     }
                     ParseError::PrecedenceNotDefined(ident) => {
-                        let range = ident.span().byte_range();
+                        let range = span_manager
+                            .get_byterange(&ident.location())
+                            .unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Precedence is not defined for this token")
                             .with_labels(vec![
@@ -688,8 +753,8 @@ impl Builder {
                                 "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string()
                             ])
                     }
-                    ParseError::NonTerminalPrecedenceNotDefined(span, _) => {
-                        let range = span.byte_range();
+                    ParseError::NonTerminalPrecedenceNotDefined(loc) => {
+                        let range = span_manager.get_byterange(&loc.location()).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Precedence is not defined for this non-terminal")
                             .with_labels(vec![Label::primary(file_id, range)
@@ -701,23 +766,28 @@ impl Builder {
                                     .to_string(),
                             ])
                     }
-                    ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
+                    ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule } => {
                         // `name` must not be generated rule,
                         // since it is programmically generated, it must have a proper reduce action
-                        let span = span.0.byte_range().start..span.1.byte_range().end;
                         Diagnostic::error()
                             .with_message("Reduce action not defined")
                             .with_labels(vec![
-                                Label::secondary(file_id, name.span().byte_range())
-                                    .with_message("This rule has a type definition"),
-                                Label::primary(file_id, span)
-                                    .with_message("This rule line has no reduce action"),
+                                Label::secondary(
+                                    file_id,
+                                    span_manager.get_byterange(&nonterm).unwrap_or(0..0),
+                                )
+                                .with_message("This non-terminal has a type definition"),
+                                Label::primary(
+                                    file_id,
+                                    span_manager.get_byterange(&rule).unwrap_or(0..0),
+                                )
+                                .with_message("This rule line has no reduce action"),
                             ])
                             .with_notes(vec!["".to_string()])
                     }
 
-                    ParseError::OnlyTerminalSet(span_begin, span_end) => {
-                        let range = span_begin.byte_range().start..span_end.byte_range().end;
+                    ParseError::OnlyTerminalSet(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Only terminal or terminal set is allowed")
                             .with_labels(vec![Label::primary(file_id, range)
@@ -725,14 +795,14 @@ impl Builder {
                             .with_notes(vec!["".to_string()])
                     }
                     ParseError::NonTerminalNotDefined(ident) => {
-                        let range = ident.span().byte_range();
+                        let range = span_manager.get_byterange(&ident).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Non-terminal not defined")
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("This non-terminal is not defined")])
                     }
-                    ParseError::OnlyUsizeLiteral(span) => {
-                        let range = span.byte_range();
+                    ParseError::OnlyUsizeLiteral(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Only usize literal is allowed for %dprec")
                             .with_labels(vec![Label::primary(file_id, range)])
@@ -740,12 +810,15 @@ impl Builder {
 
                     _ => {
                         let message = e.short_message();
-                        let span = e.span().byte_range();
+                        let mut labels = Vec::new();
+                        for loc in e.locations() {
+                            let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
+                            labels
+                                .push(Label::primary(file_id, range).with_message("occured here"));
+                        }
                         Diagnostic::error()
                             .with_message(message)
-                            .with_labels(vec![
-                                Label::primary(file_id, span).with_message("occured here")
-                            ])
+                            .with_labels(labels)
                     }
                 };
 
@@ -804,8 +877,8 @@ impl Builder {
                     match o {
                         OptimizeRemove::TerminalClassRuleMerge(rule) => {
                             let message = "Production Rule deleted";
-                            let (b, e) = rule.span_pair();
-                            let range = b.byte_range().start..e.byte_range().end;
+                            let rule_location = rule.location();
+                            let range = span_manager.get_byterange(&rule_location).unwrap_or(0..0);
                             let labels =
                                 vec![Label::primary(file_id, range).with_message("defined here")];
                             let notes =
@@ -826,12 +899,16 @@ impl Builder {
                             ];
 
                             labels.push(
-                                Label::primary(file_id, nonterm_span.byte_range())
-                                    .with_message("non-terminal defined here"),
+                                Label::primary(
+                                    file_id,
+                                    span_manager.get_byterange(&nonterm_span).unwrap_or(0..0),
+                                )
+                                .with_message("non-terminal defined here"),
                             );
 
-                            let (b, e) = rule.span_pair();
-                            let rule_range = b.byte_range().start..e.byte_range().end;
+                            let rule_location = rule.location();
+                            let rule_range =
+                                span_manager.get_byterange(&rule_location).unwrap_or(0..0);
                             labels.push(
                                 Label::secondary(file_id, rule_range)
                                     .with_message("this rule has only one child rule"),
@@ -851,8 +928,11 @@ impl Builder {
                                     .to_string()];
 
                             labels.push(
-                                Label::primary(file_id, span.byte_range())
-                                    .with_message("non-terminal defined here"),
+                                Label::primary(
+                                    file_id,
+                                    span_manager.get_byterange(&span).unwrap_or(0..0),
+                                )
+                                .with_message("non-terminal defined here"),
                             );
 
                             let diag = Diagnostic::warning()
@@ -869,8 +949,11 @@ impl Builder {
                                 vec!["This non-terminal is involved in bad cycle".to_string()];
 
                             labels.push(
-                                Label::primary(file_id, span.byte_range())
-                                    .with_message("non-terminal defined here"),
+                                Label::primary(
+                                    file_id,
+                                    span_manager.get_byterange(&span).unwrap_or(0..0),
+                                )
+                                .with_message("non-terminal defined here"),
                             );
 
                             let diag = Diagnostic::warning()
@@ -891,8 +974,13 @@ impl Builder {
                             ];
 
                             labels.push(
-                                Label::primary(file_id, nonterm.name.span().byte_range())
-                                    .with_message("non-terminal defined here"),
+                                Label::primary(
+                                    file_id,
+                                    span_manager
+                                        .get_byterange(&nonterm.name.location())
+                                        .unwrap_or(0..0),
+                                )
+                                .with_message("non-terminal defined here"),
                             );
 
                             let diag = Diagnostic::warning()
@@ -1004,7 +1092,9 @@ impl Builder {
                     );
                 }
                 if !nonterm_info.is_auto_generated() {
-                    let op_range = rule_info.prec.unwrap().1.byte_range();
+                    let op_range = span_manager
+                        .get_byterange(&rule_info.prec.unwrap().location())
+                        .unwrap_or(0..0);
                     labels.push(
                         Label::secondary(file_id, op_range)
                             .with_message("[Removed] (Reduce) operator for reduce rule"),
@@ -1069,7 +1159,9 @@ impl Builder {
                 }
 
                 if !nonterm_info.is_auto_generated() {
-                    let op_range = rule_info.prec.unwrap().1.byte_range();
+                    let op_range = span_manager
+                        .get_byterange(&rule_info.prec.unwrap().location())
+                        .unwrap_or(0..0);
                     labels.push(
                         Label::secondary(file_id, op_range)
                             .with_message("(Reduce) operator for reduce rule"),

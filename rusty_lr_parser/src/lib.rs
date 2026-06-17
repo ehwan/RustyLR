@@ -16,6 +16,9 @@ pub(crate) mod terminalset;
 pub(crate) mod token;
 pub mod utils;
 
+/// Re-export Location for use by external crates (e.g. rusty_lr_buildscript)
+pub use parser::location::Location;
+
 /// This, `rusty_lr_parser` is designed to generate a code, that will be relied on `rusty_lr`.
 ///
 /// Gets the version of the rusty_lr_core crate that current crate is targeting.

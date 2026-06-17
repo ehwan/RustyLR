@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 use std::hash::Hash;
 
 use super::ParseError;
+use crate::Location;
 
 use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
@@ -227,12 +228,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
-        Data::Location: Default,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        self.feed_location(parser, term, userdata, Default::default())
+        self.feed_location(parser, term, userdata, Data::Location::new(self.location_stack.iter().rev(), 0))
     }
 
     /// Feed one terminal with location to parser, and update stacks.
@@ -258,7 +258,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             class,
             shift_prec,
             userdata,
-            Some(location),
+            location,
         ) {
             Ok(()) => Ok(()),
             Err(ParseError::NoAction(err)) => {
@@ -333,7 +333,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     P::TermClass::ERROR,
                     error_prec,
                     userdata,
-                    Some(error_location),
+                    error_location,
                 ) {
                     Ok(()) => {
                         // try shift given term again
@@ -354,14 +354,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                 self.data_stack.push_empty();
                             }
 
-                            self.location_stack.push(err.location.unwrap());
+                            self.location_stack.push(err.location.clone());
                             self.precedence_stack.push(shift_prec);
                             self.state_stack.push(next_state.state);
                         } else {
                             // merge term with previous error
 
                             let error_location = Data::Location::new(
-                                std::iter::once(&err.location.unwrap())
+                                std::iter::once(&err.location)
                                     .chain(self.location_stack.iter().rev()),
                                 2, // error node
                             );
@@ -387,16 +387,13 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         class: P::TermClass,
         shift_prec: Precedence,
         userdata: &mut Data::UserData,
-        location: Option<Data::Location>,
+        location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        debug_assert!(
-            (term.is_eof() && location.is_none()) || (!term.is_eof() && location.is_some())
-        );
         use super::super::state::ReduceRules;
         use crate::Location;
 
@@ -543,20 +540,15 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             if next_state_id.push {
                 match term {
                     TerminalSymbol::Term(t) => self.data_stack.push_terminal(t),
-                    TerminalSymbol::Error => self.data_stack.push_empty(),
-                    TerminalSymbol::Eof => {} // do not push anything for eof
+                    TerminalSymbol::Error | TerminalSymbol::Eof => self.data_stack.push_empty(),
                 }
             } else {
                 match term {
-                    TerminalSymbol::Term(_) | TerminalSymbol::Error => self.data_stack.push_empty(),
-                    TerminalSymbol::Eof => {} // do not push anything for eof
+                    TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => self.data_stack.push_empty(),
                 }
             }
 
-            // location is `Some` if it is not `Eof`
-            if let Some(location) = location {
-                self.location_stack.push(location);
-            }
+            self.location_stack.push(location);
             self.precedence_stack.push(shift_prec);
 
             Ok(())
@@ -768,13 +760,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
+        let eof_location = Data::Location::new(self.location_stack.iter().rev(), 0);
         self.feed_location_impl(
             parser,
             TerminalSymbol::Eof,
             P::TermClass::EOF,
             Precedence::none(),
             userdata,
-            None,
+            eof_location,
         )
     }
 

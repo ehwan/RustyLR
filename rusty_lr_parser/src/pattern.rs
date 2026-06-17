@@ -7,11 +7,11 @@ use super::error::ParseError;
 use super::grammar::Grammar;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
 use super::token::TokenMapped;
+use crate::parser::location::Located;
+use crate::parser::location::Location;
 
 use std::collections::BTreeSet;
 
-use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
@@ -20,7 +20,7 @@ use quote::{quote, ToTokens};
 /// Some regex pattern
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum PatternInternal {
-    Ident(Ident),
+    Ident(Located<String>),
     Plus(Box<Pattern>),
     Star(Box<Pattern>),
     Question(Box<Pattern>),
@@ -28,7 +28,10 @@ pub enum PatternInternal {
     TerminalSet(bool, BTreeSet<usize>),
     Lookaheads(Box<Pattern>, bool, BTreeSet<usize>),
     Group(Vec<Vec<Pattern>>),
-    Literal(syn::Lit),
+    Byte(Located<u8>),
+    ByteString(Located<Vec<u8>>),
+    Char(Located<char>),
+    String(Located<String>),
     Sep(Box<Pattern>, Box<Pattern>, bool),
 }
 
@@ -57,13 +60,13 @@ impl std::cmp::Eq for Pattern {}
 #[derive(Clone)]
 pub struct PatternToToken {
     /// only for internal usage; generating name like A_star, A_plus, A_question
-    name: Ident,
+    pub name: Located<String>,
     /// actual token for the pattern
     pub token: Token<TerminalSymbol<usize>, usize>,
     /// ruletype for this pattern
     pub ruletype: Option<TokenStream>,
     /// implicit mapto derived from its parent pattern (e.g. 'A' from A+, 'A' from A*!)
-    pub mapto: Option<Ident>,
+    pub mapto: Option<Located<String>>,
 }
 
 impl Pattern {
@@ -72,12 +75,12 @@ impl Pattern {
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
-        root_span_pair: (Span, Span),
+        root_location: Location,
     ) -> Result<PatternToToken, ParseError> {
         if let Some(existing) = pattern_cache.get(self) {
             return Ok(existing.clone());
         }
-        let ret = self.to_token_impl(grammar, pattern_cache, root_span_pair)?;
+        let ret = self.to_token_impl(grammar, pattern_cache, root_location)?;
         pattern_cache.insert(self.clone(), ret.clone());
         Ok(ret)
     }
@@ -94,14 +97,14 @@ impl Pattern {
         &self,
         grammar: &mut Grammar,
         pattern_cache: &mut rusty_lr_core::hash::HashMap<Pattern, PatternToToken>,
-        root_span_pair: (Span, Span),
+        root_location: Location,
     ) -> Result<PatternToToken, ParseError> {
         use crate::nonterminal_info::ReduceAction;
         use rusty_lr_core::parser::nonterminal::NonTerminalType;
 
         match &self.internal {
             PatternInternal::Ident(ident) => {
-                if ident == crate::utils::ERROR_NAME {
+                if ident.value().as_str() == crate::utils::ERROR_NAME {
                     // special case for error token
                     return Ok(PatternToToken {
                         name: ident.clone(),
@@ -114,7 +117,7 @@ impl Pattern {
                 // check if this ident is either name of terminal or nonterminal
                 if let Some(term_idx) = grammar
                     .terminals_index
-                    .get(&TerminalName::Ident(ident.clone()))
+                    .get(&TerminalName::Ident(ident.value().clone()))
                 {
                     // terminal
                     Ok(PatternToToken {
@@ -123,7 +126,9 @@ impl Pattern {
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: Some(ident.clone()),
                     })
-                } else if let Some(nonterm_idx) = grammar.nonterminals_index.get(ident) {
+                } else if let Some(nonterm_idx) =
+                    grammar.nonterminals_index.get(ident.value().as_str())
+                {
                     // nonterminal
                     let nonterminal = &grammar.nonterminals[*nonterm_idx];
                     Ok(PatternToToken {
@@ -133,16 +138,14 @@ impl Pattern {
                         mapto: Some(ident.clone()),
                     })
                 } else {
-                    Err(ParseError::TerminalNotDefined(ident.clone()))
+                    Err(ParseError::TerminalNotDefined(ident.location()))
                 }
             }
             PatternInternal::Plus(pattern) => {
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}Plus{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
-                );
+                let newrule_name_str = format!("_{}Plus{}", base_rule.name.value(), newrule_idx);
+                let newrule_name = Located::new(newrule_name_str, root_location);
 
                 if let Some(base_typename) = &base_rule.ruletype {
                     // typename exist, make new rule with typename Vec<base_typename>
@@ -151,15 +154,14 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("A", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("A".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![A] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -169,23 +171,21 @@ impl Pattern {
                         tokens: vec![
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
-                                mapto: Some(Ident::new("Ap", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                mapto: Some(Located::new("Ap".to_string(), Location::CallSite)),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
-                                mapto: Some(Ident::new("A", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                mapto: Some(Located::new("A".to_string(), Location::CallSite)),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { Ap.push(A); Ap }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -197,7 +197,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusLeft),
@@ -205,7 +205,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -221,12 +221,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -237,20 +236,18 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -262,7 +259,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusRight),
@@ -270,7 +267,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -285,14 +282,14 @@ impl Pattern {
                     internal: PatternInternal::Plus(pattern.clone()),
                     pretty_name: format!("{}+", pattern.pretty_name),
                 }
-                .to_token(grammar, pattern_cache, root_span_pair)?;
+                .to_token(grammar, pattern_cache, root_location)?;
 
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}Star{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                let newrule_name = Located::new(
+                    format!("_{}Star{}", base_rule.name.value(), newrule_idx),
+                    root_location,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -302,13 +299,12 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -319,7 +315,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -331,7 +327,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -339,7 +335,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -355,12 +351,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -369,7 +364,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -380,7 +375,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -388,7 +383,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -399,11 +394,11 @@ impl Pattern {
                 }
             }
             PatternInternal::Question(pattern) => {
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}Question{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                let newrule_name = Located::new(
+                    format!("_{}Question{}", base_rule.name.value(), newrule_idx),
+                    root_location,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -413,13 +408,12 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("A", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("A".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! { Some(A) })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -430,7 +424,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { None }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -442,7 +436,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! {Option<#base_typename>}),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Optional),
@@ -450,7 +444,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -466,12 +460,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -480,7 +473,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -492,7 +485,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Optional),
@@ -500,7 +493,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -512,7 +505,7 @@ impl Pattern {
             }
 
             PatternInternal::Exclamation(pattern) => {
-                let mut base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let mut base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
                 base_rule.ruletype = None;
                 Ok(base_rule)
             }
@@ -525,8 +518,9 @@ impl Pattern {
                 if terminals.len() == 1 {
                     let terminal = terminals.into_iter().next().unwrap();
                     let term_info = &grammar.terminals[terminal];
+                    let name_str = term_info.name.pretty_name(grammar.is_char, grammar.is_u8);
                     return Ok(PatternToToken {
-                        name: term_info.name.clone().name(),
+                        name: Located::new(name_str, root_location),
                         token: Token::Term(TerminalSymbol::Term(terminal)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: None,
@@ -534,20 +528,18 @@ impl Pattern {
                 }
 
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name =
-                    Ident::new(&format!("_TermSet{}", newrule_idx), root_span_pair.0);
+                let newrule_name = Located::new(format!("_TermSet{}", newrule_idx), root_location);
                 let mut rules = Vec::with_capacity(terminal_set.len());
                 for terminal in terminals {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: Token::Term(TerminalSymbol::Term(terminal)),
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -560,7 +552,7 @@ impl Pattern {
                     pretty_name: self.pretty_name.clone(),
                     ruletype: Some(grammar.token_typename.clone()),
                     rules,
-                    regex_span: Some(root_span_pair),
+                    root_location: Some(root_location),
                     trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::TerminalSet),
@@ -568,7 +560,7 @@ impl Pattern {
                 grammar.nonterminals.push(nonterm_info);
                 grammar
                     .nonterminals_index
-                    .insert(newrule_name.clone(), newrule_idx);
+                    .insert(newrule_name.value().clone(), newrule_idx);
 
                 Ok(PatternToToken {
                     name: newrule_name,
@@ -583,25 +575,24 @@ impl Pattern {
                 } else {
                     lookaheads.clone()
                 };
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}LH{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                let newrule_name = Located::new(
+                    format!("_{}LH{}", base_rule.name.value(), newrule_idx),
+                    root_location,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
@@ -613,7 +604,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(base_typename.clone()),
                         rules: vec![rule],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Lookahead),
@@ -621,7 +612,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -634,12 +625,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
@@ -651,7 +641,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![rule],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Lookahead),
@@ -659,7 +649,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -685,7 +675,7 @@ impl Pattern {
 
                     let mut elements = Vec::with_capacity(line.len());
                     for child in line.iter() {
-                        elements.push(child.to_token(grammar, pattern_cache, root_span_pair)?);
+                        elements.push(child.to_token(grammar, pattern_cache, root_location)?);
                     }
                     let mut tokens = Vec::with_capacity(line.len());
                     // indices of children that have ruletype
@@ -693,9 +683,11 @@ impl Pattern {
                     for (child_idx, child) in elements.iter().enumerate() {
                         tokens.push(TokenMapped {
                             token: child.token,
-                            mapto: Some(format_ident!("__token{child_idx}")),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new(
+                                format!("__token{child_idx}"),
+                                Location::CallSite,
+                            )),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         });
                         if child.ruletype.is_some() {
@@ -708,7 +700,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: None,
-                                separator_span: Span::call_site(),
+                                separator_location: Location::CallSite,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -724,7 +716,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
-                                separator_span: Span::call_site(),
+                                separator_location: Location::CallSite,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -749,7 +741,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: Some(ReduceAction::new_custom(initializer)),
-                                separator_span: Span::call_site(),
+                                separator_location: Location::CallSite,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -777,13 +769,13 @@ impl Pattern {
                     }
                 }
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = format_ident!("_Group{}", newrule_idx);
+                let newrule_name = Located::new(format!("_Group{}", newrule_idx), root_location);
                 let nonterm_info = NonTerminalInfo {
                     name: newrule_name.clone(),
                     pretty_name: self.pretty_name.clone(),
                     ruletype: ruletype.clone(),
                     rules,
-                    regex_span: Some(root_span_pair),
+                    root_location: Some(root_location),
                     trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::Group),
@@ -791,7 +783,7 @@ impl Pattern {
                 grammar.nonterminals.push(nonterm_info);
                 grammar
                     .nonterminals_index
-                    .insert(newrule_name.clone(), newrule_idx);
+                    .insert(newrule_name.value().clone(), newrule_idx);
 
                 Ok(PatternToToken {
                     name: newrule_name,
@@ -801,156 +793,153 @@ impl Pattern {
                 })
             }
 
-            PatternInternal::Literal(literal) => match literal {
-                syn::Lit::Char(ch) => {
-                    let idx = grammar.get_terminal_index_from_char(ch.value());
-                    let info = &grammar.terminals[idx];
+            PatternInternal::Byte(l) => {
+                let idx = grammar.get_terminal_index_from_char(*l.value() as char);
+                let name_str = format!("_LiteralByte{}", idx);
 
-                    Ok(PatternToToken {
-                        name: info.name.clone().name(),
-                        token: Token::Term(TerminalSymbol::Term(idx)),
-                        ruletype: Some(grammar.token_typename.clone()),
-                        mapto: None,
-                    })
-                }
-                syn::Lit::Byte(ch) => {
-                    let idx = grammar.get_terminal_index_from_char(ch.value() as char);
-                    let info = &grammar.terminals[idx];
+                Ok(PatternToToken {
+                    name: Located::new(name_str, root_location),
+                    token: Token::Term(TerminalSymbol::Term(idx)),
+                    ruletype: Some(grammar.token_typename.clone()),
+                    mapto: None,
+                })
+            }
+            PatternInternal::ByteString(s) => {
+                let newrule_idx = grammar.nonterminals.len();
+                let newrule_name_str = format!("_LiteralString{}", newrule_idx);
+                let vec = s.value();
 
-                    Ok(PatternToToken {
-                        name: info.name.clone().name(),
-                        token: Token::Term(TerminalSymbol::Term(idx)),
-                        ruletype: Some(grammar.token_typename.clone()),
-                        mapto: None,
-                    })
-                }
-                syn::Lit::Str(s) => {
-                    let newrule_idx = grammar.nonterminals.len();
-                    let str_span = s.span();
-                    let newrule_name =
-                        Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
+                let str_loc = s.location();
 
-                    let rule = Rule {
-                        tokens: s
-                            .value()
-                            .chars()
-                            .map(|ch| {
-                                let term_id = grammar.get_terminal_index_from_char(ch);
-                                TokenMapped {
-                                    token: Token::Term(TerminalSymbol::Term(term_id)),
-                                    mapto: None,
-                                    begin_span: str_span,
-                                    end_span: str_span,
-                                    reduce_action_chains: Vec::new(),
-                                }
-                            })
-                            .collect(),
-                        reduce_action: None,
-                        separator_span: Span::call_site(),
-                        lookaheads: None,
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
+                let rule = Rule {
+                    tokens: vec
+                        .iter()
+                        .map(|ch| {
+                            let term_id = grammar.get_terminal_index_from_char(*ch as char);
+                            TokenMapped {
+                                token: Token::Term(TerminalSymbol::Term(term_id)),
+                                mapto: None,
+                                location: str_loc,
+                                reduce_action_chains: Vec::new(),
+                            }
+                        })
+                        .collect(),
+                    reduce_action: None,
+                    separator_location: Location::CallSite,
+                    lookaheads: None,
+                    prec: None,
+                    dprec: None,
+                    is_used: true,
+                };
 
-                    let nonterm_info = NonTerminalInfo {
-                        name: newrule_name.clone(),
-                        pretty_name: s.to_token_stream().to_string(),
-                        ruletype: None,
-                        rules: vec![rule],
-                        regex_span: Some((str_span, str_span)),
-                        trace: false,
-                        protected: false,
-                        nonterm_type: Some(NonTerminalType::LiteralString),
-                    };
-                    grammar.nonterminals.push(nonterm_info);
-                    grammar
-                        .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                let newrule_name = Located::new(newrule_name_str, str_loc);
+                let nonterm_info = NonTerminalInfo {
+                    name: newrule_name.clone(),
+                    pretty_name: syn::LitByteStr::new(s.value(), proc_macro2::Span::call_site())
+                        .to_token_stream()
+                        .to_string(),
+                    ruletype: None,
+                    rules: vec![rule],
+                    root_location: Some(str_loc),
+                    trace: false,
+                    protected: false,
+                    nonterm_type: Some(NonTerminalType::LiteralString),
+                };
+                grammar.nonterminals.push(nonterm_info);
+                grammar
+                    .nonterminals_index
+                    .insert(newrule_name.value().clone(), newrule_idx);
 
-                    Ok(PatternToToken {
-                        name: newrule_name.clone(),
-                        token: Token::NonTerm(newrule_idx),
-                        ruletype: Some(quote! { &'static str }),
-                        mapto: None,
-                    })
-                }
-                syn::Lit::ByteStr(s) => {
-                    let newrule_idx = grammar.nonterminals.len();
-                    let str_span = s.span();
-                    let newrule_name =
-                        Ident::new(&format!("_LiteralString{}", newrule_idx), str_span);
-                    let vec = s.value();
+                Ok(PatternToToken {
+                    name: newrule_name,
+                    token: Token::NonTerm(newrule_idx),
+                    ruletype: Some(quote! { &'static [u8] }),
+                    mapto: None,
+                })
+            }
+            PatternInternal::Char(ch) => {
+                let idx = grammar.get_terminal_index_from_char(*ch.value());
+                let name_str = format!("_LiteralChar{}", idx);
 
-                    let rule = Rule {
-                        tokens: vec
-                            .iter()
-                            .map(|ch| {
-                                let term_id = grammar.get_terminal_index_from_char(*ch as char);
-                                TokenMapped {
-                                    token: Token::Term(TerminalSymbol::Term(term_id)),
-                                    mapto: None,
-                                    begin_span: str_span,
-                                    end_span: str_span,
-                                    reduce_action_chains: Vec::new(),
-                                }
-                            })
-                            .collect(),
-                        reduce_action: None,
-                        separator_span: Span::call_site(),
-                        lookaheads: None,
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
+                Ok(PatternToToken {
+                    name: Located::new(name_str, root_location),
+                    token: Token::Term(TerminalSymbol::Term(idx)),
+                    ruletype: Some(grammar.token_typename.clone()),
+                    mapto: None,
+                })
+            }
+            PatternInternal::String(s) => {
+                let newrule_idx = grammar.nonterminals.len();
+                let str_loc = s.location();
+                let newrule_name_str = format!("_LiteralString{}", newrule_idx);
 
-                    let nonterm_info = NonTerminalInfo {
-                        name: newrule_name.clone(),
-                        pretty_name: s.to_token_stream().to_string(),
-                        ruletype: None,
-                        rules: vec![rule],
-                        regex_span: Some((str_span, str_span)),
-                        trace: false,
-                        protected: false,
-                        nonterm_type: Some(NonTerminalType::LiteralString),
-                    };
-                    grammar.nonterminals.push(nonterm_info);
-                    grammar
-                        .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                let rule = Rule {
+                    tokens: s
+                        .value()
+                        .chars()
+                        .map(|ch| {
+                            let term_id = grammar.get_terminal_index_from_char(ch);
+                            TokenMapped {
+                                token: Token::Term(TerminalSymbol::Term(term_id)),
+                                mapto: None,
+                                location: str_loc,
+                                reduce_action_chains: Vec::new(),
+                            }
+                        })
+                        .collect(),
+                    reduce_action: None,
+                    separator_location: Location::CallSite,
+                    lookaheads: None,
+                    prec: None,
+                    dprec: None,
+                    is_used: true,
+                };
 
-                    Ok(PatternToToken {
-                        name: newrule_name.clone(),
-                        token: Token::NonTerm(newrule_idx),
-                        ruletype: Some(quote! { &'static [u8] }),
-                        mapto: None,
-                    })
-                }
-                _ => unreachable!("Only char, byte, str and bytes are supported"),
-            },
+                let newrule_name = Located::new(newrule_name_str, str_loc);
+                let nonterm_info = NonTerminalInfo {
+                    name: newrule_name.clone(),
+                    pretty_name: s.to_token_stream().to_string(),
+                    ruletype: None,
+                    rules: vec![rule],
+                    root_location: Some(str_loc),
+                    trace: false,
+                    protected: false,
+                    nonterm_type: Some(NonTerminalType::LiteralString),
+                };
+                grammar.nonterminals.push(nonterm_info);
+                grammar
+                    .nonterminals_index
+                    .insert(newrule_name.value().clone(), newrule_idx);
+
+                Ok(PatternToToken {
+                    name: newrule_name,
+                    token: Token::NonTerm(newrule_idx),
+                    ruletype: Some(quote! { &'static str }),
+                    mapto: None,
+                })
+            }
 
             PatternInternal::Sep(base, del, true) => {
-                let base_rule = base.to_token(grammar, pattern_cache, root_span_pair)?;
-                let del = del.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = base.to_token(grammar, pattern_cache, root_location)?;
+                let del = del.to_token(grammar, pattern_cache, root_location)?;
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}SepPlus{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                let newrule_name = Located::new(
+                    format!("_{}SepPlus{}", base_rule.name.value(), newrule_idx),
+                    root_location,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
                     let rule1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![__token0] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -960,23 +949,26 @@ impl Pattern {
                         tokens: vec![
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
-                                mapto: Some(Ident::new("__token0", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                mapto: Some(Located::new(
+                                    "__token0".to_string(),
+                                    Location::CallSite,
+                                )),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
-                                mapto: Some(Ident::new("__token1", Span::call_site())),
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                mapto: Some(Located::new(
+                                    "__token1".to_string(),
+                                    Location::CallSite,
+                                )),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -986,7 +978,7 @@ impl Pattern {
                             __token0
                             }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -998,7 +990,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![rule1, rule2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusLeft),
@@ -1006,7 +998,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -1019,12 +1011,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1035,27 +1026,24 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                begin_span: Span::call_site(),
-                                end_span: Span::call_site(),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1067,7 +1055,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![rule1, rule2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusRight),
@@ -1075,7 +1063,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -1091,14 +1079,14 @@ impl Pattern {
                     internal: PatternInternal::Sep(base.clone(), del.clone(), true),
                     pretty_name: format!("$sep({}, {}, +)", base.pretty_name, del.pretty_name),
                 }
-                .to_token(grammar, pattern_cache, root_span_pair)?;
+                .to_token(grammar, pattern_cache, root_location)?;
 
-                let base_rule = base.to_token(grammar, pattern_cache, root_span_pair)?;
+                let base_rule = base.to_token(grammar, pattern_cache, root_location)?;
 
                 let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Ident::new(
-                    &format!("_{}SepStar{}", base_rule.name, newrule_idx),
-                    root_span_pair.0,
+                let newrule_name = Located::new(
+                    format!("_{}SepStar{}", base_rule.name.value(), newrule_idx),
+                    root_location,
                 );
 
                 if let Some(base_typename) = &base_rule.ruletype {
@@ -1108,13 +1096,12 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Ident::new("__token0", Span::call_site())),
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1125,7 +1112,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1137,7 +1124,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -1145,7 +1132,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,
@@ -1161,12 +1148,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            begin_span: Span::call_site(),
-                            end_span: Span::call_site(),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1175,7 +1161,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_span: Span::call_site(),
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1186,7 +1172,7 @@ impl Pattern {
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
                         rules: vec![line1, line2],
-                        regex_span: Some(root_span_pair),
+                        root_location: Some(root_location),
                         trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
@@ -1194,7 +1180,7 @@ impl Pattern {
                     grammar.nonterminals.push(nonterm_info);
                     grammar
                         .nonterminals_index
-                        .insert(newrule_name.clone(), newrule_idx);
+                        .insert(newrule_name.value().clone(), newrule_idx);
 
                     Ok(PatternToToken {
                         name: newrule_name,

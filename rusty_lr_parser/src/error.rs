@@ -1,38 +1,52 @@
-use proc_macro2::Ident;
-use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 
 use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::location::Location;
+use crate::parser::location::Located;
 
 /// failed to feed() the token
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseArgError {
-    /// feed() failed
-    MacroLineParse { span: Span, message: String },
+    /// feed() failed; `span` is the byte range `[start, end)` in the source
+    MacroLineParse {
+        location: Location,
+        message: String,
+    },
 }
 
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ArgError {
-    MultipleModulePrefixDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleUserDataDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleErrorDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleTokenTypeDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleEofDefinition((Span, TokenStream), (Span, TokenStream)),
-    MultipleStartDefinition(Ident, Ident),
+    /// multiple %moduleprefix in the same grammar
+    MultipleModulePrefixDefinition(Vec<Location>),
+    /// multiple %userdata in the same grammar
+    MultipleUserDataDefinition(Vec<Location>),
+    /// multiple %error in the same grammar
+    MultipleErrorDefinition(Vec<Location>),
+    /// multiple %tokentype in the same grammar
+    MultipleTokenTypeDefinition(Vec<Location>),
+    /// multiple %eof in the same grammar
+    MultipleEofDefinition(Vec<Location>),
+    /// multiple %start in the same grammar
+    MultipleStartDefinition(Vec<Location>),
+    /// multiple %prec in the same rule
+    MultiplePrecDefinition(Vec<Location>),
+    /// multiple %dprec in the same rule
+    MultipleDPrecDefinition(Vec<Location>),
 
     StartNotDefined,
     EofNotDefined,
     TokenTypeNotDefined,
 
-    /// multiple %prec in the same rule
-    MultiplePrecDefinition(Span),
-    /// multiple %dprec in the same rule
-    MultipleDPrecDefinition(Span),
+    /// duplicated name for terminal symbols or non-terminal symbols
+    MultipleNameDefinition(String, Vec<Location>),
+
+    /// can't use reserved keyword as token name
+    ReservedName(Vec<Located<String>>),
 }
 
 #[non_exhaustive]
@@ -55,294 +69,233 @@ pub enum ConflictError {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
-    MultipleRuleDefinition(Ident, Ident),
 
     /// different reduce type applied to the same terminal symbol
-    MultipleReduceDefinition {
-        terminal: String,
-        old: (Span, rusty_lr_core::rule::ReduceType),
-        new: (Span, rusty_lr_core::rule::ReduceType),
-    },
+    MultipleReduceDefinition(
+        Vec<Located<rusty_lr_core::rule::ReduceType>>,
+    ),
 
-    /// multiple %token definition
-    MultipleTokenDefinition(Ident, Ident),
-
-    /// same name for terminal and non-terminal exists
-    TermNonTermConflict {
-        name: Ident,
-        terminal: Ident,
-        non_terminal: Ident,
-    },
-
-    InvalidTerminalRange((Ident, usize, TokenStream), (Ident, usize, TokenStream)),
+    InvalidTerminalRange{ location: Location, start: (Located<String>, usize), end: (Located<String>, usize) },
 
     /// name given to %start not defined
-    StartNonTerminalNotDefined(Ident),
+    StartNonTerminalNotDefined(Location),
 
     /// unknown terminal symbol name
-    TerminalNotDefined(Ident),
+    TerminalNotDefined(Location),
 
-    /// can't use reserved keyword as token name
-    ReservedName(Ident),
 
     /// not supported literal type
-    UnsupportedLiteralType(TokenStream),
+    UnsupportedLiteralType(Location),
 
-    /// range in literal terminal set is not valid
-    InvalidLiteralRange(Literal, Literal),
+    /// range in literal terminal set is not valid; [first, last] with first > last
+    InvalidLiteralRange(Location),
 
     /// TokenType in Literal mode is not supported
-    TokenInLiteralMode(Span),
+    TokenInLiteralMode(Vec<Location>),
 
     /// conflicts in precedence definition
-    MultiplePrecedenceOrderDefinition {
-        cur: IdentOrLiteral,
-        old: Span,
-    },
+    MultiplePrecedenceOrderDefinition (Vec<Location>),
 
     /// Precedence not defined for the given token
     PrecedenceNotDefined(IdentOrLiteral),
 
     /// All production rules in this non-terminal must have %prec defined
-    NonTerminalPrecedenceNotDefined(Span, usize),
+    NonTerminalPrecedenceNotDefined(Located<usize>),
 
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined {
-        name: Ident,
-        span: (Span, Span),
+        nonterm: Location,
+        rule: Location
     },
 
     /// Only terminal or terminal set is allowed
-    OnlyTerminalSet(Span, Span),
+    OnlyTerminalSet(Location),
 
     /// unknown non-terminal symbol name
-    NonTerminalNotDefined(Ident),
+    NonTerminalNotDefined(Location),
 
     /// only 'usize' literal is allowed for %dprec
-    OnlyUsizeLiteral(Span),
+    OnlyUsizeLiteral(Location),
 }
 #[allow(unused)]
 impl ArgError {
-    pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
+        let mut output = TokenStream::new();
         let message = self.short_message();
-        quote_spanned! {
-            span=>
-            compile_error!(#message);
+        for loc in self.locations() {
+            for span in span_manager.get_spans_in_location(&loc) {
+                output.extend(quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                });
+            }
         }
+        output
     }
 
-    pub fn span(&self) -> Span {
+    pub fn locations(&self) -> Vec<Location> {
         match self {
-            ArgError::MultipleModulePrefixDefinition(
-                (span1, tokenstream1),
-                (span2, tokenstream2),
-            ) => *span2,
-            ArgError::MultipleUserDataDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                *span2
-            }
-            ArgError::MultipleErrorDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                *span2
-            }
-            ArgError::MultipleTokenTypeDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                *span2
-            }
-            ArgError::MultipleEofDefinition((span1, tokenstream1), (span2, tokenstream2)) => *span2,
-            ArgError::MultipleStartDefinition(old, new) => new.span(),
-
-            ArgError::StartNotDefined => Span::call_site(),
-            ArgError::EofNotDefined => Span::call_site(),
-            ArgError::TokenTypeNotDefined => Span::call_site(),
-
-            ArgError::MultiplePrecDefinition(span) => *span,
-            ArgError::MultipleDPrecDefinition(span) => *span,
+            ArgError::MultipleModulePrefixDefinition(locs)
+            | ArgError::MultipleUserDataDefinition(locs)
+            | ArgError::MultipleErrorDefinition(locs)
+            | ArgError::MultipleTokenTypeDefinition(locs)
+            | ArgError::MultipleEofDefinition(locs)
+            | ArgError::MultipleStartDefinition(locs)
+            | ArgError::MultiplePrecDefinition(locs)
+            | ArgError::MultipleDPrecDefinition(locs) => locs.clone(),
+            ArgError::MultipleNameDefinition(_, locs) => locs.clone(),
+            ArgError::ReservedName(names) => names.iter().map(|name| name.location()).collect(),
+            _ => vec![Location::default()],
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
-            ArgError::MultipleModulePrefixDefinition(
-                (span1, tokenstream1),
-                (span2, tokenstream2),
-            ) => "Multiple %moduleprefix definition".into(),
-            ArgError::MultipleUserDataDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %userdata definition".into()
+            ArgError::MultipleModulePrefixDefinition(_) => {
+                "Multiple %moduleprefix definition".into()
             }
-            ArgError::MultipleErrorDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %error definition".into()
-            }
-            ArgError::MultipleTokenTypeDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %tokentype definition".into()
-            }
-            ArgError::MultipleEofDefinition((span1, tokenstream1), (span2, tokenstream2)) => {
-                "Multiple %eof definition".into()
-            }
-            ArgError::MultipleStartDefinition(old, new) => {
-                format!("Multiple %start definition: {} and {}", old, new)
-            }
-
+            ArgError::MultipleUserDataDefinition(_) => "Multiple %userdata definition".into(),
+            ArgError::MultipleErrorDefinition(_) => "Multiple %error definition".into(),
+            ArgError::MultipleTokenTypeDefinition(_) => "Multiple %tokentype definition".into(),
+            ArgError::MultipleEofDefinition(_) => "Multiple %eof definition".into(),
+            ArgError::MultipleStartDefinition(_) => "Multiple %start definition".into(),
+            ArgError::MultiplePrecDefinition(_) => "Multiple %prec definition".into(),
+            ArgError::MultipleDPrecDefinition(_) => "Multiple %dprec definition".into(),
             ArgError::StartNotDefined => "Start rule not defined\n>>> %start <rule_name>;".into(),
             ArgError::EofNotDefined => "Eof not defined\n>>> %eof <eof_token_value>;".into(),
             ArgError::TokenTypeNotDefined => {
                 "Token type not defined\n>>> %tokentype <token_type_name>;".into()
             }
-
-            ArgError::MultiplePrecDefinition(span) => "Multiple %prec definition".into(),
-            ArgError::MultipleDPrecDefinition(span) => "Multiple %dprec definition".into(),
+            ArgError::MultipleNameDefinition(name, _) => {
+                format!("Duplicated name for terminal or non-terminal: {}", name)
+            }
+            ArgError::ReservedName(names) =>
+                "This name is reserved and cannot be used".into(),
         }
     }
 }
 #[allow(unused)]
 impl ParseArgError {
-    pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
+        let mut output = TokenStream::new();
         let message = self.short_message();
-        quote_spanned! {
-            span=>
-            compile_error!(#message);
+        let location = self.location();
+        for span in span_manager.get_spans_in_location(&location) {
+            output.extend(
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            );
         }
+        output
     }
 
-    pub fn span(&self) -> Span {
+    /// Returns the byte range `[start, end)` of the error location in the source.
+    pub fn location(&self) -> Location {
         match self {
-            ParseArgError::MacroLineParse { span, message } => *span,
+            ParseArgError::MacroLineParse { location, message } => *location,
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
-            ParseArgError::MacroLineParse { span, message } => message.clone(),
+            ParseArgError::MacroLineParse { message, .. } => message.clone(),
         }
     }
 }
 
 #[allow(unused)]
 impl ParseError {
-    pub fn to_compile_error(&self) -> TokenStream {
-        let span = self.span();
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
+        let mut output = TokenStream::new();
         let message = self.short_message();
-        quote_spanned! {
-            span=>
-            compile_error!(#message);
+        for loc in self.locations() {
+            for span in span_manager.get_spans_in_location(&loc) {
+                output.extend(quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                });
+            }
         }
+        output
     }
 
-    pub fn span(&self) -> Span {
+    pub fn locations(&self) -> Vec<Location> {
         match self {
-            ParseError::MultipleRuleDefinition(old, new) => new.span(),
+            ParseError::MultipleReduceDefinition(locations) => locations.iter().map(Located::location).collect(),
 
-            ParseError::MultipleReduceDefinition { terminal, old, new } => new.0,
+            ParseError::InvalidTerminalRange { location: range, start, end } => vec![range.clone()],
 
-            ParseError::TermNonTermConflict {
-                name,
-                terminal,
-                non_terminal,
-            } => name.span(),
+            ParseError::StartNonTerminalNotDefined(loc) => vec![*loc],
 
-            ParseError::InvalidTerminalRange((first, first_index, _), (last, last_index, _)) => {
-                first.span()
-            }
+            ParseError::TerminalNotDefined(loc) => vec![*loc],
 
-            ParseError::StartNonTerminalNotDefined(ident) => ident.span(),
+            ParseError::UnsupportedLiteralType(loc) => vec![*loc],
 
-            ParseError::TerminalNotDefined(ident) => ident.span(),
+            ParseError::InvalidLiteralRange(loc) => vec![*loc],
 
-            ParseError::MultipleTokenDefinition(old, new) => new.span(),
+            ParseError::TokenInLiteralMode(locs) => locs.clone(),
 
-            ParseError::ReservedName(ident) => ident.span(),
+            ParseError::MultiplePrecedenceOrderDefinition(locations) => locations.clone(),
+            ParseError::PrecedenceNotDefined(name) => vec![name.location()],
+            ParseError::NonTerminalPrecedenceNotDefined(loc) => vec![loc.location()],
 
-            ParseError::UnsupportedLiteralType(stream) => {
-                stream.clone().into_iter().next().unwrap().span()
-            }
-
-            ParseError::InvalidLiteralRange(first, last) => first.span(),
-
-            ParseError::TokenInLiteralMode(open_span) => *open_span,
-
-            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => cur.span(),
-            ParseError::PrecedenceNotDefined(name) => name.span(),
-            ParseError::NonTerminalPrecedenceNotDefined(span, _) => *span,
-
-            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => span.0,
-            ParseError::OnlyTerminalSet(span_begin, span_end) => *span_begin,
-            ParseError::NonTerminalNotDefined(ident) => ident.span(),
-            ParseError::OnlyUsizeLiteral(span) => *span,
+            ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule} => vec![*nonterm, *rule],
+            ParseError::OnlyTerminalSet(location) => vec![*location],
+            ParseError::NonTerminalNotDefined(loc) => vec![*loc],
+            ParseError::OnlyUsizeLiteral(loc) => vec![*loc],
         }
     }
 
     pub fn short_message(&self) -> String {
         match self {
-            ParseError::MultipleRuleDefinition(old, new) => {
-                format!("Multiple rule definition with same name: {}", old)
+            ParseError::MultipleReduceDefinition(_) => {
+                "Different reduce type (%left and %right) applied to the same terminal symbol".to_string()
             }
 
-            ParseError::MultipleReduceDefinition { terminal, old, new } => {
-                format!("Differnt reduce type (%left and %right) applied to the same terminal symbol: {}", terminal)
-            }
-
-            ParseError::TermNonTermConflict {
-                name,
-                terminal,
-                non_terminal,
-            } => {
-                format!("Same name for terminal and non-terminal exists: {}", name)
-            }
-
-            ParseError::InvalidTerminalRange((first, first_index, _), (last, last_index, _)) => {
+            ParseError::InvalidTerminalRange { location: range, start, end } => {
                 format!(
                     "Invalid terminal range: [{}({}) - {}({})]",
-                    first, first_index, last, last_index
+                    start.0, start.1, end.0, end.1
                 )
             }
 
-            ParseError::StartNonTerminalNotDefined(ident) => {
-                format!("Name given to %start not defined: {}", ident)
+            ParseError::StartNonTerminalNotDefined(_) => {
+                "Name given to %start not defined".to_string()
             }
 
-            ParseError::TerminalNotDefined(ident) => {
-                format!("Unknown terminal symbol name: {}", ident)
+            ParseError::TerminalNotDefined(_) => {
+                "Unknown terminal symbol name".to_string()
             }
 
-            ParseError::MultipleTokenDefinition(old, new) => {
-                format!("Multiple %token definition with same name: {}", old)
+            ParseError::UnsupportedLiteralType(_) => {
+                format!("This literal type is not supported. Use string literal (e.g. 'a', \"abc\", b'a' or b\"abc\") instead")
             }
 
-            ParseError::ReservedName(ident) => {
-                format!("'{}' is reserved name", ident)
-            }
-
-            ParseError::UnsupportedLiteralType(literal) => {
-                format!("Not supported literal type: {}", literal)
-            }
-
-            ParseError::InvalidLiteralRange(first, last) => {
-                format!(
-                    "Range in literal terminal set is not valid: [{} - {}]",
-                    first, last
-                )
-            }
+            ParseError::InvalidLiteralRange(_) => 
+                    "Invalid literal range: [first, last] with first > last".to_string(),
 
             ParseError::TokenInLiteralMode(_) => {
-                "%token with %tokentype `char` or `u8` is not supported. Use 'a' or b'a' instead"
+                "%token with %tokentype `char` or `u8` is not supported. Use character literal (e.g. 'a' or b'a') instead"
                     .to_string()
             }
 
-            ParseError::MultiplePrecedenceOrderDefinition { cur, old } => {
-                format!("Conflicts with precedence definition: {}", cur)
+            ParseError::MultiplePrecedenceOrderDefinition(_) =>
+                "Multiple precedence order definition for the same token".to_string(),
+            ParseError::PrecedenceNotDefined(_) => {
+                "Precedence not defined for the given token".to_string()
             }
-            ParseError::PrecedenceNotDefined(name) => {
-                format!("Precedence not defined for the given token: {}", name)
-            }
-            ParseError::NonTerminalPrecedenceNotDefined(span, nonterm_idx) => {
+            ParseError::NonTerminalPrecedenceNotDefined(_) => {
                 "All production rules in this non-terminal must have %prec defined".into()
             }
 
-            ParseError::RuleTypeDefinedButActionNotDefined { name, span } => {
+            ParseError::RuleTypeDefinedButActionNotDefined { .. } => {
                 "ReduceAction must be defined for this rule".into()
             }
-            ParseError::OnlyTerminalSet(_, _) => "Only terminal or terminal set is allowed".into(),
-            ParseError::NonTerminalNotDefined(ident) => {
-                format!("Unknown non-terminal symbol name: {}", ident)
+            ParseError::OnlyTerminalSet(_) => "Only terminal or terminal set is allowed".into(),
+            ParseError::NonTerminalNotDefined(_) => {
+                "Unknown non-terminal symbol name".to_string()
             }
             ParseError::OnlyUsizeLiteral(_) => "Only 'usize' literal is allowed for %dprec".into(),
         }

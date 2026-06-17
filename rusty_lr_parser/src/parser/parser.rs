@@ -6,16 +6,14 @@ use crate::parser::args::IdentOrLiteral;
 use crate::parser::args::PrecDPrecArgs;
 use crate::parser::args::RecoveredError;
 use crate::parser::lexer::Lexed;
-use crate::parser::span_pair::SpanPair;
+use crate::parser::location::Location;
+use crate::parser::location::Located;
 use crate::terminalset::TerminalSet;
 use crate::terminalset::TerminalSetItem;
 
 use proc_macro2::Group;
-use proc_macro2::Ident;
-use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use quote::format_ident;
 
 use std::boxed::Box;
 
@@ -31,7 +29,7 @@ use rusty_lr_core::rule::ReduceType;
 
 %userdata GrammarArgs;
 
-%location SpanPair;
+%location Location;
 
 %tokentype Lexed;
 %token ident Lexed::Ident(_);
@@ -51,7 +49,13 @@ use rusty_lr_core::rule::ReduceType;
 %token dollar Lexed::Dollar(_);
 %token comma Lexed::Comma(_);
 
-%token literal Lexed::Literal(_);
+%token int_literal Lexed::IntLiteral(_);
+%token byte_literal Lexed::ByteLiteral(_);
+%token byte_str_literal Lexed::ByteStrLiteral(_);
+%token char_literal Lexed::CharLiteral(_);
+%token str_literal Lexed::StrLiteral(_);
+%token other_literal Lexed::OtherLiteral(_);
+
 
 %token parengroup Lexed::ParenGroup(_);
 %token bracegroup Lexed::BraceGroup(_);
@@ -86,12 +90,11 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "Rule-Ident" );
     };
-    let span = @colon.span();
     if let Some(fisrt) = RuleLines.first_mut() {
-        fisrt.separator_span = span;
+        fisrt.separator_location = @colon;
     }
     RuleDefArgs {
-        name: ident,
+        name: Located::new(ident.to_string(), @ident),
         typename: RuleType.map(|t| t.stream()),
         rule_lines: RuleLines,
     }
@@ -110,7 +113,7 @@ RuleType(Option<Group>): parengroup {
 ;
 
 RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
-    RuleLine.separator_span = @pipe.span();
+    RuleLine.separator_location = @pipe;
     RuleLines.push( RuleLine );
     RuleLines
 }
@@ -124,10 +127,8 @@ RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
     RuleLineArgs {
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
-        separator_span: Span::call_site(),
+        separator_location: Location::default(), // will be set later in RuleLines
         precs: PrecDef,
-        prec: None,
-        dprec: None,
     }
 }
 ;
@@ -140,21 +141,21 @@ PrecDef(PrecDPrecArgs)
         data.error_recovered.push( RecoveredError {
             message: "Expected <ident> to token or <literal>".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
-            span: @error,
+            location: @error,
         });
         PrecDPrecArgs::None
     }
-    | percent! dprec! literal {
-        let Lexed::Literal(literal) = literal else {
+    | percent! dprec! int_literal {
+        let Lexed::IntLiteral(i) = int_literal else {
             unreachable!( "PrecDPrecArgs-DPrec" );
         };
-        PrecDPrecArgs::DPrec(literal) 
+        PrecDPrecArgs::DPrec(Located::new(i, @int_literal)) 
     }
     | percent! dprec! error {
         data.error_recovered.push( RecoveredError {
             message: "Expected integer literal".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#rule-priority".to_string(),
-            span: @error,
+            location: @error,
         });
         PrecDPrecArgs::None
     }
@@ -162,20 +163,20 @@ PrecDef(PrecDPrecArgs)
         data.error_recovered.push( RecoveredError {
             message: "Expected %prec or %dprec".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
-            span: @error,
+            location: @error,
         });
         PrecDPrecArgs::None
     }
     ;
 
-TokenMapped((Option<Ident>, PatternArgs)): Pattern {
+TokenMapped((Option<Located<String>>, PatternArgs)): Pattern {
     ( None, Pattern )
 }
 | ident equal Pattern {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "Token-Ident" );
     };
-    ( Some(ident), Pattern )
+    ( Some(Located::new(ident.to_string(), @ident)), Pattern )
 }
 ;
 
@@ -183,7 +184,7 @@ TerminalSetItem(TerminalSetItem): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "TerminalSetItem-Range1" );
     };
-    TerminalSetItem::Terminal( ident )
+    TerminalSetItem::Terminal( Located::new(ident.to_string(), @ident) )
 }
 | first=ident minus last=ident {
     let Lexed::Ident(first) = first else {
@@ -193,38 +194,61 @@ TerminalSetItem(TerminalSetItem): ident {
         unreachable!( "TerminalSetItem-Range3" );
     };
 
-    TerminalSetItem::Range( first, last )
+    TerminalSetItem::Range( Located::new(first.to_string(), @first), Located::new(last.to_string(), @last) )
 }
 | ident minus error {
     data.error_recovered.push( RecoveredError {
         message: "Expected ident for terminal set".to_string(),
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-        span: @error,
+        location: @error,
     });
-    TerminalSetItem::Terminal( format_ident!("dummy") )
+    TerminalSetItem::Terminal( Default::default() )
 }
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "TerminalSetItem-Literal" );
+| char_literal {
+    let Lexed::CharLiteral(ch) = char_literal else {
+        unreachable!( "TerminalSetItem-CharLiteral1" );
     };
-    TerminalSetItem::Literal(literal)
+    TerminalSetItem::Char(Located::new(ch.value(), @char_literal))
 }
-| first=literal minus last=literal {
-    let Lexed::Literal(first) = first else {
-        unreachable!( "TerminalSetItem-Range1" );
+| first=char_literal minus last=char_literal {
+    let Lexed::CharLiteral(first) = first else {
+        unreachable!( "TerminalSetItem-CharLiteral2" );
     };
-    let Lexed::Literal(last) = last else {
-        unreachable!( "TerminalSetItem-Range3" );
+    let Lexed::CharLiteral(last) = last else {
+        unreachable!( "TerminalSetItem-CharLiteral3" );
     };
-    TerminalSetItem::LiteralRange( first, last )
+    TerminalSetItem::CharRange(Located::new(first.value(), @first), Located::new(last.value(), @last))
 }
-| literal minus error {
+| char_literal minus error {
     data.error_recovered.push( RecoveredError {
-        message: "Expected literal for terminal set".to_string(),
+        message: "Expected char literal for terminal set".to_string(),
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-        span: @error,
+        location: @error,
     });
-    TerminalSetItem::Terminal( format_ident!("dummy") )
+    TerminalSetItem::Terminal( Default::default() )
+}
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "TerminalSetItem-ByteLiteral1" );
+    };
+    TerminalSetItem::Byte(Located::new(b.value(), @byte_literal))
+}
+| first=byte_literal minus last=byte_literal {
+    let Lexed::ByteLiteral(first) = first else {
+        unreachable!( "TerminalSetItem-ByteLiteral2" );
+    };
+    let Lexed::ByteLiteral(last) = last else {
+        unreachable!( "TerminalSetItem-ByteLiteral3" );
+    };
+    TerminalSetItem::ByteRange(Located::new(first.value(), @first), Located::new(last.value(), @last))
+}
+| byte_literal minus error {
+    data.error_recovered.push( RecoveredError {
+        message: "Expected byte literal for terminal set".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        location: @error,
+    });
+    TerminalSetItem::Terminal( Default::default() )
 }
 ;
 
@@ -232,17 +256,17 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
     TerminalSet {
         negate: caret.is_some(),
         items: TerminalSetItem,
-        open_span: @lbracket.span(),
-        close_span: @rbracket.span(),
+        open_location: @lbracket,
+        close_location: @rbracket,
     }
 }
 | dot {
-    let span = @dot.span();
+    let span = @dot;
     TerminalSet {
         negate: true,
         items: vec![],
-        open_span: span,
-        close_span: span,
+        open_location: span.clone(),
+        close_location: span,
     }
 }
 ;
@@ -255,48 +279,66 @@ Pattern(PatternArgs): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "Pattern-Ident" );
     };
-    PatternArgs::Ident( ident )
+    PatternArgs::Ident( Located::new(ident.to_string(), @ident) )
 }
 | Pattern plus {
     let Lexed::Plus(plus) = plus else {
         unreachable!( "Pattern-Plus" );
     };
-    PatternArgs::Plus( Box::new(Pattern), @plus.span() )
+    PatternArgs::Plus { base: Box::new(Pattern), op_location: @plus }
 }
 | Pattern star {
-    PatternArgs::Star( Box::new(Pattern), @star.span() )
+    PatternArgs::Star { base: Box::new(Pattern), op_location: @star }
 }
 | Pattern question {
-    PatternArgs::Question( Box::new(Pattern), @question.span() )
+    PatternArgs::Question { base: Box::new(Pattern), op_location: @question }
 }
 | Pattern exclamation {
-    PatternArgs::Exclamation( Box::new(Pattern), @exclamation.span() )
+    PatternArgs::Exclamation { base: Box::new(Pattern), op_location: @exclamation }
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
 }
 | p1=Pattern slash lh=Pattern {
-    PatternArgs::Lookaheads( Box::new(p1), Box::new(lh) )
+    PatternArgs::Lookaheads { pattern: Box::new(p1), lookaheads: Box::new(lh) }
 }
 | lparen $sep( Pattern*, pipe, + ) rparen {
-    PatternArgs::Group(Pattern, @lparen.span(), @rparen.span())
+    PatternArgs::Group { alternatives: Pattern, open_location: @lparen, close_location: @rparen }
 }
 | lparen error rparen {
     data.error_recovered.push( RecoveredError {
         message: "syntax error when parsing GROUP".to_string(),
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-        span: @error,
+        location: @error,
     });
-    PatternArgs::Ident(format_ident!("dummy"))
+    PatternArgs::Ident( Default::default() )
 }
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "Pattern-Literal" );
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "Pattern-ByteLiteral" );
     };
-    PatternArgs::Literal(literal)
+    PatternArgs::Byte(Located::new(b.value(), @byte_literal))
+}
+| byte_str_literal {
+    let Lexed::ByteStrLiteral(b) = byte_str_literal else {
+        unreachable!( "Pattern-ByteStringLiteral" );
+    };
+    PatternArgs::ByteString(Located::new(b.value(), @byte_str_literal))
+}
+| char_literal {
+    let Lexed::CharLiteral(c) = char_literal else {
+        unreachable!( "Pattern-CharLiteral" );
+    };
+    PatternArgs::Char(Located::new(c.value(), @char_literal))
+}
+| str_literal {
+    let Lexed::StrLiteral(s) = str_literal else {
+        unreachable!( "Pattern-StringLiteral" );
+    };
+    PatternArgs::String(Located::new(s.value(), @str_literal))
 }
 | p1=Pattern minus p2=Pattern {
-    PatternArgs::Minus( Box::new(p1), Box::new(p2) )
+    PatternArgs::Minus { base: Box::new(p1), exclude: Box::new(p2) }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma? rparen {
     let Lexed::Ident(ident) = ident else {
@@ -306,15 +348,15 @@ Pattern(PatternArgs): ident {
         data.error_recovered.push( RecoveredError {
             message: "Expected $sep".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-            span: @ident,
+            location: @ident,
         });
     }
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false, // default is '*'
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false, // default is '*'
+        location: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma plus rparen {
     let Lexed::Ident(ident) = ident else {
@@ -324,15 +366,15 @@ Pattern(PatternArgs): ident {
         data.error_recovered.push( RecoveredError {
             message: "Expected $sep".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-            span: @ident,
+            location: @ident,
         });
     }
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        true,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: true,
+        location: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma star rparen {
     let Lexed::Ident(ident) = ident else {
@@ -342,15 +384,15 @@ Pattern(PatternArgs): ident {
         data.error_recovered.push( RecoveredError {
             message: "Expected $sep".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-            span: @ident,
+            location: @ident,
         });
     }
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false,
+        location: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern error rparen {
     let Lexed::Ident(ident) = ident else {
@@ -360,21 +402,21 @@ Pattern(PatternArgs): ident {
         data.error_recovered.push( RecoveredError {
             message: "Expected $sep".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-            span: @ident,
+            location: @ident,
         });
     }
     data.error_recovered.push( RecoveredError {
         message: "Unexpected $sep arguments".to_string(),
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-        span: @error
+        location: @error
     });
 
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false,
+        location: *@$
+    }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma error rparen {
     let Lexed::Ident(ident) = ident else {
@@ -384,27 +426,27 @@ Pattern(PatternArgs): ident {
         data.error_recovered.push( RecoveredError {
             message: "Expected $sep".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-            span: @ident,
+            location: @ident,
         });
     }
     data.error_recovered.push( RecoveredError {
         message: "Expected '+' or '*' repetition".to_string(),
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-        span: @error
+        location: @error
     });
 
-    PatternArgs::Sep(
-        Box::new(base),
-        Box::new(del),
-        false,
-        *@$
-    )
+    PatternArgs::Sep {
+        base: Box::new(base),
+        delimiter: Box::new(del),
+        at_least_one: false,
+        location: *@$
+    }
 }
 // | Pattern error {
 //     data.error_recovered.push( RecoveredError {
 //         message: "Wrong pattern combination".to_string(),
 //         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
-//         span: @error,
+//         location: @error,
 //     });
 //     Pattern
 // }
@@ -423,14 +465,21 @@ IdentOrLiteral(IdentOrLiteral): ident {
     let Lexed::Ident(ident) = ident else {
         unreachable!( "IdentOrLiteral-Ident" );
     };
-    IdentOrLiteral::Ident( ident )
+    IdentOrLiteral::Ident( Located::new(ident.to_string(), @ident) )
 }
-| literal {
-    let Lexed::Literal(literal) = literal else {
-        unreachable!( "IdentOrLiteral-Literal" );
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "IdentOrLiteral-ByteLiteral" );
     };
-    IdentOrLiteral::Literal( literal )
-};
+    IdentOrLiteral::Byte(Located::new(b.value(), @byte_literal))
+}
+| char_literal {
+    let Lexed::CharLiteral(c) = char_literal else {
+        unreachable!( "IdentOrLiteral-CharLiteral" );
+    };
+    IdentOrLiteral::Char(Located::new(c.value(), @char_literal))
+}
+;
 
 RustCode(TokenStream): t=[^semicolon]+ {
     let mut tokens = TokenStream::new();
@@ -445,103 +494,103 @@ Directive
         let Lexed::Ident(ident) = ident else {
             unreachable!( "TokenDef-Ident" );
         };
-        data.terminals.push( (ident, RustCode) );
+        data.terminals.push( (Located::new(ident.to_string(), @ident), RustCode) );
     }
     | percent token ident semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected token definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-definition-must-defined".to_string(),
-            span: @ident
+            location: @ident
         });
     }
     | percent token error semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected token name".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-definition-must-defined".to_string(),
-            span: @error
+            location: @error
         });
     }
     | percent start ident semicolon {
         let Lexed::Ident(ident) = ident else {
             unreachable!( "StartDef-Ident" );
         };
-        data.start_rule_name.push(ident);
+        data.start_rule_name.push(Located::new(ident.to_string(), @ident));
     }
     | percent start error semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected start rule name".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#start-symbol-must-defined".to_string(),
-            span: @error
+            location: @error
         });
     }
     | percent tokentype RustCode semicolon {
-        data.token_typename.push( (@tokentype.span(), RustCode) );
+        data.token_typename.push( (@tokentype, RustCode) );
     }
     | percent tokentype semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected token type definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#token-type-must-defined".to_string(),
-            span: @tokentype
+            location: @tokentype
         });
     }
     | percent userdata RustCode semicolon {
-        data.userdata_typename.push( (@userdata.span(),RustCode) );
+        data.userdata_typename.push( (@userdata, RustCode) );
     }
     | percent userdata semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected userdata definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#userdata-type-optional".to_string(),
-            span: @userdata
+            location: @userdata
         });
     }
     | percent left IdentOrLiteral+ semicolon {
-        data.precedences.push( (@left.span(), Some(ReduceType::Left), IdentOrLiteral) );
+        data.precedences.push( (@left, Some(ReduceType::Left), IdentOrLiteral) );
     }
     | percent left error semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected <ident> to token or <literal>".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
-            span: @error
+            location: @error
         });
     }
     | percent right IdentOrLiteral+ semicolon {
-        data.precedences.push( (@right.span(), Some(ReduceType::Right), IdentOrLiteral) );
+        data.precedences.push( (@right, Some(ReduceType::Right), IdentOrLiteral) );
     }
     | percent right error semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected <ident> to token or <literal>".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
-            span: @error
+            location: @error
         });
     }
     | percent precedence IdentOrLiteral+ semicolon {
-        data.precedences.push( (@precedence.span(), None, IdentOrLiteral) );
+        data.precedences.push( (@precedence, None, IdentOrLiteral) );
     }
     | percent precedence error semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected <ident> to token or <literal>".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string(),
-            span: @error
+            location: @error
         });
     }
     | percent errortype RustCode semicolon {
-        data.error_typename.push( (@errortype.span(), RustCode) );
+        data.error_typename.push( (@errortype, RustCode) );
     }
     | percent errortype semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected error type definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#error-type-optional".to_string(),
-            span: @errortype
+            location: @errortype
         });
     }
     | percent moduleprefix RustCode semicolon {
-        data.module_prefix.push( (@moduleprefix.span(), RustCode) );
+        data.module_prefix.push( (@moduleprefix, RustCode) );
     }
     | percent moduleprefix semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected moduleprefix definition".to_string(),
             link: "This is hidden directive, user must not use this explicitly".to_string(),
-            span: @moduleprefix
+            location: @moduleprefix
         });
     }
     | percent glr semicolon {
@@ -551,7 +600,7 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected semicolon".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#glr-parser-generation".to_string(),
-            span: @error,
+            location: @error,
         });
     }
     | percent lalr semicolon {
@@ -561,7 +610,7 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected semicolon".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#lalr-parser-generation".to_string(),
-            span: @error,
+            location: @error,
         });
     }
     | percent nooptim semicolon {
@@ -571,7 +620,7 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected semicolon".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#no-optimization".to_string(),
-            span: @error,
+            location: @error,
         });
     }
     | percent dense semicolon {
@@ -581,7 +630,7 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected semicolon".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#dense-parser-table".to_string(),
-            span: @error,
+            location: @error,
         });
     }
     | percent trace ident* semicolon {
@@ -589,7 +638,7 @@ Directive
             let Lexed::Ident(ident) = t else {
                 unreachable!( "Trace-Ident" );
             };
-            ident
+            Located::new(ident.to_string(), @ident)
         });
         data.traces.extend( idents );
     }
@@ -597,7 +646,7 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected ident".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#tracing-non-terminals".to_string(),
-            span: @error,
+            location: @error,
         });
     }
     | percent filter! RustCode semicolon! {
@@ -607,7 +656,7 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected filter definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#filter-directive".to_string(),
-            span: @filter,
+            location: @filter,
         });
     }
     | percent location! RustCode semicolon! {
@@ -617,14 +666,14 @@ Directive
         data.error_recovered.push( RecoveredError {
             message: "Expected location type definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#location-tracking".to_string(),
-            span: @location,
+            location: @location,
         });
     }
     | percent error semicolon {
         data.error_recovered.push( RecoveredError {
             message: "Expected directive, e.g. %token, %start, ...".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#syntax".to_string(),
-            span: @error,
+            location: @error,
         });
     }
     ;

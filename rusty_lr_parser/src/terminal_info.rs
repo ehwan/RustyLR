@@ -1,13 +1,14 @@
-use proc_macro2::Ident;
 use proc_macro2::Span;
 
+use crate::parser::location::Located;
 use proc_macro2::TokenStream;
+use quote::format_ident;
 use quote::ToTokens;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum TerminalName {
     /// defined in %token
-    Ident(Ident),
+    Ident(String),
 
     /// defined as literal anywhere in the grammar
     CharRange(char, char),
@@ -23,36 +24,30 @@ impl TerminalName {
             }
         }
     }
-    pub fn ident(&self) -> Option<&Ident> {
+    pub fn ident_str(&self) -> Option<&str> {
         match self {
-            TerminalName::Ident(ident) => Some(ident),
+            TerminalName::Ident(s) => Some(s.as_str()),
             TerminalName::CharRange(_, _) => None,
         }
     }
-    pub fn into_ident(self) -> Option<Ident> {
+    pub fn name_ident(&self, span: Span) -> proc_macro2::Ident {
         match self {
-            TerminalName::Ident(ident) => Some(ident),
-            TerminalName::CharRange(_, _) => None,
-        }
-    }
-    // pub fn char(&self) -> Option<char> {
-    //     match self {
-    //         TerminalName::Ident(_) => None,
-    //         TerminalName::Char(c) => Some(*c),
-    //     }
-    // }
-    pub fn name(self) -> Ident {
-        match self {
-            TerminalName::Ident(name) => name,
+            TerminalName::Ident(s) => format_ident!("{}", s, span = span),
             TerminalName::CharRange(c, _) => {
-                let s = format!("_Terminal{}", c as u32);
-                Ident::new(&s, Span::call_site())
+                let s = format!("_Terminal{}", *c as u32);
+                proc_macro2::Ident::new(&s, span)
             }
+        }
+    }
+    pub fn into_string(self) -> Option<String> {
+        match self {
+            TerminalName::Ident(s) => Some(s),
+            TerminalName::CharRange(_, _) => None,
         }
     }
     pub fn pretty_name(&self, is_char: bool, is_u8: bool) -> String {
         match self {
-            TerminalName::Ident(ident) => ident.to_string(),
+            TerminalName::Ident(s) => s.clone(),
             TerminalName::CharRange(start, last) => {
                 if is_char {
                     let start_tok = syn::LitChar::new(*start, Span::call_site()).to_token_stream();
@@ -79,9 +74,9 @@ impl TerminalName {
         }
     }
 }
-impl From<Ident> for TerminalName {
-    fn from(ident: Ident) -> Self {
-        TerminalName::Ident(ident)
+impl From<String> for TerminalName {
+    fn from(s: String) -> Self {
+        TerminalName::Ident(s)
     }
 }
 impl From<(char, char)> for TerminalName {
@@ -89,11 +84,9 @@ impl From<(char, char)> for TerminalName {
         TerminalName::CharRange(c.0, c.1)
     }
 }
-impl From<(u32, u32)> for TerminalName {
-    fn from(c: (u32, u32)) -> Self {
-        let s = unsafe { char::from_u32_unchecked(c.0) };
-        let l = unsafe { char::from_u32_unchecked(c.1) };
-        TerminalName::CharRange(s, l)
+impl From<(u8, u8)> for TerminalName {
+    fn from(c: (u8, u8)) -> Self {
+        TerminalName::CharRange(c.0 as char, c.1 as char)
     }
 }
 
@@ -101,7 +94,7 @@ pub struct TerminalInfo {
     pub name: TerminalName,
 
     /// the precedence level of this terminal
-    pub precedence: Option<(usize, Span)>,
+    pub precedence: Option<Located<usize>>,
 
     /// the actual Rust expr to be emitted
     pub body: TokenStream,
