@@ -557,6 +557,11 @@ impl Grammar {
         }
 
         // precedence orders
+        let mut reduce_definitions: HashMap<
+            IdentOrLiteral,
+            Located<rusty_lr_core::rule::ReduceType>,
+        > = HashMap::default();
+
         for (level, (location, reduce_type, items)) in
             grammar_args.precedences.into_iter().enumerate()
         {
@@ -593,6 +598,18 @@ impl Grammar {
                         } else {
                             unreachable!("unexpected char type in precedence order");
                         }
+                    }
+                }
+                if let Some(rt) = reduce_type {
+                    if let Some(old) = reduce_definitions.get(&item) {
+                        if *old.value() != rt {
+                            return Err(ParseError::MultipleReduceDefinition(vec![
+                                *old,
+                                Located::new(rt, location),
+                            ]));
+                        }
+                    } else {
+                        reduce_definitions.insert(item.clone(), Located::new(rt, location));
                     }
                 }
                 if let Some(old) = grammar.precedence_levels.insert(item, item_prec) {
