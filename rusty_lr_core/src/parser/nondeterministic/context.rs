@@ -1961,7 +1961,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     }
 
     /// Feed eof symbol with default zero-length location from the end of stream.
-    /// Feed eof symbol with default zero-length location from the end of stream.
     fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
         &mut self,
         parser: &P,
