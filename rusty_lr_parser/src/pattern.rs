@@ -154,14 +154,14 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Located::new("A".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("A".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![A] }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -171,21 +171,21 @@ impl Pattern {
                         tokens: vec![
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
-                                mapto: Some(Located::new("Ap".to_string(), Location::Generated)),
-                                location: Location::Generated,
+                                mapto: Some(Located::new("Ap".to_string(), Location::CallSite)),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
-                                mapto: Some(Located::new("A".to_string(), Location::Generated)),
-                                location: Location::Generated,
+                                mapto: Some(Located::new("A".to_string(), Location::CallSite)),
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { Ap.push(A); Ap }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -221,11 +221,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -236,18 +236,18 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -299,12 +299,12 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Located::new("__token0".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -315,7 +315,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -351,11 +351,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -364,7 +364,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -408,12 +408,12 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Located::new("A".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("A".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! { Some(A) })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -424,7 +424,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { None }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -460,11 +460,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -473,7 +473,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -534,12 +534,12 @@ impl Pattern {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: Token::Term(TerminalSymbol::Term(terminal)),
-                            mapto: Some(Located::new("__token0".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -587,12 +587,12 @@ impl Pattern {
                     let rule = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Located::new("__token0".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
@@ -625,11 +625,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: Some(lookaheads),
                         prec: None,
                         dprec: None,
@@ -685,9 +685,9 @@ impl Pattern {
                             token: child.token,
                             mapto: Some(Located::new(
                                 format!("__token{child_idx}"),
-                                Location::Generated,
+                                Location::CallSite,
                             )),
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         });
                         if child.ruletype.is_some() {
@@ -700,7 +700,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: None,
-                                separator_location: Location::Generated,
+                                separator_location: Location::CallSite,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -716,7 +716,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
-                                separator_location: Location::Generated,
+                                separator_location: Location::CallSite,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -741,7 +741,7 @@ impl Pattern {
                             let rule = Rule {
                                 tokens,
                                 reduce_action: Some(ReduceAction::new_custom(initializer)),
-                                separator_location: Location::Generated,
+                                separator_location: Location::CallSite,
                                 lookaheads: None,
                                 prec: None,
                                 dprec: None,
@@ -825,7 +825,7 @@ impl Pattern {
                         })
                         .collect(),
                     reduce_action: None,
-                    separator_location: Location::Generated,
+                    separator_location: Location::CallSite,
                     lookaheads: None,
                     prec: None,
                     dprec: None,
@@ -888,7 +888,7 @@ impl Pattern {
                         })
                         .collect(),
                     reduce_action: None,
-                    separator_location: Location::Generated,
+                    separator_location: Location::CallSite,
                     lookaheads: None,
                     prec: None,
                     dprec: None,
@@ -932,14 +932,14 @@ impl Pattern {
                     let rule1 = Rule {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
-                            mapto: Some(Located::new("__token0".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![__token0] }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -951,24 +951,24 @@ impl Pattern {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: Some(Located::new(
                                     "__token0".to_string(),
-                                    Location::Generated,
+                                    Location::CallSite,
                                 )),
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: Some(Located::new(
                                     "__token1".to_string(),
-                                    Location::Generated,
+                                    Location::CallSite,
                                 )),
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
@@ -978,7 +978,7 @@ impl Pattern {
                             __token0
                             }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1011,11 +1011,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: base_rule.token,
                             mapto: None,
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1026,24 +1026,24 @@ impl Pattern {
                             TokenMapped {
                                 token: base_rule.token,
                                 mapto: None,
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: del.token,
                                 mapto: None,
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                             TokenMapped {
                                 token: Token::NonTerm(newrule_idx),
                                 mapto: None,
-                                location: Location::Generated,
+                                location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
                         ],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1096,12 +1096,12 @@ impl Pattern {
                     let line1 = Rule {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
-                            mapto: Some(Located::new("__token0".to_string(), Location::Generated)),
-                            location: Location::Generated,
+                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1112,7 +1112,7 @@ impl Pattern {
                         reduce_action: Some(ReduceAction::new_custom(quote! {
                             { vec![] }
                         })),
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1148,11 +1148,11 @@ impl Pattern {
                         tokens: vec![TokenMapped {
                             token: plus_rule.token,
                             mapto: None,
-                            location: Location::Generated,
+                            location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
                         }],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,
@@ -1161,7 +1161,7 @@ impl Pattern {
                     let line2 = Rule {
                         tokens: vec![],
                         reduce_action: None,
-                        separator_location: Location::Generated,
+                        separator_location: Location::CallSite,
                         lookaheads: None,
                         prec: None,
                         dprec: None,

@@ -26,7 +26,6 @@ impl SpanManager {
     pub fn get_spans_in_location(&self, location: &Location) -> Vec<Span> {
         match location {
             &Location::Range(start, end) => self.spans[start..end].to_vec(),
-            Location::Generated => vec![], // TODO: handle Generated case
             Location::CallSite => vec![Span::call_site()], // TODO: handle CallSite case
         }
     }
@@ -59,7 +58,6 @@ impl SpanManager {
                 let span = Span::call_site();
                 Some(span.byte_range().start..span.byte_range().end)
             }
-            Location::Generated => None, // TODO: handle Generated case
         }
     }
 }
@@ -73,9 +71,6 @@ pub enum Location {
     Range(usize, usize),
 
     CallSite,
-
-    /// Generated
-    Generated,
 }
 impl Default for Location {
     fn default() -> Self {
@@ -90,7 +85,7 @@ impl Location {
                 let end = e1.max(e2);
                 Location::Range(start, end)
             }
-            _ => Location::Generated, // TODO: handle merging with Generated
+            _ => Location::CallSite, // TODO: handle merging with Generated
         }
     }
 
@@ -225,9 +220,9 @@ mod tests {
         }
 
         let loc3 = Location::Range(1, 3);
-        let loc4 = Location::Generated;
+        let loc4 = Location::CallSite;
         let merged_gen = loc3.merge(&loc4);
-        assert!(matches!(merged_gen, Location::Generated));
+        assert!(matches!(merged_gen, Location::CallSite));
     }
 
     #[test]
@@ -295,7 +290,7 @@ mod tests {
             single_span.byte_range()
         );
 
-        let empty_loc = Location::Generated;
+        let empty_loc = Location::CallSite;
         assert!(manager.get_spans_in_location(&empty_loc).is_empty());
     }
 

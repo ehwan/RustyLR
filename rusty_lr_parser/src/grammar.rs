@@ -906,7 +906,7 @@ impl Grammar {
                     if tokens[*idx].mapto.is_none() {
                         tokens[*idx].mapto = Some(Located::new(
                             format!("__rustylr_token{}", idx),
-                            Location::Generated,
+                            Location::CallSite,
                         ));
                     }
                 }
@@ -922,7 +922,7 @@ impl Grammar {
                             {
                                 tokens[left_token].mapto = Some(Located::new(
                                     format!("__rustylr_token{}", left_token),
-                                    Location::Generated,
+                                    Location::CallSite,
                                 ));
                             }
                         }
@@ -1025,7 +1025,7 @@ impl Grammar {
         // insert augmented rule
         {
             let augmented_name =
-                Located::new(utils::AUGMENTED_NAME.to_string(), Location::Generated);
+                Located::new(utils::AUGMENTED_NAME.to_string(), Location::CallSite);
             let start_idx = grammar
                 .nonterminals_index
                 .get(grammar.start_rule_name.value())
@@ -1035,18 +1035,18 @@ impl Grammar {
                     TokenMapped {
                         token: Token::NonTerm(*start_idx),
                         mapto: None,
-                        location: Location::Generated,
+                        location: Location::CallSite,
                         reduce_action_chains: Vec::new(),
                     },
                     TokenMapped {
                         token: Token::Term(TerminalSymbol::Eof),
                         mapto: None,
-                        location: Location::Generated,
+                        location: Location::CallSite,
                         reduce_action_chains: Vec::new(),
                     },
                 ],
                 reduce_action: None,
-                separator_location: Location::Generated,
+                separator_location: Location::CallSite,
                 lookaheads: None,
                 prec: None,
                 dprec: None,
