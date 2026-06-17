@@ -127,7 +127,7 @@ RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
     RuleLineArgs {
         tokens: TokenMapped,
         reduce_action: Action.map(|action| action.to_token_stream()),
-        separator_location: Location::Generated, // will be set later in RuleLines
+        separator_location: Location::default(), // will be set later in RuleLines
         precs: PrecDef,
     }
 }
