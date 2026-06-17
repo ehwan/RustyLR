@@ -524,7 +524,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -539,7 +539,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -554,7 +554,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -562,9 +562,7 @@ impl JsonDataStack {
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 1usize);
         {
-            let start = __rustylr_location_error.start;
-            let end = __rustylr_location_error.end;
-            println!("Error recovered with '}}' at {start}..{end}");
+            data.push(__rustylr_location_error.clone());
         };
         Ok(())
     }
@@ -576,7 +574,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -591,7 +589,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -606,7 +604,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -621,7 +619,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -636,7 +634,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -651,7 +649,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -666,7 +664,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -681,7 +679,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -696,7 +694,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -711,7 +709,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -726,7 +724,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -741,7 +739,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -756,7 +754,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -771,7 +769,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -786,7 +784,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -801,7 +799,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -816,7 +814,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -831,7 +829,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -846,7 +844,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -861,7 +859,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -876,7 +874,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -891,7 +889,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -905,7 +903,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -920,7 +918,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -935,7 +933,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -949,7 +947,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -964,7 +962,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -979,7 +977,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -994,7 +992,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -1009,7 +1007,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -1023,7 +1021,7 @@ impl JsonDataStack {
         __push_data: bool,
         shift: &mut bool,
         lookahead: &::rusty_lr::TerminalSymbol<char>,
-        data: &mut (),
+        data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
@@ -1042,7 +1040,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     type Term = char;
     type NonTerm = JsonNonTerminals;
     type ReduceActionError = ::rusty_lr::DefaultReduceActionError;
-    type UserData = ();
+    type UserData = Vec<std::ops::Range<usize>>;
     type StartType = ();
     type Location = std::ops::Range<usize>;
     fn pop_start(&mut self) -> Option<Self::StartType> {

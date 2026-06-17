@@ -4,6 +4,7 @@
 
 %tokentype char;
 %start Json;
+%userdata Vec<std::ops::Range<usize>>;
 %dense;
 %location std::ops::Range<usize>;
 
@@ -21,10 +22,7 @@ Value: Object
 Object: '{' WS '}'
       | '{' Members '}'
       | '{' error '}' { 
-        // @error is Range<usize> at this point
-        let start = @error.start;
-        let end = @error.end;
-        println!("Error recovered with '}}' at {start}..{end}"); 
+        data.push(@error.clone());
       }
       ;
 
