@@ -39,6 +39,18 @@ impl SpanManager {
     pub fn get_byterange(&self, location: &Location) -> Option<std::ops::Range<usize>> {
         match location {
             &Location::Range(start, end) => {
+                if start > end {
+                    return None;
+                }
+                if start == end {
+                    if start == 0 {
+                        return None;
+                    }
+                    // zero-length span: point to position after the most recent token
+                    let prev_span = self.spans.get(start - 1)?;
+                    let pos = prev_span.byte_range().end;
+                    return Some(pos..pos);
+                }
                 let start_span = self.spans.get(start)?;
                 let end_span = self.spans.get(end - 1)?;
                 Some((start_span.byte_range().start)..(end_span.byte_range().end))
@@ -276,7 +288,10 @@ mod tests {
         assert_eq!(spans.len(), 2);
 
         let single_span = manager.get_span_in_location(&loc);
-        assert_eq!(manager.spans.first().unwrap().byte_range(), single_span.byte_range());
+        assert_eq!(
+            manager.spans.first().unwrap().byte_range(),
+            single_span.byte_range()
+        );
 
         let empty_loc = Location::Generated;
         assert!(manager.get_spans_in_location(&empty_loc).is_empty());
