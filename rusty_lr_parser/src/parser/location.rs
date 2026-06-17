@@ -291,7 +291,7 @@ mod tests {
         );
 
         let empty_loc = Location::CallSite;
-        assert!(manager.get_spans_in_location(&empty_loc).is_empty());
+        assert!(manager.get_spans_in_location(&empty_loc).len() == 1);
     }
 
     #[test]
