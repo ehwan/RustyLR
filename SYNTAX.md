@@ -191,6 +191,9 @@ You can reference any data with below patterns:
  - `var_name: %RuleType`: token data associated with `var_name`
  - `@var_name: %LocationType`: location data associated with `var_name`
  - `@$: &mut %LocationType`: location data of current non-terminal in this reduce action
+ - `$1`, `$2`, ...: index-based token data ($1 is the leftmost symbol, $2 is the second, etc.)
+ - `@1`, `@2`, ...: index-based location data (@1 is the location of the leftmost symbol, @2 is the second, etc.)
+ - `@0`: location data of current non-terminal in this reduce action (equivalent to `@$`)
  - `lookahead: &TerminalSymbol<%TokenType>`: lookahead token that caused this reduce action
  - `shift: &mut bool`: for non-deterministic GLR parser, set this value to `false` to revoke the shift action
 
@@ -211,6 +214,16 @@ This is also possible for advanced patterns:
 E(i32): A* { A.iter().sum() }; // sum all values in A
 ```
 Here, `A` is a `Vec<A>` and you can access its values directly.
+
+**Bison-style Positional Variables:** You can reference values and locations by their indices in the rule.
+ - `$1`, `$2`, ... represent the semantic values of RHS symbols.
+ - `@1`, `@2`, ... represent the location of RHS symbols.
+ - `@0` represents the location of LHS (equivalent to `@$`).
+
+```rust
+E(i32): A '+' A { $1 + $3 }; // sum first and third token
+```
+
 
 **User Data:** Access mutable user-defined data passed to the parser.
 ```rust

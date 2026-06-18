@@ -1087,17 +1087,24 @@ impl Grammar {
                                     None
                                 }
                             } else {
-                                // if variable was not used at this reduce action,
-                                // we can use `truncate` instead of `pop` for optimization
-                                // so check it here
+                                // check if index-based variable __rustylr_data_{token_idx} is used
+                                let index_var_used = rule.reduce_action_contains_ident(&format!("__rustylr_data_{}", token_idx));
+                                
                                 if let Some(mapto) = &token.mapto {
-                                    if rule.reduce_action_contains_ident(mapto.value().as_str()) {
+                                    let mapto_used = rule.reduce_action_contains_ident(mapto.value().as_str());
+                                    if index_var_used {
+                                        Some(format_ident!("__rustylr_data_{}", token_idx))
+                                    } else if mapto_used {
                                         Some(format_ident!("{}", mapto.value()))
                                     } else {
                                         None
                                     }
                                 } else {
-                                    None
+                                    if index_var_used {
+                                        Some(format_ident!("__rustylr_data_{}", token_idx))
+                                    } else {
+                                        None
+                                    }
                                 }
                             };
                             stack_mapto_map
@@ -1106,22 +1113,29 @@ impl Grammar {
                                 .push(mapto);
                         }
                         let location_mapto = if token.reduce_action_chains.is_empty() {
+                            let location_index_varname_str = format!("__rustylr_location_{}", token_idx);
+                            let index_var_used = rule.reduce_action_contains_ident(&location_index_varname_str);
+
                             if let Some(mapto) = &token.mapto {
                                 let location_varname =
                                     format_ident!("__rustylr_location_{}", mapto.value());
-
-                                // if variable was not used at this reduce action,
-                                // we can use `truncate` instead of `pop` for optimization
-                                // so check it here
                                 let location_varname_str =
                                     format!("__rustylr_location_{}", mapto.value());
-                                if rule.reduce_action_contains_ident(&location_varname_str) {
+                                let mapto_used = rule.reduce_action_contains_ident(&location_varname_str);
+
+                                if index_var_used {
+                                    Some(format_ident!("__rustylr_location_{}", token_idx))
+                                } else if mapto_used {
                                     Some(location_varname)
                                 } else {
                                     None
                                 }
                             } else {
-                                None
+                                if index_var_used {
+                                    Some(format_ident!("__rustylr_location_{}", token_idx))
+                                } else {
+                                    None
+                                }
                             }
                         } else {
                             if token.reduce_action_chains.iter().any(|&idx| {
@@ -1284,6 +1298,35 @@ impl Grammar {
                         }
                     }
 
+                    let mut alias_stream = TokenStream::new();
+                    for (token_idx, token) in rule.tokens.iter().enumerate() {
+                        if token.reduce_action_chains.is_empty() {
+                            if let Some(mapto) = &token.mapto {
+                                let mapto_used = rule.reduce_action_contains_ident(mapto.value().as_str());
+                                let index_var_used = rule.reduce_action_contains_ident(&format!("__rustylr_data_{}", token_idx));
+                                if mapto_used && index_var_used {
+                                    let mapto_ident = format_ident!("{}", mapto.value());
+                                    let data_varname = format_ident!("__rustylr_data_{}", token_idx);
+                                    alias_stream.extend(quote! {
+                                        let mut #mapto_ident = #data_varname;
+                                    });
+                                }
+
+                                let location_varname_str = format!("__rustylr_location_{}", mapto.value());
+                                let location_mapto_used = rule.reduce_action_contains_ident(&location_varname_str);
+                                let location_index_varname_str = format!("__rustylr_location_{}", token_idx);
+                                let location_index_var_used = rule.reduce_action_contains_ident(&location_index_varname_str);
+                                if location_mapto_used && location_index_var_used {
+                                    let mapto_ident = format_ident!("{}", location_varname_str);
+                                    let data_varname = format_ident!("{}", location_index_varname_str);
+                                    alias_stream.extend(quote! {
+                                        let mut #mapto_ident = #data_varname;
+                                    });
+                                }
+                            }
+                        }
+                    }
+
                     let mut custom_reduce_action_stream = TokenStream::new();
                     for (token_idx, token) in rule.tokens.iter().enumerate() {
                         if token.reduce_action_chains.is_empty() {
@@ -1399,6 +1442,7 @@ impl Grammar {
                                 #modify_tag_stream
 
                                 #extract_data_stream
+                                #alias_stream
                                 #custom_reduce_action_stream
 
                                 let __res = #reduce_action_body
@@ -1429,6 +1473,7 @@ impl Grammar {
                                 #modify_tag_stream
 
                                 #extract_data_stream
+                                #alias_stream
                                 #custom_reduce_action_stream
 
                                 #reduce_action_body

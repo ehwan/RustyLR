@@ -808,6 +808,28 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)])
                     }
 
+                    ParseError::BisonVariableZero(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message("Bison variable $0 is not supported")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("This variable reference is invalid")])
+                            .with_notes(vec!["Bison variable $0 is not supported".to_string()])
+                    }
+
+                    ParseError::BisonVariableOutOfRange {
+                        location,
+                        name,
+                        max,
+                    } => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message("Bison variable is out of range")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message(format!("references index out of range (max index: {})", max))])
+                            .with_notes(vec![format!("Bison variable {} is out of range (max index: {})", name, max)])
+                    }
+
                     _ => {
                         let message = e.short_message();
                         let mut labels = Vec::new();

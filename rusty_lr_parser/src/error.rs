@@ -116,6 +116,16 @@ pub enum ParseError {
 
     /// only 'usize' literal is allowed for %dprec
     OnlyUsizeLiteral(Location),
+
+    /// bison variable $0 is not supported
+    BisonVariableZero(Location),
+
+    /// bison variable is out of range
+    BisonVariableOutOfRange {
+        location: Location,
+        name: String,
+        max: usize,
+    },
 }
 #[allow(unused)]
 impl ArgError {
@@ -245,6 +255,8 @@ impl ParseError {
             ParseError::OnlyTerminalSet(location) => vec![*location],
             ParseError::NonTerminalNotDefined(loc) => vec![*loc],
             ParseError::OnlyUsizeLiteral(loc) => vec![*loc],
+            ParseError::BisonVariableZero(loc) => vec![*loc],
+            ParseError::BisonVariableOutOfRange { location, .. } => vec![*location],
         }
     }
 
@@ -298,6 +310,10 @@ impl ParseError {
                 "Unknown non-terminal symbol name".to_string()
             }
             ParseError::OnlyUsizeLiteral(_) => "Only 'usize' literal is allowed for %dprec".into(),
+            ParseError::BisonVariableZero(_) => "bison variable $0 is not supported".into(),
+            ParseError::BisonVariableOutOfRange { name, max, .. } => {
+                format!("bison variable {} is out of range (max: {})", name, max)
+            }
         }
     }
 }
