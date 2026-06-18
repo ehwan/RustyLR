@@ -500,10 +500,18 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub struct JsonDataStack {}
+pub enum JsonData {
+    Empty,
+}
+/// enum for each non-terminal and terminal symbol, that actually hold data
+#[rustfmt::skip]
+#[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+pub struct JsonDataStack {
+    pub __stack: Vec<JsonData>,
+}
 impl Default for JsonDataStack {
     fn default() -> Self {
-        Self {}
+        Self { __stack: Vec::new() }
     }
 }
 #[rustfmt::skip]
@@ -527,8 +535,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Object -> '{' Members '}'
@@ -542,8 +570,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Object -> '{' error '}'
@@ -557,13 +605,31 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
         {
             data.push(__rustylr_location_error.clone());
         };
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Members -> Member
@@ -577,8 +643,16 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Members -> Member ',' Members
@@ -592,8 +666,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Member -> WS String WS ':' Element
@@ -607,8 +701,40 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                4usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Array -> '[' $sep(Element, ',', *) ']'
@@ -622,8 +748,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Element -> WS Value WS
@@ -637,8 +783,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///String -> '"' Character* '"'
@@ -652,8 +818,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Character -> '\\' Escape
@@ -667,8 +853,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Escape -> 'u' Hex Hex Hex Hex
@@ -682,8 +882,40 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                4usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Number -> Integer ('.', Digits)? Exponent
@@ -697,8 +929,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Integer -> ['1'-'9'] Digit+
@@ -712,8 +964,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Integer -> '-' ['0'-'9']
@@ -727,8 +993,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Integer -> '-' ['1'-'9'] Digit+
@@ -742,8 +1022,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Exponent -> 'E' Sign Digit+
@@ -757,8 +1057,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Exponent -> 'e' Sign Digit+
@@ -772,8 +1092,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///WS -> ' ' WS
@@ -787,8 +1127,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///WS -> ['\t', '\n', '\r'] WS
@@ -802,8 +1156,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///"true" -> 't' 'r' 'u' 'e'
@@ -817,8 +1185,34 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 4usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///"false" -> 'f' 'a' 'l' 's' 'e'
@@ -832,8 +1226,40 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                4usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///"null" -> 'n' 'u' 'l' 'l'
@@ -847,8 +1273,34 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 4usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///$sep(Element, ',', +) -> Element
@@ -862,8 +1314,16 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///$sep(Element, ',', +) -> Element ',' $sep(Element, ',', +)
@@ -877,8 +1337,28 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///$sep(Element, ',', *) ->
@@ -893,6 +1373,7 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Character+ -> Character
@@ -906,8 +1387,16 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Character+ -> Character Character+
@@ -921,8 +1410,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Character* ->
@@ -937,6 +1440,7 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Digit+ -> ['0'-'9']
@@ -950,8 +1454,16 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///Digit+ -> ['0'-'9'] Digit+
@@ -965,8 +1477,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///['0'-'9'] -> ['1'-'9']
@@ -980,8 +1506,16 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///('.', Digits) -> '.' Digit+
@@ -995,8 +1529,22 @@ impl JsonDataStack {
         data: &mut Vec<std::ops::Range<usize>>,
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
-        #[cfg(debug_assertions)] {}
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& JsonData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& JsonData::Empty))
+            );
+        }
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///('.', Digits)? ->
@@ -1011,6 +1559,7 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
     ///"" ->
@@ -1025,6 +1574,7 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
+        __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
 }
@@ -1044,20 +1594,38 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     type StartType = ();
     type Location = std::ops::Range<usize>;
     fn pop_start(&mut self) -> Option<Self::StartType> {
-        Some(())
+        self.__stack.pop();
+        match self.__stack.pop() {
+            Some(JsonData::Empty) => Some(()),
+            _ => None,
+        }
     }
-    fn pop(&mut self) {}
+    fn pop(&mut self) {
+        self.__stack.pop();
+    }
     fn push_terminal(&mut self, term: Self::Term) {
-        unreachable!();
+        self.__stack.push(JsonData::Empty);
     }
-    fn push_empty(&mut self) {}
-    fn clear(&mut self) {}
-    fn reserve(&mut self, additional: usize) {}
+    fn push_empty(&mut self) {
+        self.__stack.push(JsonData::Empty);
+    }
+    fn clear(&mut self) {
+        self.__stack.clear();
+    }
+    fn reserve(&mut self, additional: usize) {
+        self.__stack.reserve(additional);
+    }
     fn split_off(&mut self, at: usize) -> Self {
-        Self {}
+        Self {
+            __stack: self.__stack.split_off(at),
+        }
     }
-    fn truncate(&mut self, at: usize) {}
-    fn append(&mut self, other: &mut Self) {}
+    fn truncate(&mut self, at: usize) {
+        self.__stack.truncate(at);
+    }
+    fn append(&mut self, other: &mut Self) {
+        self.__stack.append(&mut other.__stack);
+    }
     fn reduce_action(
         data_stack: &mut Self,
         location_stack: &mut Vec<std::ops::Range<usize>>,
