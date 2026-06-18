@@ -215,7 +215,20 @@ Internally, the generated parser stores all semantic values (the `%tokentype` an
 
 Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `RuleType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
 
-To avoid this, wrap large AST nodes or structures in a `Box` (e.g., `Box<MyLargeNode>`). This ensures the enum variant only takes up the size of a single pointer, optimizing stack memory usage.
+To avoid this, you can prefix the type with the `box` keyword:
+```rust
+%tokentype box Token;
+// or
+Expr(box MyLargeNode) : ... ;
+```
+
+When the `box` keyword is prefixed:
+1. The value is automatically stored as `Box<Type>` in the internal stack enum to optimize stack memory footprint.
+2. Inside reduce actions, variable bindings (e.g., `e=Expr`) automatically dereference the popped value so you receive the unboxed type `MyLargeNode` (not `Box<MyLargeNode>`).
+3. You return the unboxed type `MyLargeNode` from reduce actions; the parser generator automatically wraps the returned value in `Box::new(...)` when pushing it back to the stack.
+4. When feeding tokens to the parser, you feed the unboxed type `Token` directly; the parser wraps it in `Box::new` internally.
+
+Alternatively, you can manually use Rust's `Box` type (e.g., `Box<MyLargeNode>`), but you will need to manually call `Box::new` in reduce actions and manually dereference variables. The `box` keyword prefix provides a clean, automatic syntax sugar for this.
 
 ---
 

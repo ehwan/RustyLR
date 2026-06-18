@@ -24,3 +24,27 @@ pub(crate) fn ident_from_located(
     let span = span_manager.get_span_in_location(location);
     Ident::new(name, span)
 }
+
+pub(crate) fn has_box_prefix(ts: &proc_macro2::TokenStream) -> bool {
+    let mut iter = ts.clone().into_iter();
+    if let Some(proc_macro2::TokenTree::Ident(ident)) = iter.next() {
+        ident.to_string() == "box" && iter.next().is_some()
+    } else {
+        false
+    }
+}
+
+pub(crate) fn strip_box_prefix(ts: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+    if has_box_prefix(&ts) {
+        let mut iter = ts.into_iter();
+        let _ = iter.next(); // Consume 'box'
+        iter.collect()
+    } else {
+        ts
+    }
+}
+
+pub(crate) fn remove_whitespaces(s: String) -> String {
+    s.chars().filter(|c| !c.is_whitespace()).collect()
+}
+
