@@ -43,3 +43,34 @@ fn main() {
     println!("{}", res);
     println!("userdata: {}", userdata);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use parser::Token;
+
+    #[test]
+    fn test_calculator_success() {
+        let input = vec![
+            Token::Num(1),
+            Token::Plus,
+            Token::Num(2),
+            Token::Star,
+            Token::LParen,
+            Token::Num(3),
+            Token::Plus,
+            Token::Num(4),
+            Token::RParen,
+        ];
+
+        let parser = parser::EParser::new();
+        let mut context = parser::EContext::new();
+        let mut userdata: i32 = 0;
+        for token in input {
+            context.feed(&parser, token, &mut userdata).expect("Failed to feed token");
+        }
+        let res = context.accept(&parser, &mut userdata).expect("Failed to accept");
+        assert_eq!(res, 15);
+        assert_eq!(userdata, 2);
+    }
+}
