@@ -46,7 +46,7 @@ fn filter( term: &Token ) -> &Token {
 // data that each token holds can be accessed by its name
 // s is slice of shifted terminal symbols captured by current rule
 // userdata can be accessed by `data` ( &mut i32, for this situation )
-A(i32) : A plus a2=A {
+A(_) : A plus a2=A {
         println!("{:?} {:?} {:?}", A, plus, a2 );
         //                         ^    ^    ^
         //                         |    |    |- value of 2nd 'A'
@@ -61,7 +61,7 @@ A(i32) : A plus a2=A {
     | M
     ;
 
-M(i32) : M_optim star m2=M_optim { M_optim * m2 }
+M(_) : M_optim star m2=M_optim { M_optim * m2 }
     | P
     ;
 
@@ -77,4 +77,4 @@ P(i32) : num {
     | lparen E rparen { E }
     ;
 
-E(i32) : A;
+E(_) : A;

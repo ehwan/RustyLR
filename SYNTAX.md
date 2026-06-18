@@ -162,6 +162,13 @@ E(MyType): ... ;
 ```
 - `MyType`: The Rust type associated with the non-terminal `E`
 
+### Type Inference with Placeholder `_`
+You can use `_` as a placeholder to let `rusty_lr` automatically infer the type of a non-terminal.
+```rust
+E(_): A;
+```
+If `_` is used, the type will be inferred by analyzing the rules (specifically focusing on `Identity` actions/rules that map directly to another typed token or non-terminal). If a circular dependency prevents inference, the parser will return a compilation error.
+
 The actual value of `E` is evaluated by the result of the ReduceAction.
 
 

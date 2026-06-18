@@ -830,6 +830,14 @@ impl Builder {
                             .with_notes(vec![format!("Bison variable {} is out of range (max index: {})", name, max)])
                     }
 
+                    ParseError::TypeInferenceFailed(location) => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message("type inference failed: circular dependency or no identity action found")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("failed to infer type for this placeholder")])
+                    }
+
                     _ => {
                         let message = e.short_message();
                         let mut labels = Vec::new();
