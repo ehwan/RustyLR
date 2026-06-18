@@ -28,14 +28,10 @@ pub(crate) fn ident_from_located(
 pub(crate) fn has_box_prefix(ts: &proc_macro2::TokenStream) -> bool {
     let mut iter = ts.clone().into_iter();
     if let Some(proc_macro2::TokenTree::Ident(ident)) = iter.next() {
-        if ident.to_string() == "box" {
-            let remaining: proc_macro2::TokenStream = iter.collect();
-            if !remaining.is_empty() {
-                return syn::parse2::<syn::Type>(remaining).is_ok();
-            }
-        }
+        ident.to_string() == "box" && iter.next().is_some()
+    } else {
+        false
     }
-    false
 }
 
 pub(crate) fn strip_box_prefix(ts: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
