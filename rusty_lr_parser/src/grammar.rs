@@ -540,7 +540,8 @@ impl Grammar {
         // insert rule typenames first, since it will be used when inserting rule definitions below
         for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
             let ruletype = if is_placeholder_type(&rules_arg.typename) {
-                let placeholder_name = format_ident!("__rustylr_placeholder_{}", rules_arg.name.value());
+                let placeholder_name =
+                    format_ident!("__rustylr_placeholder_{}", rules_arg.name.value());
                 Some(quote! { #placeholder_name })
             } else {
                 rules_arg.typename.clone()
@@ -799,22 +800,35 @@ impl Grammar {
                                                 if let Ok(n) = lit_str.parse::<usize>() {
                                                     if n == 0 {
                                                         // '@0' -> rename to '__rustylr_location0' (self location)
-                                                        new_ts.extend([proc_macro2::TokenTree::Ident(
-                                                            format_ident!("__rustylr_location0"),
-                                                        )]);
+                                                        new_ts.extend([
+                                                            proc_macro2::TokenTree::Ident(
+                                                                format_ident!(
+                                                                    "__rustylr_location0"
+                                                                ),
+                                                            ),
+                                                        ]);
                                                         it.next(); // consume the literal
                                                     } else {
                                                         // '@n' where n > 0
                                                         if n <= num_tokens {
-                                                            let new_ident = format_ident!("__rustylr_location_{}", n - 1);
-                                                            new_ts.extend([proc_macro2::TokenTree::Ident(
-                                                                new_ident,
-                                                            )]);
+                                                            let new_ident = format_ident!(
+                                                                "__rustylr_location_{}",
+                                                                n - 1
+                                                            );
+                                                            new_ts.extend([
+                                                                proc_macro2::TokenTree::Ident(
+                                                                    new_ident,
+                                                                ),
+                                                            ]);
                                                             it.next(); // consume the literal
                                                         } else {
-                                                            let span_idx = span_manager.add_span(punct.span());
+                                                            let span_idx =
+                                                                span_manager.add_span(punct.span());
                                                             span_manager.add_span(lit.span());
-                                                            let loc = Location::Range(span_idx, span_idx + 2);
+                                                            let loc = Location::Range(
+                                                                span_idx,
+                                                                span_idx + 2,
+                                                            );
                                                             return Err(ParseError::BisonVariableOutOfRange {
                                                                 location: loc,
                                                                 name: format!("@{}", n),
@@ -823,7 +837,9 @@ impl Grammar {
                                                         }
                                                     }
                                                 } else {
-                                                    new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                                    new_ts.extend([proc_macro2::TokenTree::Punct(
+                                                        punct,
+                                                    )]);
                                                 }
                                             }
                                             _ => {
@@ -839,21 +855,34 @@ impl Grammar {
                                                 let lit_str = lit.to_string();
                                                 if let Ok(n) = lit_str.parse::<usize>() {
                                                     if n == 0 {
-                                                        let span_idx = span_manager.add_span(punct.span());
+                                                        let span_idx =
+                                                            span_manager.add_span(punct.span());
                                                         span_manager.add_span(lit.span());
-                                                        let loc = Location::Range(span_idx, span_idx + 2);
-                                                        return Err(ParseError::BisonVariableZero(loc));
+                                                        let loc =
+                                                            Location::Range(span_idx, span_idx + 2);
+                                                        return Err(ParseError::BisonVariableZero(
+                                                            loc,
+                                                        ));
                                                     } else {
                                                         if n <= num_tokens {
-                                                            let new_ident = format_ident!("__rustylr_data_{}", n - 1);
-                                                            new_ts.extend([proc_macro2::TokenTree::Ident(
-                                                                new_ident,
-                                                            )]);
+                                                            let new_ident = format_ident!(
+                                                                "__rustylr_data_{}",
+                                                                n - 1
+                                                            );
+                                                            new_ts.extend([
+                                                                proc_macro2::TokenTree::Ident(
+                                                                    new_ident,
+                                                                ),
+                                                            ]);
                                                             it.next(); // consume the literal
                                                         } else {
-                                                            let span_idx = span_manager.add_span(punct.span());
+                                                            let span_idx =
+                                                                span_manager.add_span(punct.span());
                                                             span_manager.add_span(lit.span());
-                                                            let loc = Location::Range(span_idx, span_idx + 2);
+                                                            let loc = Location::Range(
+                                                                span_idx,
+                                                                span_idx + 2,
+                                                            );
                                                             return Err(ParseError::BisonVariableOutOfRange {
                                                                 location: loc,
                                                                 name: format!("${}", n),
@@ -862,11 +891,14 @@ impl Grammar {
                                                         }
                                                     }
                                                 } else {
-                                                    new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                                    new_ts.extend([proc_macro2::TokenTree::Punct(
+                                                        punct,
+                                                    )]);
                                                 }
                                             }
                                             _ => {
-                                                new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                                new_ts
+                                                    .extend([proc_macro2::TokenTree::Punct(punct)]);
                                             }
                                         }
                                     } else {
@@ -1050,8 +1082,10 @@ impl Grammar {
 
         // Resolve placeholders ('_') using type inference
         {
-            let mut resolved: std::collections::HashMap<String, Option<TokenStream>> = std::collections::HashMap::new();
-            let mut unresolved_placeholders: std::collections::HashSet<String> = std::collections::HashSet::new();
+            let mut resolved: std::collections::HashMap<String, Option<TokenStream>> =
+                std::collections::HashMap::new();
+            let mut unresolved_placeholders: std::collections::HashSet<String> =
+                std::collections::HashSet::new();
 
             for nonterm in &grammar.nonterminals {
                 if let Some(name) = get_placeholder_name(&nonterm.ruletype) {
@@ -1090,10 +1124,13 @@ impl Grammar {
                                             break;
                                         }
                                         Token::NonTerm(to_nonterm_idx) => {
-                                            let target_type = &grammar.nonterminals[to_nonterm_idx].ruletype;
+                                            let target_type =
+                                                &grammar.nonterminals[to_nonterm_idx].ruletype;
                                             // Substitute any already resolved placeholders
                                             let substituted = match target_type {
-                                                Some(ts) => substitute_placeholders(ts.clone(), &resolved),
+                                                Some(ts) => {
+                                                    substitute_placeholders(ts.clone(), &resolved)
+                                                }
                                                 None => None,
                                             };
                                             // Check if the substituted type contains any placeholders
@@ -2268,7 +2305,6 @@ fn is_placeholder_type(ruletype: &Option<TokenStream>) -> bool {
     false
 }
 
-
 fn get_placeholder_name(ruletype: &Option<TokenStream>) -> Option<String> {
     if let Some(ts) = ruletype {
         for token in ts.clone() {
@@ -2514,7 +2550,10 @@ mod tests {
         };
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
         let grammar = Grammar::from_grammar_args(grammar_args);
-        assert!(matches!(grammar, Err(ParseError::BisonVariableOutOfRange { .. })));
+        assert!(matches!(
+            grammar,
+            Err(ParseError::BisonVariableOutOfRange { .. })
+        ));
 
         let input_loc = quote! {
             %tokentype char;
@@ -2523,7 +2562,10 @@ mod tests {
         };
         let grammar_args = Grammar::parse_args(input_loc).expect("Failed to parse grammar args");
         let grammar = Grammar::from_grammar_args(grammar_args);
-        assert!(matches!(grammar, Err(ParseError::BisonVariableOutOfRange { .. })));
+        assert!(matches!(
+            grammar,
+            Err(ParseError::BisonVariableOutOfRange { .. })
+        ));
     }
 
     #[test]
@@ -2566,8 +2608,22 @@ mod tests {
         let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
         let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
         let term_idx = grammar.nonterminals_index.get("Term").unwrap();
-        assert_eq!(grammar.nonterminals[*expr_idx].ruletype.as_ref().unwrap().to_string(), "char");
-        assert_eq!(grammar.nonterminals[*term_idx].ruletype.as_ref().unwrap().to_string(), "char");
+        assert_eq!(
+            grammar.nonterminals[*expr_idx]
+                .ruletype
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            "char"
+        );
+        assert_eq!(
+            grammar.nonterminals[*term_idx]
+                .ruletype
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            "char"
+        );
     }
 
     #[test]

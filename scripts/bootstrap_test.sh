@@ -108,4 +108,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+if [ "$is_from_github_actions" != "true" ]; then
+    cargo fmt || true
+fi
+
 echo "All tests passed."
