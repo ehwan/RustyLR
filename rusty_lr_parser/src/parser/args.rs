@@ -666,8 +666,8 @@ pub struct GrammarArgs {
     pub no_optim: bool,
     pub dense: bool,
     pub traces: Vec<Located<String>>,
-    pub filter: Option<TokenStream>,
-    pub location_typename: Option<TokenStream>,
+    pub filter: Vec<(Location, TokenStream)>,
+    pub location_typename: Vec<(Location, TokenStream)>,
 
     pub error_recovered: Vec<RecoveredError>,
     pub span_manager: crate::parser::location::SpanManager,
@@ -689,8 +689,8 @@ impl Default for GrammarArgs {
             no_optim: false,
             dense: false,
             traces: Vec::new(),
-            filter: None,
-            location_typename: None,
+            filter: Vec::new(),
+            location_typename: Vec::new(),
             error_recovered: Vec::new(),
             span_manager: crate::parser::location::SpanManager::default(),
         }

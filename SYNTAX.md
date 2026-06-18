@@ -28,6 +28,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Disabling Table Optimization (`%nooptim`)](#no-optimization)
 - [Dense Parser Tables (`%dense`)](#dense-parser-table)
 - [Location Tracking (`%location`)](#location-tracking)
+- [Variable Substitution](#variable-substitution)
 
 ---
 
@@ -546,4 +547,44 @@ Expr(i32) : e1=Expr '+' e2=Expr {
     println!("Left operand position: {:?}", @e1);
     e1 + e2
 };
+```
+
+---
+
+## Variable Substitution
+
+You can use variables prefixed with `$` inside any RustCode block in the grammar. This includes:
+- `%tokentype`
+- `%location`
+- `%userdata`
+- `%errortype` (or `%error`)
+- `%moduleprefix`
+- `%filter`
+- `%token` terminal definitions
+- Non-terminal rule types
+- Reduce actions
+
+### Supported Variables
+- `$tokentype` -> Evaluates to the type defined by `%tokentype`.
+- `$location` -> Evaluates to the type defined by `%location` (defaults to `$moduleprefix::DefaultLocation`).
+- `$userdata` -> Evaluates to the type defined by `%userdata` (defaults to `()`).
+- `$error` or `$errortype` -> Evaluates to the type defined by `%errortype` / `%error` (defaults to `$moduleprefix::DefaultReduceActionError`).
+- `$moduleprefix` -> Evaluates to the path defined by `%moduleprefix` (defaults to `::rusty_lr`).
+- `$filter` -> Evaluates to the filter expression/function defined by `%filter`.
+- `$NonTerminalName` -> Evaluates to the `ruletype` defined for `NonTerminalName`.
+- `$terminal_name` -> Evaluates to the match pattern/definition of `<terminal_name>`.
+
+### Circular Dependency and Max Depth
+If you introduce circular dependencies among type/definition variables, a compile-time error (`CircularDependency`) is returned. A maximum recursion limit of `100` is enforced to prevent infinite compilation loops.
+
+### Example
+```rust
+%tokentype Token;
+%userdata MyUser;
+%error MyError;
+%token a Token::A;
+
+Expr($tokentype) : a { $tokentype };
+Term($location) : a { $location };
+Rule($userdata) : a { $userdata };
 ```

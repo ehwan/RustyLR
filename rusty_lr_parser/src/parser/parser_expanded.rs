@@ -4533,7 +4533,7 @@ impl GrammarDataStack {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
+        let mut __rustylr_location_filter = __location_stack.pop().unwrap();
         let mut filter = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -4547,7 +4547,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.filter = Some(RustCode);
+            data.filter.push((__rustylr_location_filter, RustCode));
         };
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
@@ -4633,7 +4633,7 @@ impl GrammarDataStack {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
+        let mut __rustylr_location_location = __location_stack.pop().unwrap();
         __data_stack.__stack.pop().unwrap();
         __location_stack.pop().unwrap();
         __data_stack.__stack.pop().unwrap();
@@ -4644,7 +4644,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.location_typename = Some(RustCode);
+            data.location_typename.push((__rustylr_location_location, RustCode));
         };
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())

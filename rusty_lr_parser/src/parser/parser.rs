@@ -650,7 +650,7 @@ Directive
         });
     }
     | percent filter! RustCode semicolon! {
-        data.filter = Some(RustCode);
+        data.filter.push((@filter, RustCode));
     }
     | percent filter! semicolon! {
         data.error_recovered.push( RecoveredError {
@@ -660,7 +660,7 @@ Directive
         });
     }
     | percent location! RustCode semicolon! {
-        data.location_typename = Some(RustCode);
+        data.location_typename.push((@location, RustCode));
     }
     | percent location! semicolon! {
         data.error_recovered.push( RecoveredError {

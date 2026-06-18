@@ -85,11 +85,7 @@ impl Grammar {
             &format!("{}TerminalClasses", self.start_rule_name),
             start_rule_span,
         );
-        let location_typename = self
-            .location_typename
-            .as_ref()
-            .cloned()
-            .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
+        let location_typename = &self.location_typename;
         let reduce_error_typename = &self.error_typename;
 
         let state_structname = if self.emit_dense {
@@ -899,11 +895,7 @@ impl Grammar {
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
         let user_data_typename = &self.userdata_typename;
-        let location_typename = self
-            .location_typename
-            .as_ref()
-            .cloned()
-            .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
+        let location_typename = &self.location_typename;
 
         // empty tag name
         let empty_variant_name = format_ident!("Empty");
