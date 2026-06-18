@@ -613,6 +613,8 @@ impl Grammar {
                                 result.extend(resolved);
                                 continue;
                             } else if providers.contains_key(&format!("nonterm:{}", ident_name)) {
+                                // Direct non-terminal substitution ($NonTerminalName).
+                                // Resolves the variable to the rule type of the specified non-terminal.
                                 iter.next();
                                 let resolved = resolve_provider(
                                     &format!("nonterm:{}", ident_name),
@@ -626,6 +628,9 @@ impl Grammar {
                                 result.extend(resolved);
                                 continue;
                             } else {
+                                // Fallback: If the variable following '$' is not recognized as any known
+                                // configuration, terminal, or non-terminal, we do not throw a compile-time
+                                // error. Instead, we skip resolving and leave the token stream unchanged.
                                 // TODO: 이거 워닝으로 내면 좋을듯
                             }
                         }
@@ -845,6 +850,8 @@ impl Grammar {
             }
         }
 
+        // Resolve and substitute variables inside the %filter expression itself
+        // (e.g. if the user uses defined type/location variables in the filter signature).
         for (_, filter_stream) in &mut grammar_args.filter {
             *filter_stream = substitute_stream(
                 filter_stream.clone(),
