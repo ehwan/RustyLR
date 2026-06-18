@@ -512,10 +512,12 @@ impl Grammar {
                 match tt {
                     proc_macro2::TokenTree::Punct(punct) if punct.as_char() == '$' => {
                         let ref_span = punct.span();
-                        let ref_loc = Location::Range(
-                            span_manager.add_span(ref_span),
-                            span_manager.add_span(ref_span) + 1,
-                        );
+                        // We register this inner token span (e.g., '$') to the SpanManager
+                        // so that we can construct a valid Location index. This allows the buildscript
+                        // to query the exact byte range of the error for visual diagnostic reporting.
+                        // We only need to push the span once, creating a range of length 1.
+                        let idx = span_manager.add_span(ref_span);
+                        let ref_loc = Location::Range(idx, idx + 1);
 
                         if let Some(proc_macro2::TokenTree::Ident(ident)) = iter.peek() {
                             let ident_name = ident.to_string();
