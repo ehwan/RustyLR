@@ -8,7 +8,6 @@ use crate::parser::location::Location;
 use crate::parser::location::Located;
 
 /// failed to feed() the token
-#[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseArgError {
     /// feed() failed; `span` is the byte range `[start, end)` in the source
@@ -18,7 +17,6 @@ pub enum ParseArgError {
     },
 }
 
-#[non_exhaustive]
 #[derive(Debug)]
 pub enum ArgError {
     /// multiple %moduleprefix in the same grammar
@@ -53,7 +51,6 @@ pub enum ArgError {
     ReservedName(Vec<Located<String>>),
 }
 
-#[non_exhaustive]
 #[derive(Debug)]
 pub enum ConflictError {
     /// error building given CFG
@@ -70,7 +67,6 @@ pub enum ConflictError {
     },
 }
 
-#[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
 
@@ -149,7 +145,6 @@ pub enum ParseError {
     /// $filter was used in variable substitution but %filter function not defined
     FilterNotDefined(Location),
 }
-#[allow(unused)]
 impl ArgError {
     pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
@@ -205,12 +200,11 @@ impl ArgError {
             ArgError::MultipleNameDefinition(name, _) => {
                 format!("Duplicated name for terminal or non-terminal: {}", name)
             }
-            ArgError::ReservedName(names) =>
+            ArgError::ReservedName(_) =>
                 "This name is reserved and cannot be used".into(),
         }
     }
 }
-#[allow(unused)]
 impl ParseArgError {
     pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
@@ -230,7 +224,7 @@ impl ParseArgError {
     /// Returns the byte range `[start, end)` of the error location in the source.
     pub fn location(&self) -> Location {
         match self {
-            ParseArgError::MacroLineParse { location, message } => *location,
+            ParseArgError::MacroLineParse { location, .. } => *location,
         }
     }
 
@@ -241,7 +235,6 @@ impl ParseArgError {
     }
 }
 
-#[allow(unused)]
 impl ParseError {
     pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
@@ -261,7 +254,7 @@ impl ParseError {
         match self {
             ParseError::MultipleReduceDefinition(locations) => locations.iter().map(Located::location).collect(),
 
-            ParseError::InvalidTerminalRange { location: range, start, end } => vec![range.clone()],
+            ParseError::InvalidTerminalRange { location, .. } => vec![*location],
 
             ParseError::StartNonTerminalNotDefined(loc) => vec![*loc],
 
@@ -296,7 +289,7 @@ impl ParseError {
                 "Different reduce type (%left and %right) applied to the same terminal symbol".to_string()
             }
 
-            ParseError::InvalidTerminalRange { location: range, start, end } => {
+            ParseError::InvalidTerminalRange { location: _, start, end } => {
                 format!(
                     "Invalid terminal range: [{}({}) - {}({})]",
                     start.0, start.1, end.0, end.1
@@ -366,7 +359,6 @@ impl ParseError {
     }
 }
 
-#[allow(unused)]
 impl ConflictError {
     pub fn to_compile_error(&self) -> TokenStream {
         let span = self.span();
@@ -380,14 +372,10 @@ impl ConflictError {
     pub fn span(&self) -> Span {
         match self {
             ConflictError::ShiftReduceConflict {
-                term,
-                reduce_rule: (ruleid, rule),
-                shift_rules,
+                ..
             } => Span::call_site(),
             ConflictError::ReduceReduceConflict {
-                lookahead,
-                rule1: (ruleid1, rule1),
-                rule2: (ruleid2, rule2),
+                ..
             } => Span::call_site(),
         }
     }
@@ -396,7 +384,7 @@ impl ConflictError {
         match self {
             ConflictError::ShiftReduceConflict {
                 term,
-                reduce_rule: (ruleid, rule),
+                reduce_rule: (_, rule),
                 shift_rules,
             } => {
                 format!(
@@ -405,15 +393,15 @@ impl ConflictError {
                     rule,
                     shift_rules
                         .iter()
-                        .map(|(ruleid, rule)| format!("{}", rule))
+                        .map(|(_, rule)| format!("{}", rule))
                         .collect::<Vec<_>>()
                         .join("\n>>>")
                 )
             }
             ConflictError::ReduceReduceConflict {
                 lookahead,
-                rule1: (ruleid1, rule1),
-                rule2: (ruleid2, rule2),
+                rule1: (_, rule1),
+                rule2: (_, rule2),
             } => {
                 format!(
                     "Reduce-Reduce conflict with lookahead symbol: {}\n>>> Rule1: {}\n>>> Rule2: {}",

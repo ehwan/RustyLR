@@ -308,18 +308,6 @@ impl Builder {
                         )
                         .with_message("Error here")])
                         .with_notes(vec![message]),
-
-                    _ => {
-                        let message = e.short_message();
-                        let location = e.location();
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(vec![Label::primary(
-                                file_id,
-                                sm.get_byterange(&location).unwrap_or(0..0),
-                            )
-                            .with_message("occured here")])
-                    }
                 };
 
                 let writer = self.stream();
@@ -458,9 +446,9 @@ impl Builder {
                         Diagnostic::error()
                             .with_message("Multiple %location definition")
                             .with_labels(labels)
-                            .with_notes(vec![
-                                "Only one %location definition is allowed".to_string()
-                            ])
+                            .with_notes(
+                                vec!["Only one %location definition is allowed".to_string()],
+                            )
                     }
                     ArgError::MultipleFilterDefinition(locs) => {
                         let mut labels = Vec::new();
@@ -480,9 +468,7 @@ impl Builder {
                         Diagnostic::error()
                             .with_message("Multiple %filter definition")
                             .with_labels(labels)
-                            .with_notes(vec![
-                                "Only one %filter definition is allowed".to_string()
-                            ])
+                            .with_notes(vec!["Only one %filter definition is allowed".to_string()])
                     }
                     ArgError::MultipleEofDefinition(locs) => {
                         let mut labels = Vec::new();
@@ -622,22 +608,6 @@ impl Builder {
                             .with_message("Reserved name used")
                             .with_labels(labels)
                             .with_notes(vec!["Name is reserved and cannot be used".to_string()])
-                    }
-
-                    _ => {
-                        let message = e.short_message();
-                        let mut labels = Vec::new();
-                        for loc in e.locations() {
-                            let range = grammar_args
-                                .span_manager
-                                .get_byterange(&loc)
-                                .unwrap_or(0..0);
-                            labels
-                                .push(Label::primary(file_id, range).with_message("occured here"));
-                        }
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(labels)
                     }
                 };
 
@@ -869,9 +839,13 @@ impl Builder {
                         let range = span_manager.get_byterange(&location).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Bison variable is out of range")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message(format!("references index out of range (max index: {})", max))])
-                            .with_notes(vec![format!("Bison variable {} is out of range (max index: {})", name, max)])
+                            .with_labels(vec![Label::primary(file_id, range).with_message(
+                                format!("references index out of range (max index: {})", max),
+                            )])
+                            .with_notes(vec![format!(
+                                "Bison variable {} is out of range (max index: {})",
+                                name, max
+                            )])
                     }
 
                     ParseError::TypeInferenceFailed(location) => {
@@ -896,7 +870,10 @@ impl Builder {
                             ])
                     }
 
-                    ParseError::MaxSubstitutionDepthExceeded { location, max_depth } => {
+                    ParseError::MaxSubstitutionDepthExceeded {
+                        location,
+                        max_depth,
+                    } => {
                         let range = span_manager.get_byterange(&location).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message(format!(
@@ -920,19 +897,6 @@ impl Builder {
                                 "Define the filter function using %filter <path>;".to_string(),
                                 "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
                             ])
-                    }
-
-                    _ => {
-                        let message = e.short_message();
-                        let mut labels = Vec::new();
-                        for loc in e.locations() {
-                            let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
-                            labels
-                                .push(Label::primary(file_id, range).with_message("occured here"));
-                        }
-                        Diagnostic::error()
-                            .with_message(message)
-                            .with_labels(labels)
                     }
                 };
 
