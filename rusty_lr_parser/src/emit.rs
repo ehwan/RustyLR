@@ -662,148 +662,148 @@ impl Grammar {
         // do not build at runtime
         // write all parser tables and production rules directly here
 
-            let state_index_typename = if self.states.len() <= u8::MAX as usize {
-                quote! { u8 }
-            } else if self.states.len() <= u16::MAX as usize {
-                quote! { u16 }
-            } else if self.states.len() <= u32::MAX as usize {
-                quote! { u32 }
-            } else {
-                quote! { usize }
-            };
+        let state_index_typename = if self.states.len() <= u8::MAX as usize {
+            quote! { u8 }
+        } else if self.states.len() <= u16::MAX as usize {
+            quote! { u16 }
+        } else if self.states.len() <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
 
-            let rule_index_typename = if self.builder.rules.len() <= u8::MAX as usize {
-                quote! { u8 }
-            } else if self.builder.rules.len() <= u16::MAX as usize {
-                quote! { u16 }
-            } else if self.builder.rules.len() <= u32::MAX as usize {
-                quote! { u32 }
-            } else {
-                quote! { usize }
-            };
+        let rule_index_typename = if self.builder.rules.len() <= u8::MAX as usize {
+            quote! { u8 }
+        } else if self.builder.rules.len() <= u16::MAX as usize {
+            quote! { u16 }
+        } else if self.builder.rules.len() <= u32::MAX as usize {
+            quote! { u32 }
+        } else {
+            quote! { usize }
+        };
 
-            let mut production_rules_body_stream = TokenStream::new();
-            for rule in &self.builder.rules {
-                let mut tokens_vec_body_stream = TokenStream::new();
-                for &token in &rule.rule.rule {
-                    let token_stream = token_to_stream(token);
-                    tokens_vec_body_stream.extend(quote! {
-                        #token_stream,
-                    });
-                }
-                let name = &nonterminals_token[rule.rule.name];
-                let precedence_stream = if let Some(precedence) = rule.rule.precedence {
-                    let s = precedence_to_stream(precedence);
-                    quote! { Some(#s) }
-                } else {
-                    quote! { None }
-                };
-
-                // lookaheads
-                production_rules_body_stream.extend(quote! {
-                    #module_prefix::rule::ProductionRule{
-                        name: #name,
-                        rule: vec![ #tokens_vec_body_stream ],
-                        precedence: #precedence_stream,
-                    },
+        let mut production_rules_body_stream = TokenStream::new();
+        for rule in &self.builder.rules {
+            let mut tokens_vec_body_stream = TokenStream::new();
+            for &token in &rule.rule.rule {
+                let token_stream = token_to_stream(token);
+                tokens_vec_body_stream.extend(quote! {
+                    #token_stream,
                 });
             }
-            let mut states_body_stream = TokenStream::new();
-            for state in &self.states {
-                let mut shift_term_body_stream = TokenStream::new();
-                for &(term, next_state) in &state.shift_goto_map_term {
-                    let push = next_state.push;
-                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
-                    let term = match term {
-                        TerminalSymbol::Term(term) => {
-                            let var = &class_variants[term];
-                            quote! { #termclass_typename::#var }
-                        }
-                        TerminalSymbol::Error => {
-                            let error_name = format_ident!("{}", utils::ERROR_NAME);
-                            quote! { #termclass_typename::#error_name }
-                        }
-                        TerminalSymbol::Eof => {
-                            let eof_name = format_ident!("{}", utils::EOF_NAME);
-                            quote! { #termclass_typename::#eof_name }
-                        }
-                    };
-                    shift_term_body_stream.extend(quote! {
-                        (#term, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
-                    });
-                }
+            let name = &nonterminals_token[rule.rule.name];
+            let precedence_stream = if let Some(precedence) = rule.rule.precedence {
+                let s = precedence_to_stream(precedence);
+                quote! { Some(#s) }
+            } else {
+                quote! { None }
+            };
 
-                let mut shift_nonterm_body_stream = TokenStream::new();
-                for &(nonterm, next_state) in &state.shift_goto_map_nonterm {
-                    let nonterm_stream = &nonterminals_token[nonterm];
-                    let push = next_state.push;
-                    let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
-                    shift_nonterm_body_stream.extend(quote! {
-                        (#nonterm_stream, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
-                    });
-                }
-
-                let mut reduce_map_items = TokenStream::new();
-                for (term, rules) in &state.reduce_map {
-                    let term_stream = match term {
-                        TerminalSymbol::Term(term) => {
-                            let var = &class_variants[*term];
-                            quote! { #termclass_typename::#var }
-                        }
-                        TerminalSymbol::Error => {
-                            let error_name = format_ident!("{}", utils::ERROR_NAME);
-                            quote! { #termclass_typename::#error_name }
-                        }
-                        TerminalSymbol::Eof => {
-                            let eof_name = format_ident!("{}", utils::EOF_NAME);
-                            quote! { #termclass_typename::#eof_name }
-                        }
-                    };
-                    let rules_it = rules
-                        .iter()
-                        .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
-                    reduce_map_items.extend(quote! {
-                        (#term_stream, vec![#(#rules_it),*]),
-                    });
-                }
-                let reduce_map_construct_stream = if reduce_map_items.is_empty() {
-                    quote! { Default::default() }
-                } else {
-                    quote! {
-                        vec![#reduce_map_items]
+            // lookaheads
+            production_rules_body_stream.extend(quote! {
+                #module_prefix::rule::ProductionRule{
+                    name: #name,
+                    rule: vec![ #tokens_vec_body_stream ],
+                    precedence: #precedence_stream,
+                },
+            });
+        }
+        let mut states_body_stream = TokenStream::new();
+        for state in &self.states {
+            let mut shift_term_body_stream = TokenStream::new();
+            for &(term, next_state) in &state.shift_goto_map_term {
+                let push = next_state.push;
+                let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
+                let term = match term {
+                    TerminalSymbol::Term(term) => {
+                        let var = &class_variants[term];
+                        quote! { #termclass_typename::#var }
+                    }
+                    TerminalSymbol::Error => {
+                        let error_name = format_ident!("{}", utils::ERROR_NAME);
+                        quote! { #termclass_typename::#error_name }
+                    }
+                    TerminalSymbol::Eof => {
+                        let eof_name = format_ident!("{}", utils::EOF_NAME);
+                        quote! { #termclass_typename::#eof_name }
                     }
                 };
+                shift_term_body_stream.extend(quote! {
+                    (#term, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
+                });
+            }
 
-                let mut ruleset_items = TokenStream::new();
-                for &rule in &state.ruleset {
-                    let rule_lit = proc_macro2::Literal::usize_unsuffixed(rule.rule);
-                    let shifted_lit = proc_macro2::Literal::usize_unsuffixed(rule.shifted);
-                    ruleset_items.extend(quote! {
-                        #module_prefix::rule::ShiftedRuleRef {
-                            rule: #rule_lit as usize,
-                            shifted: #shifted_lit as usize,
-                        },
+            let mut shift_nonterm_body_stream = TokenStream::new();
+            for &(nonterm, next_state) in &state.shift_goto_map_nonterm {
+                let nonterm_stream = &nonterminals_token[nonterm];
+                let push = next_state.push;
+                let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
+                shift_nonterm_body_stream.extend(quote! {
+                        (#nonterm_stream, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
                     });
-                }
+            }
 
-                let can_accept_error = match state.can_accept_error {
-                    rusty_lr_core::TriState::False => quote! { #module_prefix::TriState::False },
-                    rusty_lr_core::TriState::True => quote! { #module_prefix::TriState::True },
-                    rusty_lr_core::TriState::Maybe => quote! { #module_prefix::TriState::Maybe },
+            let mut reduce_map_items = TokenStream::new();
+            for (term, rules) in &state.reduce_map {
+                let term_stream = match term {
+                    TerminalSymbol::Term(term) => {
+                        let var = &class_variants[*term];
+                        quote! { #termclass_typename::#var }
+                    }
+                    TerminalSymbol::Error => {
+                        let error_name = format_ident!("{}", utils::ERROR_NAME);
+                        quote! { #termclass_typename::#error_name }
+                    }
+                    TerminalSymbol::Eof => {
+                        let eof_name = format_ident!("{}", utils::EOF_NAME);
+                        quote! { #termclass_typename::#eof_name }
+                    }
                 };
+                let rules_it = rules
+                    .iter()
+                    .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
+                reduce_map_items.extend(quote! {
+                    (#term_stream, vec![#(#rules_it),*]),
+                });
+            }
+            let reduce_map_construct_stream = if reduce_map_items.is_empty() {
+                quote! { Default::default() }
+            } else {
+                quote! {
+                    vec![#reduce_map_items]
+                }
+            };
 
-                states_body_stream.extend(quote! {
-                    #module_prefix::parser::state::IntermediateState {
-                        shift_goto_map_term: vec![#shift_term_body_stream],
-                        shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
-                        reduce_map: #reduce_map_construct_stream,
-                        ruleset: vec![
-                            #ruleset_items
-                        ],
-                        can_accept_error: #can_accept_error,
+            let mut ruleset_items = TokenStream::new();
+            for &rule in &state.ruleset {
+                let rule_lit = proc_macro2::Literal::usize_unsuffixed(rule.rule);
+                let shifted_lit = proc_macro2::Literal::usize_unsuffixed(rule.shifted);
+                ruleset_items.extend(quote! {
+                    #module_prefix::rule::ShiftedRuleRef {
+                        rule: #rule_lit as usize,
+                        shifted: #shifted_lit as usize,
                     },
                 });
             }
+
+            let can_accept_error = match state.can_accept_error {
+                rusty_lr_core::TriState::False => quote! { #module_prefix::TriState::False },
+                rusty_lr_core::TriState::True => quote! { #module_prefix::TriState::True },
+                rusty_lr_core::TriState::Maybe => quote! { #module_prefix::TriState::Maybe },
+            };
+
+            states_body_stream.extend(quote! {
+                #module_prefix::parser::state::IntermediateState {
+                    shift_goto_map_term: vec![#shift_term_body_stream],
+                    shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
+                    reduce_map: #reduce_map_construct_stream,
+                    ruleset: vec![
+                        #ruleset_items
+                    ],
+                    can_accept_error: #can_accept_error,
+                },
+            });
+        }
 
         let error_used = self.error_used;
 
@@ -873,8 +873,8 @@ impl Grammar {
                     });
 
                     Self {
-                        rules,
-                        states,
+                        rules: rules.as_slice(),
+                        states: states.as_slice(),
                     }
                 }
             }

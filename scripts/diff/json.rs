@@ -4252,7 +4252,10 @@ impl JsonParser {
                 ];
                 states.into_iter().map(|state| state.into()).collect()
             });
-        Self { rules, states }
+        Self {
+            rules: rules.as_slice(),
+            states: states.as_slice(),
+        }
     }
 }
 
