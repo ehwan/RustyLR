@@ -2582,4 +2582,26 @@ mod tests {
         let grammar = Grammar::from_grammar_args(grammar_args);
         assert!(matches!(grammar, Err(ParseError::TypeInferenceFailed(_))));
     }
+
+    #[test]
+    fn test_codegen_no_empty_tags() {
+        let input = quote! {
+            %tokentype Token;
+            %start Expr;
+            %token a Token::A(_);
+            Expr(i32) : a { 1 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        let code = grammar.emit_compiletime();
+        
+        // Ensure the generated code compiles successfully as a valid Rust TokenStream
+        let parsed = syn::parse2::<syn::File>(code.clone());
+        assert!(parsed.is_ok(), "Generated code failed to parse: {:?}", parsed.err());
+        
+        // Check that the Empty variant is present in the output
+        let code_str = code.to_string();
+        assert!(code_str.contains("Empty"), "Empty variant should be unconditionally included");
+    }
 }
+

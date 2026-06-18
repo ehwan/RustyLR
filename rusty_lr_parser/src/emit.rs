@@ -922,7 +922,6 @@ impl Grammar {
         // for consistent output
         let mut variant_names_in_order = Vec::new();
 
-        let mut empty_tag_used = false;
         let mut terminal_data_used = false;
 
         // insert variant for terminal token type
@@ -934,9 +933,6 @@ impl Grammar {
             );
             variant_names_in_order
                 .push((terminal_variant_name.clone(), self.token_typename.clone()));
-        }
-        if self.terminal_classes.iter().any(|c| !c.data_used) {
-            empty_tag_used = true;
         }
 
         fn remove_whitespaces(s: String) -> String {
@@ -958,7 +954,6 @@ impl Grammar {
                     .clone();
                 variant_names_for_nonterm.push(variant_name);
             } else {
-                empty_tag_used = true;
                 variant_names_for_nonterm.push(empty_variant_name.clone());
             }
         }
@@ -1464,11 +1459,9 @@ impl Grammar {
                     #variant_name(#typename),
                 });
             }
-            if empty_tag_used {
-                variants.extend(quote! {
-                    Empty,
-                });
-            }
+            variants.extend(quote! {
+                Empty,
+            });
             quote! {
                 /// enum for each non-terminal and terminal symbol, that actually hold data
                 #[rustfmt::skip]
