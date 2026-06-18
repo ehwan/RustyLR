@@ -29,8 +29,8 @@ Below is a simple grammar illustrating shift/reduce conflicts caused by operator
 Digit(char) : ch=['0'-'9'] { ch };
 
 E(i32)
-    : E '+' E   { E + e2 } // Shift/Reduce conflict: + vs + or *
-    | E '*' E   { E * e2 } // Shift/Reduce conflict: * vs + or *
+    : E '+' e2=E   { E + e2 } // Shift/Reduce conflict: + vs + or *
+    | E '*' e2=E   { E * e2 } // Shift/Reduce conflict: * vs + or *
     | Digit     { Digit.to_digit(10).unwrap() as i32 }
     ;
 ```
