@@ -1,567 +1,549 @@
 # Syntax
-## Quick Reference
- - [Token type - `%tokentype`](#token-type-must-defined)
- - [Defining tokens - `%token`](#token-definition-must-defined)
- - [`%filter`](#filter-directive)
- - [Production rules](#production-rules)
- - [Regex patterns](#regex-pattern)
- - [RuleType](#ruletype-optional)
- - [ReduceAction](#reduceaction-optional)
- - [Accessing token data in ReduceAction](#accessing-token-data-in-reduceaction)
- - [Exclamation mark `!`](#exclamation-mark-)
- - [Traceable Non-Terminals - `%trace`](#tracing-non-terminals)
- - [Start symbol - `%start`](#start-symbol-must-defined)
- - [User data type - `%userdata`](#userdata-type-optional)
- - [Resolving Conflicts](#resolving-conflicts)
-    - [Panic Mode Error Recovery - `error`](#panic-mode-error-recovery)
-    - [Shift/Reduce conflicts - `%left`, `%right`, `%precedence`, `%prec`](#operator-precedence)
-    - [Reduce/Reduce conflicts - `%dprec`](#rule-priority)
- - [Error variants - `%err`, `%error`](#error-type-optional)
- - [GLR parser - `%glr`](#glr-parser-generation)
- - [LALR parser - `%lalr`](#lalr-parser-generation)
- - [Disable Optimization - `%nooptim`](#no-optimization)
- - [Make dense parser table - `%dense`](#dense-parser-table)
- - [Location tracking - `%location`](#location-tracking)
 
+This document provides a comprehensive guide to the grammar definition syntax used by RustyLR. The syntax is heavily inspired by parser generators like *Yacc* and *Bison*, but tailored to integrate seamlessly with the Rust programming language.
+
+---
+
+## Quick Reference
+
+- [Token Type (`%tokentype`)](#token-type-must-defined)
+- [Token Definition (`%token`)](#token-definition-must-defined)
+- [Filter Directive (`%filter`)](#filter-directive)
+- [Production Rules](#production-rules)
+- [Patterns](#patterns)
+- [RuleType (Non-Terminal Types)](#ruletype-optional)
+- [Reduce Actions](#reduceaction-optional)
+- [Accessing Data in Reduce Actions](#accessing-token-data-in-reduceaction)
+- [Exclamation Mark (`!`) Value Discard](#exclamation-mark-)
+- [Tracing Non-Terminals (`%trace`)](#tracing-non-terminals)
+- [Start Symbol (`%start`)](#start-symbol-must-defined)
+- [Userdata Type (`%userdata`)](#userdata-type-optional)
+- [Conflict Resolution](#resolving-conflicts)
+  - [Panic-Mode Error Recovery (`error`)](#panic-mode-error-recovery)
+  - [Operator Precedence (`%left`, `%right`, `%precedence`, `%prec`)](#operator-precedence)
+  - [Rule Priority (`%dprec`)](#rule-priority)
+- [Error Type (`%err` / `%error`)](#error-type-optional)
+- [LALR(1) Parser Generation (`%lalr`)](#lalr-parser-generation)
+- [GLR Parser Generation (`%glr`)](#glr-parser-generation)
+- [Disabling Table Optimization (`%nooptim`)](#no-optimization)
+- [Dense Parser Tables (`%dense`)](#dense-parser-table)
+- [Location Tracking (`%location`)](#location-tracking)
+
+---
 
 ## Overview
-RustyLR's grammar syntax is inspired by parser generators like Yacc and Bison.
-Grammars are defined using a combination of directives, token definitions, and production rules.
 
-In procedural macros, the grammar is defined using the `lr1!` macro.
-In build script files, the grammar section is separated from Rust code using `%%`. Everything before `%%` is treated as regular Rust code and is copied as-is to the generated output.
+RustyLR grammars can be defined in two ways:
+1. **Procedural Macros:** Using the `lr1!` macro inline in your Rust code.
+2. **Build Scripts:** Using a standalone grammar file (e.g., `src/grammar.rs`) processed by the `rustylr` command-line tool. stand-alone files use the `%%` delimiter to separate Rust helper code (imports, custom enums) from the grammar definition. Everything preceding `%%` is copied as-is into the generated parser file.
 
-## Token type <sub><sup>(must defined)</sup></sub>
+---
+
+## Token Type (Must Defined)
+
 ```
 %tokentype <RustType> ;
 ```
-Define the type of terminal symbols.
-`<RustType>` must be accessible at the point where the macro is called.
 
+Defines the Rust type representing the input terminal symbols (tokens). The `<RustType>` must be in scope at the place where the parser is generated.
+
+### Example
 ```rust
-enum MyTokenType<Generic> {
-    Digit,
-    Ident,
-    ...
-    VariantWithGeneric<Generic>
+#[derive(Debug, Clone)]
+pub enum Token {
+    Ident(String),
+    Num(i32),
+    Plus,
+    Minus,
 }
 
-lr! {
-...
-%tokentype MyTokenType<i32>;
-}
+// In the grammar section:
+%tokentype Token;
 ```
 
+---
 
-## Token definition <sub><sup>(must defined)</sup></sub>
+## Token Definition (Must Defined)
+
 ```
 %token name <MatchPattern> ;
 ```
-Defines the terminal symbol `name` for further use in the grammar,
-and `<MatchPattern>` will be used in the terminal classification `match` statement:
+
+Binds a grammar terminal symbol (`name`) to a pattern (`<MatchPattern>`) used to classify tokens. Under the hood, RustyLR generates a `match` statement to identify the token:
+
 ```rust
-match terminal_symbol {
-    <MatchPattern> => { classification }
+match terminal_token {
+    <MatchPattern> => { /* Classified as `name` */ },
     ...
 }
 ```
 
-**Example:**
+### Example
 ```rust
-%tokentype MyToken;
+%tokentype Token;
 
-%token num MyToken::Num(_);
-%token plus MyToken::Punct('+');
-%token minus MyToken::Punct('-');
-...
+%token id Token::Ident(_);   // Matches Token::Ident("foo") and extracts the value
+%token num Token::Num(_);     // Matches Token::Num(42) and extracts the value
+%token plus Token::Plus;       // Matches Token::Plus
+%token minus Token::Minus;     // Matches Token::Minus
 
-E: num plus num 
- | num minus num 
- ;
+Expr
+    : id plus num
+    | num minus id
+    ;
 ```
 
-**Notes:**
-- If `%tokentype` is either `char` or `u8`, you can't use this directive. You must use literal values in the grammar directly.
-- This directive is not for defining the *complete token space*. Any token not defined here can also be captured by `[^ term1 ...]`-like negation patterns.
+### Notes
+- **Literal Tokens:** If `%tokentype` is set to `char` or `u8`, you do not need to define tokens using `%token`. Instead, use character literals (`'+'`, `'a'`) or byte literals (`b'+'`, `b'a'`) directly in the grammar.
+- **Incomplete Token Space:** You do not need to exhaustively define every single possible enum variant. Any tokens not explicitly matched can still be captured using negation sets (e.g., `[^ plus minus]`).
 
+---
 
-## `%filter` directive
-For `%tokentype` that cannot be used in `match` statement directly,
-you can define a filter function using the `%filter` directive.
-```rust
-%filter ::my::filter_fn ;
+## %filter Directive
+
 ```
-Now the `match` statement will be generated as follows:
+%filter <Path> ;
+```
+
+When your `%tokentype` cannot be matched directly in a simple Rust `match` pattern (e.g., if it contains generic parameters, references, or requires complex validation), you can define a custom filter function.
+
+When specified, the generated classification `match` will wrap the input terminal in the filter function:
+
 ```rust
-match ::my::filter_fn(terminal_symbol) {
-    <MatchPattern> => { classification }
+match filter_fn(terminal_token) {
+    <MatchPattern> => { /* ... */ }
     ...
 }
 ```
 
-The signature of the filter function must be `fn (&Terminal) -> MatchType`.
+The filter function signature must be: `fn(&Terminal) -> MatchType` or `fn(Terminal) -> MatchType` depending on your wrapper design.
 
+### Example
+```rust
+fn my_filter(token: &Token) -> TokenKind {
+    match token {
+        Token::Ident(_) => TokenKind::Ident,
+        Token::Num(_) => TokenKind::Num,
+        Token::Plus => TokenKind::Plus,
+    }
+}
+
+// In the grammar:
+%filter my_filter;
+```
+
+---
 
 ## Production Rules
-Each production rule defines how a non-terminal symbol can be derived from a sequence of patterns.
+
+Production rules define how non-terminal symbols are constructed from sequences of other symbols or pattern groups.
+
 ```
 NonTerminalName
     : Pattern1 Pattern2 ... PatternN %prec OpName { ReduceAction }
     | Pattern1 Pattern2 ... PatternN { ReduceAction }
-   ...
+    ...
     ;
 ```
-**Components:**
- - **NonTerminalName:** The name of the non-terminal symbol being defined
- - **PatternX:** A terminal or non-terminal symbol, or a pattern as defined below
- - **ReduceAction:** Optional Rust code executed when the rule is reduced
- - **OpName:** Use this symbol as an operator for this production rule. `OpName` can be defined with `%token` or literal, or any unique identifier just for this rule. See [RuleType](#ruletype-optional) for more details.
+
+### Components
+- **`NonTerminalName`**: The name of the non-terminal being defined.
+- **`PatternX`**: A symbol (terminal or non-terminal) or a regex-like pattern (see [Patterns](#patterns)).
+- **`ReduceAction`**: An optional block of Rust code executed when the production rule is reduced.
+- **`%prec OpName`**: Explicitly assigns the operator precedence of the terminal `OpName` to this rule (see [Operator Precedence](#operator-precedence)).
+
+---
 
 ## Patterns
-Patterns define the structure of the input that matches a production rule.
 
- - `.` : Any single terminal symbol
- - `name` : Non-terminal or terminal symbol `name` defined in the grammar
- - `[term1 term_start-term_last]`, `[^term1 term_start-term_last]` : Set of terminal symbols.
- - `P*` : Zero or more repetitions of `P`
- - `P+` : One or more repetitions of `P`
- - `P?` : Zero or one repetition of `P`
- - `$sep( P, P_separator, repetition )`: A repetition of `P` separated by `P_separator`. The `repetition` can be `*`, or `+` to indicate zero or more, or one or more repetitions respectively
- - `(P1 P2 P3 | P4 | P5 P6 ...)` : Grouping of patterns
- - `P / term` or `P / [term1 term_start-term_last]`: Pattern `P` followed by lookaheads. Lookaheads will not be consumed
- - `'a'` or `b'a'`: Single character literal or byte literal. This is only supported if the `%tokentype` is `char` or `u8`
- - `"abcd"` or `b"abcd"`: String literal or byte string literal. This is only supported if the `%tokentype` is `char` or `u8`
- - `P - TerminalSet`: `P` must be a subset of terminal symbols. This pattern matches `P` but not any of the terminal symbols in `TerminalSet`
+RustyLR supports rich regular expression patterns on the right-hand side of production rules:
 
-**Important Note about Range Patterns:**
-When using range patterns like `[first-last]`, the range is determined by the order of `%token` directives, not by the actual values of the tokens.
+- **`.`** : Matches any single terminal symbol.
+- **`name`** : Matches the terminal or non-terminal symbol `name`.
+- **`[term1 term_start-term_last]`** : Matches any terminal symbol in the specified set.
+- **`[^term1 term_start-term_last]`** : Negated set. Matches any terminal symbol *not* in the specified set.
+- **`P*`** : Matches zero or more repetitions of pattern `P` (binds as a `Vec<P>`).
+- **`P+`** : Matches one or more repetitions of pattern `P` (binds as a `Vec<P>`).
+- **`P?`** : Matches zero or one occurrence of pattern `P` (binds as an `Option<P>`).
+- **`$sep(P, P_separator, repetition)`** : Matches repetitions of `P` separated by `P_separator`. The `repetition` argument can be `*` (zero or more) or `+` (one or more). Binds as a `Vec<P>`.
+- **`(P1 P2 | P3)`** : Grouping and alternation.
+- **`P / term`** or **`P / [term1 term2]`** : Lookahead assertion. Matches `P` only if followed by the lookahead symbol(s), without consuming them.
+- **`'a'` / `b'a'`** : Character/byte literals (only valid if `%tokentype` is `char` or `u8`).
+- **`"abcd"` / `b"abcd"`** : String/byte string literals (only valid if `%tokentype` is `char` or `u8`).
+- **`P - TerminalSet`** : Matches pattern `P` but excludes any terminal in the `TerminalSet`.
 
-**Example:**
-If you define tokens in the following order:
-```
-%token one '1';
-%token two '2';
-...
-%token zero '0';
-%token nine '9';
-```
-The range `[zero-nine]` will be `['0', '9']`, not `['0'-'9']`.
+### Range Patterns (`[first-last]`)
+When defining ranges of custom tokens (e.g. `[zero-nine]`), the range ordering is determined by the **declaration order of your `%token` directives**, rather than the inherent values of the enum elements.
 
-If you are using `char` or `u8` as `%tokentype`, you can use the range pattern like this:
-```
-['0'-'9']
-```
-This exactly matches the range of characters from '0' to '9'.
-
-
-
-## RuleType <sub><sup>(optional)</sup></sub>
-Assigning a type to a non-terminal allows the parser to carry semantic information.
-```
-E(MyType): ... ;
-```
-- `MyType`: The Rust type associated with the non-terminal `E`
-
-### Type Inference with Placeholder `_`
-You can use `_` as a placeholder to let `rusty_lr` automatically infer the type of a non-terminal.
+#### Example
+If tokens are declared as:
 ```rust
-E(_): A;
+%token zero Token::Num(0);
+%token one  Token::Num(1);
+%token two  Token::Num(2);
+// ...
+%token nine Token::Num(9);
 ```
-If `_` is used, the type will be inferred by analyzing the rules (specifically focusing on `Identity` actions/rules that map directly to another typed token or non-terminal). If a circular dependency prevents inference, the parser will return a compilation error.
+The range `[zero-two]` matches `zero`, `one`, and `two`.
 
-The actual value of `E` is evaluated by the result of the ReduceAction.
+If the `%tokentype` is `char` or `u8`, literal character ranges like `['0'-'9']` or `[b'0'-b'9']` are resolved using standard ASCII values.
+
+---
+
+## RuleType (Optional)
+
+You can assign a semantic return type to any non-terminal symbol.
+
+```
+NonTerminal(RustType) : ... ;
+```
+
+- **`RustType`**: The Rust type that this non-terminal evaluates to when reduced.
+
+### Type Inference with `_`
+If you do not want to specify types manually, you can use the `_` placeholder. RustyLR will inspect the rule's reduce actions and identity transitions to infer the correct type automatically:
+
+```rust
+Expr(_): Term;
+```
+
+> [!WARNING]
+> If a circular dependency exists (e.g., two rules trying to infer their types from one another without a base type), RustyLR will fail with a compilation error.
 
 ### Memory Optimization with `Box`
-Internally, the generated parser stores all semantic values—including the `%tokentype` (terminal token type) and all non-terminals' `RuleType`s—within a single unified `enum` that represents the data stack.
+Internally, the generated parser stores all semantic values (the `%tokentype` and all non-terminals' `RuleType`s) in a single unified `enum` representing the parser's data stack.
 
-Because the size of a Rust enum is determined by its largest variant, if even a single `RuleType` (or the token type itself) has a large memory footprint, it will inflate the size of the entire enum. Consequently, the data stack will consume significantly more memory, as every element pushed onto the stack will allocate space corresponding to that largest variant.
+Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `RuleType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
 
-To avoid this overhead, it is highly recommended to wrap large data types in a `Box` (e.g., `Box<MyLargeStruct>`). This keeps the variant size minimal (the size of a single pointer) and optimizes the memory consumption of the data stack as a whole.
+To avoid this, wrap large AST nodes or structures in a `Box` (e.g., `Box<MyLargeNode>`). This ensures the enum variant only takes up the size of a single pointer, optimizing stack memory usage.
 
+---
 
-## ReduceAction <sub><sup>(optional)</sup></sub>
-A ReduceAction is Rust code executed when a production rule is reduced.
+## ReduceAction (Optional)
 
-**Rules:**
-- If a `RuleType` is defined, the ReduceAction must evaluate to that type
-- If no `RuleType` is defined and only one token holds a value, the ReduceAction can be omitted
-- Reduce actions can return `Result<(), ErrorType>` to handle errors during parsing
-- Reduce actions can be written in Rust code. They are executed when the rule is matched and reduced
+A reduce action is Rust code executed when a rule is matched and reduced.
 
-**Example:**
+### General Rules
+- If the non-terminal has a `RuleType`, the reduce action block must evaluate to that type.
+- If no `RuleType` is defined and only one symbol in the rule has a value, the reduce action can be omitted (it automatically forwards that value).
+- Actions can return a `Result<RuleType, ErrorType>` to propagate runtime parser errors.
+
+### Named Variables
+Assign names to elements on the right-hand side using the `=` syntax to access their values inside the action block:
+
 ```rust
-%err String;
-
-E(i32): A div a2=A {
-    if a2 == 0 {
-        return Err("Division by zero".to_string());
-    }
-    A / a2 // new value of E
-};
+Expr(i32)
+    : left=Expr '+' right=Term { left + right }
+    ;
 ```
 
-You can reference any data with below patterns:
- - `data: &mut %UserData`: the user data passed to `feed()` function
- - `var_name: %RuleType`: token data associated with `var_name`
- - `@var_name: %LocationType`: location data associated with `var_name`
- - `@$: &mut %LocationType`: location data of current non-terminal in this reduce action
- - `$1`, `$2`, ...: index-based token data ($1 is the leftmost symbol, $2 is the second, etc.)
- - `@1`, `@2`, ...: index-based location data (@1 is the location of the leftmost symbol, @2 is the second, etc.)
- - `@0`: location data of current non-terminal in this reduce action (equivalent to `@$`)
- - `lookahead: &TerminalSymbol<%TokenType>`: lookahead token that caused this reduce action
- - `shift: &mut bool`: for non-deterministic GLR parser, set this value to `false` to revoke the shift action
+---
 
 ## Accessing Token Data in ReduceAction
-Within a ReduceAction, you can access the data associated with tokens and non-terminals:
 
-**Named Patterns:** Assign names to patterns to access their values.
+Within a `ReduceAction` block, you can access values and metadata from the matched symbols:
+
+### 1. Named Bindings
+Explicitly bind a pattern to a variable name:
 ```rust
-E(i32): left=A '+' right=A { left + right };
+Expr(i32) : left=Expr '+' right=Term { left + right };
 ```
 
-**Default Names:** Use default names when obvious.
+### 2. Default Bindings
+If a symbol name is a valid identifier, you can reference it directly without an explicit binding:
 ```rust
-E(i32): A '+' right=A { A + right }; // use A directly
-```
-This is also possible for advanced patterns:
-```rust
-E(i32): A* { A.iter().sum() }; // sum all values in A
-```
-Here, `A` is a `Vec<A>` and you can access its values directly.
-
-**Bison-style Positional Variables:** You can reference values and locations by their indices in the rule.
- - `$1`, `$2`, ... represent the semantic values of RHS symbols.
- - `@1`, `@2`, ... represent the location of RHS symbols.
- - `@0` represents the location of LHS (equivalent to `@$`).
-
-```rust
-E(i32): A '+' A { $1 + $3 }; // sum first and third token
+Expr(i32) : Expr '+' Term { Expr + Term };
 ```
 
-
-**User Data:** Access mutable user-defined data passed to the parser.
+For regex repetitions (e.g., `Term*`), referencing the base name `Term` returns a `Vec<Term>`:
 ```rust
-E(i32): A '+' right=A { 
-    *data += 1; // data: &mut UserData
-    A + right 
+Sum(i32) : Term* { Term.iter().sum() };
+```
+
+### 3. Bison-style Positional Variables
+You can access values and locations using index numbers corresponding to the position of the symbol on the RHS (1-indexed):
+- **`$1`, `$2`, ...**: The semantic value of the 1st, 2nd, etc. symbol.
+- **`@1`, `@2`, ...**: The location/span of the 1st, 2nd, etc. symbol.
+- **`@$` (or `@0`)**: The location of the entire reduced non-terminal.
+
+```rust
+Expr(i32) : Expr '+' Expr { $1 + $3 };
+```
+
+### 4. User Data (`data`)
+Access mutable user data passed to the `feed()` function. It is exposed in reduce actions as `data` (of type `&mut UserData`):
+```rust
+Expr(i32) : Term { 
+    *data += 1; // Increment a parse counter
+    Term 
 };
 ```
-Here, `data` is `&mut UserData`, which is defined by the `%userdata` directive.
 
-**Lookahead Token:** Inspect the next token without consuming it.
+### 5. Lookahead Token (`lookahead`)
+You can inspect the lookahead token that triggered the current reduction. It is exposed as `lookahead` (of type `&TerminalSymbol<TokenType>`):
 ```rust
-match *lookahead.to_term().unwrap() { // lookahead: &TerminalType
-    '+' => { /* ... */ },
-    _ => { /* ... */ },
-}
-```
-Here, `lookahead` is a `&TerminalSymbol<%TokenType>`, it is either a terminal symbol fed by the user or a special token like `error`.
-
-**Shift Control:** Control whether to perform a shift operation (for GLR parser).
-```rust
-*shift = false; // Prevent shift action
-```
-
-### Variable Types for Regex Patterns
-For some regex patterns, the type of variable will be modified as follows:
- - `P*` : `Vec<P>`
- - `P+` : `Vec<P>`
- - `P?` : `Option<P>`
- - `$sep(P, P_separator, repetetion)` : `Vec<P>`
-
-You can still access the `Vec` or `Option` by using the base name of the pattern.
-```rust
-E(i32) : A* {
-    println!("Value of A: {:?}", A); // Vec<A>
+Expr(i32) : Term {
+    if let Some(next_token) = lookahead.to_term() {
+        println!("Lookahead is: {:?}", next_token);
+    }
+    Term
 };
 ```
+
+### 6. Shift Control (`shift`)
+For GLR parsing, you can dynamically control whether the parser should perform a shift action or prune the branch by modifying the mutable `shift` boolean:
+```rust
+*shift = false; // Disable shifting the next token, forcing reduction
+```
+
+### Variable Types for Patterns
+When matching regex patterns, the bindings yield the following Rust types:
+- **`P*`** : `Vec<P>`
+- **`P+`** : `Vec<P>`
+- **`P?`** : `Option<P>`
+- **`$sep(P, Sep, Rep)`** : `Vec<P>`
 
 ### Terminal Sets
-For terminal set `[term1 term_start-term_end]`, `[^term1 term_start-term_end]`, there is no predefined variable name. You must explicitly define the variable name.
+For terminal sets (like `[plus minus]`), no default variable name is generated. You must assign a variable name to capture the token value:
 ```rust
-E: digit=[zero-nine] {
-    println!("Value of digit: {:?}", digit); // %tokentype
-};
+Op(Token) : op=[plus minus] { op };
 ```
 
 ### Pattern Groups
-For group `(P1 P2 P3 | P4 P5 | P6)`:
- - For each line `P1 P2 P3`, `P4 P5`, and `P6`, if every line holds a same type of value `T`, the group will hold a `T` value. Else, the group will not hold any value.
- - Rule type for each line will be determined by following rules:
-   - If none of the tokens in the line holds a value, the group will not hold any value
-   - If only one of the tokens in the line holds a value, the group will hold that value
-   - If there are multiple tokens in the line holding value, the group will hold a `Tuple` of those values
- - There is no default variable name for the group, you must define the variable name explicitly with the `=` operator
+For groupings like `(P1 P2 | P3)`:
+- If every branch in the group evaluates to the same type `T`, the group yields a value of type `T`. Otherwise, it yields no value.
+- The type of a branch is:
+  - Empty if no symbol yields a value.
+  - `T` if exactly one symbol yields a value.
+  - A tuple `(T1, T2, ...)` if multiple symbols yield values.
+- Groups have no default variable name. You must explicitly bind them:
+  ```rust
+  Expr(i32) : val=( Term | '+' Term ) {
+      match val {
+          // ...
+      }
+  };
+  ```
 
- ```rust
- NoRuleType: ... ;
+---
 
- I(i32): ... ;
+## Exclamation Mark (`!`)
 
- // I will be chosen
- A: i=(NoRuleType I NoRuleType | I) {
-     println!("Value of I: {:?}", i); // can access by 'i'
-     i
- };
-
-// (I I) and A does not match, so it will not hold any value
- B: ( I NoRuleType I | A ) {
- };
-
- ```
-
-## Exclamation Mark `!`
-An exclamation mark `!` can be used right after the token to ignore the value of the token.
-The token will be treated as if it is not holding any value.
+An exclamation mark (`!`) appended immediately after a symbol tells the parser to discard its value. This is useful for omitting unneeded tokens (like punctuation or delimiters) from the default variable scope.
 
 ```rust
-A(i32) : ... ;
-
-// A in the middle will be chosen, since other A's are ignored
-E(i32) : A! A A!;
+// Only the middle `Expr` is kept; the parentheses values are discarded
+Expr(i32) : '('! Expr ')'! ; 
 ```
+
+---
 
 ## Tracing Non-Terminals
-Putting non-terminals in `%trace` directive will enable tracing for that non-terminal.
-By calling `context.trace(): HashSet<NonTerminals>`, you can get the set of tracing non-terminals
-that the current context is trying to parse.
-
- - Tracing non-terminals will not be automatically removed from the grammar by optimization.
 
 ```
-%trace NonTerm1 NonTerm2 ...;
+%trace NonTerm1 NonTerm2 ... ;
 ```
 
+Registers non-terminals for tracing. When registered, you can query the active parsing goals at runtime using `context.trace()`, which returns a `HashSet<NonTerminals>`.
 
-## Start symbol <sub><sup>(must defined)</sup></sub>
+Additionally, tracing prevents the optimization engine from merging or optimizing away these non-terminal states.
+
+---
+
+## Start Symbol (Must Defined)
+
 ```
 %start NonTerminalName ;
 ```
-Set the start symbol of the grammar as `NonTerminalName`.
 
-```rust
-%start E;
-// This internally generates augmented rule Augmented -> E eof
+Defines the entry point of the grammar. RustyLR automatically creates an augmented rule `Augmented -> NonTerminalName eof`.
 
-E: ... ;
-```
+---
 
+## Userdata Type (Optional)
 
-
-## Userdata type <sub><sup>(optional)</sup></sub>
 ```
 %userdata <RustType> ;
 ```
-Define the type of user data passed to the `feed()` function.
 
-**Example:**
+Specifies a custom state type passed to the parser's `feed` and `accept` functions. This allows you to thread compilation state, symbol tables, or diagnostics through your reduce actions.
+
+### Example
 ```rust
-struct MyUserData { ... }
-
-...
-
-%userdata MyUserData;
-
-...
-
-fn main() {
-    ...
-    let mut userdata = MyUserData { ... };
-    parser.feed(..., token, &mut userdata); // <-- userdata fed here
+struct ParserState {
+    errors: Vec<String>,
 }
+
+// In the grammar:
+%userdata ParserState;
+
+// In your reduce action:
+Expr : Term {
+    if Term < 0 {
+        data.errors.push("Negative number encountered".to_string());
+    }
+    Term
+};
 ```
 
+---
 
 ## Resolving Conflicts
 
-### Panic Mode Error Recovery
-```
-JsonObject: '{' JsonKeyValue* '}'
-          | '{' error '}'          { println!("recovering with '}}' at {}", @error); }
-          ;
-```
-The `error` token is a reserved terminal symbol that can be matched with **any zero or more tokens**.
-In the above example, if the parser encounters an invalid token while parsing a JSON object, it will enter panic mode and discard all tokens until it finds a closing brace `}`.
+### Panic-Mode Error Recovery
 
-**How it works:**
-When an invalid token is encountered, the parser enters panic mode and starts discarding symbols from the parsing stack until it finds a point where the special `error` token is allowed by the grammar.
-At that point, it shifts the invalid fed token as the `error` token, then tries to complete the rule that contains the `error` token.
+```rust
+Expr: '{' Stmt* '}'
+    | '{' error '}' { println!("Recovered from syntax error at: {:?}", @error); }
+    ;
+```
 
-**Important notes:**
-- The `error` token does not have any value, no associated rule-type
-- `error` token does have location data, which can be accessed in the reduce action by `@error`. The location data is merged from the invalid tokens that consist of the `error` token.
-- In GLR parsing, the `error` path will be ignored if there are any other valid paths. In other words, it enters panic-mode only if there is no other way to feed the terminal symbol
+The reserved terminal `error` is used to implement panic-mode recovery. When the parser encounters an unexpected token:
+1. It pops states off the parser stack until it finds a state that can shift the `error` symbol.
+2. It shifts the `error` symbol.
+3. It discards input tokens until it encounters a token that can legally follow `error` in the grammar (in this case, `}`).
+4. It reduces the recovery rule, letting the parser resume normal execution.
+
+#### Notes
+- The `error` token does not carry a semantic value.
+- You can access the span of all discarded tokens using the location binder `@error`.
+- In GLR mode, the parser will prefer non-error paths and only trigger error recovery if all other active branches fail.
 
 ### Operator Precedence
+
 ```
-// reduce first
-%left term1 term2 term3 ...;
-
-// shift first
-%right term4 term5 term6 ... ;
-
-// only precedence
-%precedence term7 term8 term9 ... ;
+%left term1 term2 ... ;
+%right term3 term4 ... ;
+%precedence term5 term6 ... ;
 ```
-For shift/reduce conflicts, the `%left`, `%right`, and `%precedence` directives are used to resolve the conflicts.
-These directives define the associativity and precedence of operators.
-As in `bison`, the order of precedence is determined by the order in which `%left`, `%right`, or `%precedence` directives appear.
 
-**Conflict Resolution:**
-When a conflict occurs, the parser will compare the precedence of the shift terminal and the *operator* in the reduce rule. If both precedences are defined, either the shift or reduce will be chosen based on the precedence of the operator.
- - If the shift terminal has a higher precedence than the reduce operator, the shift will be chosen
- - If the reduce operator has a higher precedence than the shift terminal, the reduce will be chosen
- - If both have the same precedence, the `%left` or `%right` directive will be used to determine the resolving process
+Used to resolve shift/reduce conflicts in expressions. The precedence of terminals is defined by the declaration order of the `%left`, `%right`, and `%precedence` directives (lower to higher).
 
-The *operator* of the reduce rule is the rightmost terminal symbol in the production rule that has a precedence defined by `%left`, `%right`, or `%precedence` directive. Alternatively, the operator of the reduce rule can be defined explicitly by using the `%prec` directive.
+- **`%left`**: Declares left-associative operators (e.g., `a + b + c` parses as `(a + b) + c`).
+- **`%right`**: Declares right-associative operators (e.g., `a ^ b ^ c` parses as `a ^ (b ^ c)`).
+- **`%precedence`**: Declares precedence without associativity. Banning chained usage of the operator without parentheses.
 
-**Examples:**
-```rust
-// left reduction for binary operator '+'
-%left '+';
+When a conflict arises between shifting a terminal and reducing a rule:
+1. The parser compares the precedence of the lookahead terminal to the precedence of the rule's *operator*.
+2. The rule's operator is the rightmost terminal in the rule that has a precedence assigned.
+3. If the lookahead terminal has higher precedence, the parser **shifts**.
+4. If the rule operator has higher precedence, the parser **reduces**.
+5. If precedences are equal:
+   - For `%left`, the parser **reduces**.
+   - For `%right`, the parser **shifts**.
+   - For `%precedence`, the parser reports a syntax error.
 
-// right reduction for binary operator '^'
-%right '^';
-```
+#### Explicit Precedence (`%prec`)
+You can override a rule's default operator using the `%prec` directive followed by a terminal name:
 
 ```rust
 %left '+';
 %left '*';
-%left UnaryMinus; // << highest priority
+%left UnaryMinus;
 
-E: E '+' E { E + E }
- | E '*' E { E * E }
- | '-' E %prec UnaryMinus { -E } // make operator for this production rule `UnaryMinus`
- ;
+Expr
+    : Expr '+' Expr
+    | Expr '*' Expr
+    | '-' Expr %prec UnaryMinus // Gives unary minus higher precedence than '*'
+    ;
 ```
 
-You can also set the precedence of a rule by referencing a non-terminal symbol with `%prec`.
-This is useful when an operator is represented by a non-terminal that produces different actual operators.
-
-**Example:**
+You can also use a non-terminal in `%prec` if the operator is determined dynamically:
 ```rust
-%left '+';
-%left '*';
+Expr : Expr op=BinOp Expr %prec op { ... };
 
-E: E op=BinOp E %prec op { ... }
- | ...
- ;
-
-// The precedence of `BinOp` is determined by the production rule that `BinOp` was derived from.
-BinOp: '+'
-     | '*'
-     ;
+BinOp : '+' | '*';
 ```
-In this example, the `E: E op=BinOp E` rule's precedence is determined by the `BinOp` non-terminal.
-When the parser needs to resolve a conflict involving this rule, it will look at what `BinOp` was reduced from.
-If `BinOp` was reduced from `+`, the precedence of `BinOp` will be the precedence of `+`, which is defined by `%left '+'`.
-otherwise, if `BinOp` was reduced from `*`, the precedence of `BinOp` will be the precedence of `*`, which is defined by `%left '*'`.
+Here, the rule's precedence matches the specific operator that `BinOp` resolved to.
 
-If any non-terminal symbol was referenced in the `%prec` directive,
-every production rule in that non-terminal must have operator precedence.
+### Rule Priority
 
-
-### Rule priority
+```rust
+Expr
+    : Expr '+' Expr %dprec 2
+    | Expr '*' Expr %dprec 1
+    ;
 ```
-E:
-    P1 P2 P3 %dprec 2
-  | P4 P5 P6 %dprec 1
-  ;
-```
-For reduce/reduce conflicts, rule with the highest priority will be chosen.
-The priority is defined by the `%dprec` directive. Default priority is `0`.
 
+Assigns static priority numbers to rules to resolve reduce/reduce conflicts. If two rules can be reduced at the same time, the parser resolves the conflict by choosing the rule with the highest `%dprec` value (default is `0`).
 
-## Error type <sub><sup>(optional)</sup></sub>
+---
+
+## Error Type (Optional)
+
 ```
 %err <RustType> ;
 %error <RustType> ;
 ```
-Define the type of `Err` variant in `Result<(), Err>` returned from [`ReduceAction`](#reduceaction-optional). If not defined, `DefaultReduceActionError` will be used.
 
-**Example:**
-```rust
-enum MyErrorType<T> {
-    ErrVar1,
-    ErrVar2,
-    ErrVar3(T),
-}
+Defines a custom error type returned by reduce actions. If your reduce action returns a `Result`, returning an `Err(custom_error)` will stop execution (or prune the GLR branch) and bubble the error up wrapped in `ParseError::ReduceAction`.
 
-...
+---
 
-%err MyErrorType<GenericType> ;
+## LALR Parser Generation
 
-...
-
-match parser.feed( ... ) {
-    Ok(_) => {}
-    Err(err) => {
-        match err {
-            ParseError::ReduceAction( err ) => {
-                // do something with err
-            }
-            _ => {}
-        }
-    }
-}
-```
-
-
-## LALR parser generation
 ```
 %lalr;
 ```
-Switch generated parser table to LALR parser.
-By default, the parser will be generated as minimal-LR(1) parser.
 
+Forces RustyLR to generate LALR(1) parsing tables. By default, RustyLR builds minimal-LR(1) (IELR-style) tables, which provide full LR(1) parsing strength while keeping table sizes close to LALR(1).
 
+---
 
-## GLR parser generation
+## GLR Parser Generation
+
 ```
 %glr;
 ```
-Switch to GLR parser generation.
 
-If you want to generate a GLR parser, add the `%glr;` directive to your grammar.
-With this directive, any Shift/Reduce, Reduce/Reduce conflicts will not be treated as errors.
+Enables Generalized LR (GLR) parser generation. With `%glr;` enabled, shift/reduce and reduce/reduce conflicts are not treated as compiler errors. Instead, the parser splits into parallel execution branches at runtime.
 
-See [GLR Parser](GLR.md) section for more details.
+---
 
-## No optimization
+## No Optimization
+
 ```
 %nooptim;
 ```
-Disable grammar optimization.
 
-## Dense parser table
+Disables optimization passes on the generated table (which merge states and group equivalent terminals). Use this for debugging or to speed up the parser generation compilation phase itself.
+
+---
+
+## Dense Parser Table
+
 ```
 %dense;
 ```
 
-Normally, the generated code will use `HashMap` to store the parser table.
-This directive will force the parser to use `Vec` instead of `HashMap`.
-**Be careful:** this could increase memory usage significantly.
+Forces the generated parser table to use flat `Vec` indexes instead of `HashMap` lookups. This significantly speeds up token feeding, but can drastically increase the binary size of the generated parser.
 
-## Location tracking
-```
-%location <Typename for location> ;
-```
-The location type must implement `rusty_lr::Location` trait.
+---
 
-User must explicitly feed the location data to the parser.
+## Location Tracking
+
+```
+%location <RustType> ;
+```
+
+Enables location tracking in the parser. The specified `<RustType>` must implement the `rusty_lr::Location` trait:
+
 ```rust
-context.feed_location(parser, terminal, user_data, terminal_location);
-context.feed(parser, terminal, user_data); // this is equivalent to using `Location::default()` for the location
+pub trait Location: Default + Clone {
+    fn merge(&self, other: &Self) -> Self;
+}
 ```
 
-And the location data can be accessed in the reduce action by `@name` syntax.
+To feed locations, use `feed_location` instead of `feed`:
 ```rust
-Expr: exp1=Expr '+' exp2=Expr {
-    println!("Location of exp1: {:?}", @exp1);
-    println!("Location of exp2: {:?}", @exp2);
-    println!("Location of this expression: {:?}", @$); // @$ is the location of the non-terminal itself
-    exp1 + exp2
+context.feed_location(&parser, token, &mut userdata, span);
+```
+
+Within reduce actions, access symbol spans using the `@` prefix:
+```rust
+Expr(i32) : e1=Expr '+' e2=Expr {
+    println!("Start/End position: {:?}", @$); // Location of this Expr
+    println!("Left operand position: {:?}", @e1);
+    e1 + e2
 };
 ```
-
-Default location type is `rusty_lr::DefaultLocation`. This does not hold any data.
