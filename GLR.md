@@ -93,7 +93,7 @@ E(i32)
 
 ## Parsing with the GLR Parser
 
-The GLR parser shares a similar interface to the deterministic parser, but instead of producing a single result, its `accept()` method returns an iterator over all successful parse tree results.
+The GLR parser shares a similar interface to the deterministic parser, but instead of producing a single result, its `accept()` method returns an iterator over all successful parse tree results. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
 
 ```rust
 // Include the generated parser module
@@ -108,10 +108,18 @@ fn main() {
 
     // Feed tokens to the GLR parser
     for token in input {
+        // basic feeding:
         if let Err(e) = context.feed(&parser, token, &mut userdata) {
             eprintln!("Fatal parse error: {}", e);
             return;
         }
+
+        // or location-aware feeding (if %location is configured in the grammar):
+        // let span = MySpan { start: ..., end: ... };
+        // if let Err(e) = context.feed_location(&parser, token, &mut userdata, span) {
+        //     eprintln!("Fatal parse error: {}", e);
+        //     return;
+        // }
     }
 
     // Retrieve all valid parse tree results
@@ -132,4 +140,5 @@ fn main() {
 - **`EParser::new()`**: Creates the static parser table instance.
 - **`EContext::new()`**: Initializes a new GLR state context.
 - **`context.feed(&parser, token, &mut userdata)`**: Feeds a token into all active parsing stacks.
-- **`context.accept(&parser, &mut userdata)`**: Finalizes parsing and returns an iterator over all successful parse results from all active branches.
+- **`context.feed_location(&parser, token, &mut userdata, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
+- **`context.accept(&parser, &mut userdata)`**: Finalizes parsing (feeding the end-of-file symbol) and returns an iterator over all successful parse results from all active branches.
