@@ -752,7 +752,11 @@ impl Grammar {
                 // rename all '@var_name' to '__rustylr_location_{var_name}'
                 // if reduce_action is not defined, check if it can be auto-generated
                 let reduce_action = if let Some(reduce_action) = rule.reduce_action {
-                    fn rename_tokenstream_recursive(ts: TokenStream) -> TokenStream {
+                    fn rename_tokenstream_recursive(
+                        ts: TokenStream,
+                        num_tokens: usize,
+                        span_manager: &mut SpanManager,
+                    ) -> Result<TokenStream, ParseError> {
                         let mut new_ts = TokenStream::new();
                         let mut it = ts.into_iter().peekable();
                         while let Some(token) = it.next() {
@@ -784,10 +788,79 @@ impl Grammar {
                                                     )]);
                                                 }
                                             }
+                                            Some(proc_macro2::TokenTree::Literal(lit)) => {
+                                                let lit_str = lit.to_string();
+                                                if let Ok(n) = lit_str.parse::<usize>() {
+                                                    if n == 0 {
+                                                        // '@0' -> rename to '__rustylr_location0' (self location)
+                                                        new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                            format_ident!("__rustylr_location0"),
+                                                        )]);
+                                                        it.next(); // consume the literal
+                                                    } else {
+                                                        // '@n' where n > 0
+                                                        if n <= num_tokens {
+                                                            let new_ident = format_ident!("__rustylr_location_{}", n - 1);
+                                                            new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                                new_ident,
+                                                            )]);
+                                                            it.next(); // consume the literal
+                                                        } else {
+                                                            let span_idx = span_manager.add_span(punct.span());
+                                                            span_manager.add_span(lit.span());
+                                                            let loc = Location::Range(span_idx, span_idx + 2);
+                                                            return Err(ParseError::BisonVariableOutOfRange {
+                                                                location: loc,
+                                                                name: format!("@{}", n),
+                                                                max: num_tokens,
+                                                            });
+                                                        }
+                                                    }
+                                                } else {
+                                                    new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                                }
+                                            }
                                             _ => {
                                                 // just a punct, no ident after it
                                                 new_ts
                                                     .extend([proc_macro2::TokenTree::Punct(punct)]);
+                                            }
+                                        }
+                                    } else if punct.as_char() == '$' {
+                                        // found '$', check next token
+                                        match it.peek() {
+                                            Some(proc_macro2::TokenTree::Literal(lit)) => {
+                                                let lit_str = lit.to_string();
+                                                if let Ok(n) = lit_str.parse::<usize>() {
+                                                    if n == 0 {
+                                                        let span_idx = span_manager.add_span(punct.span());
+                                                        span_manager.add_span(lit.span());
+                                                        let loc = Location::Range(span_idx, span_idx + 2);
+                                                        return Err(ParseError::BisonVariableZero(loc));
+                                                    } else {
+                                                        if n <= num_tokens {
+                                                            let new_ident = format_ident!("__rustylr_data_{}", n - 1);
+                                                            new_ts.extend([proc_macro2::TokenTree::Ident(
+                                                                new_ident,
+                                                            )]);
+                                                            it.next(); // consume the literal
+                                                        } else {
+                                                            let span_idx = span_manager.add_span(punct.span());
+                                                            span_manager.add_span(lit.span());
+                                                            let loc = Location::Range(span_idx, span_idx + 2);
+                                                            return Err(ParseError::BisonVariableOutOfRange {
+                                                                location: loc,
+                                                                name: format!("${}", n),
+                                                                max: num_tokens,
+                                                            });
+                                                        }
+                                                    }
+                                                } else {
+                                                    new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
+                                                }
+                                            }
+                                            _ => {
+                                                new_ts.extend([proc_macro2::TokenTree::Punct(punct)]);
                                             }
                                         }
                                     } else {
@@ -797,7 +870,11 @@ impl Grammar {
                                 proc_macro2::TokenTree::Group(group) => {
                                     let new_group = proc_macro2::Group::new(
                                         group.delimiter(),
-                                        rename_tokenstream_recursive(group.stream()),
+                                        rename_tokenstream_recursive(
+                                            group.stream(),
+                                            num_tokens,
+                                            span_manager,
+                                        )?,
                                     );
                                     let new_group = proc_macro2::TokenTree::Group(new_group);
                                     new_ts.extend([new_group]);
@@ -807,10 +884,14 @@ impl Grammar {
                                 }
                             }
                         }
-                        new_ts
+                        Ok(new_ts)
                     }
 
-                    let new_reduce_action = rename_tokenstream_recursive(reduce_action);
+                    let new_reduce_action = rename_tokenstream_recursive(
+                        reduce_action,
+                        tokens.len(),
+                        &mut grammar.span_manager,
+                    )?;
 
                     // check if this reduce action can be identity action; i.e., { $1 }
                     fn tokenstream_contains_unique_ident(ts: TokenStream) -> Option<Ident> {
@@ -838,16 +919,32 @@ impl Grammar {
                     if let Some(unique_ident) =
                         tokenstream_contains_unique_ident(new_reduce_action.clone())
                     {
-                        if let Some(unique_idx) = tokens
-                            .iter()
-                            .enumerate()
-                            .rev()
-                            .find(move |(_, token)| {
-                                token.mapto.as_ref().map(|m| m.value().as_str())
-                                    == Some(unique_ident.to_string().as_str())
-                            })
-                            .map(|(idx, _)| idx)
-                        {
+                        let unique_idx_opt = if let Some(idx) = {
+                            let s = unique_ident.to_string();
+                            if s.starts_with("__rustylr_data_") {
+                                s["__rustylr_data_".len()..].parse::<usize>().ok()
+                            } else {
+                                None
+                            }
+                        } {
+                            if idx < tokens.len() {
+                                Some(idx)
+                            } else {
+                                None
+                            }
+                        } else {
+                            tokens
+                                .iter()
+                                .enumerate()
+                                .rev()
+                                .find(move |(_, token)| {
+                                    token.mapto.as_ref().map(|m| m.value().as_str())
+                                        == Some(unique_ident.to_string().as_str())
+                                })
+                                .map(|(idx, _)| idx)
+                        };
+
+                        if let Some(unique_idx) = unique_idx_opt {
                             Some(ReduceAction::Identity(unique_idx))
                         } else {
                             Some(ReduceAction::Custom(CustomReduceAction::new(
@@ -2207,5 +2304,50 @@ mod tests {
         assert_eq!(grammar_args.start_rule_name[0].value(), "Expr");
         assert_eq!(grammar_args.rules.len(), 1);
         assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+    }
+
+    #[test]
+    fn test_bison_variables_success() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(i32) : 'a' 'b' { $1 as i32 + $2 as i32 + @0.to_range().start as i32 + @1.to_range().start as i32 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args);
+        assert!(grammar.is_ok());
+    }
+
+    #[test]
+    fn test_bison_variables_zero_error() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(i32) : 'a' 'b' { $0 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args);
+        assert!(matches!(grammar, Err(ParseError::BisonVariableZero(_))));
+    }
+
+    #[test]
+    fn test_bison_variables_out_of_range_error() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(i32) : 'a' 'b' { $3 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args);
+        assert!(matches!(grammar, Err(ParseError::BisonVariableOutOfRange { .. })));
+
+        let input_loc = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(i32) : 'a' 'b' { @3.to_range().start as i32 };
+        };
+        let grammar_args = Grammar::parse_args(input_loc).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args);
+        assert!(matches!(grammar, Err(ParseError::BisonVariableOutOfRange { .. })));
     }
 }

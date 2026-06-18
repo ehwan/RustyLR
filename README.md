@@ -186,7 +186,7 @@ Track the location of tokens and non-terminals for better error reporting and de
 Expr: exp1=Expr '+' exp2=Expr {
     println!("Location of exp1: {:?}", @exp1);
     println!("Location of exp2: {:?}", @exp2);
-    println!("Location of this expression: {:?}", @$); // @$ is the location of the non-terminal itself
+    println!("Location of this expression: {:?}", @$); // @$ (or @0) is the location of the non-terminal itself
     exp1 + exp2
 }
 | Expr error Expr {
