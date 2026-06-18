@@ -97,7 +97,7 @@ impl Grammar {
         } else {
             format_ident!("SparseState")
         };
-        let token_typename = &self.token_typename;
+        let token_typename = crate::utils::strip_box_prefix(self.token_typename.clone());
 
         let state_index_typename = if self.states.len() <= u8::MAX as usize {
             quote! { u8 }
@@ -180,7 +180,7 @@ impl Grammar {
         let module_prefix = &self.module_prefix;
         let error_name = format_ident!("{}", utils::ERROR_NAME);
         let eof_name = format_ident!("{}", utils::EOF_NAME);
-        let token_typename = &self.token_typename;
+        let token_typename = crate::utils::strip_box_prefix(self.token_typename.clone());
 
         let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
         let mut as_str_match_stream = TokenStream::new();
@@ -526,7 +526,7 @@ impl Grammar {
         let rule_typename = format_ident!("{}Rule", start_rule_ident);
         let state_typename = format_ident!("{}State", start_rule_ident);
         let parser_struct_name = format_ident!("{}Parser", start_rule_ident);
-        let token_typename = &self.token_typename;
+        let token_typename = crate::utils::strip_box_prefix(self.token_typename.clone());
         let termclass_typename = format_ident!("{}TerminalClasses", &start_rule_ident);
 
         let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
@@ -895,7 +895,7 @@ impl Grammar {
         let reduce_error_typename = &self.error_typename;
         let data_stack_typename = format_ident!("{}DataStack", start_rule_ident);
         let data_enum_typename = format_ident!("{}Data", &start_rule_ident);
-        let token_typename = &self.token_typename;
+        let token_typename = crate::utils::strip_box_prefix(self.token_typename.clone());
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
         let user_data_typename = &self.userdata_typename;
@@ -927,12 +927,18 @@ impl Grammar {
         // insert variant for terminal token type
         if self.terminal_classes.iter().any(|c| c.data_used) {
             terminal_data_used = true;
+            let storage_type = if crate::utils::has_box_prefix(&self.token_typename) {
+                let unboxed = crate::utils::strip_box_prefix(self.token_typename.clone());
+                quote! { Box<#unboxed> }
+            } else {
+                self.token_typename.clone()
+            };
             ruletype_variant_map.insert(
-                self.token_typename.to_string(),
+                crate::utils::remove_whitespaces(storage_type.to_string()),
                 terminal_variant_name.clone(),
             );
             variant_names_in_order
-                .push((terminal_variant_name.clone(), self.token_typename.clone()));
+                .push((terminal_variant_name.clone(), storage_type));
         }
 
         fn remove_whitespaces(s: String) -> String {
@@ -942,13 +948,21 @@ impl Grammar {
         // iterates through nonterminals
         for nonterm in self.nonterminals.iter() {
             if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
+                let is_boxed = crate::utils::has_box_prefix(&ruletype_stream);
+                let unboxed_type = crate::utils::strip_box_prefix(ruletype_stream.clone());
+                let storage_type = if is_boxed {
+                    quote! { Box<#unboxed_type> }
+                } else {
+                    unboxed_type.clone()
+                };
+
                 let cur_len = ruletype_variant_map.len();
                 let variant_name = ruletype_variant_map
-                    .entry(remove_whitespaces(ruletype_stream.to_string()))
+                    .entry(remove_whitespaces(storage_type.to_string()))
                     .or_insert_with(|| {
                         let new_variant_name = format_ident!("__variant{}", cur_len);
                         variant_names_in_order
-                            .push((new_variant_name.clone(), ruletype_stream.clone()));
+                            .push((new_variant_name.clone(), storage_type));
                         new_variant_name
                     })
                     .clone();
@@ -1171,9 +1185,24 @@ impl Grammar {
 
                         if variant_name != &empty_variant_name && mapto.is_some() {
                             let data_mapto = mapto.unwrap();
+                            let is_token_boxed = match token.token {
+                                Token::Term(_) => crate::utils::has_box_prefix(&self.token_typename),
+                                Token::NonTerm(nonterm_idx) => {
+                                    if let Some(ruletype) = &self.nonterminals[nonterm_idx].ruletype {
+                                        crate::utils::has_box_prefix(ruletype)
+                                    } else {
+                                        false
+                                    }
+                                }
+                            };
+                            let val_expr = if is_token_boxed {
+                                quote! { *val }
+                            } else {
+                                quote! { val }
+                            };
                             extract_data_stream.extend(quote! {
                                 let mut #data_mapto = match __data_stack.__stack.pop().unwrap() {
-                                    #data_enum_typename::#variant_name(val) => val,
+                                    #data_enum_typename::#variant_name(val) => #val_expr,
                                     _ => unreachable!(),
                                 };
                             });
@@ -1325,6 +1354,16 @@ impl Grammar {
                         } else {
                             quote! { #reduce_action_body }
                         };
+                        let is_nonterm_boxed = if let Some(ruletype) = &self.nonterminals[nonterm_idx].ruletype {
+                            crate::utils::has_box_prefix(ruletype)
+                        } else {
+                            false
+                        };
+                        let push_val_expr = if is_nonterm_boxed {
+                            quote! { Box::new(__res) }
+                        } else {
+                            quote! { __res }
+                        };
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
@@ -1348,7 +1387,7 @@ impl Grammar {
 
                                 let __res = #res_expr;
                                 if __push_data {
-                                    __data_stack.__stack.push(#data_enum_typename::#variant_name(__res));
+                                    __data_stack.__stack.push(#data_enum_typename::#variant_name(#push_val_expr));
                                 } else {
                                     __data_stack.__stack.push(#data_enum_typename::Empty);
                                 }
@@ -1409,13 +1448,20 @@ impl Grammar {
                 .as_ref()
                 .unwrap()
                 .clone();
+            let is_start_boxed = crate::utils::has_box_prefix(&ruletype);
+            let unboxed_typename = crate::utils::strip_box_prefix(ruletype);
+            let val_expr = if is_start_boxed {
+                quote! { *val }
+            } else {
+                quote! { val }
+            };
 
             (
-                ruletype,
+                unboxed_typename,
                 quote! {
                     self.__stack.pop();
                     match self.__stack.pop() {
-                        Some(#data_enum_typename::#start_variant_name(val)) => Some(val),
+                        Some(#data_enum_typename::#start_variant_name(val)) => Some(#val_expr),
                         _ => None,
                     }
                 },
@@ -1440,8 +1486,14 @@ impl Grammar {
         };
 
         let push_terminal_body_stream = if terminal_data_used {
+            let is_term_boxed = crate::utils::has_box_prefix(&self.token_typename);
+            let push_expr = if is_term_boxed {
+                quote! { Box::new(term) }
+            } else {
+                quote! { term }
+            };
             quote! {
-                self.__stack.push(#data_enum_typename::#terminal_variant_name(term));
+                self.__stack.push(#data_enum_typename::#terminal_variant_name(#push_expr));
             }
         } else {
             quote! {
