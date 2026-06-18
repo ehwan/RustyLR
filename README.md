@@ -133,7 +133,7 @@ fn main() {
         }
     }
 
-    match context.accept(&parser) {
+    match context.accept(&parser, &mut userdata) {
         Ok(result) => {
             println!("Parsed result: {}", result); // Output: 11
         }
@@ -152,11 +152,11 @@ fn main() {
 ## Generated Code Structure
 
 The generated parser module contains several generated components tailored to your start symbol:
-- **`<Start>Parser`**: A lightweight struct containing the static parsing tables. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/trait.Parser.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/trait.Parser.html)
-- **`<Start>Context`**: A mutable state context that keeps track of the stack and parsed symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/struct.Context.html)
-- **`<Start>State`**: An internal type representing individual states in the parser.
-- **`<Start>Rule`**: An internal enum representing production rules. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/struct.ProductionRule.html)
-- **`<Start>NonTerminals`**: An enum representing all non-terminal symbols. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/trait.NonTerminal.html)
+- **`<Start>Parser`**: A lightweight struct containing the static parsing tables. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/trait.Parser.html)
+- **`<Start>Context`**: A mutable state context that keeps track of the stack and parsed symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/deterministic/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nondeterministic/struct.Context.html)
+- **`<Start>State`**: An internal type representing individual states in the parser. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/state/trait.State.html)
+- **`<Start>Rule`**: An internal enum representing production rules. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/rule/struct.ProductionRule.html)
+- **`<Start>NonTerminals`**: An enum representing all non-terminal symbols. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nonterminal/trait.NonTerminal.html)
 
 ### Interacting with the Parsing Context
 The `<Start>Context` offers helpful utilities for inspecting and tracing:
@@ -165,10 +165,10 @@ let mut context = ExprContext::new();
 
 // ... feed tokens ...
 
-context.expected_token();    // Returns the expected symbols for the current state
-context.can_feed(&token);    // Checks if a terminal can be fed next
-context.trace();             // Retrieves active `%trace` non-terminals
-println!("{}", context.backtrace()); // Prints the stack trace of parser states
+context.expected_token(&parser);    // Returns the expected symbols for the current state
+context.can_feed(&parser, &token);  // Checks if a terminal can be fed next
+context.trace(&parser);             // Retrieves active `%trace` non-terminals
+println!("{}", context.backtrace(&parser)); // Prints the stack trace of parser states
 println!("{}", context);     // Formats the state tree (requires 'tree' feature)
 ```
 

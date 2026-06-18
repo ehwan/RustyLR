@@ -344,7 +344,7 @@ Expr(i32) : '('! Expr ')'! ;
 %trace NonTerm1 NonTerm2 ... ;
 ```
 
-Registers non-terminals for tracing. When registered, you can query the active parsing goals at runtime using `context.trace()`, which returns a `HashSet<NonTerminals>`.
+Registers non-terminals for tracing. When registered, you can query the active parsing goals at runtime using `context.trace(&parser)`, which returns a `HashSet<NonTerminals>`.
 
 Additionally, tracing prevents the optimization engine from merging or optimizing away these non-terminal states.
 
