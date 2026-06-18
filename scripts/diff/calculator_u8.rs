@@ -222,36 +222,25 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
         *self as usize
     }
 }
-/// tag for token that represents which stack a token is using
+/// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum ETags {
-    __terminals,
-    __stack1,
-    __stack2,
-    __stack3,
+pub enum EData {
+    __terminals(char),
+    __variant1(i32),
+    __variant2(f32),
+    __variant3(Vec<char>),
     Empty,
 }
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub struct EDataStack {
-    pub __tags: Vec<ETags>,
-    __terminals: Vec<char>,
-    __stack1: Vec<i32>,
-    __stack2: Vec<f32>,
-    __stack3: Vec<Vec<char>>,
+    pub __stack: Vec<EData>,
 }
 impl Default for EDataStack {
     fn default() -> Self {
-        Self {
-            __tags: Vec::new(),
-            __terminals: Vec::new(),
-            __stack1: Vec::new(),
-            __stack2: Vec::new(),
-            __stack3: Vec::new(),
-        }
+        Self { __stack: Vec::new() }
     }
 }
 #[rustfmt::skip]
@@ -278,18 +267,17 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::Empty))
             );
         }
-        if __push_data {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-            __data_stack.__tags.push(ETags::__terminals);
-        } else {}
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
         let __res = { '0' };
         if __push_data {
-            __data_stack.__terminals.push(__res);
+            __data_stack.__stack.push(EData::__terminals(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -307,29 +295,32 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::Empty))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__stack3)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::__variant3(_)))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& EData::Empty))
             );
         }
-        if __push_data {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-            __data_stack.__tags.push(ETags::__stack1);
-        } else {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        }
-        let mut Digit = __data_stack.__stack3.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        let mut Digit = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant3(val) => val,
+            _ => unreachable!(),
+        };
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
         let __res = { Digit.into_iter().collect::<String>().parse().unwrap() };
         if __push_data {
-            __data_stack.__stack1.push(__res);
+            __data_stack.__stack.push(EData::__variant1(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -347,21 +338,20 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack1)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::__variant1(_)))
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        if __push_data {
-            __data_stack.__tags.push(ETags::__stack2);
-        } else {
-            __data_stack.__tags.push(ETags::Empty);
-        }
-        let mut Number = __data_stack.__stack1.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        __location_stack.pop().unwrap();
+        let mut Number = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant1(val) => val,
+            _ => unreachable!(),
+        };
         let __res = { Number as f32 };
         if __push_data {
-            __data_stack.__stack2.push(__res);
+            __data_stack.__stack.push(EData::__variant2(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -379,37 +369,44 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::Empty))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::Empty))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::__stack2)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& EData::__variant2(_)))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 3usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& EData::Empty))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 4usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                4usize), Some(& EData::Empty))
             );
         }
-        if __push_data {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 5usize);
-            __data_stack.__tags.push(ETags::__stack2);
-        } else {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 4usize);
-        }
-        let mut E = __data_stack.__stack2.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 5usize);
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        let mut E = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
         let __res = E;
         if __push_data {
-            __data_stack.__stack2.push(__res);
+            __data_stack.__stack.push(EData::__variant2(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -427,28 +424,33 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack2)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::__variant2(_)))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__terminals)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::__terminals(_)))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::__stack2)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& EData::__variant2(_)))
             );
         }
-        if __push_data {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        } else {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-            __data_stack.__tags.push(ETags::Empty);
-        }
-        let mut e2 = __data_stack.__stack2.pop().unwrap();
-        let mut E = __data_stack.__stack2.pop().unwrap();
-        let mut Op = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        __location_stack.pop().unwrap();
+        let mut e2 = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
+        __location_stack.pop().unwrap();
+        let mut Op = match __data_stack.__stack.pop().unwrap() {
+            EData::__terminals(val) => val,
+            _ => unreachable!(),
+        };
+        __location_stack.pop().unwrap();
+        let mut E = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
         let __res = {
             *data += 1;
             println!("{:?} {:?} {:?}", E, Op, e2);
@@ -459,7 +461,9 @@ impl EDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack2.push(__res);
+            __data_stack.__stack.push(EData::__variant2(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -477,29 +481,32 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__stack2)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::__variant2(_)))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::Empty))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 2usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& EData::Empty))
             );
         }
-        if __push_data {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 3usize);
-            __data_stack.__tags.push(ETags::__stack2);
-        } else {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-        }
-        let mut E = __data_stack.__stack2.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 3usize);
+        __location_stack.pop().unwrap();
+        let mut E = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
         let __res = { -E };
         if __push_data {
-            __data_stack.__stack2.push(__res);
+            __data_stack.__stack.push(EData::__variant2(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -517,16 +524,19 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::Empty))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::Empty))
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(EData::Empty);
         Ok(())
     }
     ///' '* -> ' '+
@@ -543,11 +553,13 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::Empty)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::Empty))
             );
         }
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.push(EData::Empty);
         Ok(())
     }
     ///' '* ->
@@ -562,7 +574,7 @@ impl EDataStack {
         __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__tags.push(ETags::Empty);
+        __data_stack.__stack.push(EData::Empty);
         Ok(())
     }
     ///Digit+ -> Digit
@@ -579,21 +591,20 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__terminals)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::__terminals(_)))
             );
         }
-        __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        if __push_data {
-            __data_stack.__tags.push(ETags::__stack3);
-        } else {
-            __data_stack.__tags.push(ETags::Empty);
-        }
-        let mut A = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 1usize);
+        __location_stack.pop().unwrap();
+        let mut A = match __data_stack.__stack.pop().unwrap() {
+            EData::__terminals(val) => val,
+            _ => unreachable!(),
+        };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack3.push(__res);
+            __data_stack.__stack.push(EData::__variant3(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -611,29 +622,32 @@ impl EDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 0usize) == Some(&
-                ETags::__terminals)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::__terminals(_)))
             );
             debug_assert!(
-                __data_stack.__tags.get(__data_stack.__tags.len() - 1 - 1usize) == Some(&
-                ETags::__stack3)
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::__variant3(_)))
             );
         }
-        if __push_data {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 1usize);
-        } else {
-            __data_stack.__tags.truncate(__data_stack.__tags.len() - 2usize);
-            __data_stack.__tags.push(ETags::Empty);
-        }
-        let mut Ap = __data_stack.__stack3.pop().unwrap();
-        let mut A = __data_stack.__terminals.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 2usize);
+        __location_stack.pop().unwrap();
+        let mut A = match __data_stack.__stack.pop().unwrap() {
+            EData::__terminals(val) => val,
+            _ => unreachable!(),
+        };
+        __location_stack.pop().unwrap();
+        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant3(val) => val,
+            _ => unreachable!(),
+        };
         let __res = {
             Ap.push(A);
             Ap
         };
         if __push_data {
-            __data_stack.__stack3.push(__res);
+            __data_stack.__stack.push(EData::__variant3(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
         }
         Ok(())
     }
@@ -654,88 +668,37 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
     type StartType = f32;
     type Location = ::rusty_lr::DefaultLocation;
     fn pop_start(&mut self) -> Option<Self::StartType> {
-        self.__tags.pop();
-        let tag = self.__tags.pop();
-        debug_assert!(tag == Some(ETags::__stack2));
-        self.__stack2.pop()
+        self.__stack.pop();
+        match self.__stack.pop() {
+            Some(EData::__variant2(val)) => Some(val),
+            _ => None,
+        }
     }
     fn pop(&mut self) {
-        match self.__tags.pop().unwrap() {
-            ETags::__terminals => {
-                self.__terminals.pop();
-            }
-            ETags::__stack1 => {
-                self.__stack1.pop();
-            }
-            ETags::__stack2 => {
-                self.__stack2.pop();
-            }
-            ETags::__stack3 => {
-                self.__stack3.pop();
-            }
-            _ => {}
-        }
+        self.__stack.pop();
     }
     fn push_terminal(&mut self, term: Self::Term) {
-        self.__tags.push(ETags::__terminals);
-        self.__terminals.push(term);
+        self.__stack.push(EData::__terminals(term));
     }
     fn push_empty(&mut self) {
-        self.__tags.push(ETags::Empty);
+        self.__stack.push(EData::Empty);
     }
     fn clear(&mut self) {
-        self.__tags.clear();
-        self.__terminals.clear();
-        self.__stack1.clear();
-        self.__stack2.clear();
-        self.__stack3.clear();
+        self.__stack.clear();
     }
     fn reserve(&mut self, additional: usize) {
-        self.__tags.reserve(additional);
+        self.__stack.reserve(additional);
     }
     fn split_off(&mut self, at: usize) -> Self {
-        let mut __counts: [u8; 4usize + 1] = [0; 4usize + 1];
-        let __other_tag_stack = self.__tags.split_off(at);
-        for &tag in &__other_tag_stack {
-            __counts[tag as usize] += 1;
-        }
-        let __other___terminals = self
-            .__terminals
-            .split_off(self.__terminals.len() - (__counts[0usize] as usize));
-        let __other___stack1 = self
-            .__stack1
-            .split_off(self.__stack1.len() - (__counts[1usize] as usize));
-        let __other___stack2 = self
-            .__stack2
-            .split_off(self.__stack2.len() - (__counts[2usize] as usize));
-        let __other___stack3 = self
-            .__stack3
-            .split_off(self.__stack3.len() - (__counts[3usize] as usize));
         Self {
-            __terminals: __other___terminals,
-            __stack1: __other___stack1,
-            __stack2: __other___stack2,
-            __stack3: __other___stack3,
-            __tags: __other_tag_stack,
+            __stack: self.__stack.split_off(at),
         }
     }
     fn truncate(&mut self, at: usize) {
-        let mut __counts: [u8; 4usize + 1] = [0; 4usize + 1];
-        for &tag in &self.__tags[at..] {
-            __counts[tag as usize] += 1;
-        }
-        self.__tags.truncate(at);
-        self.__terminals.truncate(self.__terminals.len() - (__counts[0usize] as usize));
-        self.__stack1.truncate(self.__stack1.len() - (__counts[1usize] as usize));
-        self.__stack2.truncate(self.__stack2.len() - (__counts[2usize] as usize));
-        self.__stack3.truncate(self.__stack3.len() - (__counts[3usize] as usize));
+        self.__stack.truncate(at);
     }
     fn append(&mut self, other: &mut Self) {
-        self.__tags.append(&mut other.__tags);
-        self.__terminals.append(&mut other.__terminals);
-        self.__stack1.append(&mut other.__stack1);
-        self.__stack2.append(&mut other.__stack2);
-        self.__stack3.append(&mut other.__stack3);
+        self.__stack.append(&mut other.__stack);
     }
     fn reduce_action(
         data_stack: &mut Self,

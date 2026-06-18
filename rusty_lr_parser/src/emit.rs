@@ -894,6 +894,7 @@ impl Grammar {
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
         let reduce_error_typename = &self.error_typename;
         let data_stack_typename = format_ident!("{}DataStack", start_rule_ident);
+        let data_enum_typename = format_ident!("{}Data", &start_rule_ident);
         let token_typename = &self.token_typename;
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
@@ -904,40 +905,34 @@ impl Grammar {
             .cloned()
             .unwrap_or_else(|| quote! { #module_prefix::DefaultLocation });
 
-        // stack name for tags
-        let tag_stack_name = format_ident!("__tags");
-        let tag_enum_name = format_ident!("{}Tags", &start_rule_ident);
+        // empty tag name
+        let empty_variant_name = format_ident!("Empty");
+        // variant name for terminal symbol
+        let terminal_variant_name = format_ident!("__terminals");
 
-        // empty tag
-        let empty_tag_name = format_ident!("Empty");
-        // stack name for terminal symbol
-        let terminal_stack_name = format_ident!("__terminals");
+        // variant name for each non-terminal
+        let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
-        // stack name for each non-terminal
-        let mut stack_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
-
-        // (<RuleType as ToString>, stack_name) map
-        let mut ruletype_stack_map: rusty_lr_core::hash::HashMap<String, Option<Ident>> =
+        // Map containing (<RuleType as ToString>, variant_name).
+        // This maps each rule type to its enum variant name (e.g. __variant0, __variant1), merging identical types.
+        let mut ruletype_variant_map: rusty_lr_core::hash::HashMap<String, Ident> =
             Default::default();
 
-        // (stack_name, TokenStream for typename) sorted in insertion order
+        // (variant_name, TokenStream for typename) sorted in insertion order
         // for consistent output
-        let mut stack_names_in_order = Vec::new();
+        let mut variant_names_in_order = Vec::new();
 
-        let mut empty_tag_used = false;
         let mut terminal_data_used = false;
 
-        // insert stack for terminal token type
+        // insert variant for terminal token type
         if self.terminal_classes.iter().any(|c| c.data_used) {
             terminal_data_used = true;
-            ruletype_stack_map.insert(
+            ruletype_variant_map.insert(
                 self.token_typename.to_string(),
-                Some(terminal_stack_name.clone()),
+                terminal_variant_name.clone(),
             );
-            stack_names_in_order.push((terminal_stack_name.clone(), self.token_typename.clone()));
-        }
-        if self.terminal_classes.iter().any(|c| !c.data_used) {
-            empty_tag_used = true;
+            variant_names_in_order
+                .push((terminal_variant_name.clone(), self.token_typename.clone()));
         }
 
         fn remove_whitespaces(s: String) -> String {
@@ -947,40 +942,35 @@ impl Grammar {
         // iterates through nonterminals
         for nonterm in self.nonterminals.iter() {
             if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
-                let cur_len = ruletype_stack_map.len();
-                let stack_name = ruletype_stack_map
+                let cur_len = ruletype_variant_map.len();
+                let variant_name = ruletype_variant_map
                     .entry(remove_whitespaces(ruletype_stream.to_string()))
                     .or_insert_with(|| {
-                        let new_stack_name = format_ident!("__stack{}", cur_len);
-                        stack_names_in_order
-                            .push((new_stack_name.clone(), ruletype_stream.clone()));
-                        Some(new_stack_name)
+                        let new_variant_name = format_ident!("__variant{}", cur_len);
+                        variant_names_in_order
+                            .push((new_variant_name.clone(), ruletype_stream.clone()));
+                        new_variant_name
                     })
                     .clone();
-                stack_names_for_nonterm.push(stack_name);
+                variant_names_for_nonterm.push(variant_name);
             } else {
-                empty_tag_used = true;
-                stack_names_for_nonterm.push(None);
+                variant_names_for_nonterm.push(empty_variant_name.clone());
             }
         }
 
-        // if only one tag kind was used, no need to emit tag_stack
-        let unique_tag = (empty_tag_used && stack_names_in_order.is_empty())
-            || (!empty_tag_used && stack_names_in_order.len() == 1);
-
-        // Token -> Option<stack_name> map, `None` for empty
-        let token_to_stack_name = |token: Token<TerminalSymbol<usize>, usize>| match token {
+        // Maps tokens to their corresponding variant names. If the token holds no data, it maps to `Empty`.
+        let token_to_variant_name = |token: Token<TerminalSymbol<usize>, usize>| match token {
             Token::Term(term) => match term {
                 TerminalSymbol::Term(term) => {
                     if self.terminal_classes[term].data_used {
-                        Some(&terminal_stack_name)
+                        &terminal_variant_name
                     } else {
-                        None
+                        &empty_variant_name
                     }
                 }
-                TerminalSymbol::Error | TerminalSymbol::Eof => None,
+                TerminalSymbol::Error | TerminalSymbol::Eof => &empty_variant_name,
             },
-            Token::NonTerm(nonterm_idx) => stack_names_for_nonterm[nonterm_idx].as_ref(),
+            Token::NonTerm(nonterm_idx) => &variant_names_for_nonterm[nonterm_idx],
         };
 
         let mut reduce_action_case_streams = quote! {};
@@ -1052,76 +1042,59 @@ impl Grammar {
 
                 use super::nonterminal_info::ReduceAction;
 
-                #[derive(PartialEq, Eq, PartialOrd, Ord)]
-                enum StackName {
-                    DataStack(Ident),
-                    LocationStack,
-                }
-                impl StackName {
-                    pub fn to_token_stream(&self) -> TokenStream {
-                        match self {
-                            StackName::DataStack(name) => {
-                                quote! {__data_stack.#name}
-                            }
-                            StackName::LocationStack => quote! {__location_stack},
-                        }
-                    }
-                }
-
                 if rule.is_used {
+                    // Generate debug assertions to verify that the variants on the data stack
+                    // match the expected token/non-terminal variants in the production rule.
                     let mut debug_tag_check_stream = TokenStream::new();
-                    let mut stack_mapto_map = std::collections::BTreeMap::new();
                     for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
                         let token_index_from_end = rule.tokens.len() - 1 - token_idx;
-                        let stack_name = token_to_stack_name(token.token);
-                        let tag_name = stack_name.unwrap_or(&empty_tag_name);
+                        let variant_name = token_to_variant_name(token.token);
 
-                        if let Some(stack_name) = stack_name {
-                            let mapto = if let Some(first_chain) =
-                                token.reduce_action_chains.first()
-                            {
-                                let first_chain = &self.custom_reduce_actions[*first_chain];
-                                if first_chain.input_type.is_some() {
-                                    Some(format_ident!("__rustylr_data_{}", token_idx))
-                                } else {
-                                    None
-                                }
-                            } else {
-                                // check if index-based variable __rustylr_data_{token_idx} is used
-                                let index_var_used = rule.reduce_action_contains_ident(&format!("__rustylr_data_{}", token_idx));
-                                
-                                if let Some(mapto) = &token.mapto {
-                                    let mapto_used = rule.reduce_action_contains_ident(mapto.value().as_str());
-                                    if index_var_used {
-                                        Some(format_ident!("__rustylr_data_{}", token_idx))
-                                    } else if mapto_used {
-                                        Some(format_ident!("{}", mapto.value()))
-                                    } else {
-                                        None
-                                    }
-                                } else {
-                                    if index_var_used {
-                                        Some(format_ident!("__rustylr_data_{}", token_idx))
-                                    } else {
-                                        None
-                                    }
-                                }
-                            };
-                            stack_mapto_map
-                                .entry(StackName::DataStack(stack_name.clone()))
-                                .or_insert_with(Vec::new)
-                                .push(mapto);
+                        if variant_name == &empty_variant_name {
+                            debug_tag_check_stream.extend(quote! {
+                                debug_assert!(
+                                    matches!(
+                                        __data_stack.__stack.get(
+                                            __data_stack.__stack.len()-1-#token_index_from_end
+                                        ),
+                                        Some(&#data_enum_typename::Empty)
+                                    )
+                                );
+                            });
+                        } else {
+                            debug_tag_check_stream.extend(quote! {
+                                debug_assert!(
+                                    matches!(
+                                        __data_stack.__stack.get(
+                                            __data_stack.__stack.len()-1-#token_index_from_end
+                                        ),
+                                        Some(&#data_enum_typename::#variant_name(_))
+                                    )
+                                );
+                            });
                         }
+                    }
+
+                    // Generate code to extract values and locations from the stacks for the reduce action.
+                    // Since the data stack is a single unified vector, we pop from it in reverse chronological order (right to left).
+                    let mut extract_data_stream = TokenStream::new();
+                    for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
+                        let variant_name = token_to_variant_name(token.token);
+
+                        // Determine location_mapto
                         let location_mapto = if token.reduce_action_chains.is_empty() {
-                            let location_index_varname_str = format!("__rustylr_location_{}", token_idx);
-                            let index_var_used = rule.reduce_action_contains_ident(&location_index_varname_str);
+                            let location_index_varname_str =
+                                format!("__rustylr_location_{}", token_idx);
+                            let index_var_used =
+                                rule.reduce_action_contains_ident(&location_index_varname_str);
 
                             if let Some(mapto) = &token.mapto {
                                 let location_varname =
                                     format_ident!("__rustylr_location_{}", mapto.value());
                                 let location_varname_str =
                                     format!("__rustylr_location_{}", mapto.value());
-                                let mapto_used = rule.reduce_action_contains_ident(&location_varname_str);
+                                let mapto_used =
+                                    rule.reduce_action_contains_ident(&location_varname_str);
 
                                 if index_var_used {
                                     Some(format_ident!("__rustylr_location_{}", token_idx))
@@ -1147,153 +1120,66 @@ impl Grammar {
                                 None
                             }
                         };
-                        stack_mapto_map
-                            .entry(StackName::LocationStack)
-                            .or_insert_with(Vec::new)
-                            .push(location_mapto);
 
-                        if !unique_tag {
-                            debug_tag_check_stream.extend(quote! {
-                                debug_assert!(
-                                    __data_stack.#tag_stack_name.get(
-                                        __data_stack.#tag_stack_name.len()-1-#token_index_from_end
-                                    ) == Some( &#tag_enum_name::#tag_name )
-                                );
+                        if let Some(loc_mapto) = location_mapto {
+                            extract_data_stream.extend(quote! {
+                                let mut #loc_mapto = __location_stack.pop().unwrap();
+                            });
+                        } else {
+                            extract_data_stream.extend(quote! {
+                                __location_stack.pop().unwrap();
                             });
                         }
-                    }
 
-                    // new tag that will be inserted by this reduce action
-                    let new_tag_name = stack_names_for_nonterm[nonterm_idx]
-                        .as_ref()
-                        .unwrap_or(&empty_tag_name);
-                    // pop n tokens from tag_stack and push new reduced tag
-                    let modify_tag_stream = if unique_tag {
-                        TokenStream::new()
-                    } else {
-                        if rule.tokens.len() > 0 {
-                            if new_tag_name == &empty_tag_name {
-                                // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
-                                // just pop n-1 tokens
-                                let first_tag_name = token_to_stack_name(rule.tokens[0].token)
-                                    .unwrap_or(&empty_tag_name);
-
-                                if first_tag_name == new_tag_name {
-                                    // pop n-1 tokens, no new insertion
-                                    let len = rule.tokens.len() - 1;
-                                    let truncate_stream = if len > 0 {
-                                        quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);}
-                                    } else {
-                                        TokenStream::new()
-                                    };
-                                    truncate_stream
+                        // Determine mapto for data
+                        let mapto = if variant_name != &empty_variant_name {
+                            if let Some(first_chain) = token.reduce_action_chains.first() {
+                                let first_chain = &self.custom_reduce_actions[*first_chain];
+                                if first_chain.input_type.is_some() {
+                                    Some(format_ident!("__rustylr_data_{}", token_idx))
                                 } else {
-                                    let len = rule.tokens.len();
-                                    // len > 0 here
-                                    quote! {
-                                        __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
-                                        __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
-                                    }
+                                    None
                                 }
                             } else {
-                                // if first token's tag is equal to new_tag, no need to (pop n tokens -> push new token).
-                                // just pop n-1 tokens
-                                let first_tag_name = token_to_stack_name(rule.tokens[0].token)
-                                    .unwrap_or(&empty_tag_name);
+                                // check if index-based variable __rustylr_data_{token_idx} is used
+                                let index_var_used = rule.reduce_action_contains_ident(&format!(
+                                    "__rustylr_data_{}",
+                                    token_idx
+                                ));
 
-                                if first_tag_name == new_tag_name {
-                                    // pop n-1 tokens, no new insertion
-                                    let lenm1 = rule.tokens.len() - 1;
-                                    let truncate_stream = if lenm1 > 0 {
-                                        quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #lenm1);}
+                                if let Some(mapto) = &token.mapto {
+                                    let mapto_used =
+                                        rule.reduce_action_contains_ident(mapto.value().as_str());
+                                    if index_var_used {
+                                        Some(format_ident!("__rustylr_data_{}", token_idx))
+                                    } else if mapto_used {
+                                        Some(format_ident!("{}", mapto.value()))
                                     } else {
-                                        TokenStream::new()
-                                    };
-
-                                    let len = rule.tokens.len();
-                                    quote! {
-                                        if __push_data {
-                                            #truncate_stream
-                                        } else {
-                                            __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
-                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
-                                        }
-                                    }
-                                } else if first_tag_name == &empty_tag_name {
-                                    // pop n-1 tokens, no new insertion
-                                    let lenm1 = rule.tokens.len() - 1;
-                                    let truncate_stream = if lenm1 > 0 {
-                                        quote! {__data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #lenm1);}
-                                    } else {
-                                        TokenStream::new()
-                                    };
-
-                                    let len = rule.tokens.len();
-                                    quote! {
-                                        if __push_data {
-                                            __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
-                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
-                                        } else {
-                                            #truncate_stream
-                                        }
+                                        None
                                     }
                                 } else {
-                                    let len = rule.tokens.len();
-                                    // len > 0 here
-                                    quote! {
-                                        __data_stack.#tag_stack_name.truncate(__data_stack.#tag_stack_name.len() - #len);
-                                        if __push_data {
-                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
-                                        } else {
-                                            __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
-                                        }
+                                    if index_var_used {
+                                        Some(format_ident!("__rustylr_data_{}", token_idx))
+                                    } else {
+                                        None
                                     }
                                 }
                             }
                         } else {
-                            if new_tag_name == &empty_tag_name {
-                                quote! {
-                                    __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
-                                }
-                            } else {
-                                quote! {
-                                    if __push_data {
-                                        __data_stack.#tag_stack_name.push(#tag_enum_name::#new_tag_name);
-                                    } else {
-                                        __data_stack.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
-                                    }
-                                }
-                            }
-                        }
-                    };
+                            None
+                        };
 
-                    let mut extract_data_stream = TokenStream::new();
-                    for (stack_name, maptos) in stack_mapto_map.iter() {
-                        let stack_stream = stack_name.to_token_stream();
-
-                        // if there are consecutive `None` mapto, truncate instead of pop
-                        let mut last_none_count: usize = 0;
-                        for mapto in maptos {
-                            match mapto {
-                                Some(mapto) => {
-                                    if last_none_count > 0 {
-                                        extract_data_stream.extend(quote! {
-                                                #stack_stream.truncate(#stack_stream.len() - #last_none_count);
-                                            });
-                                        last_none_count = 0;
-                                    }
-                                    extract_data_stream.extend(quote! {
-                                        let mut #mapto = #stack_stream.pop().unwrap();
-                                    });
-                                }
-                                None => {
-                                    last_none_count += 1;
-                                }
-                            }
-                        }
-                        if last_none_count > 0 {
+                        if variant_name != &empty_variant_name && mapto.is_some() {
+                            let data_mapto = mapto.unwrap();
                             extract_data_stream.extend(quote! {
-                                #stack_stream.truncate(#stack_stream.len() - #last_none_count);
+                                let mut #data_mapto = match __data_stack.__stack.pop().unwrap() {
+                                    #data_enum_typename::#variant_name(val) => val,
+                                    _ => unreachable!(),
+                                };
+                            });
+                        } else {
+                            extract_data_stream.extend(quote! {
+                                __data_stack.__stack.pop().unwrap();
                             });
                         }
                     }
@@ -1302,23 +1188,33 @@ impl Grammar {
                     for (token_idx, token) in rule.tokens.iter().enumerate() {
                         if token.reduce_action_chains.is_empty() {
                             if let Some(mapto) = &token.mapto {
-                                let mapto_used = rule.reduce_action_contains_ident(mapto.value().as_str());
-                                let index_var_used = rule.reduce_action_contains_ident(&format!("__rustylr_data_{}", token_idx));
+                                let mapto_used =
+                                    rule.reduce_action_contains_ident(mapto.value().as_str());
+                                let index_var_used = rule.reduce_action_contains_ident(&format!(
+                                    "__rustylr_data_{}",
+                                    token_idx
+                                ));
                                 if mapto_used && index_var_used {
                                     let mapto_ident = format_ident!("{}", mapto.value());
-                                    let data_varname = format_ident!("__rustylr_data_{}", token_idx);
+                                    let data_varname =
+                                        format_ident!("__rustylr_data_{}", token_idx);
                                     alias_stream.extend(quote! {
                                         let mut #mapto_ident = #data_varname;
                                     });
                                 }
 
-                                let location_varname_str = format!("__rustylr_location_{}", mapto.value());
-                                let location_mapto_used = rule.reduce_action_contains_ident(&location_varname_str);
-                                let location_index_varname_str = format!("__rustylr_location_{}", token_idx);
-                                let location_index_var_used = rule.reduce_action_contains_ident(&location_index_varname_str);
+                                let location_varname_str =
+                                    format!("__rustylr_location_{}", mapto.value());
+                                let location_mapto_used =
+                                    rule.reduce_action_contains_ident(&location_varname_str);
+                                let location_index_varname_str =
+                                    format!("__rustylr_location_{}", token_idx);
+                                let location_index_var_used =
+                                    rule.reduce_action_contains_ident(&location_index_varname_str);
                                 if location_mapto_used && location_index_var_used {
                                     let mapto_ident = format_ident!("{}", location_varname_str);
-                                    let data_varname = format_ident!("{}", location_index_varname_str);
+                                    let data_varname =
+                                        format_ident!("{}", location_index_varname_str);
                                     alias_stream.extend(quote! {
                                         let mut #mapto_ident = #data_varname;
                                     });
@@ -1411,18 +1307,24 @@ impl Grammar {
                     let reduce_action_body = match &rule.reduce_action {
                         Some(ReduceAction::Custom(custom)) => {
                             let body = &custom.body;
-                            quote! { #body; }
+                            quote! { #body }
                         }
                         Some(ReduceAction::Identity(identity_idx)) => {
                             let ith_ident = format_ident!(
                                 "{}",
                                 rule.tokens[*identity_idx].mapto.as_ref().unwrap().value()
                             );
-                            quote! { #ith_ident; }
+                            quote! { #ith_ident }
                         }
                         None => TokenStream::new(),
                     };
-                    if let Some(stack_name) = &stack_names_for_nonterm[nonterm_idx] {
+                    let variant_name = &variant_names_for_nonterm[nonterm_idx];
+                    if variant_name != &empty_variant_name {
+                        let res_expr = if reduce_action_body.is_empty() {
+                            quote! { () }
+                        } else {
+                            quote! { #reduce_action_body }
+                        };
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
@@ -1439,21 +1341,27 @@ impl Grammar {
                                 {
                                     #debug_tag_check_stream
                                 }
-                                #modify_tag_stream
 
                                 #extract_data_stream
                                 #alias_stream
                                 #custom_reduce_action_stream
 
-                                let __res = #reduce_action_body
+                                let __res = #res_expr;
                                 if __push_data {
-                                    __data_stack.#stack_name.push(__res);
+                                    __data_stack.__stack.push(#data_enum_typename::#variant_name(__res));
+                                } else {
+                                    __data_stack.__stack.push(#data_enum_typename::Empty);
                                 }
 
                                 Ok(())
                             }
                         });
                     } else {
+                        let semicolon_or_empty = if reduce_action_body.is_empty() {
+                            quote! {}
+                        } else {
+                            quote! { ; }
+                        };
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
@@ -1470,13 +1378,13 @@ impl Grammar {
                                 {
                                     #debug_tag_check_stream
                                 }
-                                #modify_tag_stream
 
                                 #extract_data_stream
                                 #alias_stream
                                 #custom_reduce_action_stream
 
-                                #reduce_action_body
+                                #reduce_action_body #semicolon_or_empty
+                                __data_stack.__stack.push(#data_enum_typename::Empty);
 
                                 Ok(())
                             }
@@ -1491,169 +1399,38 @@ impl Grammar {
             .nonterminals_index
             .get(self.start_rule_name.value())
             .unwrap();
-        let start_stack_name = &stack_names_for_nonterm[start_idx];
-        let tag_name = start_stack_name.as_ref().unwrap_or(&empty_tag_name);
-        let tag_check_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            quote! {
-                let tag = self.#tag_stack_name.pop();
-                debug_assert!(tag == Some(#tag_enum_name::#tag_name));
-            }
-        };
-        let (start_typename, pop_start) = match start_stack_name {
-            Some(stack_name) => {
-                let ruletype = self.nonterminals[start_idx]
-                    .ruletype
-                    .as_ref()
-                    .unwrap()
-                    .clone();
+        let start_variant_name = &variant_names_for_nonterm[start_idx];
+        // Generate the pop_start implementation.
+        // At the time of acceptance, the stack contains the EOF token (which has no data, i.e., Empty)
+        // on top of the actual start symbol's value. We pop the EOF token first, and then retrieve the start value.
+        let (start_typename, pop_start) = if start_variant_name != &empty_variant_name {
+            let ruletype = self.nonterminals[start_idx]
+                .ruletype
+                .as_ref()
+                .unwrap()
+                .clone();
 
-                let discard_empty_tag = if unique_tag {
-                    TokenStream::new()
-                } else {
-                    quote! {
-                        self.#tag_stack_name.pop();
+            (
+                ruletype,
+                quote! {
+                    self.__stack.pop();
+                    match self.__stack.pop() {
+                        Some(#data_enum_typename::#start_variant_name(val)) => Some(val),
+                        _ => None,
                     }
-                };
-
-                (
-                    ruletype,
-                    quote! {
-                        #discard_empty_tag
-                        #tag_check_stream
-                        self.#stack_name.pop()
-                    },
-                )
-            }
-            None => (
+                },
+            )
+        } else {
+            (
                 quote! {()},
                 quote! {
-                    #tag_check_stream
-                    Some(())
+                    self.__stack.pop();
+                    match self.__stack.pop() {
+                        Some(#data_enum_typename::Empty) => Some(()),
+                        _ => None,
+                    }
                 },
-            ),
-        };
-
-        // typename for count the number of tokens in each production rule
-        let max_shift = self
-            .nonterminals
-            .iter()
-            .map(|nonterm| {
-                nonterm
-                    .rules
-                    .iter()
-                    .map(|rule| rule.tokens.len())
-                    .max()
-                    .unwrap_or(0)
-            })
-            .max()
-            .unwrap_or(0);
-        let shift_typename = if max_shift <= u8::MAX as usize {
-            quote! { u8 }
-        } else if max_shift <= u16::MAX as usize {
-            quote! { u16 }
-        } else if max_shift <= u32::MAX as usize {
-            quote! { u32 }
-        } else {
-            quote! { usize }
-        };
-
-        let mut stack_definition_stream = TokenStream::new();
-        let mut stack_default_stream = TokenStream::new();
-        let mut pop_body_stream = TokenStream::new();
-        let mut stack_clear_stream = TokenStream::new();
-        let mut stack_append_stream = TokenStream::new();
-        let stack_len = stack_names_in_order.len();
-        let mut split_off_split_stream = TokenStream::new();
-        let mut split_off_ctor_stream = TokenStream::new();
-        let mut truncate_stream = TokenStream::new();
-        for (stack_idx, (stack_name, typename)) in stack_names_in_order.iter().enumerate() {
-            stack_definition_stream.extend(quote! {
-                #stack_name: Vec<#typename>,
-            });
-            stack_default_stream.extend(quote! {
-                #stack_name: Vec::new(),
-            });
-            if unique_tag {
-                pop_body_stream.extend(quote! {
-                    self.#stack_name.pop();
-                });
-            } else {
-                pop_body_stream.extend(quote! {
-                    #tag_enum_name::#stack_name => { self.#stack_name.pop(); }
-                });
-            };
-            stack_clear_stream.extend(quote! {
-                self.#stack_name.clear();
-            });
-            stack_append_stream.extend(quote! {
-                self.#stack_name.append(&mut other.#stack_name);
-            });
-
-            let other_stack_name = format_ident!("__other_{}", stack_name);
-            if unique_tag {
-                split_off_split_stream.extend(quote! {
-                    let #other_stack_name = self.#stack_name.split_off( at );
-                });
-            } else {
-                split_off_split_stream.extend(quote! {
-                    let #other_stack_name = self.#stack_name.split_off( self.#stack_name.len() - (__counts[#stack_idx] as usize) );
-                });
-            };
-            split_off_ctor_stream.extend(quote! {
-                #stack_name: #other_stack_name,
-            });
-
-            if unique_tag {
-                truncate_stream.extend(quote! {
-                    self.#stack_name.truncate( at );
-                });
-            } else {
-                truncate_stream.extend(quote! {
-                    self.#stack_name.truncate( self.#stack_name.len() - (__counts[#stack_idx] as usize) );
-                });
-            };
-        }
-
-        let pop_stream = if unique_tag {
-            pop_body_stream
-        } else {
-            quote! {
-                match self.#tag_stack_name.pop().unwrap() {
-                    #pop_body_stream
-                    _ => {}
-                }
-            }
-        };
-
-        let split_off_count_stream = if unique_tag {
-            quote! {}
-        } else {
-            quote! {
-                let mut __counts: [#shift_typename; #stack_len+1] = [0; #stack_len+1];
-                let __other_tag_stack = self.#tag_stack_name.split_off(at);
-                for &tag in &__other_tag_stack {
-                    __counts[ tag as usize ] += 1;
-                }
-            }
-        };
-        if !unique_tag {
-            split_off_ctor_stream.extend(quote! {
-                #tag_stack_name: __other_tag_stack,
-            });
-        }
-
-        let truncate_count_stream = if unique_tag {
-            quote! {}
-        } else {
-            quote! {
-                let mut __counts: [#shift_typename; #stack_len+1] = [0; #stack_len+1];
-                for &tag in &self.#tag_stack_name[at..] {
-                    __counts[ tag as usize ] += 1;
-                }
-                self.#tag_stack_name.truncate( at );
-            }
+            )
         };
 
         let derive_clone_for_glr = if self.glr {
@@ -1663,113 +1440,55 @@ impl Grammar {
         };
 
         let push_terminal_body_stream = if terminal_data_used {
-            if unique_tag {
-                quote! {
-                    self.#terminal_stack_name.push( term );
-                }
-            } else {
-                quote! {
-                    self.#tag_stack_name.push(#tag_enum_name::#terminal_stack_name);
-                    self.#terminal_stack_name.push( term );
-                }
+            quote! {
+                self.__stack.push(#data_enum_typename::#terminal_variant_name(term));
             }
         } else {
             quote! {
-                unreachable!();
+                self.__stack.push(#data_enum_typename::Empty);
             }
         };
-        let push_empty_body_stream = if empty_tag_used {
-            if unique_tag {
-                TokenStream::new()
-            } else {
-                quote! {
-                    self.#tag_stack_name.push(#tag_enum_name::#empty_tag_name);
-                }
-            }
-        } else {
-            quote! { unreachable!(); }
+        let push_empty_body_stream = quote! {
+            self.__stack.push(#data_enum_typename::Empty);
         };
 
-        let tag_definition_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            let mut tag_definition_body_stream = TokenStream::new();
-            for (stack_name, _) in &stack_names_in_order {
-                tag_definition_body_stream.extend(quote! {
-                    #stack_name,
+        let data_enum_definition = {
+            let mut variants = TokenStream::new();
+            for (variant_name, typename) in &variant_names_in_order {
+                variants.extend(quote! {
+                    #variant_name(#typename),
                 });
             }
-            if empty_tag_used {
-                tag_definition_body_stream.extend(quote! {
-                    #empty_tag_name,
-                });
-            }
+            variants.extend(quote! {
+                Empty,
+            });
             quote! {
-                /// tag for token that represents which stack a token is using
+                /// enum for each non-terminal and terminal symbol, that actually hold data
                 #[rustfmt::skip]
                 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-                #[derive(Clone, Copy, PartialEq, Eq)]
-                pub enum #tag_enum_name {
-                    #tag_definition_body_stream
+                #derive_clone_for_glr
+                pub enum #data_enum_typename {
+                    #variants
                 }
-            }
-        };
-
-        let tag_stack_definition_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            quote! { pub #tag_stack_name: Vec<#tag_enum_name>, }
-        };
-        let tag_stack_init_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            quote! {
-                #tag_stack_name: Vec::new(),
-            }
-        };
-
-        let tag_stack_clear_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            quote! {
-                self.#tag_stack_name.clear();
-            }
-        };
-
-        let tag_stack_reserve_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            quote! {
-                self.#tag_stack_name.reserve(additional);
-            }
-        };
-
-        let tag_stack_append_stream = if unique_tag {
-            TokenStream::new()
-        } else {
-            quote! {
-                self.#tag_stack_name.append(&mut other.#tag_stack_name);
             }
         };
 
         stream.extend(quote! {
 
-        #tag_definition_stream
+        #data_enum_definition
 
         /// enum for each non-terminal and terminal symbol, that actually hold data
         #[rustfmt::skip]
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
         #derive_clone_for_glr
         pub struct #data_stack_typename {
-            #tag_stack_definition_stream
-            #stack_definition_stream
+            pub __stack: Vec<#data_enum_typename>,
         }
 
         impl Default for #data_stack_typename {
             fn default() -> Self {
                 Self {
-                    #tag_stack_init_stream
-                    #stack_default_stream
+                    __stack: Vec::new(),
                 }
             }
         }
@@ -1795,7 +1514,7 @@ impl Grammar {
                 #pop_start
             }
             fn pop(&mut self) {
-                #pop_stream
+                self.__stack.pop();
             }
             fn push_terminal(&mut self, term: Self::Term) {
                 #push_terminal_body_stream
@@ -1804,28 +1523,25 @@ impl Grammar {
                 #push_empty_body_stream
             }
 
+            // Trait operations like clear, split_off, truncate, and append are highly simplified
+            // and efficient because they only need to perform a single vector operation on the unified stack.
             fn clear(&mut self) {
-                #tag_stack_clear_stream
-                #stack_clear_stream
+                self.__stack.clear();
             }
             fn reserve(&mut self, additional: usize) {
-                #tag_stack_reserve_stream
+                self.__stack.reserve(additional);
             }
 
             fn split_off(&mut self, at: usize) -> Self {
-                #split_off_count_stream
-                #split_off_split_stream
                 Self {
-                    #split_off_ctor_stream
+                    __stack: self.__stack.split_off(at),
                 }
             }
             fn truncate(&mut self, at: usize) {
-                #truncate_count_stream
-                #truncate_stream
+                self.__stack.truncate(at);
             }
             fn append(&mut self, other: &mut Self) {
-                #tag_stack_append_stream
-                #stack_append_stream
+                self.__stack.append(&mut other.__stack);
             }
 
             fn reduce_action(

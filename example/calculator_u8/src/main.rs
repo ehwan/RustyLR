@@ -42,3 +42,39 @@ fn main() {
     }
     context.feed(&parser, 0 as char, &mut userdata).unwrap(); // feed EOF
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_calculator_u8_success() {
+        let input = "  1 +  -20 *   (3 + 4 )   ";
+        let parser = parser::EParser::new();
+        let mut context = parser::EContext::new();
+        let mut userdata: i32 = 0;
+        for b in input.chars() {
+            context.feed(&parser, b, &mut userdata).expect("Failed to feed char");
+        }
+        let result = context.accept(&parser, &mut userdata).expect("Failed to accept");
+        assert_eq!(result, -139.0);
+    }
+
+    #[test]
+    fn test_calculator_u8_invalid_input() {
+        let error_input = "1+2**(3+4)";
+        let parser = parser::EParser::new();
+        let mut context = parser::EContext::new();
+        let mut userdata: i32 = 0;
+        
+        let mut has_err = false;
+        for b in error_input.chars() {
+            if context.feed(&parser, b, &mut userdata).is_err() {
+                has_err = true;
+                break;
+            }
+        }
+        assert!(has_err);
+    }
+}
+
