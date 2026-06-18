@@ -1,260 +1,294 @@
 # rusty_lr
+
 [![crates.io](https://img.shields.io/crates/v/rusty_lr.svg)](https://crates.io/crates/rusty_lr)
 [![docs.rs](https://docs.rs/rusty_lr/badge.svg)](https://docs.rs/rusty_lr)
 
-***A Bison-like Parser generator & Compiler frontend for Rust generating optimised IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing.***
+***A Bison-like parser generator and compiler frontend for Rust. It generates optimized IELR(1) and LALR(1) parsing tables, supporting both deterministic LR and non-deterministic Generalized LR (GLR) parsing.***
 
-RustyLR is a parser generator that converts context-free grammars into IELR(1)/LALR(1) tables and supporting deterministic LR and non-deterministic GLR parsing strategies. It supports custom reduce actions in Rust, with beautiful diagnostics.
-Highly inspired by tools like *bison*, it uses a similar syntax while integrating seamlessly with Rust's ecosystem.
-It constructs optimized state machines, ensuring efficient and reliable parsing.
+RustyLR is a robust parser generator that converts context-free grammars into optimized IELR(1) or LALR(1) tables. It seamlessly integrates with the Rust ecosystem, allowing you to write custom reduce actions directly in Rust with rich, diagnostic-driven error reporting. 
+
+Highly inspired by classic tools like *Bison* and *Yacc*, RustyLR uses a familiar syntax while offering modern features such as state optimization, location tracking, generalized parsing, and compile-time/runtime conflict resolution.
 
 ![title](images/title.png)
 
 ## Features
- - **Custom Reduce Actions:** Define custom actions in Rust, allowing you to build custom data structures easily.
- - **Automatic Optimization:** Reduces parser table size and improves performance by grouping terminals with identical behavior across parser states.
- - **Multiple Parsing Strategies:** Supports minimal-LR(1), LALR(1) parser tables, and GLR parsing strategy.
- - **Detailed Diagnostics:** Detects grammar conflicts, verbose conflict resolution stages, and optimization stages.
- - **Static & Runtime Conflict Resolution:** Provides mechanisms to resolve conflicts at compile time or runtime.
- - **Location Tracking:** Tracks the location of every token in the parse tree, useful for error reporting and debugging.
- - **State Machine Debugging:** The `rustylr` executable provides a `--state` option that allows you to debug and visualize the generated state machine. This is useful for understanding how the parser will behave and for identifying potential issues in the grammar.
 
-## Quick Start: Using the `rustylr` Executable
+- **Custom Reduce Actions:** Define actions directly in Rust to build abstract syntax trees (ASTs) or custom data structures easily.
+- **Automatic Parser Optimization:** Shrinks parsing tables and boosts runtime performance by grouping terminal symbols that exhibit identical behavior across parser states.
+- **Multiple Parsing Strategies:** Supports minimal-LR(1) (IELR-style), LALR(1) tables, and Generalized LR (GLR) parsing.
+- **Detailed Diagnostics:** Reports grammar conflicts, provides verbose traces of conflict resolution stages, and logs optimization passes.
+- **Static & Runtime Conflict Resolution:** Resolve grammar conflicts at compile time (precedence/associativity) or dynamically at runtime.
+- **Location Tracking:** Automatically tracks positions of tokens and non-terminals, simplifying error reporting in compiler diagnostics.
+- **State Machine Debugging:** The `rustylr` CLI provides a `--state` flag to inspect and visualize the generated state machine, making conflict debugging straightforward.
 
-The recommended way to use RustyLR is with the standalone `rustylr` executable. It's faster, provides richer grammar diagnostics, and includes commands for debugging state machines directly.
+---
 
-Here is a step-by-step guide to get you started.
+## Quick Start: Using the `rustylr` CLI
 
-**1. Add `rusty_lr` to your dependencies**
+The recommended way to use RustyLR is via the standalone `rustylr` CLI executable. It offers faster compilation, comprehensive grammar diagnostics, and interactive tools for debugging state machines.
 
-First, add the `rusty_lr` runtime library to your project's `Cargo.toml`. The generated parser code will depend on it.
+### 1. Add `rusty_lr` to your dependencies
+Add the runtime library to your `Cargo.toml`. The generated parser will depend on it.
 
 ```toml
 [dependencies]
-rusty_lr = "..." # Use the same version as the executable
+rusty_lr = "..." # Ensure this matches the version of the CLI executable
 ```
 
-**2. Install the `rustylr` executable**
-
-You can install the executable from crates.io using `cargo`:
+### 2. Install the `rustylr` CLI
+Install the command-line generator from crates.io using Cargo:
 
 ```bash
 cargo install rustylr
 ```
 
-**3. Create a grammar file**
-
-Create a file named `src/grammar.rs`. This file will contain your token definitions and grammar rules. Any Rust code above the `%%` separator will be copied directly to the generated output file.
+### 3. Create a Grammar File
+Create a grammar file, e.g., `src/grammar.rs`. Any Rust code placed *above* the `%%` delimiter is copied directly to the generated parser file. The section *below* `%%` defines directives and grammar rules.
 
 ```rust
 // src/grammar.rs
-// This code is copied to the generated file.
-pub enum MyToken {
+
+#[derive(Debug, Clone, Copy)]
+pub enum Token {
     Num(i32),
     Plus,
+    Minus,
+    Mul,
+    Div,
+    LParen,
+    RParen,
 }
 
-%% // Grammar rules start here.
+%%
 
-%tokentype MyToken;
-%start E;
-%left plus; // Specify left-associativity for the 'plus' token.
+// Define the token type and the start symbol
+%tokentype Token;
+%start Expr;
 
-// Define tokens and how they map to MyToken variants.
-%token num MyToken::Num(_);
-%token plus MyToken::Plus;
+// Declare operator precedence and associativity (lowest to highest)
+%left plus minus;
+%left mul div;
 
-// Define grammar rules and their return types.
-// E(i32) means the non-terminal E returns an i32.
-// In the action blocks `{ ... }`, you can refer to the values of symbols
-// on the right-hand side by their names (e.g., `e1`, `e2`, `num`).
-E(i32): e1=E plus e2=E { e1 + e2 }
-      | num { let MyToken::Num(num) = num else { unreachable!(); };
-        num
-      }
-      ;
+// Map grammar terminals to Token enum variants
+%token num Token::Num(_);
+%token plus Token::Plus;
+%token minus Token::Minus;
+%token mul Token::Mul;
+%token div Token::Div;
+%token lparen Token::LParen;
+%token rparen Token::RParen;
+
+// Production rules
+// Expr(i32) means the non-terminal Expr returns an i32.
+// In the action block `{ ... }`, reference RHS symbols by their names.
+Expr(i32)
+    : e1=Expr plus e2=Expr   { e1 + e2 }
+    | e1=Expr minus e2=Expr  { e1 - e2 }
+    | e1=Expr mul e2=Expr    { e1 * e2 }
+    | e1=Expr div e2=Expr    { e1 / e2 }
+    | lparen e=Expr rparen   { e }
+    | num {
+        if let Token::Num(val) = num {
+            val
+        } else {
+            unreachable!()
+        }
+    }
+    ;
 ```
 
-**4. Generate the parser code**
-
-Run the `rustylr` executable to process your grammar file. This command will generate `src/parser.rs` from `src/grammar.rs`.
+### 4. Generate the Parser Code
+Run the CLI to compile your grammar into a Rust module:
 
 ```bash
 rustylr src/grammar.rs src/parser.rs
 ```
 
-**5. Use the generated parser in your code**
-
-Finally, include the newly generated `src/parser.rs` as a module in your `main.rs` or `lib.rs` and use it to parse a token stream.
+### 5. Parse a Token Stream
+Include the generated `src/parser.rs` file in your project and feed it a stream of tokens:
 
 ```rust
-// In src/main.rs
-
-// Include the generated parser module.
+// src/main.rs
 mod parser;
-// Bring the token enum into scope.
-use parser::MyToken;
+use parser::Token;
 
 fn main() {
-    // Example token stream for "1 + 2"
-    let tokens = vec![MyToken::Num(1), MyToken::Plus, MyToken::Num(2)]; 
+    // Represents the expression: 3 + 4 * 2
+    let tokens = vec![
+        Token::Num(3),
+        Token::Plus,
+        Token::Num(4),
+        Token::Mul,
+        Token::Num(2),
+    ];
 
-    let parser = parser::EParser::new();        // Assumes 'E' is your start symbol
-    let mut context = parser::EContext::new();
-    let mut userdata = (); // No userdata in this example.
+    let parser = parser::ExprParser::new();
+    let mut context = parser::ExprContext::new();
+    let mut userdata = (); // No custom user data needed
 
     for token in tokens {
-        match context.feed(&parser, token, &mut userdata) {
-            Ok(_) => {}
-            Err(e) => {
-                eprintln!("Parse error: {}", e);
-                return;
-            }
+        if let Err(err) = context.feed(&parser, token, &mut userdata) {
+            eprintln!("Parse error: {}", err);
+            return;
         }
     }
 
-    // Get the final parsed result.
-    match context.accept(&parser) {
+    match context.accept(&parser, &mut userdata) {
         Ok(result) => {
-            let final_result: i32 = result;
-            println!("Parsed result: {}", final_result); // Should print "3"
-        },
-        Err(e) => {
-            eprintln!("Failed to produce a final result: {}", e);
+            println!("Parsed result: {}", result); // Output: 11
+        }
+        Err(err) => {
+            eprintln!("Failed to finalize parsing: {}", err);
         }
     }
 }
 ```
 
-**Important:** Ensure the version of the `rustylr` executable you run matches the version of the `rusty_lr` crate in your `Cargo.toml`. Mismatched versions can lead to build errors.
+> [!IMPORTANT]
+> The version of the `rustylr` CLI executable must exactly match the version of the `rusty_lr` library in your `Cargo.toml`. Version mismatches may result in build failures.
 
-
+---
 
 ## Generated Code Structure
 
-The generated code will include several structs and enums:
- - `<Start>Parser`: A lightweight struct that references the static parser table. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/trait.Parser.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/trait.Parser.html)
- - `<Start>Context`: A struct that maintains the current parsing state and symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/lr/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/glr/struct.Context.html)
- - `<Start>State`: A type representing a parser state and its associated table. 
- - `<Start>Rule`: A type representing a production rule. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/struct.ProductionRule.html)
- - `<Start>NonTerminals`: An enum representing all non-terminal symbols in the grammar. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/trait.NonTerminal.html)
+The generated parser module contains several generated components tailored to your start symbol:
+- **`<Start>Parser`**: A lightweight struct containing the static parsing tables. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/trait.Parser.html)
+- **`<Start>Context`**: A mutable state context that keeps track of the stack and parsed symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/deterministic/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nondeterministic/struct.Context.html)
+- **`<Start>State`**: An internal type representing individual states in the parser. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/state/trait.State.html)
+- **`<Start>Rule`**: An internal enum representing production rules. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/rule/struct.ProductionRule.html)
+- **`<Start>NonTerminals`**: An enum representing all non-terminal symbols. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nonterminal/trait.NonTerminal.html)
 
-
-### Working with Context
-You can also get contextual information from the `<Start>Context` struct:
+### Interacting with the Parsing Context
+The `<Start>Context` offers helpful utilities for inspecting and tracing:
 ```rust
-let mut context = <Start>Context::new();
+let mut context = ExprContext::new();
 
-// ... parsing ...
+// ... feed tokens ...
 
-context.expected_token();    // Get expected (terminal, non-terminal) symbols for current state
-context.can_feed(&term);     // Check if a terminal symbol can be fed
-context.trace();             // Get all `%trace` non-terminals currently being parsed
-println!("{}", context.backtrace()); // Print backtrace of the parser state
-println!("{}", context);     // Print tree structure of the parser state (`tree` feature)
+context.expected_token(&parser);    // Returns the expected symbols for the current state
+context.can_feed(&parser, &token);  // Checks if a terminal can be fed next
+context.trace(&parser);             // Retrieves active `%trace` non-terminals
+println!("{}", context.backtrace(&parser)); // Prints the stack trace of parser states
+println!("{}", context);     // Formats the state tree (requires 'tree' feature)
 ```
 
-### The Feed Method
-The generated code includes a `feed` method that processes tokens:
-
+### Feeding Tokens
+You can feed terminal symbols either with or without location information:
 ```rust
-context.feed(&parser, term, &mut userdata); // Feed a terminal symbol and update the state machine
-context.feed_location(&parser, term, &mut userdata, term_location); // Feed a terminal symbol with location tracking
+// Basic feeding
+context.feed(&parser, token, &mut userdata);
+
+// Location-aware feeding (requires %location in grammar)
+context.feed_location(&parser, token, &mut userdata, token_location);
 ```
 
-This method returns `Ok(())` if the token was successfully parsed, or an `Err` if there was an error.
-
-**Note:** The actual method signatures differ slightly when building a GLR parser.
+---
 
 ## GLR Parsing
-RustyLR offers built-in support for Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
-See [GLR.md](GLR.md) for details.
+
+RustyLR provides native support for Generalized LR (GLR) parsing. When you add the `%glr;` directive to a grammar, RustyLR generates a non-deterministic parser that forks state branches upon encountering shift/reduce or reduce/reduce conflicts. This is particularly useful for ambiguous grammars or complex programming languages.
+
+For more details, see [GLR.md](GLR.md).
+
+---
 
 ## Error Handling and Conflict Resolution
-RustyLR provides multiple mechanisms for handling semantic errors and resolving conflicts during parsing:
- - **Panic Mode Error Recovery:** Use the `error` token for panic-mode error recovery
- - **Operator Precedence:** Set precedence with `%left`, `%right`, `%precedence` for terminals
- - **Reduce Rule Priority:** Set priority with `%dprec` for production rules
- - **Runtime Errors:** Return `Err` from reduce actions to handle semantic errors
 
-See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for detailed information.
+RustyLR provides multiple tools to resolve grammar ambiguities and handle parsing failures:
+- **Panic-Mode Error Recovery:** Use the special `error` terminal to catch and recover from syntax errors.
+- **Operator Precedence:** Disambiguate expressions with `%left`, `%right`, and `%precedence` directives.
+- **Reduce Rule Priority:** Explicitly set reduce priorities with `%dprec`.
+- **Runtime Error Propagation:** Return custom `Err` payloads from reduce actions to signal semantic or parsing errors.
+
+See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for in-depth information.
+
+---
 
 ## Location Tracking
-Track the location of tokens and non-terminals for better error reporting and debugging:
+
+Track input spans automatically across tokens and non-terminals to print helpful compiler errors:
 
 ```rust
-Expr: exp1=Expr '+' exp2=Expr {
-    println!("Location of exp1: {:?}", @exp1);
-    println!("Location of exp2: {:?}", @exp2);
-    println!("Location of this expression: {:?}", @$); // @$ (or @0) is the location of the non-terminal itself
-    exp1 + exp2
-}
-| Expr error Expr {
-    println!("Error at: {:?}", @error); // @error is the location of the error token
-    0 // Return a default value
-}
+Expr(i32)
+    : e1=Expr '+' e2=Expr {
+        println!("Span of e1: {:?}", @e1);
+        println!("Span of e2: {:?}", @e2);
+        println!("Span of this Expr: {:?}", @$); // @$ (or @0) represents the current non-terminal's span
+        e1 + e2
+    }
+    | Expr error Expr {
+        println!("Syntax error recovery span: {:?}", @error);
+        0 // Fallback value
+    }
+    ;
 ```
 
-See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for detailed information.
+See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for configuration details.
+
+---
 
 ## State Machine Debugging
-The `rustylr` executable includes a powerful `--state` option for debugging the generated parser's state machine. This feature allows you to inspect the details of each state, including its production rules, expected tokens, and transitions to other states. It is an invaluable tool for diagnosing grammar ambiguities, understanding shift/reduce conflicts, and verifying that the parser behaves as expected.
 
-To use it, run `rustylr` with the `--state` flag, followed by your grammar file:
+You can inspect the generated parser states using the `--state` option. This outputs a color-coded state listing showing core items, lookahead sets, transitions, and conflict reports.
 
 ```bash
 rustylr --state src/grammar.rs
 ```
 
-This will output a detailed, color-coded representation of the state machine directly in your terminal, making it easy to trace the parser's logic.
-
 ![State Machine Debug](images/state_option.png)
 
-This visualization helps you understand the parsing process step-by-step and is particularly useful for debugging complex grammars.
+---
 
 ## Examples
- - [Calculator (enum version)](https://github.com/ehwan/RustyLR/blob/main/example/calculator/src/parser.rs): A numeric expression parser using custom token enums
- - [Calculator (u8 version)](https://github.com/ehwan/RustyLR/blob/main/example/calculator_u8/src/parser.rs): A numeric expression parser using byte tokens
- - [JSON Validator](https://github.com/ehwan/RustyLR/blob/main/example/json/src/parser.rs): A JSON syntax validator
- - [Lua 5.4 syntax parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete Lua language parser
- - [C language parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/main/src/ast/parser_lr.rs): A C language parser
- - [Bootstrap parser](https://github.com/ehwan/RustyLR/blob/main/rusty_lr_parser/src/parser/parser.rs): RustyLR's own syntax parser is written in RustyLR itself
+
+- [Calculator (enum tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator/src/parser.rs): A numeric expression parser using custom token enums.
+- [Calculator (u8 tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator_u8/src/parser.rs): A byte-stream numeric calculator.
+- [JSON Validator](https://github.com/ehwan/RustyLR/blob/main/example/json/src/parser.rs): A validator checking JSON syntax.
+- [Lua 5.4 Parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete parser for the Lua 5.4 programming language.
+- [C Parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/main/src/ast/parser_lr.rs): An LR-based parser for the C programming language.
+- [Bootstrap Parser](https://github.com/ehwan/RustyLR/blob/main/rusty_lr_parser/src/parser/parser.rs): RustyLR's own grammar parser, written using RustyLR.
+
+---
 
 ## Cargo Features
- - `build`: Enables build script tools for generating parsers at compile time.
- - `tree`: Enables automatic syntax tree construction for debugging purposes. Makes `Context` implement `Display` for pretty-printing.
+
+- **`build`**: Enables helper functions in `rusty_lr_buildscript` for compiling grammars inside `build.rs` scripts.
+- **`tree`**: Enables automatic syntax tree rendering for debugging. Implementing `Display` for `Context` outputs a formatted parse tree.
+
+---
 
 ## Grammar Syntax
-RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats.
-See [SYNTAX.md](SYNTAX.md) for detailed grammar definition syntax.
+
+RustyLR's syntax builds upon standard Yacc/Bison design but is optimized for Rust.
+
+See [SYNTAX.md](SYNTAX.md) for the complete reference.
 
 ### Type Inference with `_`
-Assigning a type to a non-terminal can be done automatically using the `_` placeholder. 
+You can omit explicit rule types using the `_` placeholder. RustyLR will infer the type based on identity rules and reduce actions:
 
 ```rust
-E(_): A;
+Expr(_): Term;
 ```
-When `_` is used, RustyLR will infer the type by examining `Identity` reduce actions. If a circular dependency prevents type resolution, a compilation error is raised.
+
+If a circular dependency prevents inference, RustyLR will report a compilation error.
+
+---
 
 ## Contributing
-Contributions are welcome! Please feel free to open an issue or submit a pull request.
+
+We welcome issues and pull requests!
 
 ### Project Structure
-This project is organized as a Cargo workspace with the following crates:
 
- - **`rusty_lr/`**: The main end-user library that provides the public API. This is what users add to their `Cargo.toml`.
- - **`rusty_lr_core/`**: Core parsing engine containing the fundamental data structures, algorithms, and runtime components for both deterministic (`src/parser/deterministic`) and non-deterministic (`src/parser/nondeterministic`) parsing.
- - **`rusty_lr_parser/`**: The main code generation engine that parses RustyLR's grammar syntax, builds parser tables, and generates the actual parser code. This is the core of the parser generation process.
- - **`rusty_lr_derive/`**: Procedural macro interface that wraps `rusty_lr_parser` to provide the `lr1!` macro for inline grammar definitions.
- - **`rusty_lr_buildscript/`**: Build script interface that wraps `rusty_lr_parser` for generating parser code at compile time when using the `build` feature.
- - **`rusty_lr_executable/`**: Standalone `rustylr` executable for command-line parser generation.
- - **`scripts/`**: Development and testing scripts
+This repository is organized as a Cargo workspace:
 
-The crates have the following dependency relationships:
-- `rusty_lr` depends on `rusty_lr_core`, `rusty_lr_derive`, and `rusty_lr_buildscript` (optional)
-- `rusty_lr_derive` and `rusty_lr_buildscript` depend on `rusty_lr_parser`
-- `rusty_lr_parser` depends on `rusty_lr_core`
-- `rusty_lr_executable` depends on `rusty_lr_buildscript`
+- **`rusty_lr/`**: The main user-facing library. Add this to your `Cargo.toml`.
+- **`rusty_lr_core/`**: The runtime engine, defining stack logic, deterministic parsing (`src/parser/deterministic`), and GLR parsing (`src/parser/nondeterministic`).
+- **`rusty_lr_parser/`**: The grammar compilation engine. Parses RustyLR files, constructs parsing tables, and generates Rust output.
+- **`rusty_lr_derive/`**: Procedural macro wrapper around `rusty_lr_parser`, providing the `lr1!` macro.
+- **`rusty_lr_buildscript/`**: Helper API for running RustyLR in cargo build scripts.
+- **`rusty_lr_executable/`**: The standalone `rustylr` CLI executable.
+- **`scripts/`**: Automation, regression test suites, and helper scripts.
 
 ```mermaid
 graph TD;
@@ -282,17 +316,17 @@ graph TD;
     rusty_lr_parser --> rusty_lr_core;
 ```
 
+### Versioning Policy
+RustyLR separates its components into two parts:
+1. The compiler CLI (`rustylr`)
+2. The runtime library (`rusty_lr`)
 
-### About the Versioning
-RustyLR consists of two big parts:
-  - executable (`rustylr`), the code generator
-  - runtime (`rusty_lr`), the main library
+To maintain Cargo compatibility, patch versions are incremented when changes are backwards-compatible (meaning previously generated parser files compile without errors with the new library version). If a change to the code generator requires updates to the runtime library API that break older generated code, a minor version bump is performed.
 
-Since the `cargo` automatically uses the latest patch in `major.minor.patch` version of a crate, we increase the patch number only if the generated code is compatible with the runtime. That is, for any user who is not using buildscript or proc-macro, and using the executable-generated code itself,
-any code change that could make compile errors with the previous generated code will result in a minor version bump.
+---
 
 ## License
-This project is dual-licensed under either of the following licenses, at your option:
 
- - MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
- - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+Dual-licensed under either:
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)

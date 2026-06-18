@@ -1,113 +1,144 @@
 # GLR Parsing in RustyLR
-RustyLR supports Generalized LR (GLR) parsing, enabling it to handle ambiguous or nondeterministic grammars that traditional LR(1) or LALR(1) parsers cannot process.
 
-When a GLR parser encounters a conflict (such as shift/reduce or reduce/reduce),
-it forks the current parsing state into multiple branches,
-each representing a different possible interpretation of the input.
-These branches are processed in parallel, and invalid paths are pruned as parsing progresses.
+RustyLR supports Generalized LR (GLR) parsing, enabling it to process ambiguous or non-deterministic grammars that traditional deterministic LR(1) or LALR(1) parsers cannot handle.
+
+When a GLR parser encounters a conflict (such as a shift/reduce or reduce/reduce conflict), it does not fail. Instead, it forks the current parsing state into multiple parallel branches. Each branch represents a different possible interpretation of the input. These branches are processed concurrently, and invalid paths are pruned dynamically as parsing progresses.
+
+---
 
 ## Enabling GLR Parsing
-To use GLR parsing in RustyLR, include the `%glr;` directive in your grammar definition.
-This directive instructs RustyLR to generate a GLR parser,
-which can handle ambiguous grammars by exploring multiple parsing paths.
 
-Once the `%glr` directive is added, any conflicts in the grammar will not be reported as errors.
-It's important to be aware of points in your grammar where shift/reduce or reduce/reduce conflicts occur, as each divergence increases computational complexity.
+To generate a GLR parser in RustyLR, add the `%glr;` directive to your grammar definition. This directive instructs the parser generator to construct a non-deterministic parsing table and runtime structure capable of maintaining multiple parser stacks.
 
-**Tip:** If you are using the `rustylr` executable, you can use the `--verbose` option to see any conflicts in the grammar and their divergent paths.
+Once the `%glr;` directive is active, grammar conflicts will not be reported as compiler errors. However, you should still be mindful of conflict points in your grammar, as excessive non-determinism increases memory usage and parsing complexity at runtime.
 
-## Example: Ambiguous Grammar
+> [!TIP]
+> If you are using the `rustylr` CLI, run it with the `--verbose` flag to inspect any grammar conflicts and trace the resulting non-deterministic paths.
+
+---
+
+## Example: Ambiguous Expression Grammar
+
+Below is a simple grammar illustrating shift/reduce conflicts caused by operator ambiguity:
 
 ```rust
 %glr;
 %tokentype char;
 %start E;
 
-Digit(char): ['0'-'9'] ;
+Digit(char) : ch=['0'-'9'] { ch };
 
-E(i32): E '+' E { E + E }
-      | E '*' E { E * E }
-      | Digit { Digit.to_digit(10).unwrap() as i32 };
+E(i32)
+    : E '+' e2=E   { E + e2 } // Shift/Reduce conflict: + vs + or *
+    | E '*' e2=E   { E * e2 } // Shift/Reduce conflict: * vs + or *
+    | Digit     { Digit.to_digit(10).unwrap() as i32 }
+    ;
 ```
 
-In this grammar, the expression `1 + 2 * 3 + 4` has multiple valid parse trees due to the ambiguity in operator precedence and associativity:
- - `((1 + 2) * 3) + 4`
- - `(1 + (2 * 3)) + 4`
- - `1 + ((2 * 3) + 4)`
- - `1 + (2 * (3 + 4))`
- - `(1 + 2) * (3 + 4)`
+For the input string `1 + 2 * 3 + 4`, this grammar generates multiple valid parse trees due to the absence of operator precedence and associativity:
+- `((1 + 2) * 3) + 4`
+- `(1 + (2 * 3)) + 4`
+- `1 + ((2 * 3) + 4)`
+- `1 + (2 * (3 + 4))`
+- `(1 + 2) * (3 + 4)`
 
-The GLR parser will explore all possible parsing paths to construct the parse forest.
+A GLR parser will execute all branches concurrently, tracking all possible parse trees in a shared parse forest.
 
-## Resolving Ambiguities
-RustyLR allows you to resolve ambiguities dynamically within reduce actions.
-Simply returning `Err` from a reduce action will prune the current branch of the parse tree.
-By inspecting the lookahead token or other context, you can decide whether to proceed with a particular reduction.
+---
 
-For example, to enforce operator precedence (e.g., `*` has higher precedence than `+`), you can modify the reduce actions as follows:
+## Resolving Ambiguities Dynamically
+
+RustyLR allows you to resolve grammar conflicts and prune parsing branches dynamically within your reduce actions.
+
+### 1. Pruning Paths via `Err`
+If a reduce action evaluates to a semantic error and returns `Err`, the parser immediately discards that active parsing branch. By checking the lookahead token or parsing context, you can selectively fail unwanted paths.
+
+### 2. Disabling Shift Actions (`*shift = false;`)
+You can control lookahead behavior directly by modifying the mutable `shift` flag (exposed in reduce actions as `shift: &mut bool`). Setting `*shift = false;` instructs the parser not to perform a shift action on the current lookahead token, effectively forcing a reduction and pruning the shift branch.
+
+### Example: Enforcing Precedence via Actions
+Here is how you can resolve the operator conflicts in the expression grammar dynamically inside the reduce actions:
 
 ```rust
-E : E '+' E {
-      match *lookahead.to_term().unwrap() {
-          '*' => {
-              // Don't reduce if the next token is '*'
-              // This prevents:
-              // E + E   /   *
-              //             ^ lookahead
-              // from becoming:  E *  ...
-              //                 ^ (E + E)
-              return Err("".to_string());
-          }
-          _ => {
-              // Revoke the shift action
-              // This prevents:
-              // E + E   /  +
-              //            ^ lookahead
-              // from becoming: E + E +  ...
-              // and enforces only the reduce action:
-              // E + ...
-              // ^ (E + E)
-              *shift = false;
-          }
-      }
-      E + E  // Return the result of the addition
-}
+E(i32)
+    : E '+' e2=E {
+        match lookahead.to_term() {
+            Some('*') => {
+                // If the next token is '*', return an error to prevent reducing
+                // this addition first. This prunes the '+' reduction branch and
+                // allows '*' to shift first (multiplying 2 * 3 before adding 1).
+                return Err("defer addition for multiplication".to_string());
+            }
+            _ => {
+                // Otherwise, prevent shifting further tokens and force the reduction
+                *shift = false;
+                E + e2
+            }
+        }
+    }
+    | E '*' e2=E {
+        // Enforce left-associative reduction for multiplication
+        *shift = false;
+        E * e2
+    }
+    | Digit { Digit.to_digit(10).unwrap() as i32 }
+    ;
 ```
 
 ### Predefined Variables in Reduce Actions
-- `lookahead: &TerminalSymbol<TokenType>` - refers to the next token in the input stream. either a terminal fed by the user or an special token like `error`
-- `shift: &mut bool` - controls whether a shift action should be performed
+- **`lookahead`**: A reference of type `&TerminalSymbol<TokenType>` pointing to the next token in the input stream (either a user-supplied terminal or a special symbol like `error`).
+- **`shift`**: A mutable reference of type `&mut bool` that controls whether the parser is allowed to shift the next token.
 
-### Ambiguity Resolution Rules
-- Returning `Err` from the reduce action will discard the current parsing path
-- Setting `*shift = false;` prevents the parser from performing a shift action, enforcing the desired reduction
+---
 
 ## Parsing with the GLR Parser
-RustyLR provides a consistent parsing interface for both deterministic and GLR parsers.
-After generating the parser, you can feed tokens to the parser context and retrieve the parsing results.
+
+The GLR parser shares a similar interface to the deterministic parser, but instead of producing a single result, its `accept()` method returns an iterator over all successful parse tree results. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
 
 ```rust
-let parser = EParser::new();        // Create <StartSymbol>Parser instance
-let mut context = EContext::new();  // Create <StartSymbol>Context instance
+// Include the generated parser module
+mod parser;
 
-for token in input_sequence {
-    match context.feed(&parser, token) {
-        Ok(_) => {}
-        Err(e) => {
-            println!("Parse error: {}", e);
+fn main() {
+    let parser = parser::EParser::new();
+    let mut context = parser::EContext::new();
+    let mut userdata = (); // Custom userdata if defined by %userdata
+
+    let input = vec!['1', '+', '2', '*', '3', '+', '4'];
+
+    // Feed tokens to the GLR parser
+    for token in input {
+        // basic feeding:
+        if let Err(e) = context.feed(&parser, token, &mut userdata) {
+            eprintln!("Fatal parse error: {}", e);
             return;
+        }
+
+        // or location-aware feeding (if %location is configured in the grammar):
+        // let span = MySpan { start: ..., end: ... };
+        // if let Err(e) = context.feed_location(&parser, token, &mut userdata, span) {
+        //     eprintln!("Fatal parse error: {}", e);
+        //     return;
+        // }
+    }
+
+    // Retrieve all valid parse tree results
+    match context.accept(&parser, &mut userdata) {
+        Ok(results) => {
+            for result in results {
+                println!("Parse tree result: {:?}", result);
+            }
+        }
+        Err(e) => {
+            eprintln!("Parsing failed: {}", e);
         }
     }
 }
-
-// Retrieve all possible parse results
-for result in context.accept(&parser).unwrap() {
-    println!("Parse result: {:?}", result);
-}
 ```
 
-### Key Components:
-- `EParser::new()` - Creates a new parser instance
-- `EContext::new()` - Initializes the parsing context
-- `context.feed(&parser, token)` - Feeds tokens to the parser
-- `context.accept(&parser)` - Returns all possible values of the `%start` symbol from every parse path
+### Key API Components
+- **`EParser::new()`**: Creates the static parser table instance.
+- **`EContext::new()`**: Initializes a new GLR state context.
+- **`context.feed(&parser, token, &mut userdata)`**: Feeds a token into all active parsing stacks.
+- **`context.feed_location(&parser, token, &mut userdata, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
+- **`context.accept(&parser, &mut userdata)`**: Finalizes parsing (feeding the end-of-file symbol) and returns an iterator over all successful parse results from all active branches.
