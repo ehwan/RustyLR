@@ -446,9 +446,8 @@ impl Grammar {
 
             span_manager: grammar_args.span_manager,
         };
-        let unboxed_token_typename = crate::utils::strip_box_prefix(grammar.token_typename.clone());
-        grammar.is_char = unboxed_token_typename.to_string() == "char";
-        grammar.is_u8 = unboxed_token_typename.to_string() == "u8";
+        grammar.is_char = grammar.token_typename.to_string() == "char";
+        grammar.is_u8 = grammar.token_typename.to_string() == "u8";
 
         // add char ranges to resolver
         // iterate over all rules, reduce_type or precedence definitions,
@@ -542,11 +541,7 @@ impl Grammar {
         for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
             let ruletype = if is_placeholder_type(&rules_arg.typename) {
                 let placeholder_name = format_ident!("__rustylr_placeholder_{}", rules_arg.name.value());
-                if crate::utils::has_box_prefix(rules_arg.typename.as_ref().unwrap()) {
-                    Some(quote! { box #placeholder_name })
-                } else {
-                    Some(quote! { #placeholder_name })
-                }
+                Some(quote! { #placeholder_name })
             } else {
                 rules_arg.typename.clone()
             };
@@ -1074,7 +1069,7 @@ impl Grammar {
                     let mut nonterm_idx = None;
                     for (idx, nonterm) in grammar.nonterminals.iter().enumerate() {
                         if let Some(name) = &nonterm.ruletype {
-                            if crate::utils::strip_box_prefix(name.clone()).to_string() == *p_name {
+                            if name.to_string() == *p_name {
                                 nonterm_idx = Some(idx);
                                 break;
                             }
@@ -1130,7 +1125,7 @@ impl Grammar {
                 let mut loc = Location::CallSite;
                 for nonterm in &grammar.nonterminals {
                     if let Some(name) = &nonterm.ruletype {
-                        if crate::utils::strip_box_prefix(name.clone()).to_string() == *first_p_name {
+                        if name.to_string() == *first_p_name {
                             loc = nonterm.name.location();
                             break;
                         }
@@ -2263,8 +2258,7 @@ impl Grammar {
 
 fn is_placeholder_type(ruletype: &Option<TokenStream>) -> bool {
     if let Some(ts) = ruletype {
-        let stripped = crate::utils::strip_box_prefix(ts.clone());
-        let mut it = stripped.into_iter();
+        let mut it = ts.clone().into_iter();
         if let Some(proc_macro2::TokenTree::Ident(ident)) = it.next() {
             if ident.to_string() == "_" && it.next().is_none() {
                 return true;
@@ -2608,49 +2602,6 @@ mod tests {
         // Check that the Empty variant is present in the output
         let code_str = code.to_string();
         assert!(code_str.contains("Empty"), "Empty variant should be unconditionally included");
-    }
-
-    #[test]
-    fn test_type_inference_with_box() {
-        let input = quote! {
-            %tokentype box MyToken;
-            %start Expr;
-            %token a MyToken::A;
-            Expr(box _) : Term;
-            Term(i32) : a;
-        };
-        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
-        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
-        assert_eq!(
-            grammar.nonterminals[*expr_idx].ruletype.as_ref().unwrap().to_string(),
-            "box i32"
-        );
-    }
-
-    #[test]
-    fn test_codegen_with_box() {
-        let input = quote! {
-            %tokentype box MyToken;
-            %start Expr;
-            %token a MyToken::A;
-            Expr(box i32) : a { 1 };
-        };
-        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
-        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-        let code = grammar.emit_compiletime();
-        
-        let parsed = syn::parse2::<syn::File>(code.clone());
-        if let Err(_e) = &parsed {
-            println!("Generated code:\n{}", code.to_string());
-        }
-        assert!(parsed.is_ok(), "Generated code failed to parse: {:?}", parsed.err());
-        
-        let code_str = code.to_string();
-        assert!(code_str.contains("Box < MyToken >"), "Data enum should box the token type");
-        assert!(code_str.contains("Box < i32 >"), "Data enum should box the Expr type");
-        assert!(code_str.contains("type Term = MyToken ;"), "Public Term type should be unboxed");
-        assert!(code_str.contains("type StartType = i32 ;"), "Public StartType should be unboxed");
     }
 }
 
