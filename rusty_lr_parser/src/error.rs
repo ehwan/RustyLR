@@ -126,6 +126,9 @@ pub enum ParseError {
         name: String,
         max: usize,
     },
+
+    /// type inference failed for NonTerminal's ruletype placeholder '_'
+    TypeInferenceFailed(Location),
 }
 #[allow(unused)]
 impl ArgError {
@@ -257,6 +260,7 @@ impl ParseError {
             ParseError::OnlyUsizeLiteral(loc) => vec![*loc],
             ParseError::BisonVariableZero(loc) => vec![*loc],
             ParseError::BisonVariableOutOfRange { location, .. } => vec![*location],
+            ParseError::TypeInferenceFailed(location) => vec![*location],
         }
     }
 
@@ -313,6 +317,9 @@ impl ParseError {
             ParseError::BisonVariableZero(_) => "bison variable $0 is not supported".into(),
             ParseError::BisonVariableOutOfRange { name, max, .. } => {
                 format!("bison variable {} is out of range (max: {})", name, max)
+            }
+            ParseError::TypeInferenceFailed(_) => {
+                "type inference failed: circular dependency or no identity action found".to_string()
             }
         }
     }

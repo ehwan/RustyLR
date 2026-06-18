@@ -539,10 +539,16 @@ impl Grammar {
 
         // insert rule typenames first, since it will be used when inserting rule definitions below
         for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
+            let ruletype = if is_placeholder_type(&rules_arg.typename) {
+                let placeholder_name = format_ident!("__rustylr_placeholder_{}", rules_arg.name.value());
+                Some(quote! { #placeholder_name })
+            } else {
+                rules_arg.typename.clone()
+            };
             let nonterminal = NonTerminalInfo {
                 name: rules_arg.name.clone(),
                 pretty_name: rules_arg.name.value().clone(),
-                ruletype: rules_arg.typename.clone(),
+                ruletype,
                 rules: Vec::new(), // production rules will be added later
                 root_location: None,
                 trace: false,
@@ -1041,6 +1047,101 @@ impl Grammar {
             grammar.nonterminals[rule_idx].rules = rule_lines;
         }
         drop(pattern_map);
+
+        // Resolve placeholders ('_') using type inference
+        {
+            let mut resolved: std::collections::HashMap<String, Option<TokenStream>> = std::collections::HashMap::new();
+            let mut unresolved_placeholders: std::collections::HashSet<String> = std::collections::HashSet::new();
+
+            for nonterm in &grammar.nonterminals {
+                if let Some(name) = get_placeholder_name(&nonterm.ruletype) {
+                    unresolved_placeholders.insert(name);
+                }
+            }
+
+            let mut changed = true;
+            while changed {
+                changed = false;
+                let mut resolved_this_round = Vec::new();
+
+                for p_name in &unresolved_placeholders {
+                    // Find the nonterminal index corresponding to p_name
+                    let mut nonterm_idx = None;
+                    for (idx, nonterm) in grammar.nonterminals.iter().enumerate() {
+                        if let Some(name) = &nonterm.ruletype {
+                            if name.to_string() == *p_name {
+                                nonterm_idx = Some(idx);
+                                break;
+                            }
+                        }
+                    }
+
+                    if let Some(i) = nonterm_idx {
+                        let mut inferred_type: Option<Option<TokenStream>> = None;
+
+                        for rule in &grammar.nonterminals[i].rules {
+                            if let Some(ReduceAction::Identity(idx)) = &rule.reduce_action {
+                                if *idx < rule.tokens.len() {
+                                    let token = rule.tokens[*idx].token;
+                                    match token {
+                                        Token::Term(_) => {
+                                            let ty = Some(grammar.token_typename.clone());
+                                            inferred_type = Some(ty);
+                                            break;
+                                        }
+                                        Token::NonTerm(to_nonterm_idx) => {
+                                            let target_type = &grammar.nonterminals[to_nonterm_idx].ruletype;
+                                            // Substitute any already resolved placeholders
+                                            let substituted = match target_type {
+                                                Some(ts) => substitute_placeholders(ts.clone(), &resolved),
+                                                None => None,
+                                            };
+                                            // Check if the substituted type contains any placeholders
+                                            if get_placeholder_name(&substituted).is_none() {
+                                                inferred_type = Some(substituted);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if let Some(ty) = inferred_type {
+                            resolved_this_round.push((p_name.clone(), ty));
+                        }
+                    }
+                }
+
+                for (p_name, ty) in resolved_this_round {
+                    resolved.insert(p_name.clone(), ty);
+                    unresolved_placeholders.remove(&p_name);
+                    changed = true;
+                }
+            }
+
+            if !unresolved_placeholders.is_empty() {
+                let first_p_name = unresolved_placeholders.iter().next().unwrap();
+                let mut loc = Location::CallSite;
+                for nonterm in &grammar.nonterminals {
+                    if let Some(name) = &nonterm.ruletype {
+                        if name.to_string() == *first_p_name {
+                            loc = nonterm.name.location();
+                            break;
+                        }
+                    }
+                }
+                return Err(ParseError::TypeInferenceFailed(loc));
+            }
+
+            // Substitute resolved types into all nonterminal ruletypes (including helpers)
+            for nonterm in &mut grammar.nonterminals {
+                nonterm.ruletype = match &nonterm.ruletype {
+                    Some(ts) => substitute_placeholders(ts.clone(), &resolved),
+                    None => None,
+                };
+            }
+        }
 
         // check for nonterminals in %prec,
         // all production rules in that nonterminal must have precedence defined.
@@ -2155,6 +2256,80 @@ impl Grammar {
     }
 }
 
+fn is_placeholder_type(ruletype: &Option<TokenStream>) -> bool {
+    if let Some(ts) = ruletype {
+        let mut it = ts.clone().into_iter();
+        if let Some(proc_macro2::TokenTree::Ident(ident)) = it.next() {
+            if ident.to_string() == "_" && it.next().is_none() {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+
+fn get_placeholder_name(ruletype: &Option<TokenStream>) -> Option<String> {
+    if let Some(ts) = ruletype {
+        for token in ts.clone() {
+            match token {
+                proc_macro2::TokenTree::Ident(ident) => {
+                    let s = ident.to_string();
+                    if s.starts_with("__rustylr_placeholder_") {
+                        return Some(s);
+                    }
+                }
+                proc_macro2::TokenTree::Group(group) => {
+                    if let Some(name) = get_placeholder_name(&Some(group.stream())) {
+                        return Some(name);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    None
+}
+
+fn substitute_placeholders(
+    ts: TokenStream,
+    resolved: &std::collections::HashMap<String, Option<TokenStream>>,
+) -> Option<TokenStream> {
+    let mut new_ts = TokenStream::new();
+    for token in ts {
+        match token {
+            proc_macro2::TokenTree::Ident(ident) => {
+                let s = ident.to_string();
+                if s.starts_with("__rustylr_placeholder_") {
+                    if let Some(replacement_opt) = resolved.get(&s) {
+                        if let Some(replacement) = replacement_opt {
+                            new_ts.extend(replacement.clone());
+                        }
+                    } else {
+                        new_ts.extend([proc_macro2::TokenTree::Ident(ident)]);
+                    }
+                } else {
+                    new_ts.extend([proc_macro2::TokenTree::Ident(ident)]);
+                }
+            }
+            proc_macro2::TokenTree::Group(group) => {
+                if let Some(sub) = substitute_placeholders(group.stream(), resolved) {
+                    let new_group = proc_macro2::Group::new(group.delimiter(), sub);
+                    new_ts.extend([proc_macro2::TokenTree::Group(new_group)]);
+                }
+            }
+            other => {
+                new_ts.extend([other]);
+            }
+        }
+    }
+    if new_ts.is_empty() {
+        None
+    } else {
+        Some(new_ts)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2349,5 +2524,62 @@ mod tests {
         let grammar_args = Grammar::parse_args(input_loc).expect("Failed to parse grammar args");
         let grammar = Grammar::from_grammar_args(grammar_args);
         assert!(matches!(grammar, Err(ParseError::BisonVariableOutOfRange { .. })));
+    }
+
+    #[test]
+    fn test_type_inference_simple() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(_) : 'a' { $1 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
+        let ruletype = &grammar.nonterminals[*expr_idx].ruletype;
+        assert_eq!(ruletype.as_ref().unwrap().to_string(), "char");
+    }
+
+    #[test]
+    fn test_type_inference_auto_identity() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(_) : 'a';
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
+        let ruletype = &grammar.nonterminals[*expr_idx].ruletype;
+        assert_eq!(ruletype.as_ref().unwrap().to_string(), "char");
+    }
+
+    #[test]
+    fn test_type_inference_multi_step() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(_) : Term { $1 };
+            Term(_) : 'a' { $1 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
+        let term_idx = grammar.nonterminals_index.get("Term").unwrap();
+        assert_eq!(grammar.nonterminals[*expr_idx].ruletype.as_ref().unwrap().to_string(), "char");
+        assert_eq!(grammar.nonterminals[*term_idx].ruletype.as_ref().unwrap().to_string(), "char");
+    }
+
+    #[test]
+    fn test_type_inference_circular_dependency() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr(_) : Term { $1 };
+            Term(_) : Expr { $1 };
+        };
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args);
+        assert!(matches!(grammar, Err(ParseError::TypeInferenceFailed(_))));
     }
 }

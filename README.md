@@ -228,6 +228,14 @@ This visualization helps you understand the parsing process step-by-step and is 
 RustyLR's grammar syntax is inspired by traditional Yacc/Bison formats.
 See [SYNTAX.md](SYNTAX.md) for detailed grammar definition syntax.
 
+### Type Inference with `_`
+Assigning a type to a non-terminal can be done automatically using the `_` placeholder. 
+
+```rust
+E(_): A;
+```
+When `_` is used, RustyLR will infer the type by examining `Identity` reduce actions. If a circular dependency prevents type resolution, a compilation error is raised.
+
 ## Contributing
 Contributions are welcome! Please feel free to open an issue or submit a pull request.
 
