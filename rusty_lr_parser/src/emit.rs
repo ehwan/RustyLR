@@ -387,7 +387,7 @@ impl Grammar {
                     }
                 }
                 fn from_term(terminal: &Self::Term) -> Self {
-                    #[allow(unreachable_patterns)]
+                    #[allow(unreachable_patterns, unused_variables)]
                     match #match_terminal_filter_expression {
                         #from_term_match_stream
                     }

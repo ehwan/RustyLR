@@ -588,3 +588,35 @@ Expr($tokentype) : a { $tokentype };
 Term($location) : a { $location };
 Rule($userdata) : a { $userdata };
 ```
+
+### Extracting Terminal Values (Syntax Sugar)
+
+When defining a terminal token, you typically wrap it inside an enum variant. For example:
+```rust
+%tokentype Token;
+%token ident Token::Ident(ident);
+```
+
+Notice that the variable bound inside the pattern `Token::Ident(ident)` has the exact same name as the terminal symbol `ident`.
+
+Inside a reduce action, you can use variable substitution to easily match and extract this inner value into a local variable without writing out the full boilerplate `let Token::Ident(ident) = ...`:
+
+```rust
+Rule(ResultType) : ident {
+    let $ident = ident else {
+        unreachable!("Expected ident token");
+    };
+    // Now you can use the extracted `ident` value directly!
+    println!("Ident value: {}", ident);
+}
+```
+
+Because `$ident` expands directly to the terminal's pattern stream (`Token::Ident(ident)`), the line `let $ident = ident else { ... };` automatically expands to:
+
+```rust
+let Token::Ident(ident) = ident else {
+    unreachable!("Expected ident token");
+};
+```
+
+This syntax sugar is extremely useful for reducing boilerplate code when processing token streams in your compiler's parser rules.

@@ -32,7 +32,7 @@ use rusty_lr_core::rule::ReduceType;
 %location Location;
 
 %tokentype Lexed;
-%token ident Lexed::Ident(_);
+%token ident Lexed::Ident(ident);
 %token colon Lexed::Colon(_);
 %token semicolon Lexed::Semicolon(_);
 %token pipe Lexed::Pipe(_);
@@ -57,8 +57,8 @@ use rusty_lr_core::rule::ReduceType;
 %token other_literal Lexed::OtherLiteral(_);
 
 
-%token parengroup Lexed::ParenGroup(_);
-%token bracegroup Lexed::BraceGroup(_);
+%token parengroup Lexed::ParenGroup(parengroup);
+%token bracegroup Lexed::BraceGroup(bracegroup);
 
 %token lparen Lexed::LParen;
 %token rparen Lexed::RParen;
@@ -87,7 +87,7 @@ use rusty_lr_core::rule::ReduceType;
 %start Grammar;
 
 Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else { // "$ident" replaced with "$ident" in the macro expansion
         unreachable!( "Rule-Ident" );
     };
     if let Some(fisrt) = RuleLines.first_mut() {
@@ -102,10 +102,10 @@ Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
 ;
 
 RuleType(Option<Group>): parengroup {
-    let Lexed::ParenGroup(group) = parengroup else {
+    let $parengroup = parengroup else {
         unreachable!( "RuleType - Group" );
     };
-    Some(group)
+    Some(parengroup)
 }
 | {
     None
@@ -173,7 +173,7 @@ TokenMapped((Option<Located<String>>, PatternArgs)): Pattern {
     ( None, Pattern )
 }
 | ident equal Pattern {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Token-Ident" );
     };
     ( Some(Located::new(ident.to_string(), @ident)), Pattern )
@@ -181,7 +181,7 @@ TokenMapped((Option<Located<String>>, PatternArgs)): Pattern {
 ;
 
 TerminalSetItem(TerminalSetItem): ident {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "TerminalSetItem-Range1" );
     };
     TerminalSetItem::Terminal( Located::new(ident.to_string(), @ident) )
@@ -276,7 +276,7 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 %left star plus question exclamation;
 
 Pattern(PatternArgs): ident {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Pattern-Ident" );
     };
     PatternArgs::Ident( Located::new(ident.to_string(), @ident) )
@@ -341,7 +341,7 @@ Pattern(PatternArgs): ident {
     PatternArgs::Minus { base: Box::new(p1), exclude: Box::new(p2) }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma? rparen {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Pattern-Sep-Ident" );
     };
     if ident != "sep" {
@@ -359,7 +359,7 @@ Pattern(PatternArgs): ident {
     }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma plus rparen {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Pattern-Sep-Ident" );
     };
     if ident != "sep" {
@@ -377,7 +377,7 @@ Pattern(PatternArgs): ident {
     }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma star rparen {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Pattern-Sep-Ident" );
     };
     if ident != "sep" {
@@ -395,7 +395,7 @@ Pattern(PatternArgs): ident {
     }
 }
 | dollar ident lparen base=Pattern comma del=Pattern error rparen {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Pattern-Sep-Ident" );
     };
     if ident != "sep" {
@@ -419,7 +419,7 @@ Pattern(PatternArgs): ident {
     }
 }
 | dollar ident lparen base=Pattern comma del=Pattern comma error rparen {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "Pattern-Sep-Ident" );
     };
     if ident != "sep" {
@@ -453,16 +453,16 @@ Pattern(PatternArgs): ident {
 ;
 
 Action(Option<Group>): bracegroup {
-    let Lexed::BraceGroup(group) = bracegroup else {
+    let $bracegroup = bracegroup else {
         unreachable!( "Action0" );
     };
-    Some(group)
+    Some(bracegroup)
 }
 | { None }
 ;
 
 IdentOrLiteral(IdentOrLiteral): ident {
-    let Lexed::Ident(ident) = ident else {
+    let $ident = ident else {
         unreachable!( "IdentOrLiteral-Ident" );
     };
     IdentOrLiteral::Ident( Located::new(ident.to_string(), @ident) )
@@ -491,7 +491,7 @@ RustCode(TokenStream): t=[^semicolon]+ {
 
 Directive
     : percent token ident RustCode semicolon {
-        let Lexed::Ident(ident) = ident else {
+        let $ident = ident else {
             unreachable!( "TokenDef-Ident" );
         };
         data.terminals.push( (Located::new(ident.to_string(), @ident), RustCode) );
@@ -511,7 +511,7 @@ Directive
         });
     }
     | percent start ident semicolon {
-        let Lexed::Ident(ident) = ident else {
+        let $ident = ident else {
             unreachable!( "StartDef-Ident" );
         };
         data.start_rule_name.push(Located::new(ident.to_string(), @ident));
@@ -635,7 +635,7 @@ Directive
     }
     | percent trace ident* semicolon {
         let idents = ident.into_iter().map(|t| {
-            let Lexed::Ident(ident) = t else {
+            let $ident = t else {
                 unreachable!( "Trace-Ident" );
             };
             Located::new(ident.to_string(), @ident)
