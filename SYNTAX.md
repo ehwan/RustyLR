@@ -378,7 +378,7 @@ struct ParserState {
 %userdata ParserState;
 
 // In your reduce action:
-Expr : Term {
+Expr(i32) : Term {
     if Term < 0 {
         data.errors.push("Negative number encountered".to_string());
     }
