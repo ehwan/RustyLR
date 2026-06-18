@@ -29,3 +29,8 @@ When requested by the user to write a Pull Request (PR):
 ## 5. Outputting the Implementation Plan
 Due to environment display issues (such as WSL rendering problems that prevent the `implementation_plan.md` artifact from rendering correctly in the UI):
 - You must print the full contents of the Implementation Plan directly into the chat/output window in addition to saving it to the artifact file.
+
+## 6. Adding comments and tests
+When adding new features or modifying existing ones:
+- You must include comprehensive comments in the code to explain the purpose and functionality of new code sections.
+- You must also add unit tests or integration tests to cover the new functionality, ensuring that it works as intended and does not introduce regressions.
