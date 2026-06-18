@@ -20,3 +20,12 @@ After completing any implementation work or documentation refactoring:
   ./scripts/bootstrap_test.sh
   ```
 - This script verifies that the parser compiles its own grammar correctly, checks output identity, compiles example crates, and runs all workspace unit/integration tests to ensure no regressions are introduced.
+
+## 4. Writing Pull Requests (PRs)
+When requested by the user to write a Pull Request (PR):
+- You must write the PR title and description in clean, professional English.
+- Output the content formatted inside raw markdown blocks so that the user can copy and paste it directly.
+
+## 5. Outputting the Implementation Plan
+Due to environment display issues (such as WSL rendering problems that prevent the `implementation_plan.md` artifact from rendering correctly in the UI):
+- You must print the full contents of the Implementation Plan directly into the chat/output window in addition to saving it to the artifact file.
