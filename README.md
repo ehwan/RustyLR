@@ -32,7 +32,7 @@ Add the runtime library to your `Cargo.toml`. The generated parser will depend o
 
 ```toml
 [dependencies]
-rusty_lr = "0.4.0" # Ensure this matches the version of the CLI executable
+rusty_lr = "..." # Ensure this matches the version of the CLI executable
 ```
 
 ### 2. Install the `rustylr` CLI
