@@ -229,8 +229,8 @@ def run_bootstrap(root_dir):
 # ==============================================================================
 
 def run_git_commit(root_dir, package_map):
-    """Stages and commits all version changes to git with a descriptive release message."""
-    print("=== STARTING GIT COMMIT ===")
+    """Stages and commits all version changes to git and tags the release with the new version of rusty_lr."""
+    print("=== STARTING GIT COMMIT & TAG ===")
     
     # Construct a detailed commit message outlining the bumped versions
     commit_msg = "Release: Bump versions and execute cargo publish\n\nVersion updates:\n"
@@ -245,11 +245,20 @@ def run_git_commit(root_dir, package_map):
         # Run 'git commit -m ...'
         print("Running 'git commit -m ...'")
         subprocess.run(["git", "commit", "-m", commit_msg], cwd=root_dir, check=True)
-        
         print("Git commit completed successfully!")
+        
+        # Tag the release with the new version of rusty_lr
+        rusty_lr_info = package_map.get('rusty_lr')
+        if rusty_lr_info:
+            new_version = rusty_lr_info['new_version']
+            tag_name = f"v{new_version}"
+            print(f"Creating git tag: {tag_name}...")
+            subprocess.run(["git", "tag", "-a", tag_name, "-m", f"Release {tag_name}"], cwd=root_dir, check=True)
+            print(f"Git tag {tag_name} created successfully!")
+            
     except subprocess.CalledProcessError as e:
-        print(f"Error during git commit: {e}")
-    print("=== GIT COMMIT COMPLETE ===\n")
+        print(f"Error during git operations: {e}")
+    print("=== GIT COMMIT & TAG COMPLETE ===\n")
 
 
 # ==============================================================================
@@ -374,6 +383,28 @@ def run_publish(root_dir, cargo_args):
     print("=== WORKSPACE PUBLISH COMPLETE ===")
 
 # ==============================================================================
+# INTENT 5: Pre-flight Git Status Check
+# Enforces that the repository working directory is clean of unstaged/staged
+# changes before starting the version bump and publish pipeline, preventing
+# accidental or incorrect commits.
+# ==============================================================================
+
+def check_git_clean(root_dir):
+    """Exit immediately if there are any uncommitted or unstaged changes in the repository."""
+    # Check for unstaged changes to tracked files
+    unstaged_check = subprocess.run(["git", "diff", "--quiet"], cwd=root_dir)
+    # Check for staged changes to tracked files
+    staged_check = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=root_dir)
+    
+    if unstaged_check.returncode != 0 or staged_check.returncode != 0:
+        print("\n" + "!" * 80)
+        print("ERROR: Git working directory is not clean (uncommitted or unstaged changes exist).")
+        print("Please commit, revert, or stash your changes before running this script.")
+        print("!" * 80 + "\n")
+        sys.exit(1)
+
+
+# ==============================================================================
 # MAIN ENTRYPOINT & CLI PARSING
 # ==============================================================================
 
@@ -406,6 +437,10 @@ def main():
             print("Since the release script modifies Cargo.toml files in place, the git working tree")
             print("is dirty, and 'cargo publish' will fail unless '--allow-dirty' is provided.")
             print("!" * 80 + "\n")
+            
+    # Check git status for commands modifying versions/code
+    if args.command in ["bump", "all"]:
+        check_git_clean(root_dir)
             
     if args.command == "bump":
         run_bump(root_dir)
