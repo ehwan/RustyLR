@@ -106,7 +106,7 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
         }
     }
     fn from_term(terminal: &Self::Term) -> Self {
-        #[allow(unreachable_patterns)]
+        #[allow(unreachable_patterns, unused_variables)]
         match filter(terminal) {
             Token::Num(_) => ETerminalClasses::num,
             Token::Plus => ETerminalClasses::plus,

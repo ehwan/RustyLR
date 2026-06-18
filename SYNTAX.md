@@ -28,6 +28,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Disabling Table Optimization (`%nooptim`)](#no-optimization)
 - [Dense Parser Tables (`%dense`)](#dense-parser-table)
 - [Location Tracking (`%location`)](#location-tracking)
+- [Variable Substitution](#variable-substitution)
 
 ---
 
@@ -547,3 +548,77 @@ Expr(i32) : e1=Expr '+' e2=Expr {
     e1 + e2
 };
 ```
+
+---
+
+## Variable Substitution
+
+You can use variables prefixed with `$` inside any RustCode block in the grammar. This includes:
+- `%tokentype`
+- `%location`
+- `%userdata`
+- `%errortype` (or `%error`)
+- `%moduleprefix`
+- `%filter`
+- `%token` terminal definitions
+- Non-terminal rule types
+- Reduce actions
+
+### Supported Variables
+- `$tokentype` -> Evaluates to the type defined by `%tokentype`.
+- `$location` -> Evaluates to the type defined by `%location` (defaults to `$moduleprefix::DefaultLocation`).
+- `$userdata` -> Evaluates to the type defined by `%userdata` (defaults to `()`).
+- `$error` or `$errortype` -> Evaluates to the type defined by `%errortype` / `%error` (defaults to `$moduleprefix::DefaultReduceActionError`).
+- `$moduleprefix` -> Evaluates to the path defined by `%moduleprefix` (defaults to `::rusty_lr`).
+- `$filter` -> Evaluates to the filter expression/function defined by `%filter`.
+- `$NonTerminalName` -> Evaluates to the `ruletype` defined for `NonTerminalName`.
+- `$terminal_name` -> Evaluates to the match pattern/definition of `<terminal_name>`.
+
+### Substitution Errors
+- **Circular Dependency**: If you introduce circular dependencies among type/definition variables, a compile-time error (`CircularDependency`) is returned.
+- **Max Depth Exceeded**: A maximum recursion limit of `100` is enforced to prevent infinite compilation loops. If exceeded, a compile-time error (`MaxSubstitutionDepthExceeded`) is returned.
+- **Filter Not Defined**: If `$filter` is used inside a reduce action block but `%filter` directive is not defined, a compile-time error (`FilterNotDefined`) is returned.
+
+### Example
+```rust
+%tokentype Token;
+%userdata MyUser;
+%error MyError;
+%token a Token::A;
+
+Expr($tokentype) : a { $tokentype };
+Term($location) : a { $location };
+Rule($userdata) : a { $userdata };
+```
+
+### Extracting Terminal Values (Syntax Sugar)
+
+When defining a terminal token, you typically wrap it inside an enum variant. For example:
+```rust
+%tokentype Token;
+%token ident Token::Ident(ident);
+```
+
+Notice that the variable bound inside the pattern `Token::Ident(ident)` has the exact same name as the terminal symbol `ident`.
+
+Inside a reduce action, you can use variable substitution to easily match and extract this inner value into a local variable without writing out the full boilerplate `let Token::Ident(ident) = ...`:
+
+```rust
+Rule(ResultType) : ident {
+    let $ident = ident else {
+        unreachable!("Expected ident token");
+    };
+    // Now you can use the extracted `ident` value directly!
+    println!("Ident value: {}", ident);
+}
+```
+
+Because `$ident` expands directly to the terminal's pattern stream (`Token::Ident(ident)`), the line `let $ident = ident else { ... };` automatically expands to:
+
+```rust
+let Token::Ident(ident) = ident else {
+    unreachable!("Expected ident token");
+};
+```
+
+This syntax sugar is extremely useful for reducing boilerplate code when processing token streams in your compiler's parser rules.

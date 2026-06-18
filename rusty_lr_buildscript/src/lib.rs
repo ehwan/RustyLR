@@ -440,6 +440,50 @@ impl Builder {
                                 "Only one %tokentype definition is allowed".to_string()
                             ])
                     }
+                    ArgError::MultipleLocationDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Multiple %location definition")
+                            .with_labels(labels)
+                            .with_notes(vec![
+                                "Only one %location definition is allowed".to_string()
+                            ])
+                    }
+                    ArgError::MultipleFilterDefinition(locs) => {
+                        let mut labels = Vec::new();
+                        for (i, loc) in locs.iter().enumerate() {
+                            let range = grammar_args
+                                .span_manager
+                                .get_byterange(&loc)
+                                .unwrap_or(0..0);
+                            let message = if i == 0 {
+                                "First definition"
+                            } else {
+                                "Other definition"
+                            };
+                            labels.push(Label::primary(file_id, range).with_message(message));
+                        }
+
+                        Diagnostic::error()
+                            .with_message("Multiple %filter definition")
+                            .with_labels(labels)
+                            .with_notes(vec![
+                                "Only one %filter definition is allowed".to_string()
+                            ])
+                    }
                     ArgError::MultipleEofDefinition(locs) => {
                         let mut labels = Vec::new();
                         for (i, loc) in locs.iter().enumerate() {
@@ -836,6 +880,46 @@ impl Builder {
                             .with_message("type inference failed: circular dependency or no identity action found")
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("failed to infer type for this placeholder")])
+                    }
+
+                    ParseError::CircularDependency { location, path } => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message(format!(
+                                "circular dependency detected: {}",
+                                path.join(" -> ")
+                            ))
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("circular reference starts here")])
+                            .with_notes(vec![
+                                "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
+                            ])
+                    }
+
+                    ParseError::MaxSubstitutionDepthExceeded { location, max_depth } => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message(format!(
+                                "maximum variable substitution depth ({}) exceeded",
+                                max_depth
+                            ))
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("recursion depth limit reached here")])
+                            .with_notes(vec![
+                                "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
+                            ])
+                    }
+
+                    ParseError::FilterNotDefined(loc) => {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message("Filter function not defined")
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("referenced here")])
+                            .with_notes(vec![
+                                "Define the filter function using %filter <path>;".to_string(),
+                                "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
+                            ])
                     }
 
                     _ => {

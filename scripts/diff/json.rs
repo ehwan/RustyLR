@@ -237,7 +237,7 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
         }
     }
     fn from_term(terminal: &Self::Term) -> Self {
-        #[allow(unreachable_patterns)]
+        #[allow(unreachable_patterns, unused_variables)]
         match terminal {
             '\t'..='\n' | '\r' => JsonTerminalClasses::TermClass0,
             ' ' => JsonTerminalClasses::TermClass1,

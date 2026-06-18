@@ -359,9 +359,9 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
         }
     }
     fn from_term(terminal: &Self::Term) -> Self {
-        #[allow(unreachable_patterns)]
+        #[allow(unreachable_patterns, unused_variables)]
         match terminal {
-            Lexed::Ident(_) => GrammarTerminalClasses::ident,
+            Lexed::Ident(ident) => GrammarTerminalClasses::ident,
             Lexed::Colon(_) => GrammarTerminalClasses::colon,
             Lexed::Pipe(_) => GrammarTerminalClasses::pipe,
             Lexed::Percent(_) => GrammarTerminalClasses::percent,
@@ -375,8 +375,8 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
             Lexed::ByteStrLiteral(_) => GrammarTerminalClasses::byte_str_literal,
             Lexed::CharLiteral(_) => GrammarTerminalClasses::char_literal,
             Lexed::StrLiteral(_) => GrammarTerminalClasses::str_literal,
-            Lexed::ParenGroup(_) => GrammarTerminalClasses::parengroup,
-            Lexed::BraceGroup(_) => GrammarTerminalClasses::bracegroup,
+            Lexed::ParenGroup(parengroup) => GrammarTerminalClasses::parengroup,
+            Lexed::BraceGroup(bracegroup) => GrammarTerminalClasses::bracegroup,
             Lexed::LParen => GrammarTerminalClasses::lparen,
             Lexed::RParen => GrammarTerminalClasses::rparen,
             Lexed::LBracket => GrammarTerminalClasses::lbracket,
@@ -786,10 +786,10 @@ impl GrammarDataStack {
             _ => unreachable!(),
         };
         let __res = {
-            let Lexed::ParenGroup(group) = parengroup else {
+            let Lexed::ParenGroup(parengroup) = parengroup else {
                 unreachable!("RuleType - Group");
             };
-            Some(group)
+            Some(parengroup)
         };
         if __push_data {
             __data_stack.__stack.push(GrammarData::__variant2(__res));
@@ -2929,10 +2929,10 @@ impl GrammarDataStack {
             _ => unreachable!(),
         };
         let __res = {
-            let Lexed::BraceGroup(group) = bracegroup else {
+            let Lexed::BraceGroup(bracegroup) = bracegroup else {
                 unreachable!("Action0");
             };
-            Some(group)
+            Some(bracegroup)
         };
         if __push_data {
             __data_stack.__stack.push(GrammarData::__variant2(__res));
@@ -4533,7 +4533,7 @@ impl GrammarDataStack {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
+        let mut __rustylr_location_filter = __location_stack.pop().unwrap();
         let mut filter = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -4547,7 +4547,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.filter = Some(RustCode);
+            data.filter.push((__rustylr_location_filter, RustCode));
         };
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
@@ -4633,7 +4633,7 @@ impl GrammarDataStack {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
+        let mut __rustylr_location_location = __location_stack.pop().unwrap();
         __data_stack.__stack.pop().unwrap();
         __location_stack.pop().unwrap();
         __data_stack.__stack.pop().unwrap();
@@ -4644,7 +4644,7 @@ impl GrammarDataStack {
         )?;
         let mut RustCode = __rustylr_data_2;
         {
-            data.location_typename = Some(RustCode);
+            data.location_typename.push((__rustylr_location_location, RustCode));
         };
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())

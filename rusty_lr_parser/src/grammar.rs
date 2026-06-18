@@ -148,7 +148,7 @@ pub struct Grammar {
     pub filter: Option<TokenStream>,
 
     /// type for location
-    pub location_typename: Option<TokenStream>,
+    pub location_typename: TokenStream,
 
     /// precedence level of error token
     pub error_precedence: Option<usize>,
@@ -220,6 +220,30 @@ impl Grammar {
             return Err(ArgError::MultipleErrorDefinition(
                 grammar_args
                     .error_typename
+                    .iter()
+                    .map(|(loc, _)| loc)
+                    .cloned()
+                    .collect(),
+            ));
+        }
+
+        // %location
+        if grammar_args.location_typename.len() > 1 {
+            return Err(ArgError::MultipleLocationDefinition(
+                grammar_args
+                    .location_typename
+                    .iter()
+                    .map(|(loc, _)| loc)
+                    .cloned()
+                    .collect(),
+            ));
+        }
+
+        // %filter
+        if grammar_args.filter.len() > 1 {
+            return Err(ArgError::MultipleFilterDefinition(
+                grammar_args
+                    .filter
                     .iter()
                     .map(|(loc, _)| loc)
                     .cloned()
@@ -384,28 +408,484 @@ impl Grammar {
     }
 
     /// parse the input TokenStream and return a parsed Grammar
-    pub fn from_grammar_args(grammar_args: GrammarArgs) -> Result<Self, ParseError> {
-        let module_prefix =
-            if let Some(module_prefix) = grammar_args.module_prefix.into_iter().next() {
-                module_prefix.1
-            } else {
-                quote! { ::rusty_lr }
+    pub fn from_grammar_args(mut grammar_args: GrammarArgs) -> Result<Self, ParseError> {
+        #[derive(Clone)]
+        enum ResolveState {
+            Unresolved,
+            Resolving,
+            Resolved(TokenStream),
+        }
+
+        struct ProviderInfo {
+            #[allow(dead_code)]
+            name: String,
+            location: Location,
+            stream: Option<TokenStream>,
+            state: ResolveState,
+        }
+
+        fn resolve_provider(
+            name: &str,
+            providers: &mut std::collections::HashMap<String, ProviderInfo>,
+            span_manager: &mut crate::parser::location::SpanManager,
+            stack: &mut Vec<String>,
+            depth: usize,
+            max_depth: usize,
+            ref_loc: Location,
+        ) -> Result<TokenStream, ParseError> {
+            if depth > max_depth {
+                return Err(ParseError::MaxSubstitutionDepthExceeded {
+                    location: ref_loc,
+                    max_depth,
+                });
+            }
+
+            if stack.contains(&name.to_string()) {
+                let mut path = stack.clone();
+                path.push(name.to_string());
+                return Err(ParseError::CircularDependency {
+                    location: ref_loc,
+                    path,
+                });
+            }
+
+            if !providers.contains_key(name) {
+                if name == "filter" {
+                    return Err(ParseError::FilterNotDefined(ref_loc));
+                } else if name.starts_with("nonterm:") {
+                    return Err(ParseError::NonTerminalNotDefined(ref_loc));
+                } else if name.starts_with("term:") {
+                    return Err(ParseError::TerminalNotDefined(ref_loc));
+                } else {
+                    return Err(ParseError::TerminalNotDefined(ref_loc));
+                }
+            }
+
+            let state = providers.get(name).unwrap().state.clone();
+            match state {
+                ResolveState::Resolved(resolved_stream) => {
+                    return Ok(resolved_stream);
+                }
+                ResolveState::Resolving => {
+                    let mut path = stack.clone();
+                    path.push(name.to_string());
+                    return Err(ParseError::CircularDependency {
+                        location: ref_loc,
+                        path,
+                    });
+                }
+                ResolveState::Unresolved => {}
+            }
+
+            providers.get_mut(name).unwrap().state = ResolveState::Resolving;
+            stack.push(name.to_string());
+
+            let raw_stream = providers.get(name).unwrap().stream.clone();
+            let resolved_stream = match raw_stream {
+                Some(stream) => {
+                    substitute_stream(stream, providers, span_manager, stack, depth + 1, max_depth)?
+                }
+                None => {
+                    debug_assert!(name.starts_with("nonterm:"));
+                    quote! { () }
+                }
             };
-        let error_typename =
-            if let Some(error_typename) = grammar_args.error_typename.into_iter().next() {
-                error_typename.1
+
+            stack.pop();
+            providers.get_mut(name).unwrap().state = ResolveState::Resolved(resolved_stream.clone());
+
+            Ok(resolved_stream)
+        }
+
+        fn substitute_stream(
+            stream: TokenStream,
+            providers: &mut std::collections::HashMap<String, ProviderInfo>,
+            span_manager: &mut crate::parser::location::SpanManager,
+            stack: &mut Vec<String>,
+            depth: usize,
+            max_depth: usize,
+        ) -> Result<TokenStream, ParseError> {
+            let mut result = TokenStream::new();
+            let mut iter = stream.into_iter().peekable();
+
+            while let Some(tt) = iter.next() {
+                match tt {
+                    proc_macro2::TokenTree::Punct(punct) if punct.as_char() == '$' => {
+                        let ref_span = punct.span();
+                        // We register this inner token span (e.g., '$') to the SpanManager
+                        // so that we can construct a valid Location index. This allows the buildscript
+                        // to query the exact byte range of the error for visual diagnostic reporting.
+                        // We only need to push the span once, creating a range of length 1.
+                        let idx = span_manager.add_span(ref_span);
+                        let ref_loc = Location::Range(idx, idx + 1);
+
+                        if let Some(proc_macro2::TokenTree::Ident(ident)) = iter.peek() {
+                            let ident_name = ident.to_string();
+                            if ident_name == "tokentype" {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    "tokentype",
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if ident_name == "location" {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    "location",
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if ident_name == "filter" {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    "filter",
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if ident_name == "userdata" {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    "userdata",
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if ident_name == "error" || ident_name == "errortype" {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    "errortype",
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if ident_name == "moduleprefix" {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    "moduleprefix",
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if providers.contains_key(&format!("term:{}", ident_name)) {
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    &format!("term:{}", ident_name),
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else if providers.contains_key(&format!("nonterm:{}", ident_name)) {
+                                // Direct non-terminal substitution ($NonTerminalName).
+                                // Resolves the variable to the rule type of the specified non-terminal.
+                                iter.next();
+                                let resolved = resolve_provider(
+                                    &format!("nonterm:{}", ident_name),
+                                    providers,
+                                    span_manager,
+                                    stack,
+                                    depth,
+                                    max_depth,
+                                    ref_loc,
+                                )?;
+                                result.extend(resolved);
+                                continue;
+                            } else {
+                                // Fallback: If the variable following '$' is not recognized as any known
+                                // configuration, terminal, or non-terminal, we do not throw a compile-time
+                                // error. Instead, we skip resolving and leave the token stream unchanged.
+                                // TODO: 이거 워닝으로 내면 좋을듯
+                            }
+                        }
+
+                        result.extend(std::iter::once(proc_macro2::TokenTree::Punct(punct)));
+                    }
+                    proc_macro2::TokenTree::Group(group) => {
+                        let substituted_stream = substitute_stream(
+                            group.stream(),
+                            providers,
+                            span_manager,
+                            stack,
+                            depth,
+                            max_depth,
+                        )?;
+                        let mut new_group = proc_macro2::Group::new(group.delimiter(), substituted_stream);
+                        new_group.set_span(group.span());
+                        result.extend(std::iter::once(proc_macro2::TokenTree::Group(new_group)));
+                    }
+                    other => {
+                        result.extend(std::iter::once(other));
+                    }
+                }
+            }
+
+            Ok(result)
+        }
+
+        // Initialize providers
+        let mut providers: std::collections::HashMap<String, ProviderInfo> = std::collections::HashMap::new();
+
+        let moduleprefix_loc = grammar_args.module_prefix.first().map(|(l, _)| *l).unwrap_or(Location::CallSite);
+        let moduleprefix_stream = grammar_args.module_prefix.first().map(|(_, s)| s.clone()).unwrap_or(quote! { ::rusty_lr });
+        providers.insert(
+            "moduleprefix".to_string(),
+            ProviderInfo {
+                name: "moduleprefix".to_string(),
+                location: moduleprefix_loc,
+                stream: Some(moduleprefix_stream),
+                state: ResolveState::Unresolved,
+            },
+        );
+
+        let userdata_loc = grammar_args.userdata_typename.first().map(|(l, _)| *l).unwrap_or(Location::CallSite);
+        let userdata_stream = grammar_args.userdata_typename.first().map(|(_, s)| s.clone()).unwrap_or(quote! { () });
+        providers.insert(
+            "userdata".to_string(),
+            ProviderInfo {
+                name: "userdata".to_string(),
+                location: userdata_loc,
+                stream: Some(userdata_stream),
+                state: ResolveState::Unresolved,
+            },
+        );
+
+        let errortype_loc = grammar_args.error_typename.first().map(|(l, _)| *l).unwrap_or(Location::CallSite);
+        let errortype_stream = grammar_args.error_typename.first().map(|(_, s)| s.clone()).unwrap_or(quote! { $moduleprefix::DefaultReduceActionError });
+        providers.insert(
+            "errortype".to_string(),
+            ProviderInfo {
+                name: "errortype".to_string(),
+                location: errortype_loc,
+                stream: Some(errortype_stream),
+                state: ResolveState::Unresolved,
+            },
+        );
+
+        if let Some((loc, stream)) = grammar_args.token_typename.first() {
+            providers.insert(
+                "tokentype".to_string(),
+                ProviderInfo {
+                    name: "tokentype".to_string(),
+                    location: *loc,
+                    stream: Some(stream.clone()),
+                    state: ResolveState::Unresolved,
+                },
+            );
+        }
+
+        let location_loc = grammar_args.location_typename.first().map(|(l, _)| *l).unwrap_or(Location::CallSite);
+        let location_stream = grammar_args.location_typename.first().map(|(_, s)| s.clone()).unwrap_or(quote! { $moduleprefix::DefaultLocation });
+        providers.insert(
+            "location".to_string(),
+            ProviderInfo {
+                name: "location".to_string(),
+                location: location_loc,
+                stream: Some(location_stream),
+                state: ResolveState::Unresolved,
+            },
+        );
+
+        if let Some((loc, stream)) = grammar_args.filter.first() {
+            providers.insert(
+                "filter".to_string(),
+                ProviderInfo {
+                    name: "filter".to_string(),
+                    location: *loc,
+                    stream: Some(stream.clone()),
+                    state: ResolveState::Unresolved,
+                },
+            );
+        }
+
+        for (ident, stream) in &grammar_args.terminals {
+            providers.insert(
+                format!("term:{}", ident.value()),
+                ProviderInfo {
+                    name: format!("term:{}", ident.value()),
+                    location: ident.location(),
+                    stream: Some(stream.clone()),
+                    state: ResolveState::Unresolved,
+                },
+            );
+        }
+
+        for rules_arg in &grammar_args.rules {
+            let stream = if is_placeholder_type(&rules_arg.typename) {
+                let placeholder_name = format_ident!("__rustylr_placeholder_{}", rules_arg.name.value());
+                Some(quote! { #placeholder_name })
             } else {
-                quote! { #module_prefix::DefaultReduceActionError }
+                rules_arg.typename.clone()
             };
+
+            providers.insert(
+                format!("nonterm:{}", rules_arg.name.value()),
+                ProviderInfo {
+                    name: format!("nonterm:{}", rules_arg.name.value()),
+                    location: rules_arg.name.location(),
+                    stream,
+                    state: ResolveState::Unresolved,
+                },
+            );
+        }
+
+        // Resolve providers
+        let provider_keys: Vec<String> = providers.keys().cloned().collect();
+        let mut stack = Vec::new();
+        for key in provider_keys {
+            let loc = providers[&key].location;
+            resolve_provider(
+                &key,
+                &mut providers,
+                &mut grammar_args.span_manager,
+                &mut stack,
+                0,
+                100,
+                loc,
+            )?;
+        }
+
+        // Write resolved streams back
+        if let Some(entry) = providers.get("moduleprefix") {
+            if let ResolveState::Resolved(resolved) = &entry.state {
+                if let Some(first) = grammar_args.module_prefix.first_mut() {
+                    first.1 = resolved.clone();
+                } else {
+                    grammar_args.module_prefix.push((Location::CallSite, resolved.clone()));
+                }
+            }
+        }
+
+        if let Some(entry) = providers.get("userdata") {
+            if let ResolveState::Resolved(resolved) = &entry.state {
+                if let Some(first) = grammar_args.userdata_typename.first_mut() {
+                    first.1 = resolved.clone();
+                } else {
+                    grammar_args.userdata_typename.push((Location::CallSite, resolved.clone()));
+                }
+            }
+        }
+
+        if let Some(entry) = providers.get("errortype") {
+            if let ResolveState::Resolved(resolved) = &entry.state {
+                if let Some(first) = grammar_args.error_typename.first_mut() {
+                    first.1 = resolved.clone();
+                } else {
+                    grammar_args.error_typename.push((Location::CallSite, resolved.clone()));
+                }
+            }
+        }
+
+        if let Some(entry) = providers.get("tokentype") {
+            if let ResolveState::Resolved(resolved) = &entry.state {
+                if let Some(first) = grammar_args.token_typename.first_mut() {
+                    first.1 = resolved.clone();
+                }
+            }
+        }
+
+        if let Some(entry) = providers.get("location") {
+            if let ResolveState::Resolved(resolved) = &entry.state {
+                if let Some(first) = grammar_args.location_typename.first_mut() {
+                    first.1 = resolved.clone();
+                } else {
+                    grammar_args.location_typename.push((Location::CallSite, resolved.clone()));
+                }
+            }
+        }
+
+        for (ident, stream) in &mut grammar_args.terminals {
+            if let Some(entry) = providers.get(&format!("term:{}", ident.value())) {
+                if let ResolveState::Resolved(resolved) = &entry.state {
+                    *stream = resolved.clone();
+                }
+            }
+        }
+
+        for rules_arg in &mut grammar_args.rules {
+            if rules_arg.typename.is_some() {
+                if let Some(entry) = providers.get(&format!("nonterm:{}", rules_arg.name.value())) {
+                    if let ResolveState::Resolved(resolved) = &entry.state {
+                        if !is_placeholder_type(&rules_arg.typename) {
+                            rules_arg.typename = Some(resolved.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        // Resolve and substitute variables inside the %filter expression itself
+        // (e.g. if the user uses defined type/location variables in the filter signature).
+        for (_, filter_stream) in &mut grammar_args.filter {
+            *filter_stream = substitute_stream(
+                filter_stream.clone(),
+                &mut providers,
+                &mut grammar_args.span_manager,
+                &mut stack,
+                0,
+                100,
+            )?;
+        }
+
+        for rules_arg in &mut grammar_args.rules {
+            for rule_line in &mut rules_arg.rule_lines {
+                if let Some(action_stream) = &mut rule_line.reduce_action {
+                    *action_stream = substitute_stream(
+                        action_stream.clone(),
+                        &mut providers,
+                        &mut grammar_args.span_manager,
+                        &mut stack,
+                        0,
+                        100,
+                    )?;
+                }
+            }
+        }
+
+        let module_prefix = grammar_args.module_prefix.into_iter().next().unwrap().1;
+        let error_typename = grammar_args.error_typename.into_iter().next().unwrap().1;
+        let location_typename = grammar_args.location_typename.into_iter().next().unwrap().1;
+
         let mut grammar = Grammar {
             module_prefix,
             token_typename: grammar_args.token_typename.into_iter().next().unwrap().1,
-            userdata_typename: grammar_args
-                .userdata_typename
-                .into_iter()
-                .next()
-                .map(|(_, stream)| stream)
-                .unwrap_or(quote! { () }),
+            userdata_typename: grammar_args.userdata_typename.into_iter().next().unwrap().1,
 
             error_typename,
             start_rule_name: grammar_args.start_rule_name.into_iter().next().unwrap(),
@@ -438,9 +918,9 @@ impl Grammar {
             range_resolver: RangeResolver::new(),
 
             emit_dense: grammar_args.dense,
-            filter: grammar_args.filter,
+            filter: grammar_args.filter.into_iter().next().map(|(_, s)| s),
 
-            location_typename: grammar_args.location_typename,
+            location_typename,
             error_precedence: None,
             custom_reduce_actions: Vec::new(),
 
@@ -2602,6 +3082,140 @@ mod tests {
         // Check that the Empty variant is present in the output
         let code_str = code.to_string();
         assert!(code_str.contains("Empty"), "Empty variant should be unconditionally included");
+    }
+
+    #[test]
+    fn test_variable_substitution_success() {
+        let input = quote! {
+            %tokentype MyToken;
+            %location MyLoc;
+            %userdata MyUser;
+            %error MyErr;
+            %moduleprefix ::my_prefix;
+            %token a MyToken::A;
+
+            %start Expr;
+            Expr($tokentype) : a { $tokentype };
+            Term($location) : a { $location };
+            Rule3($userdata) : a { $userdata };
+            Rule4($error) : a { $error };
+            Rule5($moduleprefix) : a { $moduleprefix };
+            Rule6($a) : a { $a };
+            Rule7($Expr) : a { $Expr };
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+
+        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
+        assert_eq!(grammar.nonterminals[*expr_idx].ruletype.as_ref().unwrap().to_string(), "MyToken");
+
+        let term_idx = grammar.nonterminals_index.get("Term").unwrap();
+        assert_eq!(grammar.nonterminals[*term_idx].ruletype.as_ref().unwrap().to_string(), "MyLoc");
+
+        let rule3_idx = grammar.nonterminals_index.get("Rule3").unwrap();
+        assert_eq!(grammar.nonterminals[*rule3_idx].ruletype.as_ref().unwrap().to_string(), "MyUser");
+
+        let rule4_idx = grammar.nonterminals_index.get("Rule4").unwrap();
+        assert_eq!(grammar.nonterminals[*rule4_idx].ruletype.as_ref().unwrap().to_string(), "MyErr");
+
+        let rule5_idx = grammar.nonterminals_index.get("Rule5").unwrap();
+        assert_eq!(grammar.nonterminals[*rule5_idx].ruletype.as_ref().unwrap().to_string(), ":: my_prefix");
+
+        let rule6_idx = grammar.nonterminals_index.get("Rule6").unwrap();
+        assert_eq!(grammar.nonterminals[*rule6_idx].ruletype.as_ref().unwrap().to_string(), "MyToken :: A");
+
+        let rule7_idx = grammar.nonterminals_index.get("Rule7").unwrap();
+        assert_eq!(grammar.nonterminals[*rule7_idx].ruletype.as_ref().unwrap().to_string(), "MyToken");
+    }
+
+    #[test]
+    fn test_variable_substitution_circular_dependency() {
+        let input = quote! {
+            %tokentype Token;
+            %token a Token::A;
+            %token b Token::B;
+            %start Expr;
+            Expr($Term) : a;
+            Term($Expr) : b;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args);
+        assert!(grammar.is_err());
+        let err = grammar.err().unwrap();
+        assert!(matches!(err, ParseError::CircularDependency { .. }));
+        if let ParseError::CircularDependency { path, .. } = err {
+            assert!(path.contains(&"nonterm:Expr".to_string()));
+            assert!(path.contains(&"nonterm:Term".to_string()));
+        }
+    }
+
+    #[test]
+    fn test_variable_substitution_filter() {
+        // 1. Success case
+        let input = quote! {
+            %tokentype Token;
+            %filter my_filter;
+            %token a Token::A;
+            %start Expr;
+            Expr($filter) : a { $filter };
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+
+        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
+        assert_eq!(grammar.nonterminals[*expr_idx].ruletype.as_ref().unwrap().to_string(), "my_filter");
+
+        // 2. Filter not defined error
+        let input_err = quote! {
+            %tokentype Token;
+            %token a Token::A;
+            %start Expr;
+            Expr($filter) : a { $filter };
+        };
+
+        let grammar_args_err = Grammar::parse_args(input_err).expect("Failed to parse grammar args");
+        let grammar_err = Grammar::from_grammar_args(grammar_args_err);
+        assert!(grammar_err.is_err());
+        assert!(matches!(grammar_err.err().unwrap(), ParseError::FilterNotDefined(_)));
+
+        // 3. Multiple filter definitions error
+        let input_mult = quote! {
+            %tokentype Token;
+            %filter filter1;
+            %filter filter2;
+            %token a Token::A;
+            %start Expr;
+            Expr : a;
+        };
+
+        let grammar_args_mult = Grammar::parse_args(input_mult).expect("Failed to parse grammar args");
+        let check_res = Grammar::arg_check_error(&grammar_args_mult);
+        assert!(check_res.is_err());
+        assert!(matches!(check_res.err().unwrap(), ArgError::MultipleFilterDefinition(_)));
+    }
+
+    #[test]
+    fn test_variable_substitution_unknown_fallback() {
+        let input = quote! {
+            %tokentype Token;
+            %token a Token::A;
+            %start Expr;
+            Expr : a { $unknown_var };
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+
+        // The reduce action of the rule should preserve $unknown_var unchanged
+        let rule = &grammar.nonterminals[*grammar.nonterminals_index.get("Expr").unwrap()].rules[0];
+        let action = match rule.reduce_action.as_ref().unwrap() {
+            ReduceAction::Custom(custom) => custom.body.to_string(),
+            _ => panic!("Expected Custom reduce action"),
+        };
+        assert!(action.contains("$ unknown_var"));
     }
 }
 
