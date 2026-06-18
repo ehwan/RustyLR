@@ -4,15 +4,18 @@ use proc_macro2::TokenStream;
 use quote::quote_spanned;
 
 use crate::parser::args::IdentOrLiteral;
-use crate::parser::location::Located;
 use crate::parser::location::Location;
+use crate::parser::location::Located;
 
 /// failed to feed() the token
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseArgError {
     /// feed() failed; `span` is the byte range `[start, end)` in the source
-    MacroLineParse { location: Location, message: String },
+    MacroLineParse {
+        location: Location,
+        message: String,
+    },
 }
 
 #[non_exhaustive]
@@ -66,20 +69,20 @@ pub enum ConflictError {
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum ParseError {
-    /// different reduce type applied to the same terminal symbol
-    MultipleReduceDefinition(Vec<Located<rusty_lr_core::rule::ReduceType>>),
 
-    InvalidTerminalRange {
-        location: Location,
-        start: (Located<String>, usize),
-        end: (Located<String>, usize),
-    },
+    /// different reduce type applied to the same terminal symbol
+    MultipleReduceDefinition(
+        Vec<Located<rusty_lr_core::rule::ReduceType>>,
+    ),
+
+    InvalidTerminalRange{ location: Location, start: (Located<String>, usize), end: (Located<String>, usize) },
 
     /// name given to %start not defined
     StartNonTerminalNotDefined(Location),
 
     /// unknown terminal symbol name
     TerminalNotDefined(Location),
+
 
     /// not supported literal type
     UnsupportedLiteralType(Location),
@@ -91,7 +94,7 @@ pub enum ParseError {
     TokenInLiteralMode(Vec<Location>),
 
     /// conflicts in precedence definition
-    MultiplePrecedenceOrderDefinition(Vec<Location>),
+    MultiplePrecedenceOrderDefinition (Vec<Location>),
 
     /// Precedence not defined for the given token
     PrecedenceNotDefined(IdentOrLiteral),
@@ -100,7 +103,10 @@ pub enum ParseError {
     NonTerminalPrecedenceNotDefined(Located<usize>),
 
     /// ReduceAction must be defined but not defined
-    RuleTypeDefinedButActionNotDefined { nonterm: Location, rule: Location },
+    RuleTypeDefinedButActionNotDefined {
+        nonterm: Location,
+        rule: Location
+    },
 
     /// Only terminal or terminal set is allowed
     OnlyTerminalSet(Location),
@@ -126,10 +132,7 @@ pub enum ParseError {
 }
 #[allow(unused)]
 impl ArgError {
-    pub fn to_compile_error(
-        &self,
-        span_manager: &crate::parser::location::SpanManager,
-    ) -> TokenStream {
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
@@ -179,24 +182,24 @@ impl ArgError {
             ArgError::MultipleNameDefinition(name, _) => {
                 format!("Duplicated name for terminal or non-terminal: {}", name)
             }
-            ArgError::ReservedName(names) => "This name is reserved and cannot be used".into(),
+            ArgError::ReservedName(names) =>
+                "This name is reserved and cannot be used".into(),
         }
     }
 }
 #[allow(unused)]
 impl ParseArgError {
-    pub fn to_compile_error(
-        &self,
-        span_manager: &crate::parser::location::SpanManager,
-    ) -> TokenStream {
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
         let message = self.short_message();
         let location = self.location();
         for span in span_manager.get_spans_in_location(&location) {
-            output.extend(quote_spanned! {
-                span=>
-                compile_error!(#message);
-            });
+            output.extend(
+                quote_spanned! {
+                    span=>
+                    compile_error!(#message);
+                }
+            );
         }
         output
     }
@@ -217,10 +220,7 @@ impl ParseArgError {
 
 #[allow(unused)]
 impl ParseError {
-    pub fn to_compile_error(
-        &self,
-        span_manager: &crate::parser::location::SpanManager,
-    ) -> TokenStream {
+    pub fn to_compile_error(&self, span_manager: &crate::parser::location::SpanManager) -> TokenStream {
         let mut output = TokenStream::new();
         let message = self.short_message();
         for loc in self.locations() {
@@ -236,15 +236,9 @@ impl ParseError {
 
     pub fn locations(&self) -> Vec<Location> {
         match self {
-            ParseError::MultipleReduceDefinition(locations) => {
-                locations.iter().map(Located::location).collect()
-            }
+            ParseError::MultipleReduceDefinition(locations) => locations.iter().map(Located::location).collect(),
 
-            ParseError::InvalidTerminalRange {
-                location: range,
-                start,
-                end,
-            } => vec![range.clone()],
+            ParseError::InvalidTerminalRange { location: range, start, end } => vec![range.clone()],
 
             ParseError::StartNonTerminalNotDefined(loc) => vec![*loc],
 
@@ -260,9 +254,7 @@ impl ParseError {
             ParseError::PrecedenceNotDefined(name) => vec![name.location()],
             ParseError::NonTerminalPrecedenceNotDefined(loc) => vec![loc.location()],
 
-            ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule } => {
-                vec![*nonterm, *rule]
-            }
+            ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule} => vec![*nonterm, *rule],
             ParseError::OnlyTerminalSet(location) => vec![*location],
             ParseError::NonTerminalNotDefined(loc) => vec![*loc],
             ParseError::OnlyUsizeLiteral(loc) => vec![*loc],
@@ -297,7 +289,7 @@ impl ParseError {
                 format!("This literal type is not supported. Use string literal (e.g. 'a', \"abc\", b'a' or b\"abc\") instead")
             }
 
-            ParseError::InvalidLiteralRange(_) =>
+            ParseError::InvalidLiteralRange(_) => 
                     "Invalid literal range: [first, last] with first > last".to_string(),
 
             ParseError::TokenInLiteralMode(_) => {

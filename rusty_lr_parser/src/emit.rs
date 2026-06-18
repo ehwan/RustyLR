@@ -1077,56 +1077,51 @@ impl Grammar {
                         let tag_name = stack_name.unwrap_or(&empty_tag_name);
 
                         if let Some(stack_name) = stack_name {
-                            let mapto =
-                                if let Some(first_chain) = token.reduce_action_chains.first() {
-                                    let first_chain = &self.custom_reduce_actions[*first_chain];
-                                    if first_chain.input_type.is_some() {
+                            let mapto = if let Some(first_chain) =
+                                token.reduce_action_chains.first()
+                            {
+                                let first_chain = &self.custom_reduce_actions[*first_chain];
+                                if first_chain.input_type.is_some() {
+                                    Some(format_ident!("__rustylr_data_{}", token_idx))
+                                } else {
+                                    None
+                                }
+                            } else {
+                                // check if index-based variable __rustylr_data_{token_idx} is used
+                                let index_var_used = rule.reduce_action_contains_ident(&format!("__rustylr_data_{}", token_idx));
+                                
+                                if let Some(mapto) = &token.mapto {
+                                    let mapto_used = rule.reduce_action_contains_ident(mapto.value().as_str());
+                                    if index_var_used {
                                         Some(format_ident!("__rustylr_data_{}", token_idx))
+                                    } else if mapto_used {
+                                        Some(format_ident!("{}", mapto.value()))
                                     } else {
                                         None
                                     }
                                 } else {
-                                    // check if index-based variable __rustylr_data_{token_idx} is used
-                                    let index_var_used = rule.reduce_action_contains_ident(
-                                        &format!("__rustylr_data_{}", token_idx),
-                                    );
-
-                                    if let Some(mapto) = &token.mapto {
-                                        let mapto_used = rule
-                                            .reduce_action_contains_ident(mapto.value().as_str());
-                                        if index_var_used {
-                                            Some(format_ident!("__rustylr_data_{}", token_idx))
-                                        } else if mapto_used {
-                                            Some(format_ident!("{}", mapto.value()))
-                                        } else {
-                                            None
-                                        }
+                                    if index_var_used {
+                                        Some(format_ident!("__rustylr_data_{}", token_idx))
                                     } else {
-                                        if index_var_used {
-                                            Some(format_ident!("__rustylr_data_{}", token_idx))
-                                        } else {
-                                            None
-                                        }
+                                        None
                                     }
-                                };
+                                }
+                            };
                             stack_mapto_map
                                 .entry(StackName::DataStack(stack_name.clone()))
                                 .or_insert_with(Vec::new)
                                 .push(mapto);
                         }
                         let location_mapto = if token.reduce_action_chains.is_empty() {
-                            let location_index_varname_str =
-                                format!("__rustylr_location_{}", token_idx);
-                            let index_var_used =
-                                rule.reduce_action_contains_ident(&location_index_varname_str);
+                            let location_index_varname_str = format!("__rustylr_location_{}", token_idx);
+                            let index_var_used = rule.reduce_action_contains_ident(&location_index_varname_str);
 
                             if let Some(mapto) = &token.mapto {
                                 let location_varname =
                                     format_ident!("__rustylr_location_{}", mapto.value());
                                 let location_varname_str =
                                     format!("__rustylr_location_{}", mapto.value());
-                                let mapto_used =
-                                    rule.reduce_action_contains_ident(&location_varname_str);
+                                let mapto_used = rule.reduce_action_contains_ident(&location_varname_str);
 
                                 if index_var_used {
                                     Some(format_ident!("__rustylr_location_{}", token_idx))
@@ -1307,33 +1302,23 @@ impl Grammar {
                     for (token_idx, token) in rule.tokens.iter().enumerate() {
                         if token.reduce_action_chains.is_empty() {
                             if let Some(mapto) = &token.mapto {
-                                let mapto_used =
-                                    rule.reduce_action_contains_ident(mapto.value().as_str());
-                                let index_var_used = rule.reduce_action_contains_ident(&format!(
-                                    "__rustylr_data_{}",
-                                    token_idx
-                                ));
+                                let mapto_used = rule.reduce_action_contains_ident(mapto.value().as_str());
+                                let index_var_used = rule.reduce_action_contains_ident(&format!("__rustylr_data_{}", token_idx));
                                 if mapto_used && index_var_used {
                                     let mapto_ident = format_ident!("{}", mapto.value());
-                                    let data_varname =
-                                        format_ident!("__rustylr_data_{}", token_idx);
+                                    let data_varname = format_ident!("__rustylr_data_{}", token_idx);
                                     alias_stream.extend(quote! {
                                         let mut #mapto_ident = #data_varname;
                                     });
                                 }
 
-                                let location_varname_str =
-                                    format!("__rustylr_location_{}", mapto.value());
-                                let location_mapto_used =
-                                    rule.reduce_action_contains_ident(&location_varname_str);
-                                let location_index_varname_str =
-                                    format!("__rustylr_location_{}", token_idx);
-                                let location_index_var_used =
-                                    rule.reduce_action_contains_ident(&location_index_varname_str);
+                                let location_varname_str = format!("__rustylr_location_{}", mapto.value());
+                                let location_mapto_used = rule.reduce_action_contains_ident(&location_varname_str);
+                                let location_index_varname_str = format!("__rustylr_location_{}", token_idx);
+                                let location_index_var_used = rule.reduce_action_contains_ident(&location_index_varname_str);
                                 if location_mapto_used && location_index_var_used {
                                     let mapto_ident = format_ident!("{}", location_varname_str);
-                                    let data_varname =
-                                        format_ident!("{}", location_index_varname_str);
+                                    let data_varname = format_ident!("{}", location_index_varname_str);
                                     alias_stream.extend(quote! {
                                         let mut #mapto_ident = #data_varname;
                                     });

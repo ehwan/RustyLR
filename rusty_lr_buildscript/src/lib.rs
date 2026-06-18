@@ -825,13 +825,9 @@ impl Builder {
                         let range = span_manager.get_byterange(&location).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Bison variable is out of range")
-                            .with_labels(vec![Label::primary(file_id, range).with_message(
-                                format!("references index out of range (max index: {})", max),
-                            )])
-                            .with_notes(vec![format!(
-                                "Bison variable {} is out of range (max index: {})",
-                                name, max
-                            )])
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message(format!("references index out of range (max index: {})", max))])
+                            .with_notes(vec![format!("Bison variable {} is out of range (max index: {})", name, max)])
                     }
 
                     ParseError::TypeInferenceFailed(location) => {

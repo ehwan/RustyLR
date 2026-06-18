@@ -1332,8 +1332,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
         let pop_count = loop {
             let node_ = self.node(node);
             if !node_.is_leaf() {
-                let loc = error_location_preserved
-                    .unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
+                let loc = error_location_preserved.unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
                 self.try_remove_node(node);
                 return loc;
             }
@@ -1380,9 +1379,7 @@ impl<Data: DataStack, StateIndex: Index, const MAX_REDUCE_RULES: usize>
                     Data::Location::new(self.location_iter(node), pop_count)
                 });
 
-                let loc = error_location_preserved
-                    .clone()
-                    .unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
+                let loc = error_location_preserved.clone().unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
                 if let Some(parent) = self.try_remove_node(node) {
                     node = parent;
                     continue;

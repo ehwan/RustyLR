@@ -232,12 +232,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        self.feed_location(
-            parser,
-            term,
-            userdata,
-            Data::Location::new(self.location_stack.iter().rev(), 0),
-        )
+        self.feed_location(parser, term, userdata, Data::Location::new(self.location_stack.iter().rev(), 0))
     }
 
     /// Feed one terminal with location to parser, and update stacks.
@@ -549,9 +544,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
             } else {
                 match term {
-                    TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
-                        self.data_stack.push_empty()
-                    }
+                    TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => self.data_stack.push_empty(),
                 }
             }
 

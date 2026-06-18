@@ -79,7 +79,7 @@ mod tests {
         let parser = parser::JsonParser::new();
         let mut context = parser::JsonContext::new();
         let input = r#"{"name": "test", "active": true}"#;
-
+        
         let mut userdata = Vec::new();
         let mut range_start = 0;
         for ch in input.chars() {
@@ -94,7 +94,7 @@ mod tests {
         let result = context.accept(&parser, &mut userdata);
         assert!(result.is_ok(), "Accept failed: {:?}", result.err());
         assert_eq!(result.unwrap(), ());
-
+        
         // No errors should have occurred
         assert!(userdata.is_empty());
     }
@@ -103,10 +103,10 @@ mod tests {
     fn test_json_error_recovery_exact_location() {
         let parser = parser::JsonParser::new();
         let mut context = parser::JsonContext::new();
-
+        
         // "invalid" causes syntax error inside { }
         let input = r#"{"name": "test", invalid}"#;
-
+        
         let mut userdata = Vec::new();
         let mut range_start = 0;
         for ch in input.chars() {
@@ -122,11 +122,8 @@ mod tests {
         // Verify that the error recovery action successfully captured the exact range of the error token
         // In an LR parser, the 'error' token location spans the entire popped/unwound region:
         // from right after '{' (index 1) to right before '}' (index 24)
-        assert!(
-            !userdata.is_empty(),
-            "Error recovery action did not write location to userdata"
-        );
-
+        assert!(!userdata.is_empty(), "Error recovery action did not write location to userdata");
+        
         let recovered_range = &userdata[0];
         assert_eq!(recovered_range.start, 1);
         assert_eq!(recovered_range.end, 24);
@@ -137,7 +134,7 @@ mod tests {
         let parser = parser::JsonParser::new();
         let mut context = parser::JsonContext::new();
         let input = r#"{"name": "test""#; // unclosed {
-
+        
         let mut userdata = Vec::new();
         let mut range_start = 0;
         for ch in input.chars() {
@@ -151,7 +148,7 @@ mod tests {
         // Accept should fail because of EOF while parsing object
         let result = context.accept(&parser, &mut userdata);
         assert!(result.is_err());
-
+        
         let err = result.err().unwrap();
         // Since we refine 0-length EOF location generation,
         // the error location should point to the end of input as a 0-length range
