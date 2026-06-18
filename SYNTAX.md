@@ -574,8 +574,10 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `$NonTerminalName` -> Evaluates to the `ruletype` defined for `NonTerminalName`.
 - `$terminal_name` -> Evaluates to the match pattern/definition of `<terminal_name>`.
 
-### Circular Dependency and Max Depth
-If you introduce circular dependencies among type/definition variables, a compile-time error (`CircularDependency`) is returned. A maximum recursion limit of `100` is enforced to prevent infinite compilation loops.
+### Substitution Errors
+- **Circular Dependency**: If you introduce circular dependencies among type/definition variables, a compile-time error (`CircularDependency`) is returned.
+- **Max Depth Exceeded**: A maximum recursion limit of `100` is enforced to prevent infinite compilation loops. If exceeded, a compile-time error (`MaxSubstitutionDepthExceeded`) is returned.
+- **Filter Not Defined**: If `$filter` is used inside a reduce action block but `%filter` directive is not defined, a compile-time error (`FilterNotDefined`) is returned.
 
 ### Example
 ```rust
