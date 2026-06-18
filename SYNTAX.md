@@ -82,8 +82,8 @@ match terminal_token {
 ```rust
 %tokentype Token;
 
-%token id Token::Ident(_);   // Matches Token::Ident("foo") and extracts the value
-%token num Token::Num(_);     // Matches Token::Num(42) and extracts the value
+%token id Token::Ident(_);   // Matches Token::Ident("foo")
+%token num Token::Num(_);     // Matches Token::Num(42)
 %token plus Token::Plus;       // Matches Token::Plus
 %token minus Token::Minus;     // Matches Token::Minus
 
