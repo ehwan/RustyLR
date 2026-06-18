@@ -171,6 +171,13 @@ If `_` is used, the type will be inferred by analyzing the rules (specifically f
 
 The actual value of `E` is evaluated by the result of the ReduceAction.
 
+### Memory Optimization with `Box`
+Internally, the generated parser stores all semantic values—including the `%tokentype` (terminal token type) and all non-terminals' `RuleType`s—within a single unified `enum` that represents the data stack.
+
+Because the size of a Rust enum is determined by its largest variant, if even a single `RuleType` (or the token type itself) has a large memory footprint, it will inflate the size of the entire enum. Consequently, the data stack will consume significantly more memory, as every element pushed onto the stack will allocate space corresponding to that largest variant.
+
+To avoid this overhead, it is highly recommended to wrap large data types in a `Box` (e.g., `Box<MyLargeStruct>`). This keeps the variant size minimal (the size of a single pointer) and optimizes the memory consumption of the data stack as a whole.
+
 
 ## ReduceAction <sub><sup>(optional)</sup></sub>
 A ReduceAction is Rust code executed when a production rule is reduced.
