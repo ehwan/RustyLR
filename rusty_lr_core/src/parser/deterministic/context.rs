@@ -277,11 +277,9 @@ impl<
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
+        Data::Location: Default,
     {
-        self.feed_location(
-            term,
-            Data::Location::new(self.location_stack.iter().rev(), 0),
-        )
+        self.feed_location(term, Default::default())
     }
 
     /// Feed one terminal with location to parser, and update stacks.
