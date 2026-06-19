@@ -1,13 +1,12 @@
 pub mod parser;
 
 fn main() {
-    let parser = parser::EParser::new();
     let mut context = parser::EContext::new();
 
     let input = "1+2*3+4";
     for ch in input.chars() {
-        println!("feed: {}, possible: {}", ch, context.can_feed(&parser, &ch));
-        match context.feed(&parser, ch, &mut ()) {
+        println!("feed: {}, possible: {}", ch, context.can_feed(&ch));
+        match context.feed(ch, &mut ()) {
             Ok(_) => {
                 println!("nodes: {}", context.len_paths());
             }
@@ -18,7 +17,7 @@ fn main() {
         }
         context.debug_check();
     }
-    let result = match context.accept(&parser, &mut ()) {
+    let result = match context.accept(&mut ()) {
         Ok(mut results) => results.next().unwrap(),
         Err(e) => {
             println!("Error: {}", e);
@@ -30,12 +29,8 @@ fn main() {
     let input = "1+2**3+4";
     let mut context = parser::EContext::new();
     for ch in input.chars() {
-        println!(
-            "feed: {}, can_feed(): {}",
-            ch,
-            context.can_feed(&parser, &ch)
-        );
-        match context.feed(&parser, ch, &mut ()) {
+        println!("feed: {}, can_feed(): {}", ch, context.can_feed(&ch));
+        match context.feed(ch, &mut ()) {
             Ok(_) => {
                 println!("nodes: {}", context.len_paths());
             }
@@ -46,7 +41,7 @@ fn main() {
         }
     }
 
-    for result in context.accept(&parser, &mut ()).unwrap() {
+    for result in context.accept(&mut ()).unwrap() {
         println!("Result: {}", result);
     }
 
@@ -65,19 +60,15 @@ fn main() {
 
 #[test]
 fn test_parser() {
-    let parser = parser::EParser::new();
     let mut context = parser::EContext::new();
     let input1 = "  1 + 2 * 3 * 4 + 5 * 6 + 7 ";
     for ch in input1.chars() {
-        context.feed(&parser, ch, &mut ()).unwrap();
+        context.feed(ch, &mut ()).unwrap();
     }
 
     let answer = 1 + 2 * 3 * 4 + 5 * 6 + 7;
 
-    let mut results = context
-        .accept(&parser, &mut ())
-        .unwrap()
-        .collect::<Vec<_>>();
+    let mut results = context.accept(&mut ()).unwrap().collect::<Vec<_>>();
     results.sort();
     assert_eq!(results.len(), 1);
     assert_eq!(results, [answer]);

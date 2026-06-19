@@ -105,7 +105,7 @@ rustylr src/grammar.rs src/parser.rs
 ```
 
 ### 5. Parse a Token Stream
-Include the generated `src/parser.rs` file in your project and feed it a stream of tokens:
+Simply initialize the state context using `Context::new()`, and feed your tokens to it:
 
 ```rust
 // src/main.rs
@@ -122,18 +122,17 @@ fn main() {
         Token::Num(2),
     ];
 
-    let parser = parser::ExprParser::new();
     let mut context = parser::ExprContext::new();
     let mut userdata = (); // No custom user data needed
 
     for token in tokens {
-        if let Err(err) = context.feed(&parser, token, &mut userdata) {
+        if let Err(err) = context.feed(token, &mut userdata) {
             eprintln!("Parse error: {}", err);
             return;
         }
     }
 
-    match context.accept(&parser, &mut userdata) {
+    match context.accept(&mut userdata) {
         Ok(result) => {
             println!("Parsed result: {}", result); // Output: 11
         }
@@ -165,10 +164,10 @@ let mut context = ExprContext::new();
 
 // ... feed tokens ...
 
-context.expected_token(&parser);    // Returns the expected symbols for the current state
-context.can_feed(&parser, &token);  // Checks if a terminal can be fed next
-context.trace(&parser);             // Retrieves active `%trace` non-terminals
-println!("{}", context.backtrace(&parser)); // Prints the stack trace of parser states
+context.expected_token();    // Returns the expected symbols for the current state
+context.can_feed(&token);  // Checks if a terminal can be fed next
+context.trace();             // Retrieves active `%trace` non-terminals
+println!("{}", context.backtrace()); // Prints the stack trace of parser states
 println!("{}", context);     // Formats the state tree (requires 'tree' feature)
 ```
 
@@ -176,10 +175,10 @@ println!("{}", context);     // Formats the state tree (requires 'tree' feature)
 You can feed terminal symbols either with or without location information:
 ```rust
 // Basic feeding
-context.feed(&parser, token, &mut userdata);
+context.feed(token, &mut userdata);
 
 // Location-aware feeding (requires %location in grammar)
-context.feed_location(&parser, token, &mut userdata, token_location);
+context.feed_location(token, &mut userdata, token_location);
 ```
 
 ---

@@ -23,7 +23,6 @@ use crate::parser::location::Located;
 use crate::parser::location::Location;
 use crate::parser::location::SpanManager;
 use crate::parser::parser_expanded::GrammarContext;
-use crate::parser::parser_expanded::GrammarParser;
 use crate::pattern::Pattern;
 use crate::pattern::PatternToToken;
 use crate::rangeresolver::RangeResolver;
@@ -180,13 +179,11 @@ impl Grammar {
     }
 
     pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, (ParseArgError, SpanManager)> {
-        let parser = GrammarParser::new();
         let mut context = GrammarContext::new();
 
         let mut grammar_args = GrammarArgs::default();
 
-        match crate::parser::lexer::feed_recursive(input, &parser, &mut context, &mut grammar_args)
-        {
+        match crate::parser::lexer::feed_recursive(input, &mut context, &mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
@@ -199,7 +196,7 @@ impl Grammar {
                 ));
             }
         }
-        match context.accept(&parser, &mut grammar_args) {
+        match context.accept(&mut grammar_args) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();

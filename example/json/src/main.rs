@@ -45,18 +45,17 @@ const TEST_JSON: &'static str = r#"
 "#;
 
 fn main() {
-    let parser = parser::JsonParser::new();
-    println!("#rules: {}", parser.get_rules().len());
-    println!("#states: {}", parser.get_states().len());
+    println!("#rules: {}", parser::JsonParser::get_rules().len());
+    println!("#states: {}", parser::JsonParser::get_states().len());
 
-    fn try_once(parser: &parser::JsonParser) {
+    fn try_once() {
         let mut context = parser::JsonContext::new();
         let mut range_start = 0;
         let mut userdata = Vec::new();
         for ch in TEST_JSON.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(parser, ch, &mut userdata, range_start..range_end)
+                .feed_location(ch, &mut userdata, range_start..range_end)
                 .expect("Error parsing character");
             range_start = range_end;
         }
@@ -64,7 +63,7 @@ fn main() {
 
     let start = Instant::now();
     for _ in 0..1000 {
-        try_once(&parser);
+        try_once();
     }
     let duration = start.elapsed();
     println!("Parsed 1000 times in {:?}", duration);
@@ -76,7 +75,6 @@ mod tests {
 
     #[test]
     fn test_json_parse_success() {
-        let parser = parser::JsonParser::new();
         let mut context = parser::JsonContext::new();
         let input = r#"{"name": "test", "active": true}"#;
 
@@ -85,13 +83,13 @@ mod tests {
         for ch in input.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(&parser, ch, &mut userdata, range_start..range_end)
+                .feed_location(ch, &mut userdata, range_start..range_end)
                 .expect("Failed to feed character");
             range_start = range_end;
         }
 
         // Verify accept yields Ok(()) - start data of Json (empty type)
-        let result = context.accept(&parser, &mut userdata);
+        let result = context.accept(&mut userdata);
         assert!(result.is_ok(), "Accept failed: {:?}", result.err());
         assert_eq!(result.unwrap(), ());
 
@@ -101,7 +99,6 @@ mod tests {
 
     #[test]
     fn test_json_error_recovery_exact_location() {
-        let parser = parser::JsonParser::new();
         let mut context = parser::JsonContext::new();
 
         // "invalid" causes syntax error inside { }
@@ -112,12 +109,12 @@ mod tests {
         for ch in input.chars() {
             let range_end = range_start + ch.len_utf8();
             // We ignore individual feed errors here, as panic mode / recovery will proceed
-            let _ = context.feed_location(&parser, ch, &mut userdata, range_start..range_end);
+            let _ = context.feed_location(ch, &mut userdata, range_start..range_end);
             range_start = range_end;
         }
 
         // Trigger accept (which feeds EOF and resolves recovery)
-        let _ = context.accept(&parser, &mut userdata);
+        let _ = context.accept(&mut userdata);
 
         // Verify that the error recovery action successfully captured the exact range of the error token
         // In an LR parser, the 'error' token location spans the entire popped/unwound region:
@@ -134,7 +131,6 @@ mod tests {
 
     #[test]
     fn test_unclosed_object_eof_location() {
-        let parser = parser::JsonParser::new();
         let mut context = parser::JsonContext::new();
         let input = r#"{"name": "test""#; // unclosed {
 
@@ -143,13 +139,13 @@ mod tests {
         for ch in input.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(&parser, ch, &mut userdata, range_start..range_end)
+                .feed_location(ch, &mut userdata, range_start..range_end)
                 .expect("Failed to feed character");
             range_start = range_end;
         }
 
         // Accept should fail because of EOF while parsing object
-        let result = context.accept(&parser, &mut userdata);
+        let result = context.accept(&mut userdata);
         assert!(result.is_err());
 
         let err = result.err().unwrap();

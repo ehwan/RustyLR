@@ -45,19 +45,20 @@ pub trait Parser {
     const ERROR_USED: bool;
 
     /// The type of terminal symbols.
-    type Term;
+    type Term: 'static;
     /// The type of terminal classes.
-    type TermClass: terminalclass::TerminalClass<Term = Self::Term>;
+    type TermClass: terminalclass::TerminalClass<Term = Self::Term> + 'static;
     /// The type of non-terminal symbols.
-    type NonTerm: nonterminal::NonTerminal;
+    type NonTerm: nonterminal::NonTerminal + 'static;
     /// The type of the parser state.
-    type State: State<TermClass = Self::TermClass, NonTerm = Self::NonTerm>;
+    type State: State<TermClass = Self::TermClass, NonTerm = Self::NonTerm> + 'static;
 
-    /// Get list of production rules
-    fn get_rules(&self) -> &[crate::rule::ProductionRule<Self::TermClass, Self::NonTerm>];
-    /// Get list of states
-    fn get_states(&self) -> &[Self::State];
+    /// Get list of production rules. Returns a static slice since rules are generated at compile time.
+    fn get_rules() -> &'static [crate::rule::ProductionRule<Self::TermClass, Self::NonTerm>];
+    /// Get list of states. Returns a static slice since states are generated at compile time.
+    fn get_states() -> &'static [Self::State];
     /// Get the type of precedence for i'th level.
     /// `None` if i'th level was defined as %precedence (no reduce type).
-    fn precedence_types(&self, level: u8) -> Option<crate::rule::ReduceType>;
+    /// Determined entirely at compile time and is static.
+    fn precedence_types(level: u8) -> Option<crate::rule::ReduceType>;
 }
