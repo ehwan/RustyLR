@@ -103,13 +103,6 @@ pub enum PatternArgs {
     /// a group delimited by '[' and ']' containing terminal set
     TerminalSet(TerminalSet),
 
-    /// force lookahead tokens for this pattern.
-    /// lookaheads will not be consumed.
-    Lookaheads {
-        pattern: Box<PatternArgs>,
-        lookaheads: Box<PatternArgs>,
-    },
-
     /// ( Pattern+ )
     /// alternatives is a list of alternatives (separated by '|'),
     /// each alternative is a list of patterns.
@@ -153,12 +146,6 @@ impl std::fmt::Display for PatternArgs {
             PatternArgs::Question { base, .. } => write!(f, "{}?", base),
             PatternArgs::Exclamation { base, .. } => write!(f, "{}", base),
             PatternArgs::TerminalSet(terminal_set) => write!(f, "{}", terminal_set),
-            PatternArgs::Lookaheads {
-                pattern,
-                lookaheads,
-            } => {
-                write!(f, "{}/{}", pattern, lookaheads)
-            }
             PatternArgs::Group { alternatives, .. } => {
                 write!(
                     f,
@@ -265,21 +252,6 @@ impl PatternArgs {
                 } else {
                     Ok(pattern)
                 }
-            }
-            PatternArgs::Lookaheads {
-                pattern,
-                lookaheads,
-            } => {
-                let (negate, terminal_set) = lookaheads.to_terminal_set(grammar)?;
-                let pattern = Pattern {
-                    internal: PatternInternal::Lookaheads(
-                        Box::new(pattern.into_pattern(grammar, put_exclamation)?),
-                        negate,
-                        terminal_set,
-                    ),
-                    pretty_name,
-                };
-                Ok(pattern)
             }
             PatternArgs::Group { alternatives, .. } => {
                 if alternatives.len() == 1 && alternatives[0].len() == 1 {
@@ -429,9 +401,6 @@ impl PatternArgs {
             PatternArgs::Star { .. } => Err(ParseError::OnlyTerminalSet(self.location())),
             PatternArgs::Question { .. } => Err(ParseError::OnlyTerminalSet(self.location())),
             PatternArgs::Exclamation { base, .. } => base.to_terminal_set(grammar),
-            PatternArgs::Lookaheads { pattern, .. } => {
-                Err(ParseError::OnlyTerminalSet(pattern.location()))
-            }
             PatternArgs::Group { alternatives, .. } => {
                 if alternatives.len() == 1 && alternatives[0].len() == 1 {
                     alternatives[0][0].to_terminal_set(grammar)
@@ -503,10 +472,6 @@ impl PatternArgs {
                 op_location: op_span,
             } => base.location().merge(op_span),
             PatternArgs::TerminalSet(terminal_set) => terminal_set.location(),
-            PatternArgs::Lookaheads {
-                pattern,
-                lookaheads,
-            } => pattern.location().merge(&lookaheads.location()),
             PatternArgs::Group {
                 open_location: open_span,
                 close_location: close_span,
@@ -529,14 +494,6 @@ impl PatternArgs {
             PatternArgs::Question { base, .. } => base.range_resolve(grammar),
             PatternArgs::Exclamation { base, .. } => base.range_resolve(grammar),
             PatternArgs::TerminalSet(terminal_set) => terminal_set.range_resolve(grammar),
-            PatternArgs::Lookaheads {
-                pattern,
-                lookaheads,
-            } => {
-                pattern.range_resolve(grammar)?;
-                lookaheads.range_resolve(grammar)?;
-                Ok(())
-            }
             PatternArgs::Group { alternatives, .. } => {
                 for line in alternatives {
                     for pattern in line {

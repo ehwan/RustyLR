@@ -162,7 +162,6 @@ Reduce on Terminals: {
     question => { Pattern -> TerminalSet }
     minus => { Pattern -> TerminalSet }
     exclamation => { Pattern -> TerminalSet }
-    slash => { Pattern -> TerminalSet }
      dot => { Pattern -> TerminalSet }
     dollar => { Pattern -> TerminalSet }
     comma => { Pattern -> TerminalSet }

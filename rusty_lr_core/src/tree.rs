@@ -53,7 +53,7 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
             }
 
             // remove parent, directly add children
-            Some(NonTerminalType::Lookahead) | Some(NonTerminalType::TerminalSet) => self
+            Some(NonTerminalType::TerminalSet) => self
                 .tokens
                 .iter()
                 .flat_map(|token| token.to_term_tree(term_to_display, nonterm_to_display))

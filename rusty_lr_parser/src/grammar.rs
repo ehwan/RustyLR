@@ -1545,7 +1545,6 @@ impl Grammar {
                     tokens,
                     reduce_action,
                     separator_location: rule.separator_location,
-                    lookaheads: None,
                     prec,
                     dprec,
                     is_used: true,
@@ -1759,7 +1758,6 @@ impl Grammar {
                 ],
                 reduce_action: None,
                 separator_location: Location::CallSite,
-                lookaheads: None,
                 prec: None,
                 dprec: None,
                 is_used: true,
@@ -1814,11 +1812,6 @@ impl Grammar {
         // check other, error terminals used
         for nonterm in &grammar.nonterminals {
             for rule in &nonterm.rules {
-                if let Some(lookaheads) = &rule.lookaheads {
-                    if lookaheads.contains(&grammar.other_terminal_index) {
-                        grammar.other_used = true;
-                    }
-                }
                 for token in &rule.tokens {
                     if token.token
                         == Token::Term(TerminalSymbol::Term(grammar.other_terminal_index))
@@ -1895,7 +1888,6 @@ impl Grammar {
                             .map(|token| (token.token, &token.reduce_action_chains))
                             .collect::<Vec<_>>();
                         let reduce_chains = &term_mapped.reduce_action_chains;
-                        let lookaheads = &rule.lookaheads;
                         let prec = rule.prec.map(Located::into_value);
                         let dprec = rule.dprec.map_or(0, Located::into_value);
                         let reduce_action_token_index =
@@ -1911,7 +1903,6 @@ impl Grammar {
                                 prefix,
                                 suffix,
                                 reduce_chains,
-                                lookaheads,
                                 prec,
                                 dprec,
                                 reduce_action_token_index,
@@ -2055,20 +2046,6 @@ impl Grammar {
                             }
                             token.token = Token::Term(TerminalSymbol::Term(new_class));
                         }
-                    }
-                    //  - lookaheads in the rule
-                    if let Some(lookaheads) = &mut rule.lookaheads {
-                        let new_lookaheads = std::mem::take(lookaheads)
-                            .into_iter()
-                            .map(|old_class| {
-                                let new_class = old_class_to_new_class[old_class];
-                                if new_class == self.other_terminal_class_id {
-                                    other_was_used = true;
-                                }
-                                new_class
-                            })
-                            .collect();
-                        *lookaheads = new_lookaheads;
                     }
                     new_rules.push(rule);
                 }
@@ -2530,12 +2507,6 @@ impl Grammar {
                 grammar.add_rule(
                     nonterm_id,
                     tokens,
-                    rule.lookaheads.as_ref().map(|lookaheads| {
-                        lookaheads
-                            .iter()
-                            .map(|&t| TerminalSymbol::Term(t))
-                            .collect()
-                    }),
                     rule.prec.map(Located::into_value),
                     rule.dprec.map_or(0, Located::into_value),
                 );

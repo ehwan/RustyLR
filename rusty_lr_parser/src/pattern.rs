@@ -26,7 +26,6 @@ pub enum PatternInternal {
     Question(Box<Pattern>),
     Exclamation(Box<Pattern>),
     TerminalSet(bool, BTreeSet<usize>),
-    Lookaheads(Box<Pattern>, bool, BTreeSet<usize>),
     Group(Vec<Vec<Pattern>>),
     Byte(Located<u8>),
     ByteString(Located<Vec<u8>>),
@@ -162,7 +161,6 @@ impl Pattern {
                             { vec![A] }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -186,7 +184,6 @@ impl Pattern {
                             { Ap.push(A); Ap }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -226,7 +223,6 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -248,7 +244,6 @@ impl Pattern {
                         ],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -305,7 +300,6 @@ impl Pattern {
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -316,7 +310,6 @@ impl Pattern {
                             { vec![] }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -356,7 +349,6 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -365,7 +357,6 @@ impl Pattern {
                         tokens: vec![],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -414,7 +405,6 @@ impl Pattern {
                         }],
                         reduce_action: Some(ReduceAction::new_custom(quote! { Some(A) })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -425,7 +415,6 @@ impl Pattern {
                             { None }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -465,7 +454,6 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -474,7 +462,6 @@ impl Pattern {
                         tokens: vec![],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -540,7 +527,6 @@ impl Pattern {
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -569,97 +555,6 @@ impl Pattern {
                     mapto: None,
                 })
             }
-            PatternInternal::Lookaheads(pattern, negate, lookaheads) => {
-                let lookaheads = if *negate {
-                    grammar.negate_terminal_set(lookaheads)
-                } else {
-                    lookaheads.clone()
-                };
-                let base_rule = pattern.to_token(grammar, pattern_cache, root_location)?;
-
-                let newrule_idx = grammar.nonterminals.len();
-                let newrule_name = Located::new(
-                    format!("_{}LH{}", base_rule.name.value(), newrule_idx),
-                    root_location,
-                );
-
-                if let Some(base_typename) = &base_rule.ruletype {
-                    let rule = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
-                            mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
-                            location: Location::CallSite,
-                            reduce_action_chains: Vec::new(),
-                        }],
-                        reduce_action: Some(ReduceAction::Identity(0)),
-                        separator_location: Location::CallSite,
-                        lookaheads: Some(lookaheads),
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
-
-                    let nonterm_info = NonTerminalInfo {
-                        ruletype_boxed: false,
-                        name: newrule_name.clone(),
-                        pretty_name: self.pretty_name.clone(),
-                        ruletype: Some(base_typename.clone()),
-                        rules: vec![rule],
-                        root_location: Some(root_location),
-                        protected: false,
-                        nonterm_type: Some(NonTerminalType::Lookahead),
-                    };
-                    grammar.nonterminals.push(nonterm_info);
-                    grammar
-                        .nonterminals_index
-                        .insert(newrule_name.value().clone(), newrule_idx);
-
-                    Ok(PatternToToken {
-                        name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
-                        ruletype: Some(base_typename.clone()),
-                        mapto: base_rule.mapto.clone(),
-                    })
-                } else {
-                    let rule = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
-                            mapto: None,
-                            location: Location::CallSite,
-                            reduce_action_chains: Vec::new(),
-                        }],
-                        reduce_action: None,
-                        separator_location: Location::CallSite,
-                        lookaheads: Some(lookaheads),
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
-
-                    let nonterm_info = NonTerminalInfo {
-                        ruletype_boxed: false,
-                        name: newrule_name.clone(),
-                        pretty_name: self.pretty_name.clone(),
-                        ruletype: None,
-                        rules: vec![rule],
-                        root_location: Some(root_location),
-                        protected: false,
-                        nonterm_type: Some(NonTerminalType::Lookahead),
-                    };
-                    grammar.nonterminals.push(nonterm_info);
-                    grammar
-                        .nonterminals_index
-                        .insert(newrule_name.value().clone(), newrule_idx);
-
-                    Ok(PatternToToken {
-                        name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
-                        ruletype: None,
-                        mapto: base_rule.mapto.clone(),
-                    })
-                }
-            }
-
             PatternInternal::Group(group) => {
                 debug_assert!(group.len() > 0);
 
@@ -701,7 +596,6 @@ impl Pattern {
                                 tokens,
                                 reduce_action: None,
                                 separator_location: Location::CallSite,
-                                lookaheads: None,
                                 prec: None,
                                 dprec: None,
                                 is_used: true,
@@ -717,7 +611,6 @@ impl Pattern {
                                 tokens,
                                 reduce_action: Some(ReduceAction::Identity(unique_child_idx)),
                                 separator_location: Location::CallSite,
-                                lookaheads: None,
                                 prec: None,
                                 dprec: None,
                                 is_used: true,
@@ -742,7 +635,6 @@ impl Pattern {
                                 tokens,
                                 reduce_action: Some(ReduceAction::new_custom(initializer)),
                                 separator_location: Location::CallSite,
-                                lookaheads: None,
                                 prec: None,
                                 dprec: None,
                                 is_used: true,
@@ -826,7 +718,6 @@ impl Pattern {
                         .collect(),
                     reduce_action: None,
                     separator_location: Location::CallSite,
-                    lookaheads: None,
                     prec: None,
                     dprec: None,
                     is_used: true,
@@ -889,7 +780,6 @@ impl Pattern {
                         .collect(),
                     reduce_action: None,
                     separator_location: Location::CallSite,
-                    lookaheads: None,
                     prec: None,
                     dprec: None,
                     is_used: true,
@@ -940,7 +830,6 @@ impl Pattern {
                             { vec![__token0] }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -979,7 +868,6 @@ impl Pattern {
                             }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -1016,7 +904,6 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -1044,7 +931,6 @@ impl Pattern {
                         ],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -1102,7 +988,6 @@ impl Pattern {
                         }],
                         reduce_action: Some(ReduceAction::Identity(0)),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -1113,7 +998,6 @@ impl Pattern {
                             { vec![] }
                         })),
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -1153,7 +1037,6 @@ impl Pattern {
                         }],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
@@ -1162,7 +1045,6 @@ impl Pattern {
                         tokens: vec![],
                         reduce_action: None,
                         separator_location: Location::CallSite,
-                        lookaheads: None,
                         prec: None,
                         dprec: None,
                         is_used: true,
