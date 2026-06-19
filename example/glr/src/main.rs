@@ -18,7 +18,7 @@ fn main() {
         context.debug_check();
     }
     let result = match context.accept() {
-        Ok(mut results) => results.next().unwrap().0,
+        Ok((result, _)) => result,
         Err(e) => {
             println!("Error: {}", e);
             return;
@@ -41,7 +41,7 @@ fn main() {
         }
     }
 
-    for (result, _) in context.accept().unwrap() {
+    for (result, _) in context.accept_all().unwrap() {
         println!("Result: {}", result);
     }
 
@@ -69,7 +69,7 @@ fn test_parser() {
     let answer = 1 + 2 * 3 * 4 + 5 * 6 + 7;
 
     let mut results = context
-        .accept()
+        .accept_all()
         .unwrap()
         .map(|(result, _)| result)
         .collect::<Vec<_>>();
@@ -104,7 +104,7 @@ mod userdata_branch_tests {
         let mut context = SContext::new(Vec::new());
         context.feed('a').unwrap();
 
-        let mut results = context.accept().unwrap().collect::<Vec<_>>();
+        let mut results = context.accept_all().unwrap().collect::<Vec<_>>();
         results.sort_by_key(|(value, _)| *value);
 
         assert_eq!(results.len(), 2);

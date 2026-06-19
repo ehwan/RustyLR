@@ -186,7 +186,7 @@ impl Grammar {
         }
 
         let span_manager = context.userdata().span_manager.clone();
-        let (_, grammar_args) = match context.accept_one() {
+        let (_, grammar_args) = match context.accept() {
             Ok(result) => result,
             Err(err) => {
                 let message = err.to_string();

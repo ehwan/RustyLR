@@ -93,7 +93,7 @@ E(i32)
 
 ## Parsing with the GLR Parser
 
-Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it. The GLR parser shares a similar interface to the deterministic parser, but instead of producing a single result, its `accept()` method returns an iterator over all successful `(parse_result, userdata)` pairs. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
+Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it. The GLR parser shares a similar interface to the deterministic parser: `accept()` returns the first successful `(parse_result, userdata)` pair, while `accept_all()` returns an iterator over all successful pairs. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
 
 ```rust
 // Include the generated parser module
@@ -121,7 +121,7 @@ fn main() {
     }
 
     // Retrieve all valid parse tree results
-    match context.accept() {
+    match context.accept_all() {
         Ok(results) => {
             for (result, userdata) in results {
                 println!("Parse tree result: {:?}, userdata: {:?}", result, userdata);
@@ -138,4 +138,5 @@ fn main() {
 - **`EContext::new(userdata)`**: Initializes a new GLR state context with initial user data. Use `EContext::with_default_userdata()` when `UserData: Default`.
 - **`context.feed(token)`**: Feeds a token into all active parsing stacks.
 - **`context.feed_location(token, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
-- **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches. When the GLR parser branches, each branch receives its own cloned user data.
+- **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns the first successful `(parse_result, userdata)` pair.
+- **`context.accept_all()`**: Finalizes parsing and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches. When the GLR parser branches, each branch receives its own cloned user data.

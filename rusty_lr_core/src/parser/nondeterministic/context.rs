@@ -125,24 +125,28 @@ impl<
         Self::new(Default::default())
     }
 
-    /// Borrow the user data for the only active path.
+    /// Borrow the user data for the first active path.
     pub fn userdata(&self) -> &Data::UserData {
-        assert_eq!(
-            self.current_userdatas.len(),
-            1,
-            "userdata() requires exactly one active GLR path"
-        );
-        &self.current_userdatas[0]
+        self.current_userdatas
+            .first()
+            .expect("userdata() requires at least one active GLR path")
     }
 
-    /// Mutably borrow the user data for the only active path.
+    /// Borrow the user data for every active path.
+    pub fn userdata_all(&self) -> impl Iterator<Item = &Data::UserData> {
+        self.current_userdatas.iter()
+    }
+
+    /// Mutably borrow the user data for the first active path.
     pub fn userdata_mut(&mut self) -> &mut Data::UserData {
-        assert_eq!(
-            self.current_userdatas.len(),
-            1,
-            "userdata_mut() requires exactly one active GLR path"
-        );
-        &mut self.current_userdatas[0]
+        self.current_userdatas
+            .first_mut()
+            .expect("userdata_mut() requires at least one active GLR path")
+    }
+
+    /// Mutably borrow the user data for every active path.
+    pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
+        self.current_userdatas.iter_mut()
     }
 
     pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
@@ -565,8 +569,25 @@ impl<
         self.current_nodes.is_empty()
     }
 
-    /// End this context and return iterator of the start value and user data from each successful path.
+    /// End this context and return the first successful start symbol and user data pair.
     pub fn accept(
+        self,
+    ) -> Result<
+        (Data::StartType, Data::UserData),
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
+    where
+        Data: Clone,
+        Data::UserData: Clone,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
+    {
+        Ok(self.accept_all()?.next().unwrap())
+    }
+
+    /// End this context and return iterator of the start value and user data from each successful path.
+    pub fn accept_all(
         mut self,
     ) -> Result<
         impl Iterator<Item = (Data::StartType, Data::UserData)>,
@@ -595,22 +616,6 @@ impl<
                     userdata,
                 )
             }))
-    }
-    /// End this context and return the first successful start symbol and user data pair.
-    pub fn accept_one(
-        self,
-    ) -> Result<
-        (Data::StartType, Data::UserData),
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
-    >
-    where
-        Data: Clone,
-        Data::UserData: Clone,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
-    {
-        Ok(self.accept()?.next().unwrap())
     }
 
     /// For debugging.

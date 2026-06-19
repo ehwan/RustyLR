@@ -91,9 +91,19 @@ impl<
         &self.userdata
     }
 
+    /// Borrow the user data owned by this context as an iterator.
+    pub fn userdata_all(&self) -> impl Iterator<Item = &Data::UserData> {
+        std::iter::once(&self.userdata)
+    }
+
     /// Mutably borrow the user data owned by this context.
     pub fn userdata_mut(&mut self) -> &mut Data::UserData {
         &mut self.userdata
+    }
+
+    /// Mutably borrow the user data owned by this context as an iterator.
+    pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
+        std::iter::once(&mut self.userdata)
     }
 
     /// End this context and pop the value of the start symbol from the data stack.
@@ -114,11 +124,11 @@ impl<
         Ok((self.data_stack.pop_start().unwrap(), self.userdata))
     }
 
-    /// End this context and return the start symbol together with the final user data.
-    pub fn accept_one(
+    /// End this context and return an iterator with the start symbol and final user data.
+    pub fn accept_all(
         self,
     ) -> Result<
-        (Data::StartType, Data::UserData),
+        impl Iterator<Item = (Data::StartType, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -126,7 +136,7 @@ impl<
         Data::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        self.accept()
+        Ok(std::iter::once(self.accept()?))
     }
 
     /// Check if current context can be terminated and get the value of the start symbol.
