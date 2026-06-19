@@ -1,5 +1,4 @@
 use std::collections::BTreeSet;
-use std::hash::Hash;
 
 use super::ParseError;
 use crate::Location;
@@ -752,102 +751,6 @@ impl<
             userdata,
             eof_location,
         )
-    }
-
-    /// Get backtrace information for current state.
-    /// What current state is trying to parse, and where it comes from.
-    pub fn backtrace(&self) -> crate::Backtrace<P::TermClass, P::NonTerm>
-    where
-        P::NonTerm: Hash + Eq,
-    {
-        use crate::hash::HashSet;
-        use crate::rule::ShiftedRule;
-        use crate::rule::ShiftedRuleRef;
-        use crate::Backtrace;
-        use crate::Token;
-        use std::collections::BTreeSet;
-
-        if self.state_stack.len() == 1 {
-            let state0 = &P::get_states()[0];
-            let mut rules = Vec::with_capacity(state0.get_rules().len());
-            for rule in state0.get_rules().iter() {
-                rules.push(ShiftedRule {
-                    rule: P::get_rules()[rule.rule].clone(),
-                    shifted: rule.shifted,
-                });
-            }
-
-            return Backtrace {
-                traces: vec![rules],
-            };
-        }
-
-        let mut traces = Vec::new();
-        let mut current_rules: BTreeSet<_> = P::get_states()
-            [self.state_stack.last().unwrap().into_usize()]
-        .get_rules()
-        .iter()
-        // .filter(|rule| rule.shifted > 0)
-        .copied()
-        .collect();
-        let mut next_rules = BTreeSet::new();
-        traces.push(current_rules.clone());
-        let mut zero_shifted_rules: HashSet<Data::NonTerm> = Default::default();
-
-        for state_idx in self.state_stack.iter().rev().skip(1).copied() {
-            zero_shifted_rules.clear();
-            next_rules.clear();
-            for rule in current_rules.iter() {
-                if rule.shifted > 0 {
-                    next_rules.insert(ShiftedRuleRef {
-                        rule: rule.rule,
-                        shifted: rule.shifted - 1,
-                    });
-                    if rule.shifted == 1 {
-                        zero_shifted_rules.insert(P::get_rules()[rule.rule].name.clone());
-                    }
-                }
-            }
-            std::mem::swap(&mut current_rules, &mut next_rules);
-            if zero_shifted_rules.is_empty() {
-                continue;
-            }
-
-            loop {
-                let len0 = current_rules.len();
-                for rule in P::get_states()[state_idx.into_usize()].get_rules().iter() {
-                    let prod_rule = &P::get_rules()[rule.rule];
-                    if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
-                        if zero_shifted_rules.contains(nonterm) {
-                            current_rules.insert(*rule);
-                            if rule.shifted == 0 {
-                                zero_shifted_rules.insert(prod_rule.name.clone());
-                            }
-                        }
-                    }
-                }
-                if len0 == current_rules.len() {
-                    break;
-                }
-            }
-
-            traces.push(current_rules.clone());
-        }
-
-        Backtrace {
-            traces: traces
-                .into_iter()
-                .map(|rules| {
-                    rules
-                        .into_iter()
-                        .map(|rule| ShiftedRule {
-                            rule: P::get_rules()[rule.rule].clone(),
-                            shifted: rule.shifted,
-                        })
-                        .collect()
-                })
-                .collect(),
-        }
     }
 }
 

@@ -28,9 +28,6 @@ pub(crate) mod token;
 pub use token::TerminalSymbol;
 pub use token::Token;
 
-pub(crate) mod backtrace;
-pub use backtrace::Backtrace;
-
 /// Default error type for reduce action
 #[derive(Debug, Default)]
 pub struct DefaultReduceActionError;
