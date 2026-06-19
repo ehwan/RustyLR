@@ -64,6 +64,7 @@ pub type EParseError = ::rusty_lr::parser::deterministic::ParseError<
     std::cmp::PartialOrd,
     std::cmp::Ord
 )]
+#[repr(usize)]
 pub enum ETerminalClasses {
     TermClass0,
     TermClass1,
@@ -76,6 +77,12 @@ pub enum ETerminalClasses {
     TermClass8,
     error,
     eof,
+}
+impl ETerminalClasses {
+    #[inline]
+    pub fn from_usize(value: usize) -> Self {
+        unsafe { ::std::mem::transmute(value) }
+    }
 }
 impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
     type Term = char;
@@ -147,6 +154,7 @@ impl std::fmt::Debug for ETerminalClasses {
     std::cmp::PartialOrd,
     std::cmp::Ord
 )]
+#[repr(usize)]
 pub enum ENonTerminals {
     Digit,
     Number,
@@ -157,6 +165,12 @@ pub enum ENonTerminals {
     __LiteralChar0Star7,
     _DigitPlus9,
     Augmented,
+}
+impl ENonTerminals {
+    #[inline]
+    pub fn from_usize(value: usize) -> Self {
+        unsafe { ::std::mem::transmute(value) }
+    }
 }
 impl std::fmt::Display for ENonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -849,540 +863,250 @@ impl ::rusty_lr::parser::Parser for EParser {
         static RULES: std::sync::OnceLock<Vec<ERule>> = std::sync::OnceLock::new();
         RULES
             .get_or_init(|| {
-                vec![
-                    ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Digit, rule
-                    : vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass5),],
-                    precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::Digit, rule :
-                    vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass6),],
-                    precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::Number, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::_DigitPlus9),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),],
-                    precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::P, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::Number),], precedence
-                    : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::P, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),
-                    ::rusty_lr::Token::Term(ETerminalClasses::TermClass2),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::E),
-                    ::rusty_lr::Token::Term(ETerminalClasses::TermClass3),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),],
-                    precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::E, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::E),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::Op),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::E),], precedence :
-                    Some(::rusty_lr::rule::Precedence::Dynamic(1usize)), },
-                    ::rusty_lr::rule::ProductionRule { name : ENonTerminals::E, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Star7),
-                    ::rusty_lr::Token::Term(ETerminalClasses::TermClass4),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::E),], precedence :
-                    Some(::rusty_lr::rule::Precedence::Fixed(2usize)), },
-                    ::rusty_lr::rule::ProductionRule { name : ENonTerminals::E, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::P),], precedence :
-                    None, }, ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Op,
-                    rule : vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass8),],
-                    precedence : Some(::rusty_lr::rule::Precedence::Fixed(0usize)), },
-                    ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Op, rule :
-                    vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass7),],
-                    precedence : Some(::rusty_lr::rule::Precedence::Fixed(1usize)), },
-                    ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::__LiteralChar0Plus6, rule :
-                    vec![::rusty_lr::Token::Term(ETerminalClasses::TermClass0),],
-                    precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::__LiteralChar0Plus6, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Plus6),
-                    ::rusty_lr::Token::Term(ETerminalClasses::TermClass0),], precedence :
-                    None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::__LiteralChar0Star7, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::__LiteralChar0Plus6),],
-                    precedence : None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::__LiteralChar0Star7, rule : vec![], precedence : None,
-                    }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::_DigitPlus9, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::Digit),], precedence :
-                    None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::_DigitPlus9, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::_DigitPlus9),
-                    ::rusty_lr::Token::NonTerm(ENonTerminals::Digit),], precedence :
-                    None, }, ::rusty_lr::rule::ProductionRule { name :
-                    ENonTerminals::Augmented, rule :
-                    vec![::rusty_lr::Token::NonTerm(ENonTerminals::E),
-                    ::rusty_lr::Token::Term(ETerminalClasses::eof),], precedence : None,
-                    },
-                ]
+                static RULE_NAMES: &[u32] = &[
+                    0u32, 0u32, 1u32, 2u32, 2u32, 3u32, 3u32, 3u32, 4u32, 4u32, 5u32,
+                    5u32, 6u32, 6u32, 7u32, 7u32, 8u32,
+                ];
+                static RULE_PRECEDENCES: &[u32] = &[
+                    0u32, 0u32, 0u32, 0u32, 0u32, 6u32, 9u32, 0u32, 1u32, 5u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                ];
+                static RULE_TOKENS_DATA: &[u32] = &[
+                    10u32, 12u32, 13u32, 15u32, 13u32, 3u32, 13u32, 4u32, 7u32, 6u32,
+                    13u32, 7u32, 9u32, 7u32, 13u32, 8u32, 7u32, 5u32, 16u32, 14u32, 0u32,
+                    11u32, 0u32, 11u32, 1u32, 15u32, 1u32, 7u32, 20u32,
+                ];
+                static RULE_TOKENS_OFFSETS: &[u32] = &[
+                    0u32, 1u32, 2u32, 5u32, 6u32, 11u32, 14u32, 17u32, 18u32, 19u32,
+                    20u32, 21u32, 23u32, 24u32, 24u32, 25u32, 27u32, 29u32,
+                ];
+                let num_rules = 17usize;
+                let mut rules = Vec::with_capacity(num_rules);
+                for i in 0..num_rules {
+                    let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let prec_val = RULE_PRECEDENCES[i];
+                    let precedence = match prec_val & 3 {
+                        0 => None,
+                        1 => {
+                            Some(
+                                ::rusty_lr::rule::Precedence::Fixed(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        2 => {
+                            Some(
+                                ::rusty_lr::rule::Precedence::Dynamic(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        _ => unreachable!(),
+                    };
+                    let token_start = RULE_TOKENS_OFFSETS[i] as usize;
+                    let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
+                    let mut rule = Vec::with_capacity(token_end - token_start);
+                    for idx in token_start..token_end {
+                        let val = RULE_TOKENS_DATA[idx];
+                        let is_nonterm = (val & 1) != 0;
+                        let sym_idx = (val >> 1) as usize;
+                        let token = if is_nonterm {
+                            ::rusty_lr::Token::NonTerm(
+                                ENonTerminals::from_usize(sym_idx),
+                            )
+                        } else {
+                            ::rusty_lr::Token::Term(
+                                ETerminalClasses::from_usize(sym_idx),
+                            )
+                        };
+                        rule.push(token);
+                    }
+                    rules
+                        .push(::rusty_lr::rule::ProductionRule {
+                            name,
+                            rule,
+                            precedence,
+                        });
+                }
+                rules
             })
     }
     fn get_states() -> &'static [EState] {
         static STATES: std::sync::OnceLock<Vec<EState>> = std::sync::OnceLock::new();
         STATES
             .get_or_init(|| {
-                let states: Vec<
-                    ::rusty_lr::parser::state::IntermediateState<
-                        ETerminalClasses,
-                        ENonTerminals,
-                        u8,
-                        u8,
-                    >,
-                > = vec![
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Number,
-                    ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
-                    (ENonTerminals::P, ::rusty_lr::parser::state::ShiftTarget::new(2,
-                    true)), (ENonTerminals::E,
-                    ::rusty_lr::parser::state::ShiftTarget::new(2, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map :
-                    vec![(ETerminalClasses::TermClass2, vec![13]),
-                    (ETerminalClasses::TermClass4, vec![13]),
-                    (ETerminalClasses::TermClass5, vec![13]),
-                    (ETerminalClasses::TermClass6, vec![13]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 5 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 7 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 10
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 11 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 16
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass3, vec![3]),
-                    (ETerminalClasses::TermClass7, vec![3]),
-                    (ETerminalClasses::TermClass8, vec![3]), (ETerminalClasses::eof,
-                    vec![3]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    3 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
-                    (ETerminalClasses::TermClass8,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
-                    (ETerminalClasses::eof,
-                    ::rusty_lr::parser::state::ShiftTarget::new(3, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Op,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),], reduce_map :
-                    Default::default(), ruleset : vec![::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 5 as usize, shifted : 1 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 8 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 9 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 16
-                    as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    Default::default(), ruleset : vec![::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 16 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Number,
-                    ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
-                    (ENonTerminals::P, ::rusty_lr::parser::state::ShiftTarget::new(5,
-                    true)), (ENonTerminals::E,
-                    ::rusty_lr::parser::state::ShiftTarget::new(5, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map :
-                    vec![(ETerminalClasses::TermClass2, vec![13]),
-                    (ETerminalClasses::TermClass4, vec![13]),
-                    (ETerminalClasses::TermClass5, vec![13]),
-                    (ETerminalClasses::TermClass6, vec![13]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 5 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize, shifted : 2 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 7
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 11 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),
-                    (ETerminalClasses::TermClass8,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Op,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),], reduce_map :
-                    vec![(ETerminalClasses::TermClass7, vec![5]),
-                    (ETerminalClasses::TermClass8, vec![5]), (ETerminalClasses::eof,
-                    vec![5]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    5 as usize, shifted : 1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 5 as usize, shifted : 3 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 8 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 9 as usize,
-                    shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(7, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass2, vec![12]),
-                    (ETerminalClasses::TermClass3, vec![12]),
-                    (ETerminalClasses::TermClass4, vec![12]),
-                    (ETerminalClasses::TermClass5, vec![12]),
-                    (ETerminalClasses::TermClass6, vec![12]),
-                    (ETerminalClasses::TermClass7, vec![12]),
-                    (ETerminalClasses::TermClass8, vec![12]), (ETerminalClasses::eof,
-                    vec![12]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    11 as usize, shifted : 1 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize, shifted : 1 as
-                    usize, },], can_accept_error : ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass0, vec![11]),
-                    (ETerminalClasses::TermClass2, vec![11]),
-                    (ETerminalClasses::TermClass3, vec![11]),
-                    (ETerminalClasses::TermClass4, vec![11]),
-                    (ETerminalClasses::TermClass5, vec![11]),
-                    (ETerminalClasses::TermClass6, vec![11]),
-                    (ETerminalClasses::TermClass7, vec![11]),
-                    (ETerminalClasses::TermClass8, vec![11]), (ETerminalClasses::eof,
-                    vec![11]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    11 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass2,
-                    ::rusty_lr::parser::state::ShiftTarget::new(9, false)),
-                    (ETerminalClasses::TermClass4,
-                    ::rusty_lr::parser::state::ShiftTarget::new(23, false)),
-                    (ETerminalClasses::TermClass5,
-                    ::rusty_lr::parser::state::ShiftTarget::new(18, false)),
-                    (ETerminalClasses::TermClass6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(19, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Digit,
-                    ::rusty_lr::parser::state::ShiftTarget::new(19, true)),
-                    (ENonTerminals::_DigitPlus9,
-                    ::rusty_lr::parser::state::ShiftTarget::new(20, true)),], reduce_map
-                    : Default::default(), ruleset : vec![::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 0 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 1 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 6 as usize, shifted : 1 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 14 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 15 as usize,
-                    shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Number,
-                    ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
-                    (ENonTerminals::P, ::rusty_lr::parser::state::ShiftTarget::new(10,
-                    true)), (ENonTerminals::E,
-                    ::rusty_lr::parser::state::ShiftTarget::new(10, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass2, vec![13]),
-                    (ETerminalClasses::TermClass4, vec![13]),
-                    (ETerminalClasses::TermClass5, vec![13]),
-                    (ETerminalClasses::TermClass6, vec![13]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 4 as usize, shifted : 2 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 7
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 11 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass3,
-                    ::rusty_lr::parser::state::ShiftTarget::new(11, false)),
-                    (ETerminalClasses::TermClass7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),
-                    (ETerminalClasses::TermClass8,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Op,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),], reduce_map
-                    : Default::default(), ruleset : vec![::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 4 as usize, shifted : 3 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize, shifted : 1 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 8 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 9
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(12, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass3, vec![13]),
-                    (ETerminalClasses::TermClass7, vec![13]),
-                    (ETerminalClasses::TermClass8, vec![13]), (ETerminalClasses::eof,
-                    vec![13]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    4 as usize, shifted : 4 as usize, }, ::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 11 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass3, vec![4]),
-                    (ETerminalClasses::TermClass7, vec![4]),
-                    (ETerminalClasses::TermClass8, vec![4]), (ETerminalClasses::eof,
-                    vec![4]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    4 as usize, shifted : 5 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Number,
-                    ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
-                    (ENonTerminals::P, ::rusty_lr::parser::state::ShiftTarget::new(14,
-                    true)), (ENonTerminals::E,
-                    ::rusty_lr::parser::state::ShiftTarget::new(14, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass2, vec![13]),
-                    (ETerminalClasses::TermClass4, vec![13]),
-                    (ETerminalClasses::TermClass5, vec![13]),
-                    (ETerminalClasses::TermClass6, vec![13]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 5 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize, shifted : 2 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 7
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 11 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),
-                    (ETerminalClasses::TermClass8,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Op,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass3, vec![5]),
-                    (ETerminalClasses::TermClass7, vec![5]),
-                    (ETerminalClasses::TermClass8, vec![5]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize, shifted :
-                    1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 8
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 9 as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass2,
-                    ::rusty_lr::parser::state::ShiftTarget::new(9, false)),
-                    (ETerminalClasses::TermClass4,
-                    ::rusty_lr::parser::state::ShiftTarget::new(16, false)),
-                    (ETerminalClasses::TermClass5,
-                    ::rusty_lr::parser::state::ShiftTarget::new(18, false)),
-                    (ETerminalClasses::TermClass6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(19, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Digit,
-                    ::rusty_lr::parser::state::ShiftTarget::new(19, true)),
-                    (ENonTerminals::_DigitPlus9,
-                    ::rusty_lr::parser::state::ShiftTarget::new(20, true)),], reduce_map
-                    : Default::default(), ruleset : vec![::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 0 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 1 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 6 as usize, shifted : 1 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 14 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 15 as usize,
-                    shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Number,
-                    ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
-                    (ENonTerminals::P, ::rusty_lr::parser::state::ShiftTarget::new(17,
-                    true)), (ENonTerminals::E,
-                    ::rusty_lr::parser::state::ShiftTarget::new(17, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(15, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass2, vec![13]),
-                    (ETerminalClasses::TermClass4, vec![13]),
-                    (ETerminalClasses::TermClass5, vec![13]),
-                    (ETerminalClasses::TermClass6, vec![13]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 5 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 7
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 11 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![(ENonTerminals::Op,
-                    ::rusty_lr::parser::state::ShiftTarget::new(13, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass3, vec![6]),
-                    (ETerminalClasses::TermClass7, vec![6]),
-                    (ETerminalClasses::TermClass8, vec![6]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 5 as usize, shifted :
-                    1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass0, vec![0]),
-                    (ETerminalClasses::TermClass3, vec![0]),
-                    (ETerminalClasses::TermClass5, vec![0]),
-                    (ETerminalClasses::TermClass6, vec![0]),
-                    (ETerminalClasses::TermClass7, vec![0]),
-                    (ETerminalClasses::TermClass8, vec![0]), (ETerminalClasses::eof,
-                    vec![0]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    0 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass0, vec![14]),
-                    (ETerminalClasses::TermClass3, vec![14]),
-                    (ETerminalClasses::TermClass5, vec![14]),
-                    (ETerminalClasses::TermClass6, vec![14]),
-                    (ETerminalClasses::TermClass7, vec![14]),
-                    (ETerminalClasses::TermClass8, vec![14]), (ETerminalClasses::eof,
-                    vec![14]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    14 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),
-                    (ETerminalClasses::TermClass5,
-                    ::rusty_lr::parser::state::ShiftTarget::new(18, false)),
-                    (ETerminalClasses::TermClass6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(21, true)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Digit,
-                    ::rusty_lr::parser::state::ShiftTarget::new(21, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(22, true)),], reduce_map
-                    : vec![(ETerminalClasses::TermClass3, vec![13]),
-                    (ETerminalClasses::TermClass7, vec![13]),
-                    (ETerminalClasses::TermClass8, vec![13]), (ETerminalClasses::eof,
-                    vec![13]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    0 as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 1 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted : 2 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 10 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 11
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 12 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 13 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 15 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass0, vec![15]),
-                    (ETerminalClasses::TermClass3, vec![15]),
-                    (ETerminalClasses::TermClass5, vec![15]),
-                    (ETerminalClasses::TermClass6, vec![15]),
-                    (ETerminalClasses::TermClass7, vec![15]),
-                    (ETerminalClasses::TermClass8, vec![15]), (ETerminalClasses::eof,
-                    vec![15]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    15 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(ETerminalClasses::TermClass3, vec![2]),
-                    (ETerminalClasses::TermClass7, vec![2]),
-                    (ETerminalClasses::TermClass8, vec![2]), (ETerminalClasses::eof,
-                    vec![2]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    2 as usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![(ETerminalClasses::TermClass0,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, false)),],
-                    shift_goto_map_nonterm : vec![(ENonTerminals::Number,
-                    ::rusty_lr::parser::state::ShiftTarget::new(1, true)),
-                    (ENonTerminals::P, ::rusty_lr::parser::state::ShiftTarget::new(24,
-                    true)), (ENonTerminals::E,
-                    ::rusty_lr::parser::state::ShiftTarget::new(24, true)),
-                    (ENonTerminals::__LiteralChar0Plus6,
-                    ::rusty_lr::parser::state::ShiftTarget::new(6, true)),
-                    (ENonTerminals::__LiteralChar0Star7,
-                    ::rusty_lr::parser::state::ShiftTarget::new(8, true)),], reduce_map :
-                    vec![(ETerminalClasses::TermClass2, vec![13]),
-                    (ETerminalClasses::TermClass4, vec![13]),
-                    (ETerminalClasses::TermClass5, vec![13]),
-                    (ETerminalClasses::TermClass6, vec![13]),], ruleset :
-                    vec![::rusty_lr::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 4
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 5 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 7
-                    as usize, shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef {
-                    rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr::rule::ShiftedRuleRef { rule : 11 as usize, shifted : 0 as
-                    usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr::rule::ShiftedRuleRef { rule : 13
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
-                    ::rusty_lr::parser::state::IntermediateState { shift_goto_map_term :
-                    vec![], shift_goto_map_nonterm : vec![(ENonTerminals::Op,
-                    ::rusty_lr::parser::state::ShiftTarget::new(4, true)),], reduce_map :
-                    vec![(ETerminalClasses::TermClass7, vec![6]),
-                    (ETerminalClasses::TermClass8, vec![6]), (ETerminalClasses::eof,
-                    vec![6]),], ruleset : vec![::rusty_lr::rule::ShiftedRuleRef { rule :
-                    5 as usize, shifted : 1 as usize, }, ::rusty_lr::rule::ShiftedRuleRef
-                    { rule : 6 as usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr::TriState::False, },
+                static SHIFT_TERM_DATA: &[u32] = &[
+                    196608u32, 2147614727u32, 2147614728u32, 2147581962u32, 196608u32,
+                    2147614727u32, 2147614728u32, 229376u32, 294914u32, 753668u32,
+                    589829u32, 2148106246u32, 196608u32, 360451u32, 2147909639u32,
+                    2147909640u32, 196608u32, 196608u32, 2147909639u32, 2147909640u32,
+                    294914u32, 524292u32, 589829u32, 2148106246u32, 196608u32, 196608u32,
+                    589829u32, 2148171782u32, 196608u32,
                 ];
-                states.into_iter().map(|state| state.into()).collect()
+                static SHIFT_TERM_OFFSETS: &[u32] = &[
+                    0u32, 1u32, 1u32, 4u32, 4u32, 5u32, 7u32, 8u32, 8u32, 12u32, 13u32,
+                    16u32, 17u32, 17u32, 18u32, 20u32, 24u32, 25u32, 25u32, 25u32, 25u32,
+                    28u32, 28u32, 28u32, 29u32, 29u32,
+                ];
+                static SHIFT_NONTERM_DATA: &[u32] = &[
+                    2147516417u32, 2147549186u32, 2147549187u32, 2147680261u32,
+                    2147745798u32, 2147614724u32, 2147516417u32, 2147647490u32,
+                    2147647491u32, 2147680261u32, 2147745798u32, 2147614724u32,
+                    2148106240u32, 2148139015u32, 2147516417u32, 2147811330u32,
+                    2147811331u32, 2147680261u32, 2147975174u32, 2147909636u32,
+                    2147680261u32, 2147876870u32, 2147516417u32, 2147942402u32,
+                    2147942403u32, 2147680261u32, 2147975174u32, 2147909636u32,
+                    2148106240u32, 2148139015u32, 2147516417u32, 2148040706u32,
+                    2148040707u32, 2147680261u32, 2147975174u32, 2147909636u32,
+                    2148171776u32, 2147680261u32, 2148204550u32, 2147516417u32,
+                    2148270082u32, 2148270083u32, 2147680261u32, 2147745798u32,
+                    2147614724u32,
+                ];
+                static SHIFT_NONTERM_OFFSETS: &[u32] = &[
+                    0u32, 5u32, 5u32, 6u32, 6u32, 11u32, 12u32, 12u32, 12u32, 14u32,
+                    19u32, 20u32, 22u32, 22u32, 27u32, 28u32, 30u32, 35u32, 36u32, 36u32,
+                    36u32, 39u32, 39u32, 39u32, 44u32, 45u32,
+                ];
+                static REDUCE_DATA: &[u32] = &[
+                    2u32, 1u32, 13u32, 4u32, 1u32, 13u32, 5u32, 1u32, 13u32, 6u32, 1u32,
+                    13u32, 3u32, 1u32, 3u32, 7u32, 1u32, 3u32, 8u32, 1u32, 3u32, 10u32,
+                    1u32, 3u32, 2u32, 1u32, 13u32, 4u32, 1u32, 13u32, 5u32, 1u32, 13u32,
+                    6u32, 1u32, 13u32, 7u32, 1u32, 5u32, 8u32, 1u32, 5u32, 10u32, 1u32,
+                    5u32, 2u32, 1u32, 12u32, 3u32, 1u32, 12u32, 4u32, 1u32, 12u32, 5u32,
+                    1u32, 12u32, 6u32, 1u32, 12u32, 7u32, 1u32, 12u32, 8u32, 1u32, 12u32,
+                    10u32, 1u32, 12u32, 0u32, 1u32, 11u32, 2u32, 1u32, 11u32, 3u32, 1u32,
+                    11u32, 4u32, 1u32, 11u32, 5u32, 1u32, 11u32, 6u32, 1u32, 11u32, 7u32,
+                    1u32, 11u32, 8u32, 1u32, 11u32, 10u32, 1u32, 11u32, 2u32, 1u32,
+                    13u32, 4u32, 1u32, 13u32, 5u32, 1u32, 13u32, 6u32, 1u32, 13u32, 3u32,
+                    1u32, 13u32, 7u32, 1u32, 13u32, 8u32, 1u32, 13u32, 10u32, 1u32,
+                    13u32, 3u32, 1u32, 4u32, 7u32, 1u32, 4u32, 8u32, 1u32, 4u32, 10u32,
+                    1u32, 4u32, 2u32, 1u32, 13u32, 4u32, 1u32, 13u32, 5u32, 1u32, 13u32,
+                    6u32, 1u32, 13u32, 3u32, 1u32, 5u32, 7u32, 1u32, 5u32, 8u32, 1u32,
+                    5u32, 2u32, 1u32, 13u32, 4u32, 1u32, 13u32, 5u32, 1u32, 13u32, 6u32,
+                    1u32, 13u32, 3u32, 1u32, 6u32, 7u32, 1u32, 6u32, 8u32, 1u32, 6u32,
+                    0u32, 1u32, 0u32, 3u32, 1u32, 0u32, 5u32, 1u32, 0u32, 6u32, 1u32,
+                    0u32, 7u32, 1u32, 0u32, 8u32, 1u32, 0u32, 10u32, 1u32, 0u32, 0u32,
+                    1u32, 14u32, 3u32, 1u32, 14u32, 5u32, 1u32, 14u32, 6u32, 1u32, 14u32,
+                    7u32, 1u32, 14u32, 8u32, 1u32, 14u32, 10u32, 1u32, 14u32, 3u32, 1u32,
+                    13u32, 7u32, 1u32, 13u32, 8u32, 1u32, 13u32, 10u32, 1u32, 13u32,
+                    0u32, 1u32, 15u32, 3u32, 1u32, 15u32, 5u32, 1u32, 15u32, 6u32, 1u32,
+                    15u32, 7u32, 1u32, 15u32, 8u32, 1u32, 15u32, 10u32, 1u32, 15u32,
+                    3u32, 1u32, 2u32, 7u32, 1u32, 2u32, 8u32, 1u32, 2u32, 10u32, 1u32,
+                    2u32, 2u32, 1u32, 13u32, 4u32, 1u32, 13u32, 5u32, 1u32, 13u32, 6u32,
+                    1u32, 13u32, 7u32, 1u32, 6u32, 8u32, 1u32, 6u32, 10u32, 1u32, 6u32,
+                ];
+                static REDUCE_OFFSETS: &[u32] = &[
+                    0u32, 12u32, 24u32, 24u32, 24u32, 36u32, 45u32, 69u32, 96u32, 96u32,
+                    108u32, 108u32, 120u32, 132u32, 144u32, 153u32, 153u32, 165u32,
+                    174u32, 195u32, 216u32, 228u32, 249u32, 261u32, 273u32, 282u32,
+                ];
+                static RULESET_DATA: &[u32] = &[
+                    2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 10u32, 11u32, 12u32, 13u32,
+                    16u32, 65539u32, 65541u32, 8u32, 9u32, 65552u32, 131088u32, 2u32,
+                    3u32, 4u32, 5u32, 131077u32, 6u32, 7u32, 10u32, 11u32, 12u32, 13u32,
+                    65541u32, 196613u32, 8u32, 9u32, 65547u32, 65548u32, 131083u32, 0u32,
+                    1u32, 65538u32, 65540u32, 65542u32, 14u32, 15u32, 2u32, 3u32, 4u32,
+                    131076u32, 5u32, 6u32, 7u32, 10u32, 11u32, 12u32, 13u32, 196612u32,
+                    65541u32, 8u32, 9u32, 262148u32, 10u32, 11u32, 12u32, 13u32,
+                    327684u32, 2u32, 3u32, 4u32, 5u32, 131077u32, 6u32, 7u32, 10u32,
+                    11u32, 12u32, 13u32, 65541u32, 196613u32, 8u32, 9u32, 0u32, 1u32,
+                    65538u32, 65540u32, 65542u32, 14u32, 15u32, 2u32, 3u32, 4u32, 5u32,
+                    6u32, 131078u32, 7u32, 10u32, 11u32, 12u32, 13u32, 65541u32,
+                    196614u32, 65536u32, 65550u32, 0u32, 1u32, 131074u32, 10u32, 11u32,
+                    12u32, 13u32, 65551u32, 131087u32, 196610u32, 2u32, 3u32, 4u32, 5u32,
+                    6u32, 131078u32, 7u32, 10u32, 11u32, 12u32, 13u32, 65541u32,
+                    196614u32,
+                ];
+                static RULESET_OFFSETS: &[u32] = &[
+                    0u32, 11u32, 12u32, 16u32, 17u32, 28u32, 32u32, 34u32, 35u32, 42u32,
+                    53u32, 57u32, 62u32, 63u32, 74u32, 78u32, 85u32, 96u32, 98u32, 99u32,
+                    100u32, 108u32, 109u32, 110u32, 121u32, 123u32,
+                ];
+                static CAN_ACCEPT_ERROR: &[u8] = &[
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                ];
+                let num_states = 25usize;
+                let mut states = Vec::with_capacity(num_states);
+                for i in 0..num_states {
+                    let term_start = SHIFT_TERM_OFFSETS[i] as usize;
+                    let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
+                    let mut shift_goto_map_term = Vec::with_capacity(
+                        term_end - term_start,
+                    );
+                    for idx in term_start..term_end {
+                        let val = SHIFT_TERM_DATA[idx];
+                        let term_class = ETerminalClasses::from_usize(
+                            (val & 0x7fff) as usize,
+                        );
+                        let state = ((val >> 15) & 0xffff) as u8;
+                        let push = (val >> 31) != 0;
+                        shift_goto_map_term
+                            .push((
+                                term_class,
+                                ::rusty_lr::parser::state::ShiftTarget::new(state, push),
+                            ));
+                    }
+                    let nonterm_start = SHIFT_NONTERM_OFFSETS[i] as usize;
+                    let nonterm_end = SHIFT_NONTERM_OFFSETS[i + 1] as usize;
+                    let mut shift_goto_map_nonterm = Vec::with_capacity(
+                        nonterm_end - nonterm_start,
+                    );
+                    for idx in nonterm_start..nonterm_end {
+                        let val = SHIFT_NONTERM_DATA[idx];
+                        let nonterm = ENonTerminals::from_usize((val & 0x7fff) as usize);
+                        let state = ((val >> 15) & 0xffff) as u8;
+                        let push = (val >> 31) != 0;
+                        shift_goto_map_nonterm
+                            .push((
+                                nonterm,
+                                ::rusty_lr::parser::state::ShiftTarget::new(state, push),
+                            ));
+                    }
+                    let reduce_start = REDUCE_OFFSETS[i] as usize;
+                    let reduce_end = REDUCE_OFFSETS[i + 1] as usize;
+                    let mut reduce_map = Vec::new();
+                    let mut idx = reduce_start;
+                    while idx < reduce_end {
+                        let term_val = REDUCE_DATA[idx];
+                        let term_class = ETerminalClasses::from_usize(term_val as usize);
+                        let len = REDUCE_DATA[idx + 1] as usize;
+                        let mut rules = Vec::with_capacity(len);
+                        for r_idx in 0..len {
+                            rules.push(REDUCE_DATA[idx + 2 + r_idx] as u8);
+                        }
+                        reduce_map.push((term_class, rules));
+                        idx += 2 + len;
+                    }
+                    let ruleset_start = RULESET_OFFSETS[i] as usize;
+                    let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
+                    let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
+                    for idx in ruleset_start..ruleset_end {
+                        let val = RULESET_DATA[idx];
+                        let rule = (val & 0xffff) as usize;
+                        let shifted = (val >> 16) as usize;
+                        ruleset
+                            .push(::rusty_lr::rule::ShiftedRuleRef {
+                                rule,
+                                shifted,
+                            });
+                    }
+                    let can_accept_error = match CAN_ACCEPT_ERROR[i] {
+                        0 => ::rusty_lr::TriState::False,
+                        1 => ::rusty_lr::TriState::True,
+                        2 => ::rusty_lr::TriState::Maybe,
+                        _ => unreachable!(),
+                    };
+                    let intermediate = ::rusty_lr::parser::state::IntermediateState {
+                        shift_goto_map_term,
+                        shift_goto_map_nonterm,
+                        reduce_map,
+                        ruleset,
+                        can_accept_error,
+                    };
+                    states.push(intermediate.into());
+                }
+                states
             })
     }
 }

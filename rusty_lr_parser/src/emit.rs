@@ -362,10 +362,18 @@ impl Grammar {
             /// A enum that represents terminal classes
             #[allow(non_camel_case_types, dead_code)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            #[repr(usize)]
             pub enum #termclass_typename {
                 #(#class_variants),*,
                 #error_name,
                 #eof_name,
+            }
+
+            impl #termclass_typename {
+                #[inline]
+                pub fn from_usize(value: usize) -> Self {
+                    unsafe { ::std::mem::transmute(value) }
+                }
             }
 
             impl #module_prefix::parser::terminalclass::TerminalClass for #termclass_typename {
@@ -473,8 +481,16 @@ impl Grammar {
             /// An enum that represents non-terminal symbols
             #[allow(non_camel_case_types, dead_code)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            #[repr(usize)]
             pub enum #enum_typename {
                 #comma_separated_variants
+            }
+
+            impl #enum_typename {
+                #[inline]
+                pub fn from_usize(value: usize) -> Self {
+                    unsafe { ::std::mem::transmute(value) }
+                }
             }
             impl std::fmt::Display for #enum_typename {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -551,56 +567,6 @@ impl Grammar {
         use rusty_lr_core::rule::ReduceType;
         use rusty_lr_core::TerminalSymbol;
         use rusty_lr_core::Token;
-
-        let precedence_to_stream = |op: rusty_lr_core::rule::Precedence| -> TokenStream {
-            match op {
-                rusty_lr_core::rule::Precedence::Fixed(level) => {
-                    quote! { #module_prefix::rule::Precedence::Fixed(#level) }
-                }
-                rusty_lr_core::rule::Precedence::Dynamic(idx) => {
-                    quote! { #module_prefix::rule::Precedence::Dynamic(#idx) }
-                }
-            }
-        };
-        let nonterminals_token: Vec<_> = self
-            .nonterminals
-            .iter()
-            .map(|nonterm| {
-                let name = utils::ident_from_located(
-                    nonterm.name.value().as_str(),
-                    &nonterm.name.location(),
-                    &self.span_manager,
-                );
-                quote! {
-                    #nonterminals_enum_name::#name
-                }
-            })
-            .collect();
-        let token_to_stream = |token: Token<TerminalSymbol<usize>, usize>| -> TokenStream {
-            match token {
-                Token::Term(term) => {
-                    let term = match term {
-                        TerminalSymbol::Term(term) => {
-                            let var = &class_variants[term];
-                            quote! { #termclass_typename::#var }
-                        }
-                        TerminalSymbol::Error => {
-                            let error_name = format_ident!("{}", utils::ERROR_NAME);
-                            quote! { #termclass_typename::#error_name }
-                        }
-                        TerminalSymbol::Eof => {
-                            let eof_name = format_ident!("{}", utils::EOF_NAME);
-                            quote! { #termclass_typename::#eof_name }
-                        }
-                    };
-                    quote! { #module_prefix::Token::Term(#term) }
-                }
-                Token::NonTerm(nonterm) => {
-                    let nonterm = &nonterminals_token[nonterm];
-                    quote! { #module_prefix::Token::NonTerm(#nonterm) }
-                }
-            }
-        };
 
         // generate precedence level -> reduce type match stream
         // match level {
@@ -680,129 +646,196 @@ impl Grammar {
             quote! { usize }
         };
 
-        let mut production_rules_body_stream = TokenStream::new();
+        // ------------------
+        // Rules Serialization
+        // ------------------
+        let mut rule_names = Vec::new();
+        let mut rule_precedences = Vec::new();
+        let mut rule_tokens_data = Vec::new();
+        let mut rule_tokens_offsets = Vec::new();
+
+        rule_tokens_offsets.push(0);
+
         for rule in &self.builder.rules {
-            let mut tokens_vec_body_stream = TokenStream::new();
-            for &token in &rule.rule.rule {
-                let token_stream = token_to_stream(token);
-                tokens_vec_body_stream.extend(quote! {
-                    #token_stream,
-                });
-            }
-            let name = &nonterminals_token[rule.rule.name];
-            let precedence_stream = if let Some(precedence) = rule.rule.precedence {
-                let s = precedence_to_stream(precedence);
-                quote! { Some(#s) }
-            } else {
-                quote! { None }
-            };
+            assert!(
+                rule.rule.name < 32768,
+                "Non-terminal index {} exceeds 15-bit serialization limit (32768)",
+                rule.rule.name
+            );
+            rule_names.push(rule.rule.name as u32);
 
-            // lookaheads
-            production_rules_body_stream.extend(quote! {
-                #module_prefix::rule::ProductionRule{
-                    name: #name,
-                    rule: vec![ #tokens_vec_body_stream ],
-                    precedence: #precedence_stream,
-                },
-            });
-        }
-        let mut states_body_stream = TokenStream::new();
-        for state in &self.states {
-            let mut shift_term_body_stream = TokenStream::new();
-            for &(term, next_state) in &state.shift_goto_map_term {
-                let push = next_state.push;
-                let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
-                let term = match term {
-                    TerminalSymbol::Term(term) => {
-                        let var = &class_variants[term];
-                        quote! { #termclass_typename::#var }
+            let prec_val = if let Some(precedence) = rule.rule.precedence {
+                match precedence {
+                    rusty_lr_core::rule::Precedence::Fixed(level) => {
+                        assert!(
+                            level < (1 << 30),
+                            "Precedence level {} exceeds 30-bit limit",
+                            level
+                        );
+                        ((level as u32) << 2) | 1
                     }
-                    TerminalSymbol::Error => {
-                        let error_name = format_ident!("{}", utils::ERROR_NAME);
-                        quote! { #termclass_typename::#error_name }
+                    rusty_lr_core::rule::Precedence::Dynamic(idx) => {
+                        assert!(
+                            idx < (1 << 30),
+                            "Precedence dynamic token index {} exceeds 30-bit limit",
+                            idx
+                        );
+                        ((idx as u32) << 2) | 2
                     }
-                    TerminalSymbol::Eof => {
-                        let eof_name = format_ident!("{}", utils::EOF_NAME);
-                        quote! { #termclass_typename::#eof_name }
-                    }
-                };
-                shift_term_body_stream.extend(quote! {
-                    (#term, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
-                });
-            }
-
-            let mut shift_nonterm_body_stream = TokenStream::new();
-            for &(nonterm, next_state) in &state.shift_goto_map_nonterm {
-                let nonterm_stream = &nonterminals_token[nonterm];
-                let push = next_state.push;
-                let next_state = proc_macro2::Literal::usize_unsuffixed(next_state.state);
-                shift_nonterm_body_stream.extend(quote! {
-                        (#nonterm_stream, #module_prefix::parser::state::ShiftTarget::new(#next_state,#push)),
-                    });
-            }
-
-            let mut reduce_map_items = TokenStream::new();
-            for (term, rules) in &state.reduce_map {
-                let term_stream = match term {
-                    TerminalSymbol::Term(term) => {
-                        let var = &class_variants[*term];
-                        quote! { #termclass_typename::#var }
-                    }
-                    TerminalSymbol::Error => {
-                        let error_name = format_ident!("{}", utils::ERROR_NAME);
-                        quote! { #termclass_typename::#error_name }
-                    }
-                    TerminalSymbol::Eof => {
-                        let eof_name = format_ident!("{}", utils::EOF_NAME);
-                        quote! { #termclass_typename::#eof_name }
-                    }
-                };
-                let rules_it = rules
-                    .iter()
-                    .map(|&rule| proc_macro2::Literal::usize_unsuffixed(rule));
-                reduce_map_items.extend(quote! {
-                    (#term_stream, vec![#(#rules_it),*]),
-                });
-            }
-            let reduce_map_construct_stream = if reduce_map_items.is_empty() {
-                quote! { Default::default() }
-            } else {
-                quote! {
-                    vec![#reduce_map_items]
                 }
+            } else {
+                0
             };
+            rule_precedences.push(prec_val);
 
-            let mut ruleset_items = TokenStream::new();
-            for &rule in &state.ruleset {
-                let rule_lit = proc_macro2::Literal::usize_unsuffixed(rule.rule);
-                let shifted_lit = proc_macro2::Literal::usize_unsuffixed(rule.shifted);
-                ruleset_items.extend(quote! {
-                    #module_prefix::rule::ShiftedRuleRef {
-                        rule: #rule_lit as usize,
-                        shifted: #shifted_lit as usize,
-                    },
-                });
+            for &token in &rule.rule.rule {
+                let (sym_idx, is_nonterm) = match token {
+                    Token::Term(term) => {
+                        let idx = match term {
+                            TerminalSymbol::Term(t) => t,
+                            TerminalSymbol::Error => self.terminal_classes.len(),
+                            TerminalSymbol::Eof => self.terminal_classes.len() + 1,
+                        };
+                        assert!(
+                            idx < 32768,
+                            "Terminal class index {} exceeds 15-bit limit (32768)",
+                            idx
+                        );
+                        (idx, false)
+                    }
+                    Token::NonTerm(nonterm) => {
+                        assert!(
+                            nonterm < 32768,
+                            "Non-terminal index {} exceeds 15-bit limit (32768)",
+                            nonterm
+                        );
+                        (nonterm, true)
+                    }
+                };
+                let val = ((sym_idx as u32) << 1) | (is_nonterm as u32);
+                rule_tokens_data.push(val);
             }
-
-            let can_accept_error = match state.can_accept_error {
-                rusty_lr_core::TriState::False => quote! { #module_prefix::TriState::False },
-                rusty_lr_core::TriState::True => quote! { #module_prefix::TriState::True },
-                rusty_lr_core::TriState::Maybe => quote! { #module_prefix::TriState::Maybe },
-            };
-
-            states_body_stream.extend(quote! {
-                #module_prefix::parser::state::IntermediateState {
-                    shift_goto_map_term: vec![#shift_term_body_stream],
-                    shift_goto_map_nonterm: vec![#shift_nonterm_body_stream],
-                    reduce_map: #reduce_map_construct_stream,
-                    ruleset: vec![
-                        #ruleset_items
-                    ],
-                    can_accept_error: #can_accept_error,
-                },
-            });
+            rule_tokens_offsets.push(rule_tokens_data.len() as u32);
         }
 
+        // ------------------
+        // States Serialization
+        // ------------------
+        let mut shift_term_data = Vec::new();
+        let mut shift_term_offsets = Vec::new();
+        let mut shift_nonterm_data = Vec::new();
+        let mut shift_nonterm_offsets = Vec::new();
+        let mut reduce_data = Vec::new();
+        let mut reduce_offsets = Vec::new();
+        let mut ruleset_data = Vec::new();
+        let mut ruleset_offsets = Vec::new();
+        let mut can_accept_error = Vec::new();
+
+        shift_term_offsets.push(0);
+        shift_nonterm_offsets.push(0);
+        reduce_offsets.push(0);
+        ruleset_offsets.push(0);
+
+        for state in &self.states {
+            // 1. shift_goto_map_term
+            for &(term, next_state) in &state.shift_goto_map_term {
+                let term_idx = match term {
+                    TerminalSymbol::Term(t) => t,
+                    TerminalSymbol::Error => self.terminal_classes.len(),
+                    TerminalSymbol::Eof => self.terminal_classes.len() + 1,
+                };
+                let state_idx = next_state.state;
+                let push = next_state.push;
+                assert!(
+                    term_idx < 32768,
+                    "Terminal class index {} exceeds 15-bit limit (32768)",
+                    term_idx
+                );
+                assert!(
+                    state_idx < 65536,
+                    "State index {} exceeds 16-bit limit (65536)",
+                    state_idx
+                );
+                let val = (term_idx as u32) | ((state_idx as u32) << 15) | ((push as u32) << 31);
+                shift_term_data.push(val);
+            }
+            shift_term_offsets.push(shift_term_data.len() as u32);
+
+            // 2. shift_goto_map_nonterm
+            for &(nonterm, next_state) in &state.shift_goto_map_nonterm {
+                let nonterm_idx = nonterm;
+                let state_idx = next_state.state;
+                let push = next_state.push;
+                assert!(
+                    nonterm_idx < 32768,
+                    "Non-terminal index {} exceeds 15-bit limit (32768)",
+                    nonterm_idx
+                );
+                assert!(
+                    state_idx < 65536,
+                    "State index {} exceeds 16-bit limit (65536)",
+                    state_idx
+                );
+                let val = (nonterm_idx as u32) | ((state_idx as u32) << 15) | ((push as u32) << 31);
+                shift_nonterm_data.push(val);
+            }
+            shift_nonterm_offsets.push(shift_nonterm_data.len() as u32);
+
+            // 3. reduce_map: Vec<(TermClass, Vec<RuleIndex>)>
+            for (term, rules) in &state.reduce_map {
+                let term_idx = match term {
+                    TerminalSymbol::Term(t) => *t,
+                    TerminalSymbol::Error => self.terminal_classes.len(),
+                    TerminalSymbol::Eof => self.terminal_classes.len() + 1,
+                };
+                assert!(
+                    term_idx < 32768,
+                    "Terminal class index {} exceeds 15-bit limit (32768)",
+                    term_idx
+                );
+                reduce_data.push(term_idx as u32);
+                reduce_data.push(rules.len() as u32);
+                for &rule in rules {
+                    assert!(
+                        rule < 65536,
+                        "Rule index {} exceeds 16-bit limit (65536)",
+                        rule
+                    );
+                    reduce_data.push(rule as u32);
+                }
+            }
+            reduce_offsets.push(reduce_data.len() as u32);
+
+            // 4. ruleset: Vec<ShiftedRuleRef>
+            for &rule in &state.ruleset {
+                let rule_val = rule.rule;
+                let shifted_val = rule.shifted;
+                assert!(
+                    rule_val < 65536,
+                    "Rule index {} in ruleset exceeds 16-bit limit (65536)",
+                    rule_val
+                );
+                assert!(
+                    shifted_val < 65536,
+                    "Shifted index {} in ruleset exceeds 16-bit limit (65536)",
+                    shifted_val
+                );
+                let val = (rule_val as u32) | ((shifted_val as u32) << 16);
+                ruleset_data.push(val);
+            }
+            ruleset_offsets.push(ruleset_data.len() as u32);
+
+            // 5. can_accept_error: TriState
+            let tri_val = match state.can_accept_error {
+                rusty_lr_core::TriState::False => 0u8,
+                rusty_lr_core::TriState::True => 1u8,
+                rusty_lr_core::TriState::Maybe => 2u8,
+            };
+            can_accept_error.push(tri_val);
+        }
+
+        let num_rules = self.builder.rules.len();
+        let num_states = self.states.len();
         let error_used = self.error_used;
 
         // range-compressed Vec based terminal-class_id map
@@ -835,22 +868,133 @@ impl Grammar {
                 fn get_rules() -> &'static [#rule_typename] {
                     static RULES: std::sync::OnceLock<Vec<#rule_typename>> = std::sync::OnceLock::new();
                     RULES.get_or_init(|| {
-                        vec![
-                            #production_rules_body_stream
-                        ]
+                        static RULE_NAMES: &[u32] = &[ #(#rule_names),* ];
+                        static RULE_PRECEDENCES: &[u32] = &[ #(#rule_precedences),* ];
+                        static RULE_TOKENS_DATA: &[u32] = &[ #(#rule_tokens_data),* ];
+                        static RULE_TOKENS_OFFSETS: &[u32] = &[ #(#rule_tokens_offsets),* ];
+
+                        let num_rules = #num_rules;
+                        let mut rules = Vec::with_capacity(num_rules);
+                        for i in 0..num_rules {
+                            let name = #nonterminals_enum_name::from_usize(RULE_NAMES[i] as usize);
+
+                            let prec_val = RULE_PRECEDENCES[i];
+                            let precedence = match prec_val & 3 {
+                                0 => None,
+                                1 => Some(#module_prefix::rule::Precedence::Fixed((prec_val >> 2) as usize)),
+                                2 => Some(#module_prefix::rule::Precedence::Dynamic((prec_val >> 2) as usize)),
+                                _ => unreachable!(),
+                            };
+
+                            let token_start = RULE_TOKENS_OFFSETS[i] as usize;
+                            let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
+                            let mut rule = Vec::with_capacity(token_end - token_start);
+                            for idx in token_start..token_end {
+                                let val = RULE_TOKENS_DATA[idx];
+                                let is_nonterm = (val & 1) != 0;
+                                let sym_idx = (val >> 1) as usize;
+                                let token = if is_nonterm {
+                                    #module_prefix::Token::NonTerm(#nonterminals_enum_name::from_usize(sym_idx))
+                                } else {
+                                    #module_prefix::Token::Term(#termclass_typename::from_usize(sym_idx))
+                                };
+                                rule.push(token);
+                            }
+
+                            rules.push(#module_prefix::rule::ProductionRule {
+                                name,
+                                rule,
+                                precedence,
+                            });
+                        }
+                        rules
                     })
                 }
                 fn get_states() -> &'static [#state_typename] {
                     static STATES: std::sync::OnceLock<Vec<#state_typename>> = std::sync::OnceLock::new();
                     STATES.get_or_init(|| {
-                        let states: Vec<#module_prefix::parser::state::IntermediateState<
-                            #termclass_typename, #nonterminals_enum_name, #state_index_typename, #rule_index_typename
-                        >> = vec![
-                            #states_body_stream
-                        ];
-                        states.into_iter().map(
-                            |state| state.into(),
-                        ).collect()
+                        static SHIFT_TERM_DATA: &[u32] = &[ #(#shift_term_data),* ];
+                        static SHIFT_TERM_OFFSETS: &[u32] = &[ #(#shift_term_offsets),* ];
+                        static SHIFT_NONTERM_DATA: &[u32] = &[ #(#shift_nonterm_data),* ];
+                        static SHIFT_NONTERM_OFFSETS: &[u32] = &[ #(#shift_nonterm_offsets),* ];
+                        static REDUCE_DATA: &[u32] = &[ #(#reduce_data),* ];
+                        static REDUCE_OFFSETS: &[u32] = &[ #(#reduce_offsets),* ];
+                        static RULESET_DATA: &[u32] = &[ #(#ruleset_data),* ];
+                        static RULESET_OFFSETS: &[u32] = &[ #(#ruleset_offsets),* ];
+                        static CAN_ACCEPT_ERROR: &[u8] = &[ #(#can_accept_error),* ];
+
+                        let num_states = #num_states;
+                        let mut states = Vec::with_capacity(num_states);
+                        for i in 0..num_states {
+                            // shift_goto_map_term
+                            let term_start = SHIFT_TERM_OFFSETS[i] as usize;
+                            let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
+                            let mut shift_goto_map_term = Vec::with_capacity(term_end - term_start);
+                            for idx in term_start..term_end {
+                                let val = SHIFT_TERM_DATA[idx];
+                                let term_class = #termclass_typename::from_usize((val & 0x7fff) as usize);
+                                let state = ((val >> 15) & 0xffff) as #state_index_typename;
+                                let push = (val >> 31) != 0;
+                                shift_goto_map_term.push((term_class, #module_prefix::parser::state::ShiftTarget::new(state, push)));
+                            }
+
+                            // shift_goto_map_nonterm
+                            let nonterm_start = SHIFT_NONTERM_OFFSETS[i] as usize;
+                            let nonterm_end = SHIFT_NONTERM_OFFSETS[i + 1] as usize;
+                            let mut shift_goto_map_nonterm = Vec::with_capacity(nonterm_end - nonterm_start);
+                            for idx in nonterm_start..nonterm_end {
+                                let val = SHIFT_NONTERM_DATA[idx];
+                                let nonterm = #nonterminals_enum_name::from_usize((val & 0x7fff) as usize);
+                                let state = ((val >> 15) & 0xffff) as #state_index_typename;
+                                let push = (val >> 31) != 0;
+                                shift_goto_map_nonterm.push((nonterm, #module_prefix::parser::state::ShiftTarget::new(state, push)));
+                            }
+
+                            // reduce_map
+                            let reduce_start = REDUCE_OFFSETS[i] as usize;
+                            let reduce_end = REDUCE_OFFSETS[i + 1] as usize;
+                            let mut reduce_map = Vec::new();
+                            let mut idx = reduce_start;
+                            while idx < reduce_end {
+                                let term_val = REDUCE_DATA[idx];
+                                let term_class = #termclass_typename::from_usize(term_val as usize);
+                                let len = REDUCE_DATA[idx + 1] as usize;
+                                let mut rules = Vec::with_capacity(len);
+                                for r_idx in 0..len {
+                                    rules.push(REDUCE_DATA[idx + 2 + r_idx] as #rule_index_typename);
+                                }
+                                reduce_map.push((term_class, rules));
+                                idx += 2 + len;
+                            }
+
+                            // ruleset
+                            let ruleset_start = RULESET_OFFSETS[i] as usize;
+                            let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
+                            let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
+                            for idx in ruleset_start..ruleset_end {
+                                let val = RULESET_DATA[idx];
+                                let rule = (val & 0xffff) as usize;
+                                let shifted = (val >> 16) as usize;
+                                ruleset.push(#module_prefix::rule::ShiftedRuleRef { rule, shifted });
+                            }
+
+                            let can_accept_error = match CAN_ACCEPT_ERROR[i] {
+                                0 => #module_prefix::TriState::False,
+                                1 => #module_prefix::TriState::True,
+                                2 => #module_prefix::TriState::Maybe,
+                                _ => unreachable!(),
+                            };
+
+                            let intermediate = #module_prefix::parser::state::IntermediateState {
+                                shift_goto_map_term,
+                                shift_goto_map_nonterm,
+                                reduce_map,
+                                ruleset,
+                                can_accept_error,
+                            };
+                            states.push(intermediate.into());
+                        }
+                        states
                     })
                 }
             }

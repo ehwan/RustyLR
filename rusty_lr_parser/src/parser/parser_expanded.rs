@@ -228,6 +228,7 @@ pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     std::cmp::PartialOrd,
     std::cmp::Ord,
 )]
+#[repr(usize)]
 pub enum GrammarTerminalClasses {
     ident,
     TermClass1,
@@ -277,6 +278,12 @@ pub enum GrammarTerminalClasses {
     slash,
     error,
     eof,
+}
+impl GrammarTerminalClasses {
+    #[inline]
+    pub fn from_usize(value: usize) -> Self {
+        unsafe { ::std::mem::transmute(value) }
+    }
 }
 impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalClasses {
     type Term = Lexed;
@@ -426,6 +433,7 @@ impl std::fmt::Debug for GrammarTerminalClasses {
     std::cmp::PartialOrd,
     std::cmp::Ord,
 )]
+#[repr(usize)]
 pub enum GrammarNonTerminals {
     Rule,
     RuleType,
@@ -459,6 +467,12 @@ pub enum GrammarNonTerminals {
     _identStar30,
     _GrammarLinePlus31,
     Augmented,
+}
+impl GrammarNonTerminals {
+    #[inline]
+    pub fn from_usize(value: usize) -> Self {
+        unsafe { ::std::mem::transmute(value) }
+    }
 }
 impl std::fmt::Display for GrammarNonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -6973,6249 +6987,1067 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
         static RULES: std::sync::OnceLock<Vec<GrammarRule>> = std::sync::OnceLock::new();
         RULES
             .get_or_init(|| {
-                vec![
-                    ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Rule, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleType),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::colon),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::RuleType, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::parengroup),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::RuleType, rule : vec![], precedence : None, },
-                    ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::RuleLines, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLines),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::pipe),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::RuleLines, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::RuleLine),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::RuleLine, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedStar16),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefStar18),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Action),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::PrecDef, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::prec),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::PrecDef, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::prec),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::PrecDef, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::dprec),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::int_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::PrecDef, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::dprec),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::PrecDef, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TokenMapped, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TokenMapped, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::equal),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSetItem, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSet, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::lbracket),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_caretQuestion19),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemStar21),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rbracket),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::TerminalSet, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dot),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::plus),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::star),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::question),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::exclamation),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSet),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::slash),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(1usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__PatternStar23SepPlus24),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_str_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::str_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(0usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dollar),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_commaQuestion25),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dollar),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::plus),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dollar),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::star),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : Some(::rusty_lr_core::rule::Precedence::Fixed(2usize)),
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dollar),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Pattern, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dollar),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Action, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::bracegroup),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Action, rule : vec![], precedence : None, },
-                    ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::IdentOrLiteral, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::IdentOrLiteral, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::IdentOrLiteral, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::token),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::token),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::token),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::start),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::start),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::tokentype),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::tokentype),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::userdata),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::userdata),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::left),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus28),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::left),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::right),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus28),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::right),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::precedence),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus28),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::precedence),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::errortype),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::errortype),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::moduleprefix),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::moduleprefix),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::glr),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::glr),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lalr),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::lalr),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::nooptim),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::nooptim),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::dense),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::dense),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::trace),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identStar30),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::trace),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::filter),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::filter),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::location),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::location),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Directive, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::error),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::semicolon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::GrammarLine, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Rule),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::GrammarLine, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Directive),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Grammar, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus31),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TokenMappedPlus15, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TokenMappedPlus15, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus15),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TokenMapped),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TokenMappedStar16, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TokenMappedPlus15),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TokenMappedStar16, rule : vec![], precedence :
-                    None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PrecDefPlus17, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::PrecDef),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PrecDefPlus17, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus17),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::PrecDef),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PrecDefStar18, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PrecDefPlus17),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PrecDefStar18, rule : vec![], precedence :
-                    None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_caretQuestion19, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::caret),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_caretQuestion19, rule : vec![], precedence :
-                    None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TerminalSetItemPlus20, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TerminalSetItemPlus20, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus20),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::TerminalSetItem),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TerminalSetItemStar21, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TerminalSetItemPlus20),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TerminalSetItemStar21, rule : vec![],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PatternPlus22, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PatternPlus22, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus22),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Pattern),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PatternStar23, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternPlus22),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_PatternStar23, rule : vec![], precedence :
-                    None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::__PatternStar23SepPlus24, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternStar23),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::__PatternStar23SepPlus24, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__PatternStar23SepPlus24),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::pipe),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_PatternStar23),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_commaQuestion25, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_commaQuestion25, rule : vec![], precedence :
-                    None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::colon),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::pipe),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::percent),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::equal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::plus),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::star),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::question),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::caret),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::minus),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::exclamation),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::slash),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dot),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dollar),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::comma),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::int_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::byte_str_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::char_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::str_literal),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::TermClass1),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::parengroup),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::bracegroup),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::lparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::rparen),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::lbracket),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::rbracket),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::left),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::right),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::token),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::start),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::tokentype),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::userdata),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::errortype),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::moduleprefix),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::lalr),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::glr),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::prec),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::precedence),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::nooptim),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dense),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::trace),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::dprec),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::filter),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_TermSet26, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::location),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::__TermSet26Plus27, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet26),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::__TermSet26Plus27, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::__TermSet26Plus27),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_TermSet26),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_IdentOrLiteralPlus28, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_IdentOrLiteralPlus28, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_IdentOrLiteralPlus28),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::IdentOrLiteral),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_identPlus29, rule :
-                    vec![::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_identPlus29, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus29),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::ident),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_identStar30, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_identPlus29),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_identStar30, rule : vec![], precedence : None,
-                    }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_GrammarLinePlus31, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::_GrammarLinePlus31, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::GrammarLine),
-                    ::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::_GrammarLinePlus31),],
-                    precedence : None, }, ::rusty_lr_core::rule::ProductionRule { name :
-                    GrammarNonTerminals::Augmented, rule :
-                    vec![::rusty_lr_core::Token::NonTerm(GrammarNonTerminals::Grammar),
-                    ::rusty_lr_core::Token::Term(GrammarTerminalClasses::eof),],
-                    precedence : None, },
-                ]
+                static RULE_NAMES: &[u32] = &[
+                    0u32, 1u32, 1u32, 2u32, 2u32, 3u32, 4u32, 4u32, 4u32, 4u32, 4u32,
+                    5u32, 5u32, 6u32, 6u32, 6u32, 6u32, 6u32, 6u32, 6u32, 6u32, 6u32,
+                    7u32, 7u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32,
+                    8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 8u32, 9u32,
+                    9u32, 10u32, 10u32, 10u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32,
+                    11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32,
+                    11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32,
+                    11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 12u32, 12u32,
+                    13u32, 14u32, 14u32, 15u32, 15u32, 16u32, 16u32, 17u32, 17u32, 18u32,
+                    18u32, 19u32, 19u32, 20u32, 20u32, 21u32, 21u32, 22u32, 22u32, 23u32,
+                    23u32, 24u32, 24u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
+                    25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
+                    25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
+                    25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
+                    25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 26u32, 26u32,
+                    27u32, 27u32, 28u32, 28u32, 29u32, 29u32, 30u32, 30u32, 31u32,
+                ];
+                static RULE_PRECEDENCES: &[u32] = &[
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 1u32, 1u32, 0u32, 1u32, 1u32, 0u32, 1u32, 1u32,
+                    0u32, 0u32, 0u32, 9u32, 9u32, 9u32, 9u32, 0u32, 5u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 1u32, 0u32, 9u32, 9u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                ];
+                static RULE_TOKENS_DATA: &[u32] = &[
+                    0u32, 3u32, 4u32, 5u32, 78u32, 30u32, 5u32, 6u32, 7u32, 7u32, 31u32,
+                    35u32, 19u32, 8u32, 62u32, 21u32, 8u32, 62u32, 92u32, 8u32, 72u32,
+                    20u32, 8u32, 72u32, 92u32, 8u32, 92u32, 17u32, 0u32, 10u32, 17u32,
+                    0u32, 0u32, 88u32, 0u32, 0u32, 88u32, 92u32, 26u32, 26u32, 88u32,
+                    26u32, 26u32, 88u32, 92u32, 22u32, 22u32, 88u32, 22u32, 22u32, 88u32,
+                    92u32, 38u32, 37u32, 41u32, 40u32, 14u32, 0u32, 17u32, 80u32, 17u32,
+                    82u32, 17u32, 84u32, 17u32, 86u32, 15u32, 17u32, 90u32, 17u32, 34u32,
+                    47u32, 36u32, 34u32, 92u32, 36u32, 22u32, 24u32, 26u32, 28u32, 17u32,
+                    88u32, 17u32, 16u32, 0u32, 34u32, 17u32, 18u32, 17u32, 49u32, 36u32,
+                    16u32, 0u32, 34u32, 17u32, 18u32, 17u32, 18u32, 80u32, 36u32, 16u32,
+                    0u32, 34u32, 17u32, 18u32, 17u32, 18u32, 82u32, 36u32, 16u32, 0u32,
+                    34u32, 17u32, 18u32, 17u32, 92u32, 36u32, 16u32, 0u32, 34u32, 17u32,
+                    18u32, 17u32, 18u32, 92u32, 36u32, 32u32, 0u32, 22u32, 26u32, 8u32,
+                    46u32, 0u32, 53u32, 78u32, 8u32, 46u32, 0u32, 78u32, 8u32, 46u32,
+                    92u32, 78u32, 8u32, 48u32, 0u32, 78u32, 8u32, 48u32, 92u32, 78u32,
+                    8u32, 50u32, 53u32, 78u32, 8u32, 50u32, 78u32, 8u32, 52u32, 53u32,
+                    78u32, 8u32, 52u32, 78u32, 8u32, 42u32, 55u32, 78u32, 8u32, 42u32,
+                    92u32, 78u32, 8u32, 44u32, 55u32, 78u32, 8u32, 44u32, 92u32, 78u32,
+                    8u32, 64u32, 55u32, 78u32, 8u32, 64u32, 92u32, 78u32, 8u32, 54u32,
+                    53u32, 78u32, 8u32, 54u32, 78u32, 8u32, 56u32, 53u32, 78u32, 8u32,
+                    56u32, 78u32, 8u32, 60u32, 78u32, 8u32, 60u32, 92u32, 78u32, 8u32,
+                    58u32, 78u32, 8u32, 58u32, 92u32, 78u32, 8u32, 66u32, 78u32, 8u32,
+                    66u32, 92u32, 78u32, 8u32, 68u32, 78u32, 8u32, 68u32, 92u32, 78u32,
+                    8u32, 70u32, 59u32, 78u32, 8u32, 70u32, 92u32, 78u32, 8u32, 74u32,
+                    53u32, 78u32, 8u32, 74u32, 78u32, 8u32, 76u32, 53u32, 78u32, 8u32,
+                    76u32, 78u32, 8u32, 92u32, 78u32, 1u32, 23u32, 61u32, 11u32, 29u32,
+                    11u32, 29u32, 9u32, 33u32, 9u32, 33u32, 12u32, 13u32, 39u32, 13u32,
+                    39u32, 17u32, 43u32, 17u32, 43u32, 45u32, 47u32, 6u32, 45u32, 18u32,
+                    0u32, 4u32, 6u32, 8u32, 10u32, 80u32, 82u32, 84u32, 12u32, 88u32,
+                    86u32, 90u32, 14u32, 16u32, 18u32, 20u32, 22u32, 24u32, 26u32, 28u32,
+                    2u32, 30u32, 32u32, 34u32, 36u32, 38u32, 40u32, 42u32, 44u32, 46u32,
+                    48u32, 50u32, 52u32, 54u32, 56u32, 58u32, 60u32, 62u32, 64u32, 66u32,
+                    68u32, 70u32, 72u32, 74u32, 76u32, 51u32, 53u32, 51u32, 21u32, 55u32,
+                    21u32, 0u32, 57u32, 0u32, 57u32, 25u32, 25u32, 61u32, 27u32, 94u32,
+                ];
+                static RULE_TOKENS_OFFSETS: &[u32] = &[
+                    0u32, 5u32, 6u32, 6u32, 9u32, 10u32, 13u32, 16u32, 19u32, 22u32,
+                    25u32, 27u32, 28u32, 31u32, 32u32, 35u32, 38u32, 39u32, 42u32, 45u32,
+                    46u32, 49u32, 52u32, 56u32, 57u32, 58u32, 60u32, 62u32, 64u32, 66u32,
+                    67u32, 70u32, 73u32, 76u32, 77u32, 78u32, 79u32, 80u32, 83u32, 91u32,
+                    100u32, 109u32, 117u32, 126u32, 127u32, 127u32, 128u32, 129u32,
+                    130u32, 135u32, 139u32, 143u32, 147u32, 151u32, 155u32, 158u32,
+                    162u32, 165u32, 169u32, 173u32, 177u32, 181u32, 185u32, 189u32,
+                    193u32, 196u32, 200u32, 203u32, 206u32, 210u32, 213u32, 217u32,
+                    220u32, 224u32, 227u32, 231u32, 235u32, 239u32, 243u32, 246u32,
+                    250u32, 253u32, 256u32, 257u32, 258u32, 259u32, 260u32, 262u32,
+                    263u32, 263u32, 264u32, 266u32, 267u32, 267u32, 268u32, 268u32,
+                    269u32, 271u32, 272u32, 272u32, 273u32, 275u32, 276u32, 276u32,
+                    277u32, 280u32, 281u32, 281u32, 282u32, 283u32, 284u32, 285u32,
+                    286u32, 287u32, 288u32, 289u32, 290u32, 291u32, 292u32, 293u32,
+                    294u32, 295u32, 296u32, 297u32, 298u32, 299u32, 300u32, 301u32,
+                    302u32, 303u32, 304u32, 305u32, 306u32, 307u32, 308u32, 309u32,
+                    310u32, 311u32, 312u32, 313u32, 314u32, 315u32, 316u32, 317u32,
+                    318u32, 319u32, 320u32, 321u32, 322u32, 323u32, 324u32, 325u32,
+                    326u32, 327u32, 329u32, 330u32, 332u32, 333u32, 335u32, 336u32,
+                    336u32, 337u32, 339u32, 341u32,
+                ];
+                let num_rules = 163usize;
+                let mut rules = Vec::with_capacity(num_rules);
+                for i in 0..num_rules {
+                    let name = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let prec_val = RULE_PRECEDENCES[i];
+                    let precedence = match prec_val & 3 {
+                        0 => None,
+                        1 => {
+                            Some(
+                                ::rusty_lr_core::rule::Precedence::Fixed(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        2 => {
+                            Some(
+                                ::rusty_lr_core::rule::Precedence::Dynamic(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        _ => unreachable!(),
+                    };
+                    let token_start = RULE_TOKENS_OFFSETS[i] as usize;
+                    let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
+                    let mut rule = Vec::with_capacity(token_end - token_start);
+                    for idx in token_start..token_end {
+                        let val = RULE_TOKENS_DATA[idx];
+                        let is_nonterm = (val & 1) != 0;
+                        let sym_idx = (val >> 1) as usize;
+                        let token = if is_nonterm {
+                            ::rusty_lr_core::Token::NonTerm(
+                                GrammarNonTerminals::from_usize(sym_idx),
+                            )
+                        } else {
+                            ::rusty_lr_core::Token::Term(
+                                GrammarTerminalClasses::from_usize(sym_idx),
+                            )
+                        };
+                        rule.push(token);
+                    }
+                    rules
+                        .push(::rusty_lr_core::rule::ProductionRule {
+                            name,
+                            rule,
+                            precedence,
+                        });
+                }
+                rules
             })
     }
     fn get_states() -> &'static [GrammarState] {
         static STATES: std::sync::OnceLock<Vec<GrammarState>> = std::sync::OnceLock::new();
         STATES
             .get_or_init(|| {
-                let states: Vec<
-                    ::rusty_lr_core::parser::state::IntermediateState<
-                        GrammarTerminalClasses,
-                        GrammarNonTerminals,
-                        u8,
-                        u8,
-                    >,
-                > = vec![
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(1, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(98, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::Rule,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(180, true)),
-                    (GrammarNonTerminals::Directive,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(181, false)),
-                    (GrammarNonTerminals::GrammarLine,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(181, true)),
-                    (GrammarNonTerminals::Grammar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(183, true)),
-                    (GrammarNonTerminals::_GrammarLinePlus31,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(183, false)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 48 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 49 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 50 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 51 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 52 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 53 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 54 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 55 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 56 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 57 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 58 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 59 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 60 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 61 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 62 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 63 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 64 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 65 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 66 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 67 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 68 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 69 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 70 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 71 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 72 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 73 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 74 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 75 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 76 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 77 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 78 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 79 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 80 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 81 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 82 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 83 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 84 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 160 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 161
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 162 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(2, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::RuleType,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(3, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::colon, vec![2]),], ruleset
-                    : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 1 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 2 as usize, shifted :
-                    0 as usize, },], can_accept_error : ::rusty_lr_core::TriState::False,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::colon, vec![1]),], ruleset
-                    : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 1 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(4, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as
-                    usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(5, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::RuleLines,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(71, true)),
-                    (GrammarNonTerminals::RuleLine,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(97, true)),
-                    (GrammarNonTerminals::TokenMapped,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(74, true)),
-                    (GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
-                    (GrammarNonTerminals::_TokenMappedPlus15,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),
-                    (GrammarNonTerminals::_TokenMappedStar16,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(78, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![88]),
-                    (GrammarTerminalClasses::percent, vec![88]),
-                    (GrammarTerminalClasses::bracegroup, vec![88]),
-                    (GrammarTerminalClasses::semicolon, vec![88]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 3 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 4 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 5 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 11 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 12 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 32 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 35 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 38 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 41 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 85 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 86 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 87 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 88 as
-                    usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(6, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![24]),
-                    (GrammarTerminalClasses::pipe, vec![24]),
-                    (GrammarTerminalClasses::percent, vec![24]),
-                    (GrammarTerminalClasses::dot, vec![24]),
-                    (GrammarTerminalClasses::dollar, vec![24]),
-                    (GrammarTerminalClasses::byte_literal, vec![24]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![24]),
-                    (GrammarTerminalClasses::char_literal, vec![24]),
-                    (GrammarTerminalClasses::str_literal, vec![24]),
-                    (GrammarTerminalClasses::bracegroup, vec![24]),
-                    (GrammarTerminalClasses::lparen, vec![24]),
-                    (GrammarTerminalClasses::lbracket, vec![24]),
-                    (GrammarTerminalClasses::semicolon, vec![24]),
-                    (GrammarTerminalClasses::plus, vec![24]),
-                    (GrammarTerminalClasses::star, vec![24]),
-                    (GrammarTerminalClasses::question, vec![24]),
-                    (GrammarTerminalClasses::exclamation, vec![24]),
-                    (GrammarTerminalClasses::minus, vec![24]),
-                    (GrammarTerminalClasses::slash, vec![24]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 24 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(70, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 22 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 23 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 25 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 26 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 28 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 29 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 31 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 34 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 35 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 37 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 40 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![24]),
-                    (GrammarTerminalClasses::pipe, vec![24]),
-                    (GrammarTerminalClasses::percent, vec![24]),
-                    (GrammarTerminalClasses::dot, vec![24]),
-                    (GrammarTerminalClasses::dollar, vec![24]),
-                    (GrammarTerminalClasses::comma, vec![24]),
-                    (GrammarTerminalClasses::byte_literal, vec![24]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![24]),
-                    (GrammarTerminalClasses::char_literal, vec![24]),
-                    (GrammarTerminalClasses::str_literal, vec![24]),
-                    (GrammarTerminalClasses::bracegroup, vec![24]),
-                    (GrammarTerminalClasses::lparen, vec![24]),
-                    (GrammarTerminalClasses::rparen, vec![24]),
-                    (GrammarTerminalClasses::lbracket, vec![24]),
-                    (GrammarTerminalClasses::semicolon, vec![24]),
-                    (GrammarTerminalClasses::plus, vec![24]),
-                    (GrammarTerminalClasses::star, vec![24]),
-                    (GrammarTerminalClasses::question, vec![24]),
-                    (GrammarTerminalClasses::exclamation, vec![24]),
-                    (GrammarTerminalClasses::minus, vec![24]),
-                    (GrammarTerminalClasses::slash, vec![24]),
-                    (GrammarTerminalClasses::error, vec![24]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![23]),
-                    (GrammarTerminalClasses::pipe, vec![23]),
-                    (GrammarTerminalClasses::percent, vec![23]),
-                    (GrammarTerminalClasses::dot, vec![23]),
-                    (GrammarTerminalClasses::dollar, vec![23]),
-                    (GrammarTerminalClasses::comma, vec![23]),
-                    (GrammarTerminalClasses::byte_literal, vec![23]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![23]),
-                    (GrammarTerminalClasses::char_literal, vec![23]),
-                    (GrammarTerminalClasses::str_literal, vec![23]),
-                    (GrammarTerminalClasses::bracegroup, vec![23]),
-                    (GrammarTerminalClasses::lparen, vec![23]),
-                    (GrammarTerminalClasses::rparen, vec![23]),
-                    (GrammarTerminalClasses::lbracket, vec![23]),
-                    (GrammarTerminalClasses::semicolon, vec![23]),
-                    (GrammarTerminalClasses::plus, vec![23]),
-                    (GrammarTerminalClasses::star, vec![23]),
-                    (GrammarTerminalClasses::question, vec![23]),
-                    (GrammarTerminalClasses::exclamation, vec![23]),
-                    (GrammarTerminalClasses::minus, vec![23]),
-                    (GrammarTerminalClasses::slash, vec![23]),
-                    (GrammarTerminalClasses::error, vec![23]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 23 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(10, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(11, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(38, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 32 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 35 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 38 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize, shifted :
-                    3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 3 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as
-                    usize, shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 41 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize, shifted :
-                    3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![33]),
-                    (GrammarTerminalClasses::pipe, vec![33]),
-                    (GrammarTerminalClasses::percent, vec![33]),
-                    (GrammarTerminalClasses::dot, vec![33]),
-                    (GrammarTerminalClasses::dollar, vec![33]),
-                    (GrammarTerminalClasses::comma, vec![33]),
-                    (GrammarTerminalClasses::byte_literal, vec![33]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![33]),
-                    (GrammarTerminalClasses::char_literal, vec![33]),
-                    (GrammarTerminalClasses::str_literal, vec![33]),
-                    (GrammarTerminalClasses::bracegroup, vec![33]),
-                    (GrammarTerminalClasses::lparen, vec![33]),
-                    (GrammarTerminalClasses::rparen, vec![33]),
-                    (GrammarTerminalClasses::lbracket, vec![33]),
-                    (GrammarTerminalClasses::semicolon, vec![33]),
-                    (GrammarTerminalClasses::plus, vec![33]),
-                    (GrammarTerminalClasses::star, vec![33]),
-                    (GrammarTerminalClasses::question, vec![33]),
-                    (GrammarTerminalClasses::exclamation, vec![33]),
-                    (GrammarTerminalClasses::minus, vec![33]),
-                    (GrammarTerminalClasses::slash, vec![33]),
-                    (GrammarTerminalClasses::error, vec![33]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![34]),
-                    (GrammarTerminalClasses::pipe, vec![34]),
-                    (GrammarTerminalClasses::percent, vec![34]),
-                    (GrammarTerminalClasses::dot, vec![34]),
-                    (GrammarTerminalClasses::dollar, vec![34]),
-                    (GrammarTerminalClasses::comma, vec![34]),
-                    (GrammarTerminalClasses::byte_literal, vec![34]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![34]),
-                    (GrammarTerminalClasses::char_literal, vec![34]),
-                    (GrammarTerminalClasses::str_literal, vec![34]),
-                    (GrammarTerminalClasses::bracegroup, vec![34]),
-                    (GrammarTerminalClasses::lparen, vec![34]),
-                    (GrammarTerminalClasses::rparen, vec![34]),
-                    (GrammarTerminalClasses::lbracket, vec![34]),
-                    (GrammarTerminalClasses::semicolon, vec![34]),
-                    (GrammarTerminalClasses::plus, vec![34]),
-                    (GrammarTerminalClasses::star, vec![34]),
-                    (GrammarTerminalClasses::question, vec![34]),
-                    (GrammarTerminalClasses::exclamation, vec![34]),
-                    (GrammarTerminalClasses::minus, vec![34]),
-                    (GrammarTerminalClasses::slash, vec![34]),
-                    (GrammarTerminalClasses::error, vec![34]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![35]),
-                    (GrammarTerminalClasses::pipe, vec![35]),
-                    (GrammarTerminalClasses::percent, vec![35]),
-                    (GrammarTerminalClasses::dot, vec![35]),
-                    (GrammarTerminalClasses::dollar, vec![35]),
-                    (GrammarTerminalClasses::comma, vec![35]),
-                    (GrammarTerminalClasses::byte_literal, vec![35]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![35]),
-                    (GrammarTerminalClasses::char_literal, vec![35]),
-                    (GrammarTerminalClasses::str_literal, vec![35]),
-                    (GrammarTerminalClasses::bracegroup, vec![35]),
-                    (GrammarTerminalClasses::lparen, vec![35]),
-                    (GrammarTerminalClasses::rparen, vec![35]),
-                    (GrammarTerminalClasses::lbracket, vec![35]),
-                    (GrammarTerminalClasses::semicolon, vec![35]),
-                    (GrammarTerminalClasses::plus, vec![35]),
-                    (GrammarTerminalClasses::star, vec![35]),
-                    (GrammarTerminalClasses::question, vec![35]),
-                    (GrammarTerminalClasses::exclamation, vec![35]),
-                    (GrammarTerminalClasses::minus, vec![35]),
-                    (GrammarTerminalClasses::slash, vec![35]),
-                    (GrammarTerminalClasses::error, vec![35]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 35 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![36]),
-                    (GrammarTerminalClasses::pipe, vec![36]),
-                    (GrammarTerminalClasses::percent, vec![36]),
-                    (GrammarTerminalClasses::dot, vec![36]),
-                    (GrammarTerminalClasses::dollar, vec![36]),
-                    (GrammarTerminalClasses::comma, vec![36]),
-                    (GrammarTerminalClasses::byte_literal, vec![36]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![36]),
-                    (GrammarTerminalClasses::char_literal, vec![36]),
-                    (GrammarTerminalClasses::str_literal, vec![36]),
-                    (GrammarTerminalClasses::bracegroup, vec![36]),
-                    (GrammarTerminalClasses::lparen, vec![36]),
-                    (GrammarTerminalClasses::rparen, vec![36]),
-                    (GrammarTerminalClasses::lbracket, vec![36]),
-                    (GrammarTerminalClasses::semicolon, vec![36]),
-                    (GrammarTerminalClasses::plus, vec![36]),
-                    (GrammarTerminalClasses::star, vec![36]),
-                    (GrammarTerminalClasses::question, vec![36]),
-                    (GrammarTerminalClasses::exclamation, vec![36]),
-                    (GrammarTerminalClasses::minus, vec![36]),
-                    (GrammarTerminalClasses::slash, vec![36]),
-                    (GrammarTerminalClasses::error, vec![36]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(40, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(42, true)),
-                    (GrammarNonTerminals::_PatternPlus22,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(51, true)),
-                    (GrammarNonTerminals::_PatternStar23,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(53, true)),
-                    (GrammarNonTerminals::__PatternStar23SepPlus24,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(54, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![102]),
-                    (GrammarTerminalClasses::rparen, vec![102]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 31 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 33 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 35 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 36 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 99 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 100 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 101 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 102 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 103
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 104 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(18, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_caretQuestion19,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(19, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![94]),
-                    (GrammarTerminalClasses::byte_literal, vec![94]),
-                    (GrammarTerminalClasses::char_literal, vec![94]),
-                    (GrammarTerminalClasses::rbracket, vec![94]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 93 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 94 as usize, shifted :
-                    0 as usize, },], can_accept_error : ::rusty_lr_core::TriState::False,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![93]),
-                    (GrammarTerminalClasses::byte_literal, vec![93]),
-                    (GrammarTerminalClasses::char_literal, vec![93]),
-                    (GrammarTerminalClasses::rbracket, vec![93]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 93 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(20, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(24, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(28, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSetItem,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(32, true)),
-                    (GrammarNonTerminals::_TerminalSetItemPlus20,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(33, true)),
-                    (GrammarNonTerminals::_TerminalSetItemStar21,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(35, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::rbracket, vec![98]),],
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 13 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 14 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 15 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 16 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 17 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 18 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 19 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 20 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 21 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 95 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 96 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 97 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 98 as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(21, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![13]),
-                    (GrammarTerminalClasses::byte_literal, vec![13]),
-                    (GrammarTerminalClasses::char_literal, vec![13]),
-                    (GrammarTerminalClasses::rbracket, vec![13]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 13 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 14 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 15 as usize, shifted :
-                    1 as usize, },], can_accept_error : ::rusty_lr_core::TriState::False,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(22, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(23, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 14 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 15 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![14]),
-                    (GrammarTerminalClasses::byte_literal, vec![14]),
-                    (GrammarTerminalClasses::char_literal, vec![14]),
-                    (GrammarTerminalClasses::rbracket, vec![14]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 14 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![15]),
-                    (GrammarTerminalClasses::byte_literal, vec![15]),
-                    (GrammarTerminalClasses::char_literal, vec![15]),
-                    (GrammarTerminalClasses::rbracket, vec![15]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 15 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(25, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![19]),
-                    (GrammarTerminalClasses::byte_literal, vec![19]),
-                    (GrammarTerminalClasses::char_literal, vec![19]),
-                    (GrammarTerminalClasses::rbracket, vec![19]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 19 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 20 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 21 as usize, shifted :
-                    1 as usize, },], can_accept_error : ::rusty_lr_core::TriState::False,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(26, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(27, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 20 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 21 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![20]),
-                    (GrammarTerminalClasses::byte_literal, vec![20]),
-                    (GrammarTerminalClasses::char_literal, vec![20]),
-                    (GrammarTerminalClasses::rbracket, vec![20]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 20 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![21]),
-                    (GrammarTerminalClasses::byte_literal, vec![21]),
-                    (GrammarTerminalClasses::char_literal, vec![21]),
-                    (GrammarTerminalClasses::rbracket, vec![21]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 21 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(29, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![16]),
-                    (GrammarTerminalClasses::byte_literal, vec![16]),
-                    (GrammarTerminalClasses::char_literal, vec![16]),
-                    (GrammarTerminalClasses::rbracket, vec![16]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 16 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 17 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 18 as usize, shifted :
-                    1 as usize, },], can_accept_error : ::rusty_lr_core::TriState::False,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(30, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(31, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 17 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 18 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![17]),
-                    (GrammarTerminalClasses::byte_literal, vec![17]),
-                    (GrammarTerminalClasses::char_literal, vec![17]),
-                    (GrammarTerminalClasses::rbracket, vec![17]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 17 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![18]),
-                    (GrammarTerminalClasses::byte_literal, vec![18]),
-                    (GrammarTerminalClasses::char_literal, vec![18]),
-                    (GrammarTerminalClasses::rbracket, vec![18]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 18 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![95]),
-                    (GrammarTerminalClasses::byte_literal, vec![95]),
-                    (GrammarTerminalClasses::char_literal, vec![95]),
-                    (GrammarTerminalClasses::rbracket, vec![95]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 95 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(20, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(24, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(28, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSetItem,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(34, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::rbracket, vec![97]),],
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 13 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 14 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 15 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 16 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 17 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 18 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 19 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 20 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 21 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 96 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 97 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![96]),
-                    (GrammarTerminalClasses::byte_literal, vec![96]),
-                    (GrammarTerminalClasses::char_literal, vec![96]),
-                    (GrammarTerminalClasses::rbracket, vec![96]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 96 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(36, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![22]),
-                    (GrammarTerminalClasses::pipe, vec![22]),
-                    (GrammarTerminalClasses::percent, vec![22]),
-                    (GrammarTerminalClasses::dot, vec![22]),
-                    (GrammarTerminalClasses::dollar, vec![22]),
-                    (GrammarTerminalClasses::comma, vec![22]),
-                    (GrammarTerminalClasses::byte_literal, vec![22]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![22]),
-                    (GrammarTerminalClasses::char_literal, vec![22]),
-                    (GrammarTerminalClasses::str_literal, vec![22]),
-                    (GrammarTerminalClasses::bracegroup, vec![22]),
-                    (GrammarTerminalClasses::lparen, vec![22]),
-                    (GrammarTerminalClasses::rparen, vec![22]),
-                    (GrammarTerminalClasses::lbracket, vec![22]),
-                    (GrammarTerminalClasses::semicolon, vec![22]),
-                    (GrammarTerminalClasses::plus, vec![22]),
-                    (GrammarTerminalClasses::star, vec![22]),
-                    (GrammarTerminalClasses::question, vec![22]),
-                    (GrammarTerminalClasses::exclamation, vec![22]),
-                    (GrammarTerminalClasses::minus, vec![22]),
-                    (GrammarTerminalClasses::slash, vec![22]),
-                    (GrammarTerminalClasses::error, vec![22]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![29]),
-                    (GrammarTerminalClasses::pipe, vec![29]),
-                    (GrammarTerminalClasses::percent, vec![29]),
-                    (GrammarTerminalClasses::dot, vec![29]),
-                    (GrammarTerminalClasses::dollar, vec![29]),
-                    (GrammarTerminalClasses::comma, vec![29]),
-                    (GrammarTerminalClasses::byte_literal, vec![29]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![29]),
-                    (GrammarTerminalClasses::char_literal, vec![29]),
-                    (GrammarTerminalClasses::str_literal, vec![29]),
-                    (GrammarTerminalClasses::bracegroup, vec![29]),
-                    (GrammarTerminalClasses::lparen, vec![29]),
-                    (GrammarTerminalClasses::rparen, vec![29]),
-                    (GrammarTerminalClasses::lbracket, vec![29]),
-                    (GrammarTerminalClasses::semicolon, vec![29]),
-                    (GrammarTerminalClasses::plus, vec![29]),
-                    (GrammarTerminalClasses::star, vec![29]),
-                    (GrammarTerminalClasses::question, vec![29]),
-                    (GrammarTerminalClasses::exclamation, vec![29]),
-                    (GrammarTerminalClasses::minus, vec![29]),
-                    (GrammarTerminalClasses::slash, vec![29]),
-                    (GrammarTerminalClasses::error, vec![29]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 29 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(39, true)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 4 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 4 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    4 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 4 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(58, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 32 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 35 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 38 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize, shifted :
-                    5 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 5 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as
-                    usize, shifted : 5 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 41 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize, shifted :
-                    5 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 5 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(41, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as
-                    usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![32]),
-                    (GrammarTerminalClasses::pipe, vec![32]),
-                    (GrammarTerminalClasses::percent, vec![32]),
-                    (GrammarTerminalClasses::dot, vec![32]),
-                    (GrammarTerminalClasses::dollar, vec![32]),
-                    (GrammarTerminalClasses::comma, vec![32]),
-                    (GrammarTerminalClasses::byte_literal, vec![32]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![32]),
-                    (GrammarTerminalClasses::char_literal, vec![32]),
-                    (GrammarTerminalClasses::str_literal, vec![32]),
-                    (GrammarTerminalClasses::bracegroup, vec![32]),
-                    (GrammarTerminalClasses::lparen, vec![32]),
-                    (GrammarTerminalClasses::rparen, vec![32]),
-                    (GrammarTerminalClasses::lbracket, vec![32]),
-                    (GrammarTerminalClasses::semicolon, vec![32]),
-                    (GrammarTerminalClasses::plus, vec![32]),
-                    (GrammarTerminalClasses::star, vec![32]),
-                    (GrammarTerminalClasses::question, vec![32]),
-                    (GrammarTerminalClasses::exclamation, vec![32]),
-                    (GrammarTerminalClasses::minus, vec![32]),
-                    (GrammarTerminalClasses::slash, vec![32]),
-                    (GrammarTerminalClasses::error, vec![32]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![99]),
-                    (GrammarTerminalClasses::pipe, vec![99]),
-                    (GrammarTerminalClasses::dot, vec![99]),
-                    (GrammarTerminalClasses::dollar, vec![99]),
-                    (GrammarTerminalClasses::byte_literal, vec![99]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![99]),
-                    (GrammarTerminalClasses::char_literal, vec![99]),
-                    (GrammarTerminalClasses::str_literal, vec![99]),
-                    (GrammarTerminalClasses::lparen, vec![99]),
-                    (GrammarTerminalClasses::rparen, vec![99]),
-                    (GrammarTerminalClasses::lbracket, vec![99]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 26 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 99 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![25]),
-                    (GrammarTerminalClasses::pipe, vec![25]),
-                    (GrammarTerminalClasses::percent, vec![25]),
-                    (GrammarTerminalClasses::dot, vec![25]),
-                    (GrammarTerminalClasses::dollar, vec![25]),
-                    (GrammarTerminalClasses::comma, vec![25]),
-                    (GrammarTerminalClasses::byte_literal, vec![25]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![25]),
-                    (GrammarTerminalClasses::char_literal, vec![25]),
-                    (GrammarTerminalClasses::str_literal, vec![25]),
-                    (GrammarTerminalClasses::bracegroup, vec![25]),
-                    (GrammarTerminalClasses::lparen, vec![25]),
-                    (GrammarTerminalClasses::rparen, vec![25]),
-                    (GrammarTerminalClasses::lbracket, vec![25]),
-                    (GrammarTerminalClasses::semicolon, vec![25]),
-                    (GrammarTerminalClasses::plus, vec![25]),
-                    (GrammarTerminalClasses::star, vec![25]),
-                    (GrammarTerminalClasses::question, vec![25]),
-                    (GrammarTerminalClasses::exclamation, vec![25]),
-                    (GrammarTerminalClasses::minus, vec![25]),
-                    (GrammarTerminalClasses::slash, vec![25]),
-                    (GrammarTerminalClasses::error, vec![25]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![26]),
-                    (GrammarTerminalClasses::pipe, vec![26]),
-                    (GrammarTerminalClasses::percent, vec![26]),
-                    (GrammarTerminalClasses::dot, vec![26]),
-                    (GrammarTerminalClasses::dollar, vec![26]),
-                    (GrammarTerminalClasses::comma, vec![26]),
-                    (GrammarTerminalClasses::byte_literal, vec![26]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![26]),
-                    (GrammarTerminalClasses::char_literal, vec![26]),
-                    (GrammarTerminalClasses::str_literal, vec![26]),
-                    (GrammarTerminalClasses::bracegroup, vec![26]),
-                    (GrammarTerminalClasses::lparen, vec![26]),
-                    (GrammarTerminalClasses::rparen, vec![26]),
-                    (GrammarTerminalClasses::lbracket, vec![26]),
-                    (GrammarTerminalClasses::semicolon, vec![26]),
-                    (GrammarTerminalClasses::plus, vec![26]),
-                    (GrammarTerminalClasses::star, vec![26]),
-                    (GrammarTerminalClasses::question, vec![26]),
-                    (GrammarTerminalClasses::exclamation, vec![26]),
-                    (GrammarTerminalClasses::minus, vec![26]),
-                    (GrammarTerminalClasses::slash, vec![26]),
-                    (GrammarTerminalClasses::error, vec![26]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 26 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![27]),
-                    (GrammarTerminalClasses::pipe, vec![27]),
-                    (GrammarTerminalClasses::percent, vec![27]),
-                    (GrammarTerminalClasses::dot, vec![27]),
-                    (GrammarTerminalClasses::dollar, vec![27]),
-                    (GrammarTerminalClasses::comma, vec![27]),
-                    (GrammarTerminalClasses::byte_literal, vec![27]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![27]),
-                    (GrammarTerminalClasses::char_literal, vec![27]),
-                    (GrammarTerminalClasses::str_literal, vec![27]),
-                    (GrammarTerminalClasses::bracegroup, vec![27]),
-                    (GrammarTerminalClasses::lparen, vec![27]),
-                    (GrammarTerminalClasses::rparen, vec![27]),
-                    (GrammarTerminalClasses::lbracket, vec![27]),
-                    (GrammarTerminalClasses::semicolon, vec![27]),
-                    (GrammarTerminalClasses::plus, vec![27]),
-                    (GrammarTerminalClasses::star, vec![27]),
-                    (GrammarTerminalClasses::question, vec![27]),
-                    (GrammarTerminalClasses::exclamation, vec![27]),
-                    (GrammarTerminalClasses::minus, vec![27]),
-                    (GrammarTerminalClasses::slash, vec![27]),
-                    (GrammarTerminalClasses::error, vec![27]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![28]),
-                    (GrammarTerminalClasses::pipe, vec![28]),
-                    (GrammarTerminalClasses::percent, vec![28]),
-                    (GrammarTerminalClasses::dot, vec![28]),
-                    (GrammarTerminalClasses::dollar, vec![28]),
-                    (GrammarTerminalClasses::comma, vec![28]),
-                    (GrammarTerminalClasses::byte_literal, vec![28]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![28]),
-                    (GrammarTerminalClasses::char_literal, vec![28]),
-                    (GrammarTerminalClasses::str_literal, vec![28]),
-                    (GrammarTerminalClasses::bracegroup, vec![28]),
-                    (GrammarTerminalClasses::lparen, vec![28]),
-                    (GrammarTerminalClasses::rparen, vec![28]),
-                    (GrammarTerminalClasses::lbracket, vec![28]),
-                    (GrammarTerminalClasses::semicolon, vec![28]),
-                    (GrammarTerminalClasses::plus, vec![28]),
-                    (GrammarTerminalClasses::star, vec![28]),
-                    (GrammarTerminalClasses::question, vec![28]),
-                    (GrammarTerminalClasses::exclamation, vec![28]),
-                    (GrammarTerminalClasses::minus, vec![28]),
-                    (GrammarTerminalClasses::slash, vec![28]),
-                    (GrammarTerminalClasses::error, vec![28]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(48, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 32 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 35 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 37 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 40 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![37]),
-                    (GrammarTerminalClasses::pipe, vec![37]),
-                    (GrammarTerminalClasses::percent, vec![37]),
-                    (GrammarTerminalClasses::dot, vec![37]),
-                    (GrammarTerminalClasses::dollar, vec![37]),
-                    (GrammarTerminalClasses::comma, vec![37]),
-                    (GrammarTerminalClasses::byte_literal, vec![37]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![37]),
-                    (GrammarTerminalClasses::char_literal, vec![37]),
-                    (GrammarTerminalClasses::str_literal, vec![37]),
-                    (GrammarTerminalClasses::bracegroup, vec![37]),
-                    (GrammarTerminalClasses::lparen, vec![37]),
-                    (GrammarTerminalClasses::rparen, vec![37]),
-                    (GrammarTerminalClasses::lbracket, vec![37]),
-                    (GrammarTerminalClasses::semicolon, vec![37]),
-                    (GrammarTerminalClasses::minus, vec![37]),
-                    (GrammarTerminalClasses::error, vec![37]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 26 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    3 as usize, },], can_accept_error : ::rusty_lr_core::TriState::Maybe,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(50, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 31 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 34 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 35 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 37 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 40 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![30]),
-                    (GrammarTerminalClasses::pipe, vec![30]),
-                    (GrammarTerminalClasses::percent, vec![30]),
-                    (GrammarTerminalClasses::dot, vec![30]),
-                    (GrammarTerminalClasses::dollar, vec![30]),
-                    (GrammarTerminalClasses::comma, vec![30]),
-                    (GrammarTerminalClasses::byte_literal, vec![30]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![30]),
-                    (GrammarTerminalClasses::char_literal, vec![30]),
-                    (GrammarTerminalClasses::str_literal, vec![30]),
-                    (GrammarTerminalClasses::bracegroup, vec![30]),
-                    (GrammarTerminalClasses::lparen, vec![30]),
-                    (GrammarTerminalClasses::rparen, vec![30]),
-                    (GrammarTerminalClasses::lbracket, vec![30]),
-                    (GrammarTerminalClasses::semicolon, vec![30]),
-                    (GrammarTerminalClasses::minus, vec![30]),
-                    (GrammarTerminalClasses::slash, vec![30]),
-                    (GrammarTerminalClasses::error, vec![30]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 26 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(52, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![101]),
-                    (GrammarTerminalClasses::rparen, vec![101]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 32 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 35 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 38 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 41 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 100 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 101 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![100]),
-                    (GrammarTerminalClasses::pipe, vec![100]),
-                    (GrammarTerminalClasses::dot, vec![100]),
-                    (GrammarTerminalClasses::dollar, vec![100]),
-                    (GrammarTerminalClasses::byte_literal, vec![100]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![100]),
-                    (GrammarTerminalClasses::char_literal, vec![100]),
-                    (GrammarTerminalClasses::str_literal, vec![100]),
-                    (GrammarTerminalClasses::lparen, vec![100]),
-                    (GrammarTerminalClasses::rparen, vec![100]),
-                    (GrammarTerminalClasses::lbracket, vec![100]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 26 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 100 as
-                    usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![103]),
-                    (GrammarTerminalClasses::rparen, vec![103]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 103 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(55, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(57, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 104 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(7, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(42, true)),
-                    (GrammarNonTerminals::_PatternPlus22,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(51, true)),
-                    (GrammarNonTerminals::_PatternStar23,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(56, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![102]),
-                    (GrammarTerminalClasses::rparen, vec![102]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 23 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 29 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 32 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 35 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 38 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 41 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 99 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 100 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 101 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 102
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 104 as usize, shifted
-                    : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![104]),
-                    (GrammarTerminalClasses::rparen, vec![104]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 104 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![31]),
-                    (GrammarTerminalClasses::pipe, vec![31]),
-                    (GrammarTerminalClasses::percent, vec![31]),
-                    (GrammarTerminalClasses::dot, vec![31]),
-                    (GrammarTerminalClasses::dollar, vec![31]),
-                    (GrammarTerminalClasses::comma, vec![31]),
-                    (GrammarTerminalClasses::byte_literal, vec![31]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![31]),
-                    (GrammarTerminalClasses::char_literal, vec![31]),
-                    (GrammarTerminalClasses::str_literal, vec![31]),
-                    (GrammarTerminalClasses::bracegroup, vec![31]),
-                    (GrammarTerminalClasses::lparen, vec![31]),
-                    (GrammarTerminalClasses::rparen, vec![31]),
-                    (GrammarTerminalClasses::lbracket, vec![31]),
-                    (GrammarTerminalClasses::semicolon, vec![31]),
-                    (GrammarTerminalClasses::plus, vec![31]),
-                    (GrammarTerminalClasses::star, vec![31]),
-                    (GrammarTerminalClasses::question, vec![31]),
-                    (GrammarTerminalClasses::exclamation, vec![31]),
-                    (GrammarTerminalClasses::minus, vec![31]),
-                    (GrammarTerminalClasses::slash, vec![31]),
-                    (GrammarTerminalClasses::error, vec![31]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(59, true)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(66, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_commaQuestion25,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(68, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::rparen, vec![106]),],
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 26 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 6 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 6 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    6 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 6 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 6 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 105 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 106
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(60, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(62, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(64, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::rparen, vec![105]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as usize,
-                    shifted : 7 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 40 as usize, shifted : 7 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as usize, shifted :
-                    7 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 105 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(61, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 8 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![39]),
-                    (GrammarTerminalClasses::pipe, vec![39]),
-                    (GrammarTerminalClasses::percent, vec![39]),
-                    (GrammarTerminalClasses::dot, vec![39]),
-                    (GrammarTerminalClasses::dollar, vec![39]),
-                    (GrammarTerminalClasses::comma, vec![39]),
-                    (GrammarTerminalClasses::byte_literal, vec![39]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![39]),
-                    (GrammarTerminalClasses::char_literal, vec![39]),
-                    (GrammarTerminalClasses::str_literal, vec![39]),
-                    (GrammarTerminalClasses::bracegroup, vec![39]),
-                    (GrammarTerminalClasses::lparen, vec![39]),
-                    (GrammarTerminalClasses::rparen, vec![39]),
-                    (GrammarTerminalClasses::lbracket, vec![39]),
-                    (GrammarTerminalClasses::semicolon, vec![39]),
-                    (GrammarTerminalClasses::plus, vec![39]),
-                    (GrammarTerminalClasses::star, vec![39]),
-                    (GrammarTerminalClasses::question, vec![39]),
-                    (GrammarTerminalClasses::exclamation, vec![39]),
-                    (GrammarTerminalClasses::minus, vec![39]),
-                    (GrammarTerminalClasses::slash, vec![39]),
-                    (GrammarTerminalClasses::error, vec![39]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as usize,
-                    shifted : 9 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(63, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as
-                    usize, shifted : 8 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![40]),
-                    (GrammarTerminalClasses::pipe, vec![40]),
-                    (GrammarTerminalClasses::percent, vec![40]),
-                    (GrammarTerminalClasses::dot, vec![40]),
-                    (GrammarTerminalClasses::dollar, vec![40]),
-                    (GrammarTerminalClasses::comma, vec![40]),
-                    (GrammarTerminalClasses::byte_literal, vec![40]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![40]),
-                    (GrammarTerminalClasses::char_literal, vec![40]),
-                    (GrammarTerminalClasses::str_literal, vec![40]),
-                    (GrammarTerminalClasses::bracegroup, vec![40]),
-                    (GrammarTerminalClasses::lparen, vec![40]),
-                    (GrammarTerminalClasses::rparen, vec![40]),
-                    (GrammarTerminalClasses::lbracket, vec![40]),
-                    (GrammarTerminalClasses::semicolon, vec![40]),
-                    (GrammarTerminalClasses::plus, vec![40]),
-                    (GrammarTerminalClasses::star, vec![40]),
-                    (GrammarTerminalClasses::question, vec![40]),
-                    (GrammarTerminalClasses::exclamation, vec![40]),
-                    (GrammarTerminalClasses::minus, vec![40]),
-                    (GrammarTerminalClasses::slash, vec![40]),
-                    (GrammarTerminalClasses::error, vec![40]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize,
-                    shifted : 9 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(65, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 8 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![42]),
-                    (GrammarTerminalClasses::pipe, vec![42]),
-                    (GrammarTerminalClasses::percent, vec![42]),
-                    (GrammarTerminalClasses::dot, vec![42]),
-                    (GrammarTerminalClasses::dollar, vec![42]),
-                    (GrammarTerminalClasses::comma, vec![42]),
-                    (GrammarTerminalClasses::byte_literal, vec![42]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![42]),
-                    (GrammarTerminalClasses::char_literal, vec![42]),
-                    (GrammarTerminalClasses::str_literal, vec![42]),
-                    (GrammarTerminalClasses::bracegroup, vec![42]),
-                    (GrammarTerminalClasses::lparen, vec![42]),
-                    (GrammarTerminalClasses::rparen, vec![42]),
-                    (GrammarTerminalClasses::lbracket, vec![42]),
-                    (GrammarTerminalClasses::semicolon, vec![42]),
-                    (GrammarTerminalClasses::plus, vec![42]),
-                    (GrammarTerminalClasses::star, vec![42]),
-                    (GrammarTerminalClasses::question, vec![42]),
-                    (GrammarTerminalClasses::exclamation, vec![42]),
-                    (GrammarTerminalClasses::minus, vec![42]),
-                    (GrammarTerminalClasses::slash, vec![42]),
-                    (GrammarTerminalClasses::error, vec![42]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as usize,
-                    shifted : 9 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(67, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 7 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![41]),
-                    (GrammarTerminalClasses::pipe, vec![41]),
-                    (GrammarTerminalClasses::percent, vec![41]),
-                    (GrammarTerminalClasses::dot, vec![41]),
-                    (GrammarTerminalClasses::dollar, vec![41]),
-                    (GrammarTerminalClasses::comma, vec![41]),
-                    (GrammarTerminalClasses::byte_literal, vec![41]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![41]),
-                    (GrammarTerminalClasses::char_literal, vec![41]),
-                    (GrammarTerminalClasses::str_literal, vec![41]),
-                    (GrammarTerminalClasses::bracegroup, vec![41]),
-                    (GrammarTerminalClasses::lparen, vec![41]),
-                    (GrammarTerminalClasses::rparen, vec![41]),
-                    (GrammarTerminalClasses::lbracket, vec![41]),
-                    (GrammarTerminalClasses::semicolon, vec![41]),
-                    (GrammarTerminalClasses::plus, vec![41]),
-                    (GrammarTerminalClasses::star, vec![41]),
-                    (GrammarTerminalClasses::question, vec![41]),
-                    (GrammarTerminalClasses::exclamation, vec![41]),
-                    (GrammarTerminalClasses::minus, vec![41]),
-                    (GrammarTerminalClasses::slash, vec![41]),
-                    (GrammarTerminalClasses::error, vec![41]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize,
-                    shifted : 8 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(69, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 7 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![38]),
-                    (GrammarTerminalClasses::pipe, vec![38]),
-                    (GrammarTerminalClasses::percent, vec![38]),
-                    (GrammarTerminalClasses::dot, vec![38]),
-                    (GrammarTerminalClasses::dollar, vec![38]),
-                    (GrammarTerminalClasses::comma, vec![38]),
-                    (GrammarTerminalClasses::byte_literal, vec![38]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![38]),
-                    (GrammarTerminalClasses::char_literal, vec![38]),
-                    (GrammarTerminalClasses::str_literal, vec![38]),
-                    (GrammarTerminalClasses::bracegroup, vec![38]),
-                    (GrammarTerminalClasses::lparen, vec![38]),
-                    (GrammarTerminalClasses::rparen, vec![38]),
-                    (GrammarTerminalClasses::lbracket, vec![38]),
-                    (GrammarTerminalClasses::semicolon, vec![38]),
-                    (GrammarTerminalClasses::plus, vec![38]),
-                    (GrammarTerminalClasses::star, vec![38]),
-                    (GrammarTerminalClasses::question, vec![38]),
-                    (GrammarTerminalClasses::exclamation, vec![38]),
-                    (GrammarTerminalClasses::minus, vec![38]),
-                    (GrammarTerminalClasses::slash, vec![38]),
-                    (GrammarTerminalClasses::error, vec![38]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize,
-                    shifted : 8 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::Maybe, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![12]),
-                    (GrammarTerminalClasses::pipe, vec![12]),
-                    (GrammarTerminalClasses::percent, vec![12]),
-                    (GrammarTerminalClasses::dot, vec![12]),
-                    (GrammarTerminalClasses::dollar, vec![12]),
-                    (GrammarTerminalClasses::byte_literal, vec![12]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![12]),
-                    (GrammarTerminalClasses::char_literal, vec![12]),
-                    (GrammarTerminalClasses::str_literal, vec![12]),
-                    (GrammarTerminalClasses::bracegroup, vec![12]),
-                    (GrammarTerminalClasses::lparen, vec![12]),
-                    (GrammarTerminalClasses::lbracket, vec![12]),
-                    (GrammarTerminalClasses::semicolon, vec![12]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 12 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 25 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 26 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 28 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(72, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(96, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as
-                    usize, shifted : 4 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 3 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(5, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::RuleLine,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(73, true)),
-                    (GrammarNonTerminals::TokenMapped,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(74, true)),
-                    (GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),
-                    (GrammarNonTerminals::_TokenMappedPlus15,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(76, true)),
-                    (GrammarNonTerminals::_TokenMappedStar16,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(78, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![88]),
-                    (GrammarTerminalClasses::percent, vec![88]),
-                    (GrammarTerminalClasses::bracegroup, vec![88]),
-                    (GrammarTerminalClasses::semicolon, vec![88]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 5 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 11 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 12 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 22 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 23 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 24 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 25 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 26 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 28 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 29 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 31 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 33 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 34 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 35 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 36 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 37 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 39 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 40 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 42 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 85 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 86 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 87 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 88 as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![3]),
-                    (GrammarTerminalClasses::semicolon, vec![3]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 3 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![85]),
-                    (GrammarTerminalClasses::pipe, vec![85]),
-                    (GrammarTerminalClasses::percent, vec![85]),
-                    (GrammarTerminalClasses::dot, vec![85]),
-                    (GrammarTerminalClasses::dollar, vec![85]),
-                    (GrammarTerminalClasses::byte_literal, vec![85]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![85]),
-                    (GrammarTerminalClasses::char_literal, vec![85]),
-                    (GrammarTerminalClasses::str_literal, vec![85]),
-                    (GrammarTerminalClasses::bracegroup, vec![85]),
-                    (GrammarTerminalClasses::lparen, vec![85]),
-                    (GrammarTerminalClasses::lbracket, vec![85]),
-                    (GrammarTerminalClasses::semicolon, vec![85]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 85 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(43, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(44, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(45, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(46, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(47, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(49, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::ident, vec![11]),
-                    (GrammarTerminalClasses::pipe, vec![11]),
-                    (GrammarTerminalClasses::percent, vec![11]),
-                    (GrammarTerminalClasses::dot, vec![11]),
-                    (GrammarTerminalClasses::dollar, vec![11]),
-                    (GrammarTerminalClasses::byte_literal, vec![11]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![11]),
-                    (GrammarTerminalClasses::char_literal, vec![11]),
-                    (GrammarTerminalClasses::str_literal, vec![11]),
-                    (GrammarTerminalClasses::bracegroup, vec![11]),
-                    (GrammarTerminalClasses::lparen, vec![11]),
-                    (GrammarTerminalClasses::lbracket, vec![11]),
-                    (GrammarTerminalClasses::semicolon, vec![11]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 11 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 25 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 26 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 27 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 28 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 30 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(5, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(8, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(9, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(12, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(13, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(14, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(15, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(16, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(17, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::TokenMapped,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(77, true)),
-                    (GrammarNonTerminals::TerminalSet,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(37, true)),
-                    (GrammarNonTerminals::Pattern,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(75, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![87]),
-                    (GrammarTerminalClasses::percent, vec![87]),
-                    (GrammarTerminalClasses::bracegroup, vec![87]),
-                    (GrammarTerminalClasses::semicolon, vec![87]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 11 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 12 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 22 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 23 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 24 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 25 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 26 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 27 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 28 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 29 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 30 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 31 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 32 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 33 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 34 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 35 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 36 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 37 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 38 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 39 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 40 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 41 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 42 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 86 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 87 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![86]),
-                    (GrammarTerminalClasses::pipe, vec![86]),
-                    (GrammarTerminalClasses::percent, vec![86]),
-                    (GrammarTerminalClasses::dot, vec![86]),
-                    (GrammarTerminalClasses::dollar, vec![86]),
-                    (GrammarTerminalClasses::byte_literal, vec![86]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![86]),
-                    (GrammarTerminalClasses::char_literal, vec![86]),
-                    (GrammarTerminalClasses::str_literal, vec![86]),
-                    (GrammarTerminalClasses::bracegroup, vec![86]),
-                    (GrammarTerminalClasses::lparen, vec![86]),
-                    (GrammarTerminalClasses::lbracket, vec![86]),
-                    (GrammarTerminalClasses::semicolon, vec![86]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 86 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(79, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::PrecDef,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(90, true)),
-                    (GrammarNonTerminals::_PrecDefPlus17,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(91, true)),
-                    (GrammarNonTerminals::_PrecDefStar18,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(93, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![92]),
-                    (GrammarTerminalClasses::bracegroup, vec![92]),
-                    (GrammarTerminalClasses::semicolon, vec![92]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 5 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 6 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 7 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 8 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 9 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 10 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 89 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 90 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 91 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 92 as
-                    usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(80, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(86, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(89, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 6 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 7 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 8 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 9 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 10 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(84, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(85, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 7 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 46 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 47 as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![45]),
-                    (GrammarTerminalClasses::pipe, vec![45]),
-                    (GrammarTerminalClasses::percent, vec![45]),
-                    (GrammarTerminalClasses::byte_literal, vec![45]),
-                    (GrammarTerminalClasses::char_literal, vec![45]),
-                    (GrammarTerminalClasses::bracegroup, vec![45]),
-                    (GrammarTerminalClasses::semicolon, vec![45]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![46]),
-                    (GrammarTerminalClasses::pipe, vec![46]),
-                    (GrammarTerminalClasses::percent, vec![46]),
-                    (GrammarTerminalClasses::byte_literal, vec![46]),
-                    (GrammarTerminalClasses::char_literal, vec![46]),
-                    (GrammarTerminalClasses::bracegroup, vec![46]),
-                    (GrammarTerminalClasses::semicolon, vec![46]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 46 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![47]),
-                    (GrammarTerminalClasses::pipe, vec![47]),
-                    (GrammarTerminalClasses::percent, vec![47]),
-                    (GrammarTerminalClasses::byte_literal, vec![47]),
-                    (GrammarTerminalClasses::char_literal, vec![47]),
-                    (GrammarTerminalClasses::bracegroup, vec![47]),
-                    (GrammarTerminalClasses::semicolon, vec![47]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![7]),
-                    (GrammarTerminalClasses::percent, vec![7]),
-                    (GrammarTerminalClasses::bracegroup, vec![7]),
-                    (GrammarTerminalClasses::semicolon, vec![7]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 7 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![6]),
-                    (GrammarTerminalClasses::percent, vec![6]),
-                    (GrammarTerminalClasses::bracegroup, vec![6]),
-                    (GrammarTerminalClasses::semicolon, vec![6]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(87, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(88, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 8 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 9 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![8]),
-                    (GrammarTerminalClasses::percent, vec![8]),
-                    (GrammarTerminalClasses::bracegroup, vec![8]),
-                    (GrammarTerminalClasses::semicolon, vec![8]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 8 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![9]),
-                    (GrammarTerminalClasses::percent, vec![9]),
-                    (GrammarTerminalClasses::bracegroup, vec![9]),
-                    (GrammarTerminalClasses::semicolon, vec![9]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 9 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![10]),
-                    (GrammarTerminalClasses::percent, vec![10]),
-                    (GrammarTerminalClasses::bracegroup, vec![10]),
-                    (GrammarTerminalClasses::semicolon, vec![10]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 10 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![89]),
-                    (GrammarTerminalClasses::percent, vec![89]),
-                    (GrammarTerminalClasses::bracegroup, vec![89]),
-                    (GrammarTerminalClasses::semicolon, vec![89]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 89 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(79, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::PrecDef,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(92, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![91]),
-                    (GrammarTerminalClasses::bracegroup, vec![91]),
-                    (GrammarTerminalClasses::semicolon, vec![91]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 6 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 7 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 8 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 9 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 10 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 90 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 91 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![90]),
-                    (GrammarTerminalClasses::percent, vec![90]),
-                    (GrammarTerminalClasses::bracegroup, vec![90]),
-                    (GrammarTerminalClasses::semicolon, vec![90]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 90 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(94, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::Action,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(95, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![44]),
-                    (GrammarTerminalClasses::semicolon, vec![44]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 5 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 43 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 44 as usize, shifted :
-                    0 as usize, },], can_accept_error : ::rusty_lr_core::TriState::False,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![43]),
-                    (GrammarTerminalClasses::semicolon, vec![43]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 43 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![5]),
-                    (GrammarTerminalClasses::semicolon, vec![5]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 5 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![0]),
-                    (GrammarTerminalClasses::percent, vec![0]),
-                    (GrammarTerminalClasses::eof, vec![0]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as usize,
-                    shifted : 5 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::pipe, vec![4]),
-                    (GrammarTerminalClasses::semicolon, vec![4]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 4 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(99, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(106, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(111, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(120, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(125, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(129, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(133, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(137, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(141, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(145, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(149, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(154, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(158, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(162, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(170, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(174, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(178, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 48 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 49 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 50 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 51 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 52 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 53 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 54 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 55 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 56 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 57 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 58 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 59 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 60 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 61 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 62 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 63 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 64 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 65 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 66 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 67 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 68 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 69 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 70 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 71 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 72 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 73 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 74 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 75 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 76 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 77 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 78 as
-                    usize, shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 79 as usize, shifted : 1 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 80 as usize, shifted :
-                    1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 81 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(100, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(102, true)),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus28,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(103, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 46 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 57 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 58 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 154 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 155
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(101, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 58 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![58]),
-                    (GrammarTerminalClasses::percent, vec![58]),
-                    (GrammarTerminalClasses::eof, vec![58]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 58 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![154]),
-                    (GrammarTerminalClasses::byte_literal, vec![154]),
-                    (GrammarTerminalClasses::char_literal, vec![154]),
-                    (GrammarTerminalClasses::semicolon, vec![154]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 154 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(104, false)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(105, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 46 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 57 as
-                    usize, shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 155 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![57]),
-                    (GrammarTerminalClasses::percent, vec![57]),
-                    (GrammarTerminalClasses::eof, vec![57]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 57 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![155]),
-                    (GrammarTerminalClasses::byte_literal, vec![155]),
-                    (GrammarTerminalClasses::char_literal, vec![155]),
-                    (GrammarTerminalClasses::semicolon, vec![155]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 155 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(107, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(102, true)),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus28,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(109, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 46 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 59 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 60 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 154 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 155
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(108, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 60 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![60]),
-                    (GrammarTerminalClasses::percent, vec![60]),
-                    (GrammarTerminalClasses::eof, vec![60]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 60 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(110, false)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(105, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 46 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 59 as
-                    usize, shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 155 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![59]),
-                    (GrammarTerminalClasses::percent, vec![59]),
-                    (GrammarTerminalClasses::eof, vec![59]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 59 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(112, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(118, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 48 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 49 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 50 as usize, shifted :
-                    2 as usize, },], can_accept_error : ::rusty_lr_core::TriState::True,
-                    }, ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(113, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(115, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 48 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 49 as usize, shifted : 3 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![49]),
-                    (GrammarTerminalClasses::percent, vec![49]),
-                    (GrammarTerminalClasses::eof, vec![49]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 49 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![152]),
-                    (GrammarTerminalClasses::TermClass1, vec![152]),
-                    (GrammarTerminalClasses::colon, vec![152]),
-                    (GrammarTerminalClasses::pipe, vec![152]),
-                    (GrammarTerminalClasses::percent, vec![152]),
-                    (GrammarTerminalClasses::equal, vec![152]),
-                    (GrammarTerminalClasses::caret, vec![152]),
-                    (GrammarTerminalClasses::dot, vec![152]),
-                    (GrammarTerminalClasses::dollar, vec![152]),
-                    (GrammarTerminalClasses::comma, vec![152]),
-                    (GrammarTerminalClasses::int_literal, vec![152]),
-                    (GrammarTerminalClasses::byte_literal, vec![152]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![152]),
-                    (GrammarTerminalClasses::char_literal, vec![152]),
-                    (GrammarTerminalClasses::str_literal, vec![152]),
-                    (GrammarTerminalClasses::parengroup, vec![152]),
-                    (GrammarTerminalClasses::bracegroup, vec![152]),
-                    (GrammarTerminalClasses::lparen, vec![152]),
-                    (GrammarTerminalClasses::rparen, vec![152]),
-                    (GrammarTerminalClasses::lbracket, vec![152]),
-                    (GrammarTerminalClasses::rbracket, vec![152]),
-                    (GrammarTerminalClasses::left, vec![152]),
-                    (GrammarTerminalClasses::right, vec![152]),
-                    (GrammarTerminalClasses::token, vec![152]),
-                    (GrammarTerminalClasses::start, vec![152]),
-                    (GrammarTerminalClasses::tokentype, vec![152]),
-                    (GrammarTerminalClasses::userdata, vec![152]),
-                    (GrammarTerminalClasses::errortype, vec![152]),
-                    (GrammarTerminalClasses::moduleprefix, vec![152]),
-                    (GrammarTerminalClasses::lalr, vec![152]),
-                    (GrammarTerminalClasses::glr, vec![152]),
-                    (GrammarTerminalClasses::prec, vec![152]),
-                    (GrammarTerminalClasses::precedence, vec![152]),
-                    (GrammarTerminalClasses::nooptim, vec![152]),
-                    (GrammarTerminalClasses::dense, vec![152]),
-                    (GrammarTerminalClasses::trace, vec![152]),
-                    (GrammarTerminalClasses::dprec, vec![152]),
-                    (GrammarTerminalClasses::filter, vec![152]),
-                    (GrammarTerminalClasses::location, vec![152]),
-                    (GrammarTerminalClasses::semicolon, vec![152]),
-                    (GrammarTerminalClasses::plus, vec![152]),
-                    (GrammarTerminalClasses::star, vec![152]),
-                    (GrammarTerminalClasses::question, vec![152]),
-                    (GrammarTerminalClasses::exclamation, vec![152]),
-                    (GrammarTerminalClasses::minus, vec![152]),
-                    (GrammarTerminalClasses::slash, vec![152]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 152 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(116, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 48 as usize,
-                    shifted : 4 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![48]),
-                    (GrammarTerminalClasses::percent, vec![48]),
-                    (GrammarTerminalClasses::eof, vec![48]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 48 as usize,
-                    shifted : 5 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![153]),
-                    (GrammarTerminalClasses::TermClass1, vec![153]),
-                    (GrammarTerminalClasses::colon, vec![153]),
-                    (GrammarTerminalClasses::pipe, vec![153]),
-                    (GrammarTerminalClasses::percent, vec![153]),
-                    (GrammarTerminalClasses::equal, vec![153]),
-                    (GrammarTerminalClasses::caret, vec![153]),
-                    (GrammarTerminalClasses::dot, vec![153]),
-                    (GrammarTerminalClasses::dollar, vec![153]),
-                    (GrammarTerminalClasses::comma, vec![153]),
-                    (GrammarTerminalClasses::int_literal, vec![153]),
-                    (GrammarTerminalClasses::byte_literal, vec![153]),
-                    (GrammarTerminalClasses::byte_str_literal, vec![153]),
-                    (GrammarTerminalClasses::char_literal, vec![153]),
-                    (GrammarTerminalClasses::str_literal, vec![153]),
-                    (GrammarTerminalClasses::parengroup, vec![153]),
-                    (GrammarTerminalClasses::bracegroup, vec![153]),
-                    (GrammarTerminalClasses::lparen, vec![153]),
-                    (GrammarTerminalClasses::rparen, vec![153]),
-                    (GrammarTerminalClasses::lbracket, vec![153]),
-                    (GrammarTerminalClasses::rbracket, vec![153]),
-                    (GrammarTerminalClasses::left, vec![153]),
-                    (GrammarTerminalClasses::right, vec![153]),
-                    (GrammarTerminalClasses::token, vec![153]),
-                    (GrammarTerminalClasses::start, vec![153]),
-                    (GrammarTerminalClasses::tokentype, vec![153]),
-                    (GrammarTerminalClasses::userdata, vec![153]),
-                    (GrammarTerminalClasses::errortype, vec![153]),
-                    (GrammarTerminalClasses::moduleprefix, vec![153]),
-                    (GrammarTerminalClasses::lalr, vec![153]),
-                    (GrammarTerminalClasses::glr, vec![153]),
-                    (GrammarTerminalClasses::prec, vec![153]),
-                    (GrammarTerminalClasses::precedence, vec![153]),
-                    (GrammarTerminalClasses::nooptim, vec![153]),
-                    (GrammarTerminalClasses::dense, vec![153]),
-                    (GrammarTerminalClasses::trace, vec![153]),
-                    (GrammarTerminalClasses::dprec, vec![153]),
-                    (GrammarTerminalClasses::filter, vec![153]),
-                    (GrammarTerminalClasses::location, vec![153]),
-                    (GrammarTerminalClasses::semicolon, vec![153]),
-                    (GrammarTerminalClasses::plus, vec![153]),
-                    (GrammarTerminalClasses::star, vec![153]),
-                    (GrammarTerminalClasses::question, vec![153]),
-                    (GrammarTerminalClasses::exclamation, vec![153]),
-                    (GrammarTerminalClasses::minus, vec![153]),
-                    (GrammarTerminalClasses::slash, vec![153]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(119, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 50 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![50]),
-                    (GrammarTerminalClasses::percent, vec![50]),
-                    (GrammarTerminalClasses::eof, vec![50]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 50 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(121, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(123, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 51 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 52 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(122, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 51 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![51]),
-                    (GrammarTerminalClasses::percent, vec![51]),
-                    (GrammarTerminalClasses::eof, vec![51]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 51 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(124, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 52 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![52]),
-                    (GrammarTerminalClasses::percent, vec![52]),
-                    (GrammarTerminalClasses::eof, vec![52]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 52 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(126, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(127, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 53 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 54 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![54]),
-                    (GrammarTerminalClasses::percent, vec![54]),
-                    (GrammarTerminalClasses::eof, vec![54]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 54 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(128, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 53 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![53]),
-                    (GrammarTerminalClasses::percent, vec![53]),
-                    (GrammarTerminalClasses::eof, vec![53]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 53 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(130, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(131, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 55 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 56 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![56]),
-                    (GrammarTerminalClasses::percent, vec![56]),
-                    (GrammarTerminalClasses::eof, vec![56]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 56 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(132, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 55 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![55]),
-                    (GrammarTerminalClasses::percent, vec![55]),
-                    (GrammarTerminalClasses::eof, vec![55]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 55 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(134, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(135, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 63 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 64 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![64]),
-                    (GrammarTerminalClasses::percent, vec![64]),
-                    (GrammarTerminalClasses::eof, vec![64]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 64 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(136, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 63 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![63]),
-                    (GrammarTerminalClasses::percent, vec![63]),
-                    (GrammarTerminalClasses::eof, vec![63]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 63 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(138, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(139, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 65 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 66 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![66]),
-                    (GrammarTerminalClasses::percent, vec![66]),
-                    (GrammarTerminalClasses::eof, vec![66]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 66 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(140, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 65 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![65]),
-                    (GrammarTerminalClasses::percent, vec![65]),
-                    (GrammarTerminalClasses::eof, vec![65]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 65 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(142, false)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(143, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 69 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 70 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![69]),
-                    (GrammarTerminalClasses::percent, vec![69]),
-                    (GrammarTerminalClasses::eof, vec![69]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 69 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(144, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 70 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![70]),
-                    (GrammarTerminalClasses::percent, vec![70]),
-                    (GrammarTerminalClasses::eof, vec![70]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 70 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(146, false)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(147, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 67 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 68 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![67]),
-                    (GrammarTerminalClasses::percent, vec![67]),
-                    (GrammarTerminalClasses::eof, vec![67]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 67 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(148, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 68 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![68]),
-                    (GrammarTerminalClasses::percent, vec![68]),
-                    (GrammarTerminalClasses::eof, vec![68]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 68 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(150, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(102, true)),
-                    (GrammarNonTerminals::_IdentOrLiteralPlus28,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(152, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 46 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 61 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 62 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 154 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 155
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(151, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 62 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![62]),
-                    (GrammarTerminalClasses::percent, vec![62]),
-                    (GrammarTerminalClasses::eof, vec![62]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 62 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(81, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(82, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(83, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(153, false)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::IdentOrLiteral,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(105, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 45 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 46 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 47 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 61 as
-                    usize, shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 155 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![61]),
-                    (GrammarTerminalClasses::percent, vec![61]),
-                    (GrammarTerminalClasses::eof, vec![61]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 61 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(155, false)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(156, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 71 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 72 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![71]),
-                    (GrammarTerminalClasses::percent, vec![71]),
-                    (GrammarTerminalClasses::eof, vec![71]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 71 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(157, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 72 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![72]),
-                    (GrammarTerminalClasses::percent, vec![72]),
-                    (GrammarTerminalClasses::eof, vec![72]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 72 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(159, false)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(160, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 73 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 74 as usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![73]),
-                    (GrammarTerminalClasses::percent, vec![73]),
-                    (GrammarTerminalClasses::eof, vec![73]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 73 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(161, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 74 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![74]),
-                    (GrammarTerminalClasses::percent, vec![74]),
-                    (GrammarTerminalClasses::eof, vec![74]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 74 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(163, true)),
-                    (GrammarTerminalClasses::error,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(164, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_identPlus29,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(166, true)),
-                    (GrammarNonTerminals::_identStar30,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(168, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::semicolon, vec![159]),],
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 75 as
-                    usize, shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 76 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 156 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 157
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 158 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 159
-                    as usize, shifted : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::True, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![156]),
-                    (GrammarTerminalClasses::semicolon, vec![156]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 156 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(165, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 76 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![76]),
-                    (GrammarTerminalClasses::percent, vec![76]),
-                    (GrammarTerminalClasses::eof, vec![76]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 76 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(167, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map :
-                    vec![(GrammarTerminalClasses::semicolon, vec![158]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 157 as usize,
-                    shifted : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 158 as usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![157]),
-                    (GrammarTerminalClasses::semicolon, vec![157]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 157 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(169, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 75 as
-                    usize, shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![75]),
-                    (GrammarTerminalClasses::percent, vec![75]),
-                    (GrammarTerminalClasses::eof, vec![75]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 75 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(171, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(172, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 77 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 78 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![78]),
-                    (GrammarTerminalClasses::percent, vec![78]),
-                    (GrammarTerminalClasses::eof, vec![78]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 78 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(173, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 77 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![77]),
-                    (GrammarTerminalClasses::percent, vec![77]),
-                    (GrammarTerminalClasses::eof, vec![77]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 77 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(175, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(114, true)),
-                    (GrammarNonTerminals::__TermSet26Plus27,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(176, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 79 as usize,
-                    shifted : 2 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 80 as usize, shifted : 2 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 107 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 152
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 0 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![80]),
-                    (GrammarTerminalClasses::percent, vec![80]),
-                    (GrammarTerminalClasses::eof, vec![80]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 80 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::TermClass1,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::colon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::pipe,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::equal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::caret,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dot,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dollar,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::comma,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::int_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::byte_str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::char_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::str_literal,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::parengroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::bracegroup,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rparen,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::rbracket,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::left,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::right,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::token,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::start,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::tokentype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::userdata,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::errortype,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::moduleprefix,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::lalr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::glr,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::prec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::precedence,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::nooptim,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dense,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::trace,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::dprec,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::filter,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::location,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(177, false)),
-                    (GrammarTerminalClasses::plus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::star,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::question,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::exclamation,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::minus,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),
-                    (GrammarTerminalClasses::slash,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::_TermSet26,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(117, true)),],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 79 as usize,
-                    shifted : 3 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 107 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 108 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 109
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 110 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 111
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 112 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 113
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 114 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 115
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 116 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 117
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 118 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 119
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 120 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 121
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 122 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 123
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 124 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 125
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 126 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 127
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 128 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 129
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 130 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 131
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 132 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 133
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 134 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 135
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 136 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 137
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 138 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 139
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 140 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 141
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 142 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 143
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 144 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 145
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 146 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 147
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 148 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 149
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 150 as usize, shifted
-                    : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 151
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 153 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![79]),
-                    (GrammarTerminalClasses::percent, vec![79]),
-                    (GrammarTerminalClasses::eof, vec![79]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 79 as usize,
-                    shifted : 4 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::semicolon,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(179, false)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 81 as
-                    usize, shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![81]),
-                    (GrammarTerminalClasses::percent, vec![81]),
-                    (GrammarTerminalClasses::eof, vec![81]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 81 as usize,
-                    shifted : 3 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::ident, vec![82]),
-                    (GrammarTerminalClasses::percent, vec![82]),
-                    (GrammarTerminalClasses::eof, vec![82]),], ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 82 as usize,
-                    shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::ident,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(1, true)),
-                    (GrammarTerminalClasses::percent,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(98, true)),],
-                    shift_goto_map_nonterm : vec![(GrammarNonTerminals::Rule,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(180, true)),
-                    (GrammarNonTerminals::Directive,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(181, false)),
-                    (GrammarNonTerminals::GrammarLine,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(181, true)),
-                    (GrammarNonTerminals::_GrammarLinePlus31,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(182, true)),],
-                    reduce_map : vec![(GrammarTerminalClasses::eof, vec![160]),], ruleset
-                    : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 0 as usize,
-                    shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule
-                    : 48 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 49 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 50 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 51 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 52 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 53 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 54 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 55 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 56 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 57 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 58 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 59 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 60 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 61 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 62 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 63 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 64 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 65 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 66 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 67 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 68 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 69 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 70 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 71 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 72 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 73 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 74 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 75 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 76 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 77 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 78 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 79 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 80 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 81 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 82 as usize, shifted :
-                    0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 83 as
-                    usize, shifted : 0 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef
-                    { rule : 160 as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 160 as usize, shifted
-                    : 1 as usize, }, ::rusty_lr_core::rule::ShiftedRuleRef { rule : 161
-                    as usize, shifted : 0 as usize, },
-                    ::rusty_lr_core::rule::ShiftedRuleRef { rule : 161 as usize, shifted
-                    : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : vec![(GrammarTerminalClasses::eof, vec![161]),], ruleset
-                    : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 161 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![(GrammarTerminalClasses::eof,
-                    ::rusty_lr_core::parser::state::ShiftTarget::new(184, true)),],
-                    shift_goto_map_nonterm : vec![], reduce_map : Default::default(),
-                    ruleset : vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 162 as
-                    usize, shifted : 1 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
-                    ::rusty_lr_core::parser::state::IntermediateState {
-                    shift_goto_map_term : vec![], shift_goto_map_nonterm : vec![],
-                    reduce_map : Default::default(), ruleset :
-                    vec![::rusty_lr_core::rule::ShiftedRuleRef { rule : 162 as usize,
-                    shifted : 2 as usize, },], can_accept_error :
-                    ::rusty_lr_core::TriState::False, },
+                static SHIFT_TERM_DATA: &[u32] = &[
+                    2147516416u32, 2150694916u32, 2147549199u32, 2147614722u32,
+                    2147647488u32, 2147745799u32, 2147778568u32, 2147876875u32,
+                    2147909644u32, 2147942413u32, 2147975182u32, 2148007953u32,
+                    2148040723u32, 2147680261u32, 2147713024u32, 2147745799u32,
+                    2147778568u32, 2147876875u32, 2147909644u32, 2147942413u32,
+                    2147975182u32, 2148007953u32, 2148040723u32, 2147811328u32,
+                    2147844113u32, 2147713024u32, 2147745799u32, 2147778568u32,
+                    2147876875u32, 2147909644u32, 2147942413u32, 2147975182u32,
+                    2148007953u32, 2148040723u32, 2147713024u32, 2147745799u32,
+                    2147778568u32, 2147876875u32, 2147909644u32, 2147942413u32,
+                    2147975182u32, 2148007953u32, 2148040723u32, 2148794414u32,
+                    2148073478u32, 2148139008u32, 2148270091u32, 2148401165u32,
+                    2148171820u32, 2148204544u32, 2148237358u32, 2148302892u32,
+                    2148335627u32, 2148368430u32, 2148433964u32, 2148466701u32,
+                    2148499502u32, 2148139008u32, 2148270091u32, 2148401165u32,
+                    2148663316u32, 2148761609u32, 2148892712u32, 2148925481u32,
+                    2148958250u32, 2148991019u32, 2149023788u32, 2149089325u32,
+                    2147713024u32, 2147745799u32, 2147778568u32, 2147876875u32,
+                    2147909644u32, 2147942413u32, 2147975182u32, 2148007953u32,
+                    2148040723u32, 2148827154u32, 2148892712u32, 2148925481u32,
+                    2148958250u32, 2148991019u32, 2149023788u32, 2149089325u32,
+                    2147713024u32, 2147745799u32, 2147778568u32, 2147876875u32,
+                    2147909644u32, 2147942413u32, 2147975182u32, 2148007953u32,
+                    2148040723u32, 2148892712u32, 2148925481u32, 2148958250u32,
+                    2148991019u32, 2149089325u32, 2147713024u32, 2147745799u32,
+                    2147778568u32, 2147876875u32, 2147909644u32, 2147942413u32,
+                    2147975182u32, 2148007953u32, 2148040723u32, 2148892712u32,
+                    2148925481u32, 2148958250u32, 2148991019u32, 2147713024u32,
+                    2147745799u32, 2147778568u32, 2147876875u32, 2147909644u32,
+                    2147942413u32, 2147975182u32, 2148007953u32, 2148040723u32,
+                    2148892712u32, 2148925481u32, 2148958250u32, 2148991019u32,
+                    2149023788u32, 2149089325u32, 2149285891u32, 2149351442u32,
+                    2147713024u32, 2147745799u32, 2147778568u32, 2147876875u32,
+                    2147909644u32, 2147942413u32, 2147975182u32, 2148007953u32,
+                    2148040723u32, 2149416969u32, 2148892712u32, 2148925481u32,
+                    2148958250u32, 2148991019u32, 2149023788u32, 2149089325u32,
+                    2149646382u32, 2149449768u32, 2149515305u32, 2149580846u32,
+                    2149482514u32, 2149548050u32, 2149613586u32, 2149679122u32,
+                    2149744658u32, 2148892712u32, 2148925481u32, 2148958250u32,
+                    2148991019u32, 2149023788u32, 2149089325u32, 2149842947u32,
+                    3145767u32, 2147647488u32, 2147745799u32, 2147778568u32,
+                    2147876875u32, 2147909644u32, 2147942413u32, 2147975182u32,
+                    2148007953u32, 2148040723u32, 2148892712u32, 2148925481u32,
+                    2148958250u32, 2148991019u32, 2149023788u32, 2149089325u32,
+                    2147647488u32, 2147745799u32, 2147778568u32, 2147876875u32,
+                    2147909644u32, 2147942413u32, 2147975182u32, 2148007953u32,
+                    2148040723u32, 2150072324u32, 2150105119u32, 2150301732u32,
+                    2150400046u32, 2150137856u32, 2150170635u32, 2150203405u32,
+                    2150236206u32, 2150334474u32, 2150367278u32, 2150072324u32,
+                    2150563856u32, 2150727701u32, 2150957078u32, 2151120919u32,
+                    2151415832u32, 2151579673u32, 2151710746u32, 2151841819u32,
+                    2151972892u32, 2152103965u32, 2152235038u32, 2152366112u32,
+                    2152529953u32, 2152661026u32, 2152792099u32, 2153054245u32,
+                    2153185318u32, 2153316398u32, 2150137856u32, 2150170635u32,
+                    2150203405u32, 2150760494u32, 3309607u32, 2150137856u32,
+                    2150170635u32, 2150203405u32, 3407911u32, 2150137856u32,
+                    2150170635u32, 2150203405u32, 2150989870u32, 3538983u32,
+                    2150137856u32, 2150170635u32, 2150203405u32, 3604519u32,
+                    2151153664u32, 2151350318u32, 2151219200u32, 2151219201u32,
+                    2151219202u32, 2151219203u32, 2151219204u32, 2151219205u32,
+                    2151219206u32, 2151219207u32, 2151219208u32, 2151219209u32,
+                    2151219210u32, 2151219211u32, 2151219212u32, 2151219213u32,
+                    2151219214u32, 2151219215u32, 2151219216u32, 2151219217u32,
+                    2151219218u32, 2151219219u32, 2151219220u32, 2151219221u32,
+                    2151219222u32, 2151219223u32, 2151219224u32, 2151219225u32,
+                    2151219226u32, 2151219227u32, 2151219228u32, 2151219229u32,
+                    2151219230u32, 2151219231u32, 2151219232u32, 2151219233u32,
+                    2151219234u32, 2151219235u32, 2151219236u32, 2151219237u32,
+                    2151219238u32, 3702823u32, 2151219240u32, 2151219241u32,
+                    2151219242u32, 2151219243u32, 2151219244u32, 2151219245u32,
+                    2151317504u32, 2151317505u32, 2151317506u32, 2151317507u32,
+                    2151317508u32, 2151317509u32, 2151317510u32, 2151317511u32,
+                    2151317512u32, 2151317513u32, 2151317514u32, 2151317515u32,
+                    2151317516u32, 2151317517u32, 2151317518u32, 2151317519u32,
+                    2151317520u32, 2151317521u32, 2151317522u32, 2151317523u32,
+                    2151317524u32, 2151317525u32, 2151317526u32, 2151317527u32,
+                    2151317528u32, 2151317529u32, 2151317530u32, 2151317531u32,
+                    2151317532u32, 2151317533u32, 2151317534u32, 2151317535u32,
+                    2151317536u32, 2151317537u32, 2151317538u32, 2151317539u32,
+                    2151317540u32, 2151317541u32, 2151317542u32, 3801127u32,
+                    2151317544u32, 2151317545u32, 2151317546u32, 2151317547u32,
+                    2151317548u32, 2151317549u32, 3899431u32, 2151448576u32,
+                    2151514158u32, 3997735u32, 4063271u32, 2151219200u32, 2151219201u32,
+                    2151219202u32, 2151219203u32, 2151219204u32, 2151219205u32,
+                    2151219206u32, 2151219207u32, 2151219208u32, 2151219209u32,
+                    2151219210u32, 2151219211u32, 2151219212u32, 2151219213u32,
+                    2151219214u32, 2151219215u32, 2151219216u32, 2151219217u32,
+                    2151219218u32, 2151219219u32, 2151219220u32, 2151219221u32,
+                    2151219222u32, 2151219223u32, 2151219224u32, 2151219225u32,
+                    2151219226u32, 2151219227u32, 2151219228u32, 2151219229u32,
+                    2151219230u32, 2151219231u32, 2151219232u32, 2151219233u32,
+                    2151219234u32, 2151219235u32, 2151219236u32, 2151219237u32,
+                    2151219238u32, 4128807u32, 2151219240u32, 2151219241u32,
+                    2151219242u32, 2151219243u32, 2151219244u32, 2151219245u32,
+                    2151317504u32, 2151317505u32, 2151317506u32, 2151317507u32,
+                    2151317508u32, 2151317509u32, 2151317510u32, 2151317511u32,
+                    2151317512u32, 2151317513u32, 2151317514u32, 2151317515u32,
+                    2151317516u32, 2151317517u32, 2151317518u32, 2151317519u32,
+                    2151317520u32, 2151317521u32, 2151317522u32, 2151317523u32,
+                    2151317524u32, 2151317525u32, 2151317526u32, 2151317527u32,
+                    2151317528u32, 2151317529u32, 2151317530u32, 2151317531u32,
+                    2151317532u32, 2151317533u32, 2151317534u32, 2151317535u32,
+                    2151317536u32, 2151317537u32, 2151317538u32, 2151317539u32,
+                    2151317540u32, 2151317541u32, 2151317542u32, 4194343u32,
+                    2151317544u32, 2151317545u32, 2151317546u32, 2151317547u32,
+                    2151317548u32, 2151317549u32, 2151219200u32, 2151219201u32,
+                    2151219202u32, 2151219203u32, 2151219204u32, 2151219205u32,
+                    2151219206u32, 2151219207u32, 2151219208u32, 2151219209u32,
+                    2151219210u32, 2151219211u32, 2151219212u32, 2151219213u32,
+                    2151219214u32, 2151219215u32, 2151219216u32, 2151219217u32,
+                    2151219218u32, 2151219219u32, 2151219220u32, 2151219221u32,
+                    2151219222u32, 2151219223u32, 2151219224u32, 2151219225u32,
+                    2151219226u32, 2151219227u32, 2151219228u32, 2151219229u32,
+                    2151219230u32, 2151219231u32, 2151219232u32, 2151219233u32,
+                    2151219234u32, 2151219235u32, 2151219236u32, 2151219237u32,
+                    2151219238u32, 4259879u32, 2151219240u32, 2151219241u32,
+                    2151219242u32, 2151219243u32, 2151219244u32, 2151219245u32,
+                    2151317504u32, 2151317505u32, 2151317506u32, 2151317507u32,
+                    2151317508u32, 2151317509u32, 2151317510u32, 2151317511u32,
+                    2151317512u32, 2151317513u32, 2151317514u32, 2151317515u32,
+                    2151317516u32, 2151317517u32, 2151317518u32, 2151317519u32,
+                    2151317520u32, 2151317521u32, 2151317522u32, 2151317523u32,
+                    2151317524u32, 2151317525u32, 2151317526u32, 2151317527u32,
+                    2151317528u32, 2151317529u32, 2151317530u32, 2151317531u32,
+                    2151317532u32, 2151317533u32, 2151317534u32, 2151317535u32,
+                    2151317536u32, 2151317537u32, 2151317538u32, 2151317539u32,
+                    2151317540u32, 2151317541u32, 2151317542u32, 4325415u32,
+                    2151317544u32, 2151317545u32, 2151317546u32, 2151317547u32,
+                    2151317548u32, 2151317549u32, 2151219200u32, 2151219201u32,
+                    2151219202u32, 2151219203u32, 2151219204u32, 2151219205u32,
+                    2151219206u32, 2151219207u32, 2151219208u32, 2151219209u32,
+                    2151219210u32, 2151219211u32, 2151219212u32, 2151219213u32,
+                    2151219214u32, 2151219215u32, 2151219216u32, 2151219217u32,
+                    2151219218u32, 2151219219u32, 2151219220u32, 2151219221u32,
+                    2151219222u32, 2151219223u32, 2151219224u32, 2151219225u32,
+                    2151219226u32, 2151219227u32, 2151219228u32, 2151219229u32,
+                    2151219230u32, 2151219231u32, 2151219232u32, 2151219233u32,
+                    2151219234u32, 2151219235u32, 2151219236u32, 2151219237u32,
+                    2151219238u32, 4390951u32, 2151219240u32, 2151219241u32,
+                    2151219242u32, 2151219243u32, 2151219244u32, 2151219245u32,
+                    2151317504u32, 2151317505u32, 2151317506u32, 2151317507u32,
+                    2151317508u32, 2151317509u32, 2151317510u32, 2151317511u32,
+                    2151317512u32, 2151317513u32, 2151317514u32, 2151317515u32,
+                    2151317516u32, 2151317517u32, 2151317518u32, 2151317519u32,
+                    2151317520u32, 2151317521u32, 2151317522u32, 2151317523u32,
+                    2151317524u32, 2151317525u32, 2151317526u32, 2151317527u32,
+                    2151317528u32, 2151317529u32, 2151317530u32, 2151317531u32,
+                    2151317532u32, 2151317533u32, 2151317534u32, 2151317535u32,
+                    2151317536u32, 2151317537u32, 2151317538u32, 2151317539u32,
+                    2151317540u32, 2151317541u32, 2151317542u32, 4456487u32,
+                    2151317544u32, 2151317545u32, 2151317546u32, 2151317547u32,
+                    2151317548u32, 2151317549u32, 2151219200u32, 2151219201u32,
+                    2151219202u32, 2151219203u32, 2151219204u32, 2151219205u32,
+                    2151219206u32, 2151219207u32, 2151219208u32, 2151219209u32,
+                    2151219210u32, 2151219211u32, 2151219212u32, 2151219213u32,
+                    2151219214u32, 2151219215u32, 2151219216u32, 2151219217u32,
+                    2151219218u32, 2151219219u32, 2151219220u32, 2151219221u32,
+                    2151219222u32, 2151219223u32, 2151219224u32, 2151219225u32,
+                    2151219226u32, 2151219227u32, 2151219228u32, 2151219229u32,
+                    2151219230u32, 2151219231u32, 2151219232u32, 2151219233u32,
+                    2151219234u32, 2151219235u32, 2151219236u32, 2151219237u32,
+                    2151219238u32, 4522023u32, 2151219240u32, 2151219241u32,
+                    2151219242u32, 2151219243u32, 2151219244u32, 2151219245u32,
+                    2151317504u32, 2151317505u32, 2151317506u32, 2151317507u32,
+                    2151317508u32, 2151317509u32, 2151317510u32, 2151317511u32,
+                    2151317512u32, 2151317513u32, 2151317514u32, 2151317515u32,
+                    2151317516u32, 2151317517u32, 2151317518u32, 2151317519u32,
+                    2151317520u32, 2151317521u32, 2151317522u32, 2151317523u32,
+                    2151317524u32, 2151317525u32, 2151317526u32, 2151317527u32,
+                    2151317528u32, 2151317529u32, 2151317530u32, 2151317531u32,
+                    2151317532u32, 2151317533u32, 2151317534u32, 2151317535u32,
+                    2151317536u32, 2151317537u32, 2151317538u32, 2151317539u32,
+                    2151317540u32, 2151317541u32, 2151317542u32, 4587559u32,
+                    2151317544u32, 2151317545u32, 2151317546u32, 2151317547u32,
+                    2151317548u32, 2151317549u32, 4653095u32, 2152169518u32, 4718631u32,
+                    4784167u32, 2152300590u32, 4849703u32, 2150137856u32, 2150170635u32,
+                    2150203405u32, 2152398894u32, 4948007u32, 2150137856u32,
+                    2150170635u32, 2150203405u32, 5013543u32, 5079079u32, 2152595502u32,
+                    5144615u32, 5210151u32, 2152726574u32, 5275687u32, 2152824832u32,
+                    2152857646u32, 5406759u32, 2152955904u32, 5537831u32, 2151219200u32,
+                    2151219201u32, 2151219202u32, 2151219203u32, 2151219204u32,
+                    2151219205u32, 2151219206u32, 2151219207u32, 2151219208u32,
+                    2151219209u32, 2151219210u32, 2151219211u32, 2151219212u32,
+                    2151219213u32, 2151219214u32, 2151219215u32, 2151219216u32,
+                    2151219217u32, 2151219218u32, 2151219219u32, 2151219220u32,
+                    2151219221u32, 2151219222u32, 2151219223u32, 2151219224u32,
+                    2151219225u32, 2151219226u32, 2151219227u32, 2151219228u32,
+                    2151219229u32, 2151219230u32, 2151219231u32, 2151219232u32,
+                    2151219233u32, 2151219234u32, 2151219235u32, 2151219236u32,
+                    2151219237u32, 2151219238u32, 5603367u32, 2151219240u32,
+                    2151219241u32, 2151219242u32, 2151219243u32, 2151219244u32,
+                    2151219245u32, 2151317504u32, 2151317505u32, 2151317506u32,
+                    2151317507u32, 2151317508u32, 2151317509u32, 2151317510u32,
+                    2151317511u32, 2151317512u32, 2151317513u32, 2151317514u32,
+                    2151317515u32, 2151317516u32, 2151317517u32, 2151317518u32,
+                    2151317519u32, 2151317520u32, 2151317521u32, 2151317522u32,
+                    2151317523u32, 2151317524u32, 2151317525u32, 2151317526u32,
+                    2151317527u32, 2151317528u32, 2151317529u32, 2151317530u32,
+                    2151317531u32, 2151317532u32, 2151317533u32, 2151317534u32,
+                    2151317535u32, 2151317536u32, 2151317537u32, 2151317538u32,
+                    2151317539u32, 2151317540u32, 2151317541u32, 2151317542u32,
+                    5668903u32, 2151317544u32, 2151317545u32, 2151317546u32,
+                    2151317547u32, 2151317548u32, 2151317549u32, 2151219200u32,
+                    2151219201u32, 2151219202u32, 2151219203u32, 2151219204u32,
+                    2151219205u32, 2151219206u32, 2151219207u32, 2151219208u32,
+                    2151219209u32, 2151219210u32, 2151219211u32, 2151219212u32,
+                    2151219213u32, 2151219214u32, 2151219215u32, 2151219216u32,
+                    2151219217u32, 2151219218u32, 2151219219u32, 2151219220u32,
+                    2151219221u32, 2151219222u32, 2151219223u32, 2151219224u32,
+                    2151219225u32, 2151219226u32, 2151219227u32, 2151219228u32,
+                    2151219229u32, 2151219230u32, 2151219231u32, 2151219232u32,
+                    2151219233u32, 2151219234u32, 2151219235u32, 2151219236u32,
+                    2151219237u32, 2151219238u32, 5734439u32, 2151219240u32,
+                    2151219241u32, 2151219242u32, 2151219243u32, 2151219244u32,
+                    2151219245u32, 2151317504u32, 2151317505u32, 2151317506u32,
+                    2151317507u32, 2151317508u32, 2151317509u32, 2151317510u32,
+                    2151317511u32, 2151317512u32, 2151317513u32, 2151317514u32,
+                    2151317515u32, 2151317516u32, 2151317517u32, 2151317518u32,
+                    2151317519u32, 2151317520u32, 2151317521u32, 2151317522u32,
+                    2151317523u32, 2151317524u32, 2151317525u32, 2151317526u32,
+                    2151317527u32, 2151317528u32, 2151317529u32, 2151317530u32,
+                    2151317531u32, 2151317532u32, 2151317533u32, 2151317534u32,
+                    2151317535u32, 2151317536u32, 2151317537u32, 2151317538u32,
+                    2151317539u32, 2151317540u32, 2151317541u32, 2151317542u32,
+                    5799975u32, 2151317544u32, 2151317545u32, 2151317546u32,
+                    2151317547u32, 2151317548u32, 2151317549u32, 5865511u32,
+                    2147516416u32, 2150694916u32, 2153513007u32,
                 ];
-                states.into_iter().map(|state| state.into()).collect()
+                static SHIFT_TERM_OFFSETS: &[u32] = &[
+                    0u32, 2u32, 3u32, 3u32, 4u32, 13u32, 14u32, 23u32, 23u32, 23u32,
+                    24u32, 25u32, 34u32, 34u32, 34u32, 34u32, 34u32, 44u32, 45u32, 45u32,
+                    48u32, 49u32, 51u32, 51u32, 51u32, 52u32, 54u32, 54u32, 54u32, 55u32,
+                    57u32, 57u32, 57u32, 57u32, 60u32, 60u32, 61u32, 61u32, 61u32, 68u32,
+                    77u32, 78u32, 78u32, 84u32, 84u32, 84u32, 84u32, 84u32, 93u32, 98u32,
+                    107u32, 111u32, 120u32, 126u32, 126u32, 128u32, 137u32, 137u32,
+                    137u32, 145u32, 148u32, 149u32, 149u32, 150u32, 150u32, 151u32,
+                    151u32, 152u32, 152u32, 153u32, 153u32, 159u32, 161u32, 170u32,
+                    170u32, 170u32, 176u32, 185u32, 185u32, 186u32, 189u32, 193u32,
+                    193u32, 193u32, 193u32, 193u32, 193u32, 195u32, 195u32, 195u32,
+                    195u32, 195u32, 196u32, 196u32, 197u32, 197u32, 197u32, 197u32,
+                    197u32, 214u32, 218u32, 219u32, 219u32, 219u32, 223u32, 223u32,
+                    223u32, 227u32, 228u32, 228u32, 232u32, 232u32, 234u32, 280u32,
+                    280u32, 280u32, 326u32, 326u32, 326u32, 327u32, 327u32, 329u32,
+                    330u32, 330u32, 331u32, 331u32, 377u32, 377u32, 423u32, 423u32,
+                    469u32, 469u32, 515u32, 515u32, 561u32, 561u32, 607u32, 607u32,
+                    653u32, 653u32, 699u32, 699u32, 701u32, 701u32, 702u32, 702u32,
+                    704u32, 704u32, 705u32, 705u32, 709u32, 710u32, 710u32, 714u32,
+                    714u32, 716u32, 716u32, 717u32, 717u32, 719u32, 719u32, 720u32,
+                    720u32, 722u32, 722u32, 723u32, 723u32, 724u32, 724u32, 725u32,
+                    725u32, 771u32, 771u32, 817u32, 817u32, 863u32, 863u32, 909u32,
+                    909u32, 910u32, 910u32, 910u32, 912u32, 912u32, 913u32, 913u32,
+                ];
+                static SHIFT_NONTERM_DATA: &[u32] = &[
+                    2153381888u32, 5931019u32, 2153414668u32, 2153480205u32, 5996574u32,
+                    2147581953u32, 2149810178u32, 2150662147u32, 2149908485u32,
+                    2148696071u32, 2149941256u32, 2149974030u32, 2150039567u32,
+                    2148696071u32, 2149777416u32, 2148696071u32, 2148728840u32,
+                    2148696071u32, 2148859912u32, 2149154837u32, 2149220374u32,
+                    2149253143u32, 2148106258u32, 2148532230u32, 2148565011u32,
+                    2148630548u32, 2148597766u32, 2148696071u32, 2149384200u32,
+                    2148696071u32, 2149056520u32, 2148696071u32, 2149122056u32,
+                    2148696071u32, 2149187592u32, 2148696071u32, 2148859912u32,
+                    2149154837u32, 2149318678u32, 2149711896u32, 2149875715u32,
+                    2149908485u32, 2148696071u32, 2149941256u32, 2149974030u32,
+                    2150039567u32, 2150006789u32, 2148696071u32, 2149941256u32,
+                    2150432772u32, 2150465552u32, 2150531089u32, 2150268938u32,
+                    2150498308u32, 2150596617u32, 2150825994u32, 2150858779u32,
+                    2150924298u32, 2150825994u32, 2151055387u32, 2150924298u32,
+                    2151219225u32, 2151251994u32, 2151317529u32, 2151219225u32,
+                    2151645210u32, 2151317529u32, 2151219225u32, 2151776282u32,
+                    2151317529u32, 2151219225u32, 2151907354u32, 2151317529u32,
+                    2151219225u32, 2152038426u32, 2151317529u32, 2150825994u32,
+                    2152464411u32, 2150924298u32, 2152923164u32, 2152988701u32,
+                    2151219225u32, 2153119770u32, 2151317529u32, 2151219225u32,
+                    2153250842u32, 2151317529u32, 2153381888u32, 5931019u32,
+                    2153414668u32, 2153447454u32,
+                ];
+                static SHIFT_NONTERM_OFFSETS: &[u32] = &[
+                    0u32, 5u32, 6u32, 6u32, 6u32, 13u32, 13u32, 15u32, 15u32, 15u32,
+                    15u32, 15u32, 17u32, 17u32, 17u32, 17u32, 17u32, 22u32, 23u32, 23u32,
+                    26u32, 26u32, 26u32, 26u32, 26u32, 26u32, 26u32, 26u32, 26u32, 26u32,
+                    26u32, 26u32, 26u32, 26u32, 27u32, 27u32, 27u32, 27u32, 27u32, 27u32,
+                    29u32, 29u32, 29u32, 29u32, 29u32, 29u32, 29u32, 29u32, 31u32, 31u32,
+                    33u32, 33u32, 35u32, 35u32, 35u32, 35u32, 39u32, 39u32, 39u32, 40u32,
+                    40u32, 40u32, 40u32, 40u32, 40u32, 40u32, 40u32, 40u32, 40u32, 40u32,
+                    40u32, 40u32, 40u32, 46u32, 46u32, 46u32, 46u32, 49u32, 49u32, 52u32,
+                    52u32, 53u32, 53u32, 53u32, 53u32, 53u32, 53u32, 53u32, 53u32, 53u32,
+                    53u32, 53u32, 54u32, 54u32, 55u32, 55u32, 55u32, 55u32, 55u32, 55u32,
+                    57u32, 57u32, 57u32, 57u32, 58u32, 58u32, 58u32, 60u32, 60u32, 60u32,
+                    61u32, 61u32, 61u32, 63u32, 63u32, 63u32, 64u32, 64u32, 64u32, 64u32,
+                    64u32, 64u32, 64u32, 64u32, 64u32, 64u32, 66u32, 66u32, 67u32, 67u32,
+                    69u32, 69u32, 70u32, 70u32, 72u32, 72u32, 73u32, 73u32, 75u32, 75u32,
+                    76u32, 76u32, 76u32, 76u32, 76u32, 76u32, 76u32, 76u32, 76u32, 76u32,
+                    78u32, 78u32, 78u32, 79u32, 79u32, 79u32, 79u32, 79u32, 79u32, 79u32,
+                    79u32, 79u32, 79u32, 81u32, 81u32, 81u32, 81u32, 81u32, 81u32, 81u32,
+                    81u32, 83u32, 83u32, 84u32, 84u32, 86u32, 86u32, 87u32, 87u32, 87u32,
+                    87u32, 87u32, 91u32, 91u32, 91u32, 91u32,
+                ];
+                static REDUCE_DATA: &[u32] = &[
+                    2u32, 1u32, 2u32, 2u32, 1u32, 1u32, 3u32, 1u32, 88u32, 4u32, 1u32,
+                    88u32, 16u32, 1u32, 88u32, 39u32, 1u32, 88u32, 0u32, 1u32, 24u32,
+                    3u32, 1u32, 24u32, 4u32, 1u32, 24u32, 7u32, 1u32, 24u32, 8u32, 1u32,
+                    24u32, 11u32, 1u32, 24u32, 12u32, 1u32, 24u32, 13u32, 1u32, 24u32,
+                    14u32, 1u32, 24u32, 16u32, 1u32, 24u32, 17u32, 1u32, 24u32, 19u32,
+                    1u32, 24u32, 39u32, 1u32, 24u32, 40u32, 1u32, 24u32, 41u32, 1u32,
+                    24u32, 42u32, 1u32, 24u32, 43u32, 1u32, 24u32, 44u32, 1u32, 24u32,
+                    45u32, 1u32, 24u32, 0u32, 1u32, 24u32, 3u32, 1u32, 24u32, 4u32, 1u32,
+                    24u32, 7u32, 1u32, 24u32, 8u32, 1u32, 24u32, 9u32, 1u32, 24u32,
+                    11u32, 1u32, 24u32, 12u32, 1u32, 24u32, 13u32, 1u32, 24u32, 14u32,
+                    1u32, 24u32, 16u32, 1u32, 24u32, 17u32, 1u32, 24u32, 18u32, 1u32,
+                    24u32, 19u32, 1u32, 24u32, 39u32, 1u32, 24u32, 40u32, 1u32, 24u32,
+                    41u32, 1u32, 24u32, 42u32, 1u32, 24u32, 43u32, 1u32, 24u32, 44u32,
+                    1u32, 24u32, 45u32, 1u32, 24u32, 46u32, 1u32, 24u32, 0u32, 1u32,
+                    23u32, 3u32, 1u32, 23u32, 4u32, 1u32, 23u32, 7u32, 1u32, 23u32, 8u32,
+                    1u32, 23u32, 9u32, 1u32, 23u32, 11u32, 1u32, 23u32, 12u32, 1u32,
+                    23u32, 13u32, 1u32, 23u32, 14u32, 1u32, 23u32, 16u32, 1u32, 23u32,
+                    17u32, 1u32, 23u32, 18u32, 1u32, 23u32, 19u32, 1u32, 23u32, 39u32,
+                    1u32, 23u32, 40u32, 1u32, 23u32, 41u32, 1u32, 23u32, 42u32, 1u32,
+                    23u32, 43u32, 1u32, 23u32, 44u32, 1u32, 23u32, 45u32, 1u32, 23u32,
+                    46u32, 1u32, 23u32, 0u32, 1u32, 33u32, 3u32, 1u32, 33u32, 4u32, 1u32,
+                    33u32, 7u32, 1u32, 33u32, 8u32, 1u32, 33u32, 9u32, 1u32, 33u32,
+                    11u32, 1u32, 33u32, 12u32, 1u32, 33u32, 13u32, 1u32, 33u32, 14u32,
+                    1u32, 33u32, 16u32, 1u32, 33u32, 17u32, 1u32, 33u32, 18u32, 1u32,
+                    33u32, 19u32, 1u32, 33u32, 39u32, 1u32, 33u32, 40u32, 1u32, 33u32,
+                    41u32, 1u32, 33u32, 42u32, 1u32, 33u32, 43u32, 1u32, 33u32, 44u32,
+                    1u32, 33u32, 45u32, 1u32, 33u32, 46u32, 1u32, 33u32, 0u32, 1u32,
+                    34u32, 3u32, 1u32, 34u32, 4u32, 1u32, 34u32, 7u32, 1u32, 34u32, 8u32,
+                    1u32, 34u32, 9u32, 1u32, 34u32, 11u32, 1u32, 34u32, 12u32, 1u32,
+                    34u32, 13u32, 1u32, 34u32, 14u32, 1u32, 34u32, 16u32, 1u32, 34u32,
+                    17u32, 1u32, 34u32, 18u32, 1u32, 34u32, 19u32, 1u32, 34u32, 39u32,
+                    1u32, 34u32, 40u32, 1u32, 34u32, 41u32, 1u32, 34u32, 42u32, 1u32,
+                    34u32, 43u32, 1u32, 34u32, 44u32, 1u32, 34u32, 45u32, 1u32, 34u32,
+                    46u32, 1u32, 34u32, 0u32, 1u32, 35u32, 3u32, 1u32, 35u32, 4u32, 1u32,
+                    35u32, 7u32, 1u32, 35u32, 8u32, 1u32, 35u32, 9u32, 1u32, 35u32,
+                    11u32, 1u32, 35u32, 12u32, 1u32, 35u32, 13u32, 1u32, 35u32, 14u32,
+                    1u32, 35u32, 16u32, 1u32, 35u32, 17u32, 1u32, 35u32, 18u32, 1u32,
+                    35u32, 19u32, 1u32, 35u32, 39u32, 1u32, 35u32, 40u32, 1u32, 35u32,
+                    41u32, 1u32, 35u32, 42u32, 1u32, 35u32, 43u32, 1u32, 35u32, 44u32,
+                    1u32, 35u32, 45u32, 1u32, 35u32, 46u32, 1u32, 35u32, 0u32, 1u32,
+                    36u32, 3u32, 1u32, 36u32, 4u32, 1u32, 36u32, 7u32, 1u32, 36u32, 8u32,
+                    1u32, 36u32, 9u32, 1u32, 36u32, 11u32, 1u32, 36u32, 12u32, 1u32,
+                    36u32, 13u32, 1u32, 36u32, 14u32, 1u32, 36u32, 16u32, 1u32, 36u32,
+                    17u32, 1u32, 36u32, 18u32, 1u32, 36u32, 19u32, 1u32, 36u32, 39u32,
+                    1u32, 36u32, 40u32, 1u32, 36u32, 41u32, 1u32, 36u32, 42u32, 1u32,
+                    36u32, 43u32, 1u32, 36u32, 44u32, 1u32, 36u32, 45u32, 1u32, 36u32,
+                    46u32, 1u32, 36u32, 3u32, 1u32, 102u32, 18u32, 1u32, 102u32, 0u32,
+                    1u32, 94u32, 11u32, 1u32, 94u32, 13u32, 1u32, 94u32, 20u32, 1u32,
+                    94u32, 0u32, 1u32, 93u32, 11u32, 1u32, 93u32, 13u32, 1u32, 93u32,
+                    20u32, 1u32, 93u32, 20u32, 1u32, 98u32, 0u32, 1u32, 13u32, 11u32,
+                    1u32, 13u32, 13u32, 1u32, 13u32, 20u32, 1u32, 13u32, 0u32, 1u32,
+                    14u32, 11u32, 1u32, 14u32, 13u32, 1u32, 14u32, 20u32, 1u32, 14u32,
+                    0u32, 1u32, 15u32, 11u32, 1u32, 15u32, 13u32, 1u32, 15u32, 20u32,
+                    1u32, 15u32, 0u32, 1u32, 19u32, 11u32, 1u32, 19u32, 13u32, 1u32,
+                    19u32, 20u32, 1u32, 19u32, 0u32, 1u32, 20u32, 11u32, 1u32, 20u32,
+                    13u32, 1u32, 20u32, 20u32, 1u32, 20u32, 0u32, 1u32, 21u32, 11u32,
+                    1u32, 21u32, 13u32, 1u32, 21u32, 20u32, 1u32, 21u32, 0u32, 1u32,
+                    16u32, 11u32, 1u32, 16u32, 13u32, 1u32, 16u32, 20u32, 1u32, 16u32,
+                    0u32, 1u32, 17u32, 11u32, 1u32, 17u32, 13u32, 1u32, 17u32, 20u32,
+                    1u32, 17u32, 0u32, 1u32, 18u32, 11u32, 1u32, 18u32, 13u32, 1u32,
+                    18u32, 20u32, 1u32, 18u32, 0u32, 1u32, 95u32, 11u32, 1u32, 95u32,
+                    13u32, 1u32, 95u32, 20u32, 1u32, 95u32, 20u32, 1u32, 97u32, 0u32,
+                    1u32, 96u32, 11u32, 1u32, 96u32, 13u32, 1u32, 96u32, 20u32, 1u32,
+                    96u32, 0u32, 1u32, 22u32, 3u32, 1u32, 22u32, 4u32, 1u32, 22u32, 7u32,
+                    1u32, 22u32, 8u32, 1u32, 22u32, 9u32, 1u32, 22u32, 11u32, 1u32,
+                    22u32, 12u32, 1u32, 22u32, 13u32, 1u32, 22u32, 14u32, 1u32, 22u32,
+                    16u32, 1u32, 22u32, 17u32, 1u32, 22u32, 18u32, 1u32, 22u32, 19u32,
+                    1u32, 22u32, 39u32, 1u32, 22u32, 40u32, 1u32, 22u32, 41u32, 1u32,
+                    22u32, 42u32, 1u32, 22u32, 43u32, 1u32, 22u32, 44u32, 1u32, 22u32,
+                    45u32, 1u32, 22u32, 46u32, 1u32, 22u32, 0u32, 1u32, 29u32, 3u32,
+                    1u32, 29u32, 4u32, 1u32, 29u32, 7u32, 1u32, 29u32, 8u32, 1u32, 29u32,
+                    9u32, 1u32, 29u32, 11u32, 1u32, 29u32, 12u32, 1u32, 29u32, 13u32,
+                    1u32, 29u32, 14u32, 1u32, 29u32, 16u32, 1u32, 29u32, 17u32, 1u32,
+                    29u32, 18u32, 1u32, 29u32, 19u32, 1u32, 29u32, 39u32, 1u32, 29u32,
+                    40u32, 1u32, 29u32, 41u32, 1u32, 29u32, 42u32, 1u32, 29u32, 43u32,
+                    1u32, 29u32, 44u32, 1u32, 29u32, 45u32, 1u32, 29u32, 46u32, 1u32,
+                    29u32, 0u32, 1u32, 32u32, 3u32, 1u32, 32u32, 4u32, 1u32, 32u32, 7u32,
+                    1u32, 32u32, 8u32, 1u32, 32u32, 9u32, 1u32, 32u32, 11u32, 1u32,
+                    32u32, 12u32, 1u32, 32u32, 13u32, 1u32, 32u32, 14u32, 1u32, 32u32,
+                    16u32, 1u32, 32u32, 17u32, 1u32, 32u32, 18u32, 1u32, 32u32, 19u32,
+                    1u32, 32u32, 39u32, 1u32, 32u32, 40u32, 1u32, 32u32, 41u32, 1u32,
+                    32u32, 42u32, 1u32, 32u32, 43u32, 1u32, 32u32, 44u32, 1u32, 32u32,
+                    45u32, 1u32, 32u32, 46u32, 1u32, 32u32, 0u32, 1u32, 99u32, 3u32,
+                    1u32, 99u32, 7u32, 1u32, 99u32, 8u32, 1u32, 99u32, 11u32, 1u32,
+                    99u32, 12u32, 1u32, 99u32, 13u32, 1u32, 99u32, 14u32, 1u32, 99u32,
+                    17u32, 1u32, 99u32, 18u32, 1u32, 99u32, 19u32, 1u32, 99u32, 0u32,
+                    1u32, 25u32, 3u32, 1u32, 25u32, 4u32, 1u32, 25u32, 7u32, 1u32, 25u32,
+                    8u32, 1u32, 25u32, 9u32, 1u32, 25u32, 11u32, 1u32, 25u32, 12u32,
+                    1u32, 25u32, 13u32, 1u32, 25u32, 14u32, 1u32, 25u32, 16u32, 1u32,
+                    25u32, 17u32, 1u32, 25u32, 18u32, 1u32, 25u32, 19u32, 1u32, 25u32,
+                    39u32, 1u32, 25u32, 40u32, 1u32, 25u32, 41u32, 1u32, 25u32, 42u32,
+                    1u32, 25u32, 43u32, 1u32, 25u32, 44u32, 1u32, 25u32, 45u32, 1u32,
+                    25u32, 46u32, 1u32, 25u32, 0u32, 1u32, 26u32, 3u32, 1u32, 26u32,
+                    4u32, 1u32, 26u32, 7u32, 1u32, 26u32, 8u32, 1u32, 26u32, 9u32, 1u32,
+                    26u32, 11u32, 1u32, 26u32, 12u32, 1u32, 26u32, 13u32, 1u32, 26u32,
+                    14u32, 1u32, 26u32, 16u32, 1u32, 26u32, 17u32, 1u32, 26u32, 18u32,
+                    1u32, 26u32, 19u32, 1u32, 26u32, 39u32, 1u32, 26u32, 40u32, 1u32,
+                    26u32, 41u32, 1u32, 26u32, 42u32, 1u32, 26u32, 43u32, 1u32, 26u32,
+                    44u32, 1u32, 26u32, 45u32, 1u32, 26u32, 46u32, 1u32, 26u32, 0u32,
+                    1u32, 27u32, 3u32, 1u32, 27u32, 4u32, 1u32, 27u32, 7u32, 1u32, 27u32,
+                    8u32, 1u32, 27u32, 9u32, 1u32, 27u32, 11u32, 1u32, 27u32, 12u32,
+                    1u32, 27u32, 13u32, 1u32, 27u32, 14u32, 1u32, 27u32, 16u32, 1u32,
+                    27u32, 17u32, 1u32, 27u32, 18u32, 1u32, 27u32, 19u32, 1u32, 27u32,
+                    39u32, 1u32, 27u32, 40u32, 1u32, 27u32, 41u32, 1u32, 27u32, 42u32,
+                    1u32, 27u32, 43u32, 1u32, 27u32, 44u32, 1u32, 27u32, 45u32, 1u32,
+                    27u32, 46u32, 1u32, 27u32, 0u32, 1u32, 28u32, 3u32, 1u32, 28u32,
+                    4u32, 1u32, 28u32, 7u32, 1u32, 28u32, 8u32, 1u32, 28u32, 9u32, 1u32,
+                    28u32, 11u32, 1u32, 28u32, 12u32, 1u32, 28u32, 13u32, 1u32, 28u32,
+                    14u32, 1u32, 28u32, 16u32, 1u32, 28u32, 17u32, 1u32, 28u32, 18u32,
+                    1u32, 28u32, 19u32, 1u32, 28u32, 39u32, 1u32, 28u32, 40u32, 1u32,
+                    28u32, 41u32, 1u32, 28u32, 42u32, 1u32, 28u32, 43u32, 1u32, 28u32,
+                    44u32, 1u32, 28u32, 45u32, 1u32, 28u32, 46u32, 1u32, 28u32, 0u32,
+                    1u32, 37u32, 3u32, 1u32, 37u32, 4u32, 1u32, 37u32, 7u32, 1u32, 37u32,
+                    8u32, 1u32, 37u32, 9u32, 1u32, 37u32, 11u32, 1u32, 37u32, 12u32,
+                    1u32, 37u32, 13u32, 1u32, 37u32, 14u32, 1u32, 37u32, 16u32, 1u32,
+                    37u32, 17u32, 1u32, 37u32, 18u32, 1u32, 37u32, 19u32, 1u32, 37u32,
+                    39u32, 1u32, 37u32, 44u32, 1u32, 37u32, 46u32, 1u32, 37u32, 0u32,
+                    1u32, 30u32, 3u32, 1u32, 30u32, 4u32, 1u32, 30u32, 7u32, 1u32, 30u32,
+                    8u32, 1u32, 30u32, 9u32, 1u32, 30u32, 11u32, 1u32, 30u32, 12u32,
+                    1u32, 30u32, 13u32, 1u32, 30u32, 14u32, 1u32, 30u32, 16u32, 1u32,
+                    30u32, 17u32, 1u32, 30u32, 18u32, 1u32, 30u32, 19u32, 1u32, 30u32,
+                    39u32, 1u32, 30u32, 44u32, 1u32, 30u32, 45u32, 1u32, 30u32, 46u32,
+                    1u32, 30u32, 3u32, 1u32, 101u32, 18u32, 1u32, 101u32, 0u32, 1u32,
+                    100u32, 3u32, 1u32, 100u32, 7u32, 1u32, 100u32, 8u32, 1u32, 100u32,
+                    11u32, 1u32, 100u32, 12u32, 1u32, 100u32, 13u32, 1u32, 100u32, 14u32,
+                    1u32, 100u32, 17u32, 1u32, 100u32, 18u32, 1u32, 100u32, 19u32, 1u32,
+                    100u32, 3u32, 1u32, 103u32, 18u32, 1u32, 103u32, 3u32, 1u32, 102u32,
+                    18u32, 1u32, 102u32, 3u32, 1u32, 104u32, 18u32, 1u32, 104u32, 0u32,
+                    1u32, 31u32, 3u32, 1u32, 31u32, 4u32, 1u32, 31u32, 7u32, 1u32, 31u32,
+                    8u32, 1u32, 31u32, 9u32, 1u32, 31u32, 11u32, 1u32, 31u32, 12u32,
+                    1u32, 31u32, 13u32, 1u32, 31u32, 14u32, 1u32, 31u32, 16u32, 1u32,
+                    31u32, 17u32, 1u32, 31u32, 18u32, 1u32, 31u32, 19u32, 1u32, 31u32,
+                    39u32, 1u32, 31u32, 40u32, 1u32, 31u32, 41u32, 1u32, 31u32, 42u32,
+                    1u32, 31u32, 43u32, 1u32, 31u32, 44u32, 1u32, 31u32, 45u32, 1u32,
+                    31u32, 46u32, 1u32, 31u32, 18u32, 1u32, 106u32, 18u32, 1u32, 105u32,
+                    0u32, 1u32, 39u32, 3u32, 1u32, 39u32, 4u32, 1u32, 39u32, 7u32, 1u32,
+                    39u32, 8u32, 1u32, 39u32, 9u32, 1u32, 39u32, 11u32, 1u32, 39u32,
+                    12u32, 1u32, 39u32, 13u32, 1u32, 39u32, 14u32, 1u32, 39u32, 16u32,
+                    1u32, 39u32, 17u32, 1u32, 39u32, 18u32, 1u32, 39u32, 19u32, 1u32,
+                    39u32, 39u32, 1u32, 39u32, 40u32, 1u32, 39u32, 41u32, 1u32, 39u32,
+                    42u32, 1u32, 39u32, 43u32, 1u32, 39u32, 44u32, 1u32, 39u32, 45u32,
+                    1u32, 39u32, 46u32, 1u32, 39u32, 0u32, 1u32, 40u32, 3u32, 1u32,
+                    40u32, 4u32, 1u32, 40u32, 7u32, 1u32, 40u32, 8u32, 1u32, 40u32, 9u32,
+                    1u32, 40u32, 11u32, 1u32, 40u32, 12u32, 1u32, 40u32, 13u32, 1u32,
+                    40u32, 14u32, 1u32, 40u32, 16u32, 1u32, 40u32, 17u32, 1u32, 40u32,
+                    18u32, 1u32, 40u32, 19u32, 1u32, 40u32, 39u32, 1u32, 40u32, 40u32,
+                    1u32, 40u32, 41u32, 1u32, 40u32, 42u32, 1u32, 40u32, 43u32, 1u32,
+                    40u32, 44u32, 1u32, 40u32, 45u32, 1u32, 40u32, 46u32, 1u32, 40u32,
+                    0u32, 1u32, 42u32, 3u32, 1u32, 42u32, 4u32, 1u32, 42u32, 7u32, 1u32,
+                    42u32, 8u32, 1u32, 42u32, 9u32, 1u32, 42u32, 11u32, 1u32, 42u32,
+                    12u32, 1u32, 42u32, 13u32, 1u32, 42u32, 14u32, 1u32, 42u32, 16u32,
+                    1u32, 42u32, 17u32, 1u32, 42u32, 18u32, 1u32, 42u32, 19u32, 1u32,
+                    42u32, 39u32, 1u32, 42u32, 40u32, 1u32, 42u32, 41u32, 1u32, 42u32,
+                    42u32, 1u32, 42u32, 43u32, 1u32, 42u32, 44u32, 1u32, 42u32, 45u32,
+                    1u32, 42u32, 46u32, 1u32, 42u32, 0u32, 1u32, 41u32, 3u32, 1u32,
+                    41u32, 4u32, 1u32, 41u32, 7u32, 1u32, 41u32, 8u32, 1u32, 41u32, 9u32,
+                    1u32, 41u32, 11u32, 1u32, 41u32, 12u32, 1u32, 41u32, 13u32, 1u32,
+                    41u32, 14u32, 1u32, 41u32, 16u32, 1u32, 41u32, 17u32, 1u32, 41u32,
+                    18u32, 1u32, 41u32, 19u32, 1u32, 41u32, 39u32, 1u32, 41u32, 40u32,
+                    1u32, 41u32, 41u32, 1u32, 41u32, 42u32, 1u32, 41u32, 43u32, 1u32,
+                    41u32, 44u32, 1u32, 41u32, 45u32, 1u32, 41u32, 46u32, 1u32, 41u32,
+                    0u32, 1u32, 38u32, 3u32, 1u32, 38u32, 4u32, 1u32, 38u32, 7u32, 1u32,
+                    38u32, 8u32, 1u32, 38u32, 9u32, 1u32, 38u32, 11u32, 1u32, 38u32,
+                    12u32, 1u32, 38u32, 13u32, 1u32, 38u32, 14u32, 1u32, 38u32, 16u32,
+                    1u32, 38u32, 17u32, 1u32, 38u32, 18u32, 1u32, 38u32, 19u32, 1u32,
+                    38u32, 39u32, 1u32, 38u32, 40u32, 1u32, 38u32, 41u32, 1u32, 38u32,
+                    42u32, 1u32, 38u32, 43u32, 1u32, 38u32, 44u32, 1u32, 38u32, 45u32,
+                    1u32, 38u32, 46u32, 1u32, 38u32, 0u32, 1u32, 12u32, 3u32, 1u32,
+                    12u32, 4u32, 1u32, 12u32, 7u32, 1u32, 12u32, 8u32, 1u32, 12u32,
+                    11u32, 1u32, 12u32, 12u32, 1u32, 12u32, 13u32, 1u32, 12u32, 14u32,
+                    1u32, 12u32, 16u32, 1u32, 12u32, 17u32, 1u32, 12u32, 19u32, 1u32,
+                    12u32, 39u32, 1u32, 12u32, 3u32, 1u32, 88u32, 4u32, 1u32, 88u32,
+                    16u32, 1u32, 88u32, 39u32, 1u32, 88u32, 3u32, 1u32, 3u32, 39u32,
+                    1u32, 3u32, 0u32, 1u32, 85u32, 3u32, 1u32, 85u32, 4u32, 1u32, 85u32,
+                    7u32, 1u32, 85u32, 8u32, 1u32, 85u32, 11u32, 1u32, 85u32, 12u32,
+                    1u32, 85u32, 13u32, 1u32, 85u32, 14u32, 1u32, 85u32, 16u32, 1u32,
+                    85u32, 17u32, 1u32, 85u32, 19u32, 1u32, 85u32, 39u32, 1u32, 85u32,
+                    0u32, 1u32, 11u32, 3u32, 1u32, 11u32, 4u32, 1u32, 11u32, 7u32, 1u32,
+                    11u32, 8u32, 1u32, 11u32, 11u32, 1u32, 11u32, 12u32, 1u32, 11u32,
+                    13u32, 1u32, 11u32, 14u32, 1u32, 11u32, 16u32, 1u32, 11u32, 17u32,
+                    1u32, 11u32, 19u32, 1u32, 11u32, 39u32, 1u32, 11u32, 3u32, 1u32,
+                    87u32, 4u32, 1u32, 87u32, 16u32, 1u32, 87u32, 39u32, 1u32, 87u32,
+                    0u32, 1u32, 86u32, 3u32, 1u32, 86u32, 4u32, 1u32, 86u32, 7u32, 1u32,
+                    86u32, 8u32, 1u32, 86u32, 11u32, 1u32, 86u32, 12u32, 1u32, 86u32,
+                    13u32, 1u32, 86u32, 14u32, 1u32, 86u32, 16u32, 1u32, 86u32, 17u32,
+                    1u32, 86u32, 19u32, 1u32, 86u32, 39u32, 1u32, 86u32, 3u32, 1u32,
+                    92u32, 16u32, 1u32, 92u32, 39u32, 1u32, 92u32, 0u32, 1u32, 45u32,
+                    3u32, 1u32, 45u32, 4u32, 1u32, 45u32, 11u32, 1u32, 45u32, 13u32,
+                    1u32, 45u32, 16u32, 1u32, 45u32, 39u32, 1u32, 45u32, 0u32, 1u32,
+                    46u32, 3u32, 1u32, 46u32, 4u32, 1u32, 46u32, 11u32, 1u32, 46u32,
+                    13u32, 1u32, 46u32, 16u32, 1u32, 46u32, 39u32, 1u32, 46u32, 0u32,
+                    1u32, 47u32, 3u32, 1u32, 47u32, 4u32, 1u32, 47u32, 11u32, 1u32,
+                    47u32, 13u32, 1u32, 47u32, 16u32, 1u32, 47u32, 39u32, 1u32, 47u32,
+                    3u32, 1u32, 7u32, 4u32, 1u32, 7u32, 16u32, 1u32, 7u32, 39u32, 1u32,
+                    7u32, 3u32, 1u32, 6u32, 4u32, 1u32, 6u32, 16u32, 1u32, 6u32, 39u32,
+                    1u32, 6u32, 3u32, 1u32, 8u32, 4u32, 1u32, 8u32, 16u32, 1u32, 8u32,
+                    39u32, 1u32, 8u32, 3u32, 1u32, 9u32, 4u32, 1u32, 9u32, 16u32, 1u32,
+                    9u32, 39u32, 1u32, 9u32, 3u32, 1u32, 10u32, 4u32, 1u32, 10u32, 16u32,
+                    1u32, 10u32, 39u32, 1u32, 10u32, 3u32, 1u32, 89u32, 4u32, 1u32,
+                    89u32, 16u32, 1u32, 89u32, 39u32, 1u32, 89u32, 3u32, 1u32, 91u32,
+                    16u32, 1u32, 91u32, 39u32, 1u32, 91u32, 3u32, 1u32, 90u32, 4u32,
+                    1u32, 90u32, 16u32, 1u32, 90u32, 39u32, 1u32, 90u32, 3u32, 1u32,
+                    44u32, 39u32, 1u32, 44u32, 3u32, 1u32, 43u32, 39u32, 1u32, 43u32,
+                    3u32, 1u32, 5u32, 39u32, 1u32, 5u32, 0u32, 1u32, 0u32, 4u32, 1u32,
+                    0u32, 47u32, 1u32, 0u32, 3u32, 1u32, 4u32, 39u32, 1u32, 4u32, 0u32,
+                    1u32, 58u32, 4u32, 1u32, 58u32, 47u32, 1u32, 58u32, 0u32, 1u32,
+                    154u32, 11u32, 1u32, 154u32, 13u32, 1u32, 154u32, 39u32, 1u32,
+                    154u32, 0u32, 1u32, 57u32, 4u32, 1u32, 57u32, 47u32, 1u32, 57u32,
+                    0u32, 1u32, 155u32, 11u32, 1u32, 155u32, 13u32, 1u32, 155u32, 39u32,
+                    1u32, 155u32, 0u32, 1u32, 60u32, 4u32, 1u32, 60u32, 47u32, 1u32,
+                    60u32, 0u32, 1u32, 59u32, 4u32, 1u32, 59u32, 47u32, 1u32, 59u32,
+                    0u32, 1u32, 49u32, 4u32, 1u32, 49u32, 47u32, 1u32, 49u32, 0u32, 1u32,
+                    152u32, 1u32, 1u32, 152u32, 2u32, 1u32, 152u32, 3u32, 1u32, 152u32,
+                    4u32, 1u32, 152u32, 5u32, 1u32, 152u32, 6u32, 1u32, 152u32, 7u32,
+                    1u32, 152u32, 8u32, 1u32, 152u32, 9u32, 1u32, 152u32, 10u32, 1u32,
+                    152u32, 11u32, 1u32, 152u32, 12u32, 1u32, 152u32, 13u32, 1u32,
+                    152u32, 14u32, 1u32, 152u32, 15u32, 1u32, 152u32, 16u32, 1u32,
+                    152u32, 17u32, 1u32, 152u32, 18u32, 1u32, 152u32, 19u32, 1u32,
+                    152u32, 20u32, 1u32, 152u32, 21u32, 1u32, 152u32, 22u32, 1u32,
+                    152u32, 23u32, 1u32, 152u32, 24u32, 1u32, 152u32, 25u32, 1u32,
+                    152u32, 26u32, 1u32, 152u32, 27u32, 1u32, 152u32, 28u32, 1u32,
+                    152u32, 29u32, 1u32, 152u32, 30u32, 1u32, 152u32, 31u32, 1u32,
+                    152u32, 32u32, 1u32, 152u32, 33u32, 1u32, 152u32, 34u32, 1u32,
+                    152u32, 35u32, 1u32, 152u32, 36u32, 1u32, 152u32, 37u32, 1u32,
+                    152u32, 38u32, 1u32, 152u32, 39u32, 1u32, 152u32, 40u32, 1u32,
+                    152u32, 41u32, 1u32, 152u32, 42u32, 1u32, 152u32, 43u32, 1u32,
+                    152u32, 44u32, 1u32, 152u32, 45u32, 1u32, 152u32, 0u32, 1u32, 48u32,
+                    4u32, 1u32, 48u32, 47u32, 1u32, 48u32, 0u32, 1u32, 153u32, 1u32,
+                    1u32, 153u32, 2u32, 1u32, 153u32, 3u32, 1u32, 153u32, 4u32, 1u32,
+                    153u32, 5u32, 1u32, 153u32, 6u32, 1u32, 153u32, 7u32, 1u32, 153u32,
+                    8u32, 1u32, 153u32, 9u32, 1u32, 153u32, 10u32, 1u32, 153u32, 11u32,
+                    1u32, 153u32, 12u32, 1u32, 153u32, 13u32, 1u32, 153u32, 14u32, 1u32,
+                    153u32, 15u32, 1u32, 153u32, 16u32, 1u32, 153u32, 17u32, 1u32,
+                    153u32, 18u32, 1u32, 153u32, 19u32, 1u32, 153u32, 20u32, 1u32,
+                    153u32, 21u32, 1u32, 153u32, 22u32, 1u32, 153u32, 23u32, 1u32,
+                    153u32, 24u32, 1u32, 153u32, 25u32, 1u32, 153u32, 26u32, 1u32,
+                    153u32, 27u32, 1u32, 153u32, 28u32, 1u32, 153u32, 29u32, 1u32,
+                    153u32, 30u32, 1u32, 153u32, 31u32, 1u32, 153u32, 32u32, 1u32,
+                    153u32, 33u32, 1u32, 153u32, 34u32, 1u32, 153u32, 35u32, 1u32,
+                    153u32, 36u32, 1u32, 153u32, 37u32, 1u32, 153u32, 38u32, 1u32,
+                    153u32, 39u32, 1u32, 153u32, 40u32, 1u32, 153u32, 41u32, 1u32,
+                    153u32, 42u32, 1u32, 153u32, 43u32, 1u32, 153u32, 44u32, 1u32,
+                    153u32, 45u32, 1u32, 153u32, 0u32, 1u32, 50u32, 4u32, 1u32, 50u32,
+                    47u32, 1u32, 50u32, 0u32, 1u32, 51u32, 4u32, 1u32, 51u32, 47u32,
+                    1u32, 51u32, 0u32, 1u32, 52u32, 4u32, 1u32, 52u32, 47u32, 1u32,
+                    52u32, 0u32, 1u32, 54u32, 4u32, 1u32, 54u32, 47u32, 1u32, 54u32,
+                    0u32, 1u32, 53u32, 4u32, 1u32, 53u32, 47u32, 1u32, 53u32, 0u32, 1u32,
+                    56u32, 4u32, 1u32, 56u32, 47u32, 1u32, 56u32, 0u32, 1u32, 55u32,
+                    4u32, 1u32, 55u32, 47u32, 1u32, 55u32, 0u32, 1u32, 64u32, 4u32, 1u32,
+                    64u32, 47u32, 1u32, 64u32, 0u32, 1u32, 63u32, 4u32, 1u32, 63u32,
+                    47u32, 1u32, 63u32, 0u32, 1u32, 66u32, 4u32, 1u32, 66u32, 47u32,
+                    1u32, 66u32, 0u32, 1u32, 65u32, 4u32, 1u32, 65u32, 47u32, 1u32,
+                    65u32, 0u32, 1u32, 69u32, 4u32, 1u32, 69u32, 47u32, 1u32, 69u32,
+                    0u32, 1u32, 70u32, 4u32, 1u32, 70u32, 47u32, 1u32, 70u32, 0u32, 1u32,
+                    67u32, 4u32, 1u32, 67u32, 47u32, 1u32, 67u32, 0u32, 1u32, 68u32,
+                    4u32, 1u32, 68u32, 47u32, 1u32, 68u32, 0u32, 1u32, 62u32, 4u32, 1u32,
+                    62u32, 47u32, 1u32, 62u32, 0u32, 1u32, 61u32, 4u32, 1u32, 61u32,
+                    47u32, 1u32, 61u32, 0u32, 1u32, 71u32, 4u32, 1u32, 71u32, 47u32,
+                    1u32, 71u32, 0u32, 1u32, 72u32, 4u32, 1u32, 72u32, 47u32, 1u32,
+                    72u32, 0u32, 1u32, 73u32, 4u32, 1u32, 73u32, 47u32, 1u32, 73u32,
+                    0u32, 1u32, 74u32, 4u32, 1u32, 74u32, 47u32, 1u32, 74u32, 39u32,
+                    1u32, 159u32, 0u32, 1u32, 156u32, 39u32, 1u32, 156u32, 0u32, 1u32,
+                    76u32, 4u32, 1u32, 76u32, 47u32, 1u32, 76u32, 39u32, 1u32, 158u32,
+                    0u32, 1u32, 157u32, 39u32, 1u32, 157u32, 0u32, 1u32, 75u32, 4u32,
+                    1u32, 75u32, 47u32, 1u32, 75u32, 0u32, 1u32, 78u32, 4u32, 1u32,
+                    78u32, 47u32, 1u32, 78u32, 0u32, 1u32, 77u32, 4u32, 1u32, 77u32,
+                    47u32, 1u32, 77u32, 0u32, 1u32, 80u32, 4u32, 1u32, 80u32, 47u32,
+                    1u32, 80u32, 0u32, 1u32, 79u32, 4u32, 1u32, 79u32, 47u32, 1u32,
+                    79u32, 0u32, 1u32, 81u32, 4u32, 1u32, 81u32, 47u32, 1u32, 81u32,
+                    0u32, 1u32, 82u32, 4u32, 1u32, 82u32, 47u32, 1u32, 82u32, 47u32,
+                    1u32, 160u32, 47u32, 1u32, 161u32,
+                ];
+                static REDUCE_OFFSETS: &[u32] = &[
+                    0u32, 0u32, 3u32, 6u32, 6u32, 18u32, 75u32, 75u32, 141u32, 207u32,
+                    207u32, 207u32, 207u32, 273u32, 339u32, 405u32, 471u32, 477u32,
+                    489u32, 501u32, 504u32, 516u32, 516u32, 528u32, 540u32, 552u32,
+                    552u32, 564u32, 576u32, 588u32, 588u32, 600u32, 612u32, 624u32,
+                    627u32, 639u32, 639u32, 705u32, 771u32, 771u32, 771u32, 771u32,
+                    837u32, 870u32, 936u32, 1002u32, 1068u32, 1134u32, 1134u32, 1185u32,
+                    1185u32, 1239u32, 1245u32, 1278u32, 1284u32, 1284u32, 1290u32,
+                    1296u32, 1362u32, 1365u32, 1368u32, 1368u32, 1434u32, 1434u32,
+                    1500u32, 1500u32, 1566u32, 1566u32, 1632u32, 1632u32, 1698u32,
+                    1737u32, 1737u32, 1749u32, 1755u32, 1794u32, 1833u32, 1845u32,
+                    1884u32, 1893u32, 1893u32, 1893u32, 1914u32, 1935u32, 1956u32,
+                    1968u32, 1980u32, 1980u32, 1992u32, 2004u32, 2016u32, 2028u32,
+                    2037u32, 2049u32, 2055u32, 2061u32, 2067u32, 2076u32, 2082u32,
+                    2082u32, 2082u32, 2082u32, 2091u32, 2103u32, 2103u32, 2112u32,
+                    2124u32, 2124u32, 2124u32, 2133u32, 2133u32, 2142u32, 2142u32,
+                    2142u32, 2151u32, 2289u32, 2289u32, 2298u32, 2436u32, 2436u32,
+                    2445u32, 2445u32, 2445u32, 2454u32, 2454u32, 2463u32, 2463u32,
+                    2472u32, 2472u32, 2481u32, 2481u32, 2490u32, 2490u32, 2499u32,
+                    2499u32, 2508u32, 2508u32, 2517u32, 2517u32, 2526u32, 2526u32,
+                    2535u32, 2535u32, 2544u32, 2544u32, 2553u32, 2553u32, 2562u32,
+                    2562u32, 2571u32, 2571u32, 2571u32, 2580u32, 2580u32, 2589u32,
+                    2589u32, 2598u32, 2598u32, 2607u32, 2607u32, 2616u32, 2616u32,
+                    2625u32, 2628u32, 2634u32, 2634u32, 2643u32, 2646u32, 2652u32,
+                    2652u32, 2661u32, 2661u32, 2670u32, 2670u32, 2679u32, 2679u32,
+                    2688u32, 2688u32, 2697u32, 2697u32, 2706u32, 2715u32, 2718u32,
+                    2721u32, 2721u32, 2721u32,
+                ];
+                static RULESET_DATA: &[u32] = &[
+                    0u32, 48u32, 49u32, 50u32, 51u32, 52u32, 53u32, 54u32, 55u32, 56u32,
+                    57u32, 58u32, 59u32, 60u32, 61u32, 62u32, 63u32, 64u32, 65u32, 66u32,
+                    67u32, 68u32, 69u32, 70u32, 71u32, 72u32, 73u32, 74u32, 75u32, 76u32,
+                    77u32, 78u32, 79u32, 80u32, 81u32, 82u32, 83u32, 84u32, 160u32,
+                    161u32, 162u32, 65536u32, 1u32, 2u32, 65537u32, 131072u32, 196608u32,
+                    3u32, 4u32, 5u32, 11u32, 12u32, 22u32, 23u32, 24u32, 25u32, 26u32,
+                    27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32, 34u32, 35u32, 36u32,
+                    37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 85u32, 86u32, 87u32, 88u32,
+                    65548u32, 65560u32, 131084u32, 22u32, 23u32, 24u32, 25u32, 26u32,
+                    27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32, 34u32, 35u32, 36u32,
+                    37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 65560u32, 65559u32,
+                    65574u32, 65575u32, 65576u32, 65577u32, 65578u32, 131110u32,
+                    131111u32, 131112u32, 131113u32, 131114u32, 22u32, 23u32, 24u32,
+                    25u32, 26u32, 27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32, 34u32,
+                    35u32, 36u32, 37u32, 38u32, 196646u32, 39u32, 196647u32, 40u32,
+                    196648u32, 41u32, 196649u32, 42u32, 196650u32, 65569u32, 65570u32,
+                    65571u32, 65572u32, 22u32, 23u32, 24u32, 25u32, 26u32, 27u32, 28u32,
+                    29u32, 30u32, 31u32, 65567u32, 32u32, 65568u32, 33u32, 34u32, 35u32,
+                    36u32, 37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 99u32, 100u32,
+                    101u32, 102u32, 103u32, 104u32, 65558u32, 93u32, 94u32, 65629u32,
+                    13u32, 14u32, 15u32, 16u32, 17u32, 18u32, 19u32, 20u32, 21u32,
+                    131094u32, 95u32, 96u32, 97u32, 98u32, 65549u32, 65550u32, 65551u32,
+                    131086u32, 131087u32, 196622u32, 196623u32, 65555u32, 65556u32,
+                    65557u32, 131092u32, 131093u32, 196628u32, 196629u32, 65552u32,
+                    65553u32, 65554u32, 131089u32, 131090u32, 196625u32, 196626u32,
+                    65631u32, 13u32, 14u32, 15u32, 16u32, 17u32, 18u32, 19u32, 20u32,
+                    21u32, 65632u32, 65633u32, 131168u32, 196630u32, 262166u32, 65565u32,
+                    65561u32, 65562u32, 65563u32, 65564u32, 65566u32, 65573u32,
+                    262182u32, 262183u32, 262184u32, 262185u32, 262186u32, 22u32, 23u32,
+                    24u32, 25u32, 26u32, 27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32,
+                    34u32, 35u32, 36u32, 37u32, 38u32, 327718u32, 39u32, 327719u32,
+                    40u32, 327720u32, 41u32, 327721u32, 42u32, 327722u32, 131104u32,
+                    196640u32, 65561u32, 65562u32, 65563u32, 65564u32, 65566u32,
+                    65573u32, 65635u32, 131097u32, 131098u32, 131099u32, 131100u32,
+                    22u32, 23u32, 24u32, 25u32, 26u32, 27u32, 28u32, 29u32, 30u32, 31u32,
+                    32u32, 33u32, 34u32, 35u32, 36u32, 37u32, 131109u32, 38u32, 39u32,
+                    40u32, 41u32, 42u32, 65561u32, 65562u32, 65563u32, 65564u32,
+                    65566u32, 196645u32, 22u32, 23u32, 24u32, 25u32, 26u32, 27u32, 28u32,
+                    29u32, 30u32, 131102u32, 31u32, 32u32, 33u32, 34u32, 35u32, 36u32,
+                    37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 65561u32, 65562u32,
+                    65563u32, 65564u32, 196638u32, 22u32, 23u32, 24u32, 25u32, 26u32,
+                    27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32, 34u32, 35u32, 36u32,
+                    37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 65636u32, 65637u32,
+                    65561u32, 65562u32, 65563u32, 65564u32, 65566u32, 65573u32,
+                    131172u32, 65639u32, 131103u32, 65640u32, 22u32, 23u32, 24u32, 25u32,
+                    26u32, 27u32, 28u32, 29u32, 30u32, 31u32, 32u32, 33u32, 34u32, 35u32,
+                    36u32, 37u32, 38u32, 39u32, 40u32, 41u32, 42u32, 99u32, 100u32,
+                    101u32, 102u32, 131176u32, 196712u32, 196639u32, 65561u32, 65562u32,
+                    65563u32, 65564u32, 65566u32, 65573u32, 393254u32, 393255u32,
+                    393256u32, 393257u32, 393258u32, 105u32, 106u32, 458791u32,
+                    458792u32, 458794u32, 65641u32, 524327u32, 589863u32, 524328u32,
+                    589864u32, 524330u32, 589866u32, 458793u32, 524329u32, 458790u32,
+                    524326u32, 196620u32, 65561u32, 65562u32, 65563u32, 65564u32,
+                    65566u32, 65573u32, 262144u32, 65539u32, 131075u32, 5u32, 11u32,
+                    12u32, 22u32, 23u32, 24u32, 25u32, 26u32, 27u32, 28u32, 29u32, 30u32,
+                    31u32, 32u32, 33u32, 34u32, 35u32, 36u32, 37u32, 38u32, 39u32, 40u32,
+                    41u32, 42u32, 85u32, 86u32, 87u32, 88u32, 196611u32, 65621u32,
+                    65547u32, 65561u32, 65562u32, 65563u32, 65564u32, 65566u32, 65573u32,
+                    11u32, 12u32, 22u32, 23u32, 24u32, 25u32, 26u32, 27u32, 28u32, 29u32,
+                    30u32, 31u32, 32u32, 33u32, 34u32, 35u32, 36u32, 37u32, 38u32, 39u32,
+                    40u32, 41u32, 42u32, 65622u32, 65623u32, 131158u32, 65541u32, 6u32,
+                    7u32, 8u32, 9u32, 10u32, 89u32, 90u32, 91u32, 92u32, 65542u32,
+                    65543u32, 65544u32, 65545u32, 65546u32, 131078u32, 131079u32, 45u32,
+                    46u32, 47u32, 65581u32, 65582u32, 65583u32, 196615u32, 196614u32,
+                    131080u32, 131081u32, 196616u32, 196617u32, 131082u32, 65625u32,
+                    6u32, 7u32, 8u32, 9u32, 10u32, 65626u32, 65627u32, 131162u32,
+                    131077u32, 43u32, 44u32, 65579u32, 196613u32, 327680u32, 65540u32,
+                    65584u32, 65585u32, 65586u32, 65587u32, 65588u32, 65589u32, 65590u32,
+                    65591u32, 65592u32, 65593u32, 65594u32, 65595u32, 65596u32, 65597u32,
+                    65598u32, 65599u32, 65600u32, 65601u32, 65602u32, 65603u32, 65604u32,
+                    65605u32, 65606u32, 65607u32, 65608u32, 65609u32, 65610u32, 65611u32,
+                    65612u32, 65613u32, 65614u32, 65615u32, 65616u32, 65617u32, 45u32,
+                    46u32, 47u32, 131129u32, 131130u32, 154u32, 155u32, 196666u32,
+                    262202u32, 65690u32, 45u32, 46u32, 47u32, 196665u32, 65691u32,
+                    262201u32, 131227u32, 45u32, 46u32, 47u32, 131131u32, 131132u32,
+                    154u32, 155u32, 196668u32, 262204u32, 45u32, 46u32, 47u32, 196667u32,
+                    65691u32, 262203u32, 131120u32, 131121u32, 131122u32, 196656u32,
+                    196657u32, 107u32, 108u32, 109u32, 110u32, 111u32, 112u32, 113u32,
+                    114u32, 115u32, 116u32, 117u32, 118u32, 119u32, 120u32, 121u32,
+                    122u32, 123u32, 124u32, 125u32, 126u32, 127u32, 128u32, 129u32,
+                    130u32, 131u32, 132u32, 133u32, 134u32, 135u32, 136u32, 137u32,
+                    138u32, 139u32, 140u32, 141u32, 142u32, 143u32, 144u32, 145u32,
+                    146u32, 147u32, 148u32, 149u32, 150u32, 151u32, 152u32, 153u32,
+                    262193u32, 65688u32, 262192u32, 107u32, 108u32, 109u32, 110u32,
+                    111u32, 112u32, 113u32, 114u32, 115u32, 116u32, 117u32, 118u32,
+                    119u32, 120u32, 121u32, 122u32, 123u32, 124u32, 125u32, 126u32,
+                    127u32, 128u32, 129u32, 130u32, 131u32, 132u32, 133u32, 134u32,
+                    135u32, 136u32, 137u32, 138u32, 139u32, 140u32, 141u32, 142u32,
+                    143u32, 144u32, 145u32, 146u32, 147u32, 148u32, 149u32, 150u32,
+                    151u32, 65689u32, 327728u32, 131225u32, 196658u32, 262194u32,
+                    131123u32, 131124u32, 196659u32, 262195u32, 196660u32, 262196u32,
+                    131125u32, 131126u32, 107u32, 108u32, 109u32, 110u32, 111u32, 112u32,
+                    113u32, 114u32, 115u32, 116u32, 117u32, 118u32, 119u32, 120u32,
+                    121u32, 122u32, 123u32, 124u32, 125u32, 126u32, 127u32, 128u32,
+                    129u32, 130u32, 131u32, 132u32, 133u32, 134u32, 135u32, 136u32,
+                    137u32, 138u32, 139u32, 140u32, 141u32, 142u32, 143u32, 144u32,
+                    145u32, 146u32, 147u32, 148u32, 149u32, 150u32, 151u32, 152u32,
+                    153u32, 196662u32, 196661u32, 107u32, 108u32, 109u32, 110u32, 111u32,
+                    112u32, 113u32, 114u32, 115u32, 116u32, 117u32, 118u32, 119u32,
+                    120u32, 121u32, 122u32, 123u32, 124u32, 125u32, 126u32, 127u32,
+                    128u32, 129u32, 130u32, 131u32, 132u32, 133u32, 134u32, 135u32,
+                    136u32, 137u32, 138u32, 139u32, 140u32, 141u32, 142u32, 143u32,
+                    144u32, 145u32, 146u32, 147u32, 148u32, 149u32, 150u32, 151u32,
+                    65689u32, 262197u32, 131127u32, 131128u32, 107u32, 108u32, 109u32,
+                    110u32, 111u32, 112u32, 113u32, 114u32, 115u32, 116u32, 117u32,
+                    118u32, 119u32, 120u32, 121u32, 122u32, 123u32, 124u32, 125u32,
+                    126u32, 127u32, 128u32, 129u32, 130u32, 131u32, 132u32, 133u32,
+                    134u32, 135u32, 136u32, 137u32, 138u32, 139u32, 140u32, 141u32,
+                    142u32, 143u32, 144u32, 145u32, 146u32, 147u32, 148u32, 149u32,
+                    150u32, 151u32, 152u32, 153u32, 196664u32, 196663u32, 107u32, 108u32,
+                    109u32, 110u32, 111u32, 112u32, 113u32, 114u32, 115u32, 116u32,
+                    117u32, 118u32, 119u32, 120u32, 121u32, 122u32, 123u32, 124u32,
+                    125u32, 126u32, 127u32, 128u32, 129u32, 130u32, 131u32, 132u32,
+                    133u32, 134u32, 135u32, 136u32, 137u32, 138u32, 139u32, 140u32,
+                    141u32, 142u32, 143u32, 144u32, 145u32, 146u32, 147u32, 148u32,
+                    149u32, 150u32, 151u32, 65689u32, 262199u32, 131135u32, 131136u32,
+                    107u32, 108u32, 109u32, 110u32, 111u32, 112u32, 113u32, 114u32,
+                    115u32, 116u32, 117u32, 118u32, 119u32, 120u32, 121u32, 122u32,
+                    123u32, 124u32, 125u32, 126u32, 127u32, 128u32, 129u32, 130u32,
+                    131u32, 132u32, 133u32, 134u32, 135u32, 136u32, 137u32, 138u32,
+                    139u32, 140u32, 141u32, 142u32, 143u32, 144u32, 145u32, 146u32,
+                    147u32, 148u32, 149u32, 150u32, 151u32, 152u32, 153u32, 196672u32,
+                    196671u32, 107u32, 108u32, 109u32, 110u32, 111u32, 112u32, 113u32,
+                    114u32, 115u32, 116u32, 117u32, 118u32, 119u32, 120u32, 121u32,
+                    122u32, 123u32, 124u32, 125u32, 126u32, 127u32, 128u32, 129u32,
+                    130u32, 131u32, 132u32, 133u32, 134u32, 135u32, 136u32, 137u32,
+                    138u32, 139u32, 140u32, 141u32, 142u32, 143u32, 144u32, 145u32,
+                    146u32, 147u32, 148u32, 149u32, 150u32, 151u32, 65689u32, 262207u32,
+                    131137u32, 131138u32, 107u32, 108u32, 109u32, 110u32, 111u32, 112u32,
+                    113u32, 114u32, 115u32, 116u32, 117u32, 118u32, 119u32, 120u32,
+                    121u32, 122u32, 123u32, 124u32, 125u32, 126u32, 127u32, 128u32,
+                    129u32, 130u32, 131u32, 132u32, 133u32, 134u32, 135u32, 136u32,
+                    137u32, 138u32, 139u32, 140u32, 141u32, 142u32, 143u32, 144u32,
+                    145u32, 146u32, 147u32, 148u32, 149u32, 150u32, 151u32, 152u32,
+                    153u32, 196674u32, 196673u32, 107u32, 108u32, 109u32, 110u32, 111u32,
+                    112u32, 113u32, 114u32, 115u32, 116u32, 117u32, 118u32, 119u32,
+                    120u32, 121u32, 122u32, 123u32, 124u32, 125u32, 126u32, 127u32,
+                    128u32, 129u32, 130u32, 131u32, 132u32, 133u32, 134u32, 135u32,
+                    136u32, 137u32, 138u32, 139u32, 140u32, 141u32, 142u32, 143u32,
+                    144u32, 145u32, 146u32, 147u32, 148u32, 149u32, 150u32, 151u32,
+                    65689u32, 262209u32, 131141u32, 131142u32, 196677u32, 196678u32,
+                    262214u32, 131139u32, 131140u32, 196675u32, 196676u32, 262212u32,
+                    45u32, 46u32, 47u32, 131133u32, 131134u32, 154u32, 155u32, 196670u32,
+                    262206u32, 45u32, 46u32, 47u32, 196669u32, 65691u32, 262205u32,
+                    131143u32, 131144u32, 196679u32, 196680u32, 262216u32, 131145u32,
+                    131146u32, 196681u32, 196682u32, 262218u32, 131147u32, 131148u32,
+                    156u32, 157u32, 158u32, 159u32, 65692u32, 196684u32, 262220u32,
+                    65693u32, 65694u32, 131229u32, 196683u32, 262219u32, 131149u32,
+                    131150u32, 107u32, 108u32, 109u32, 110u32, 111u32, 112u32, 113u32,
+                    114u32, 115u32, 116u32, 117u32, 118u32, 119u32, 120u32, 121u32,
+                    122u32, 123u32, 124u32, 125u32, 126u32, 127u32, 128u32, 129u32,
+                    130u32, 131u32, 132u32, 133u32, 134u32, 135u32, 136u32, 137u32,
+                    138u32, 139u32, 140u32, 141u32, 142u32, 143u32, 144u32, 145u32,
+                    146u32, 147u32, 148u32, 149u32, 150u32, 151u32, 152u32, 153u32,
+                    196686u32, 196685u32, 107u32, 108u32, 109u32, 110u32, 111u32, 112u32,
+                    113u32, 114u32, 115u32, 116u32, 117u32, 118u32, 119u32, 120u32,
+                    121u32, 122u32, 123u32, 124u32, 125u32, 126u32, 127u32, 128u32,
+                    129u32, 130u32, 131u32, 132u32, 133u32, 134u32, 135u32, 136u32,
+                    137u32, 138u32, 139u32, 140u32, 141u32, 142u32, 143u32, 144u32,
+                    145u32, 146u32, 147u32, 148u32, 149u32, 150u32, 151u32, 65689u32,
+                    262221u32, 131151u32, 131152u32, 107u32, 108u32, 109u32, 110u32,
+                    111u32, 112u32, 113u32, 114u32, 115u32, 116u32, 117u32, 118u32,
+                    119u32, 120u32, 121u32, 122u32, 123u32, 124u32, 125u32, 126u32,
+                    127u32, 128u32, 129u32, 130u32, 131u32, 132u32, 133u32, 134u32,
+                    135u32, 136u32, 137u32, 138u32, 139u32, 140u32, 141u32, 142u32,
+                    143u32, 144u32, 145u32, 146u32, 147u32, 148u32, 149u32, 150u32,
+                    151u32, 152u32, 153u32, 196688u32, 196687u32, 107u32, 108u32, 109u32,
+                    110u32, 111u32, 112u32, 113u32, 114u32, 115u32, 116u32, 117u32,
+                    118u32, 119u32, 120u32, 121u32, 122u32, 123u32, 124u32, 125u32,
+                    126u32, 127u32, 128u32, 129u32, 130u32, 131u32, 132u32, 133u32,
+                    134u32, 135u32, 136u32, 137u32, 138u32, 139u32, 140u32, 141u32,
+                    142u32, 143u32, 144u32, 145u32, 146u32, 147u32, 148u32, 149u32,
+                    150u32, 151u32, 65689u32, 262223u32, 131153u32, 196689u32, 65618u32,
+                    0u32, 48u32, 49u32, 50u32, 51u32, 52u32, 53u32, 54u32, 55u32, 56u32,
+                    57u32, 58u32, 59u32, 60u32, 61u32, 62u32, 63u32, 64u32, 65u32, 66u32,
+                    67u32, 68u32, 69u32, 70u32, 71u32, 72u32, 73u32, 74u32, 75u32, 76u32,
+                    77u32, 78u32, 79u32, 80u32, 81u32, 82u32, 83u32, 160u32, 65696u32,
+                    161u32, 65697u32, 131233u32, 65698u32, 131234u32,
+                ];
+                static RULESET_OFFSETS: &[u32] = &[
+                    0u32, 41u32, 44u32, 45u32, 46u32, 77u32, 79u32, 101u32, 102u32,
+                    103u32, 108u32, 113u32, 139u32, 140u32, 141u32, 142u32, 143u32,
+                    172u32, 175u32, 176u32, 190u32, 193u32, 195u32, 196u32, 197u32,
+                    200u32, 202u32, 203u32, 204u32, 207u32, 209u32, 210u32, 211u32,
+                    212u32, 223u32, 224u32, 225u32, 226u32, 227u32, 238u32, 264u32,
+                    265u32, 266u32, 273u32, 274u32, 275u32, 276u32, 277u32, 299u32,
+                    305u32, 327u32, 332u32, 355u32, 362u32, 363u32, 365u32, 391u32,
+                    392u32, 393u32, 406u32, 410u32, 411u32, 412u32, 413u32, 414u32,
+                    415u32, 416u32, 417u32, 418u32, 419u32, 420u32, 427u32, 429u32,
+                    458u32, 459u32, 460u32, 467u32, 492u32, 493u32, 503u32, 508u32,
+                    513u32, 514u32, 515u32, 516u32, 517u32, 518u32, 520u32, 521u32,
+                    522u32, 523u32, 524u32, 531u32, 532u32, 535u32, 536u32, 537u32,
+                    538u32, 539u32, 573u32, 580u32, 581u32, 582u32, 583u32, 588u32,
+                    589u32, 590u32, 597u32, 598u32, 599u32, 604u32, 605u32, 608u32,
+                    657u32, 658u32, 659u32, 706u32, 707u32, 708u32, 709u32, 710u32,
+                    712u32, 713u32, 714u32, 715u32, 716u32, 765u32, 766u32, 813u32,
+                    814u32, 863u32, 864u32, 911u32, 912u32, 961u32, 962u32, 1009u32,
+                    1010u32, 1059u32, 1060u32, 1107u32, 1108u32, 1110u32, 1111u32,
+                    1112u32, 1113u32, 1115u32, 1116u32, 1117u32, 1118u32, 1125u32,
+                    1126u32, 1127u32, 1132u32, 1133u32, 1135u32, 1136u32, 1137u32,
+                    1138u32, 1140u32, 1141u32, 1142u32, 1143u32, 1149u32, 1150u32,
+                    1151u32, 1152u32, 1154u32, 1155u32, 1156u32, 1157u32, 1206u32,
+                    1207u32, 1254u32, 1255u32, 1304u32, 1305u32, 1352u32, 1353u32,
+                    1354u32, 1355u32, 1356u32, 1397u32, 1398u32, 1399u32, 1400u32,
+                ];
+                static CAN_ACCEPT_ERROR: &[u8] = &[
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 2u8, 2u8,
+                    2u8, 2u8, 1u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8,
+                    0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 2u8,
+                    0u8, 2u8, 2u8, 2u8, 2u8, 0u8, 2u8, 0u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0u8, 2u8, 1u8, 1u8, 0u8, 2u8, 0u8, 2u8, 0u8, 2u8, 0u8, 2u8, 0u8, 2u8,
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8, 0u8, 0u8, 0u8,
+                    0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    1u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 1u8,
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8,
+                    1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0u8, 0u8, 0u8,
+                ];
+                let num_states = 185usize;
+                let mut states = Vec::with_capacity(num_states);
+                for i in 0..num_states {
+                    let term_start = SHIFT_TERM_OFFSETS[i] as usize;
+                    let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
+                    let mut shift_goto_map_term = Vec::with_capacity(
+                        term_end - term_start,
+                    );
+                    for idx in term_start..term_end {
+                        let val = SHIFT_TERM_DATA[idx];
+                        let term_class = GrammarTerminalClasses::from_usize(
+                            (val & 0x7fff) as usize,
+                        );
+                        let state = ((val >> 15) & 0xffff) as u8;
+                        let push = (val >> 31) != 0;
+                        shift_goto_map_term
+                            .push((
+                                term_class,
+                                ::rusty_lr_core::parser::state::ShiftTarget::new(
+                                    state,
+                                    push,
+                                ),
+                            ));
+                    }
+                    let nonterm_start = SHIFT_NONTERM_OFFSETS[i] as usize;
+                    let nonterm_end = SHIFT_NONTERM_OFFSETS[i + 1] as usize;
+                    let mut shift_goto_map_nonterm = Vec::with_capacity(
+                        nonterm_end - nonterm_start,
+                    );
+                    for idx in nonterm_start..nonterm_end {
+                        let val = SHIFT_NONTERM_DATA[idx];
+                        let nonterm = GrammarNonTerminals::from_usize(
+                            (val & 0x7fff) as usize,
+                        );
+                        let state = ((val >> 15) & 0xffff) as u8;
+                        let push = (val >> 31) != 0;
+                        shift_goto_map_nonterm
+                            .push((
+                                nonterm,
+                                ::rusty_lr_core::parser::state::ShiftTarget::new(
+                                    state,
+                                    push,
+                                ),
+                            ));
+                    }
+                    let reduce_start = REDUCE_OFFSETS[i] as usize;
+                    let reduce_end = REDUCE_OFFSETS[i + 1] as usize;
+                    let mut reduce_map = Vec::new();
+                    let mut idx = reduce_start;
+                    while idx < reduce_end {
+                        let term_val = REDUCE_DATA[idx];
+                        let term_class = GrammarTerminalClasses::from_usize(
+                            term_val as usize,
+                        );
+                        let len = REDUCE_DATA[idx + 1] as usize;
+                        let mut rules = Vec::with_capacity(len);
+                        for r_idx in 0..len {
+                            rules.push(REDUCE_DATA[idx + 2 + r_idx] as u8);
+                        }
+                        reduce_map.push((term_class, rules));
+                        idx += 2 + len;
+                    }
+                    let ruleset_start = RULESET_OFFSETS[i] as usize;
+                    let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
+                    let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
+                    for idx in ruleset_start..ruleset_end {
+                        let val = RULESET_DATA[idx];
+                        let rule = (val & 0xffff) as usize;
+                        let shifted = (val >> 16) as usize;
+                        ruleset
+                            .push(::rusty_lr_core::rule::ShiftedRuleRef {
+                                rule,
+                                shifted,
+                            });
+                    }
+                    let can_accept_error = match CAN_ACCEPT_ERROR[i] {
+                        0 => ::rusty_lr_core::TriState::False,
+                        1 => ::rusty_lr_core::TriState::True,
+                        2 => ::rusty_lr_core::TriState::Maybe,
+                        _ => unreachable!(),
+                    };
+                    let intermediate = ::rusty_lr_core::parser::state::IntermediateState {
+                        shift_goto_map_term,
+                        shift_goto_map_nonterm,
+                        reduce_map,
+                        ruleset,
+                        can_accept_error,
+                    };
+                    states.push(intermediate.into());
+                }
+                states
             })
     }
 }
