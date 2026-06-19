@@ -412,15 +412,20 @@ Expr: '{' Stmt* '}'
 ```
 
 The reserved terminal `error` is used to implement panic-mode recovery. When the parser encounters an unexpected token:
-1. It pops states off the parser stack until it finds a state that can shift the `error` symbol.
-2. It shifts the `error` symbol.
-3. It discards input tokens until it encounters a token that can legally follow `error` in the grammar (in this case, `}`).
-4. It reduces the recovery rule, letting the parser resume normal execution.
+1. **Pop Stack**: The parser pops states off the parser stack until it finds a state that can shift the `error` symbol. If no such state is found, parsing aborts immediately with a `ParseError::NoAction`.
+2. **Shift `error`**: The parser shifts the `error` symbol onto the stack. The initial span/location of the `error` token is set to the span of the popped tokens.
+3. **Handle Lookahead & Merge**: 
+   - The parser checks the current lookahead token (the one that caused the syntax error).
+   - If the lookahead token can legally follow `error` in the grammar, it is shifted and recovery succeeds.
+   - If the lookahead token cannot follow `error`, its location span is **merged** into the `error` token's span, the token itself is discarded, and the parser returns `Ok(())` (resuming normal execution for subsequent tokens).
+   - Any subsequent fed tokens that cannot follow `error` will continue to be discarded and have their locations merged into the `error` token's location span.
+4. **Resume/Reduce**: Once a valid token is fed and successfully shifted, normal parsing resumes, and the recovery rule will eventually be reduced.
 
 #### Notes
 - The `error` token does not carry a semantic value.
-- You can access the span of all discarded tokens using the location binder `@error`.
+- You can access the entire span of all discarded/merged tokens using the location binder `@error`.
 - In GLR mode, the parser will prefer non-error paths and only trigger error recovery if all other active branches fail.
+- **Comparison to Bison**: Unlike Bison, which runs a blocking pull-loop internally to discard tokens until it finds a synchronizing token, RustyLR integrates with a push-based model (`feed()`). If a token cannot follow `error`, RustyLR discards it and merges its location span into the `error` token's span, returning control to the caller. This enables reactive parsing and easy diagnostics via `@error` containing the full range of discarded tokens.
 
 ### Operator Precedence
 

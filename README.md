@@ -195,7 +195,7 @@ For more details, see [GLR.md](GLR.md).
 ## Error Handling and Conflict Resolution
 
 RustyLR provides multiple tools to resolve grammar ambiguities and handle parsing failures:
-- **Panic-Mode Error Recovery:** Use the special `error` terminal to catch and recover from syntax errors.
+- **Panic-Mode Error Recovery:** Use the special `error` terminal to catch and recover from syntax errors. Unlike Bison's blocking loop-based recovery, RustyLR incrementally discards and merges subsequent unexpected tokens into the `error` token's location span on each `feed()`, enabling reactive stream parsing and accurate diagnostic spans.
 - **Operator Precedence:** Disambiguate expressions with `%left`, `%right`, and `%precedence` directives.
 - **Reduce Rule Priority:** Explicitly set reduce priorities with `%dprec`.
 - **Runtime Error Propagation:** Return custom `Err` payloads from reduce actions to signal semantic or parsing errors.
