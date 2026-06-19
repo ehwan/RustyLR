@@ -60,8 +60,6 @@ pub struct Rule {
     pub reduce_action: Option<ReduceAction>,
     /// span of '|' or ':' before this production rule
     pub separator_location: Location,
-    /// force lookahead tokens for this pattern.
-    pub lookaheads: Option<BTreeSet<usize>>,
     /// %prec definition
     pub prec: Option<Located<rusty_lr_core::rule::Precedence>>,
     /// %dprec definition

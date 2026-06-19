@@ -40,8 +40,6 @@ pub enum NonTerminalType {
 
     /// terminal set enclosed in brackets ( [a-zA-Z0-9] )
     TerminalSet,
-    /// rule with explicit lookaheads
-    Lookahead,
 
     /// sequence of tokens enclosed in parentheses ( a B c ... )
     Group,

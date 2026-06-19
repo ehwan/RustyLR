@@ -187,7 +187,6 @@ RustyLR supports rich regular expression patterns on the right-hand side of prod
 - **`P?`** : Matches zero or one occurrence of pattern `P` (binds as an `Option<P>`).
 - **`$sep(P, P_separator, repetition)`** : Matches repetitions of `P` separated by `P_separator`. The `repetition` argument can be `*` (zero or more) or `+` (one or more). Binds as a `Vec<P>`.
 - **`(P1 P2 | P3)`** : Grouping and alternation.
-- **`P / term`** or **`P / [term1 term2]`** : Lookahead assertion. Matches `P` only if followed by the lookahead symbol(s), without consuming them.
 - **`'a'` / `b'a'`** : Character/byte literals (only valid if `%tokentype` is `char` or `u8`).
 - **`"abcd"` / `b"abcd"`** : String/byte string literals (only valid if `%tokentype` is `char` or `u8`).
 - **`P - TerminalSet`** : Matches pattern `P` but excludes any terminal in the `TerminalSet`.

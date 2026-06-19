@@ -44,7 +44,6 @@ use rusty_lr_core::rule::ReduceType;
 %token caret Lexed::Caret(_);
 %token minus Lexed::Minus(_);
 %token exclamation Lexed::Exclamation(_);
-%token slash Lexed::Slash(_);
 %token dot Lexed::Dot(_);
 %token dollar Lexed::Dollar(_);
 %token comma Lexed::Comma(_);
@@ -270,7 +269,6 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 ;
 
 %left minus;
-%left slash;
 %left star plus question exclamation;
 
 Pattern(PatternArgs): ident {
@@ -296,9 +294,6 @@ Pattern(PatternArgs): ident {
 }
 | TerminalSet {
     PatternArgs::TerminalSet( TerminalSet )
-}
-| p1=Pattern slash lh=Pattern {
-    PatternArgs::Lookaheads { pattern: Box::new(p1), lookaheads: Box::new(lh) }
 }
 | lparen $sep( Pattern*, pipe, + ) rparen {
     PatternArgs::Group { alternatives: Pattern, open_location: @lparen, close_location: @rparen }

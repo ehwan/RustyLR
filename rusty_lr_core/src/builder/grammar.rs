@@ -26,7 +26,6 @@ struct ExpandCache<Term> {
 #[derive(Debug, Clone)]
 pub struct Rule<Term, NonTerm> {
     pub rule: ProductionRule<Term, NonTerm>,
-    pub lookaheads: Option<BTreeSet<Term>>,
     /// for reduce/reduce conflict resolving
     pub priority: usize,
 }
@@ -71,7 +70,6 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         &mut self,
         name: NonTerm,
         rule: Vec<Token<TerminalSymbol<Term>, NonTerm>>,
-        lookaheads: Option<BTreeSet<TerminalSymbol<Term>>>,
         precedence: Option<Precedence>,
         priority: usize,
     ) -> usize
@@ -86,7 +84,6 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 rule,
                 precedence,
             },
-            lookaheads,
             priority,
         };
         self.rules.push(rule);
@@ -324,14 +321,6 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     } else {
                         c.lookaheads.clone()
                     };
-                    // check for force lookahead
-                    let lookaheads =
-                        if let Some(force_lookaheads) = self.rules[c.rule].lookaheads.as_ref() {
-                            lookaheads.intersection(force_lookaheads).copied().collect()
-                        } else {
-                            lookaheads
-                        };
-
                     new_rules.push((
                         ShiftedRuleRef {
                             rule: c.rule,
