@@ -51,8 +51,8 @@ pub enum Lexed {
     LBracket,
     RBracket,
 
-    Left(Ident),         // %left, %l, %reduce
-    Right(Ident),        // %right, %r, %shift
+    Left(Ident),         // %left
+    Right(Ident),        // %right
     Token(Ident),        // %token
     Start(Ident),        // %start
     TokenType(Ident),    // %tokentype
@@ -219,8 +219,8 @@ impl std::fmt::Display for Lexed {
 
 fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
     match ident.to_string().as_str() {
-        "left" | "l" | "reduce" => Some(Lexed::Left(ident)),
-        "right" | "r" | "shift" => Some(Lexed::Right(ident)),
+        "left" => Some(Lexed::Left(ident)),
+        "right" => Some(Lexed::Right(ident)),
         "token" => Some(Lexed::Token(ident)),
         "start" => Some(Lexed::Start(ident)),
         "tokentype" => Some(Lexed::TokenType(ident)),

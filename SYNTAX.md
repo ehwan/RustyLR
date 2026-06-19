@@ -19,14 +19,16 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Conflict Resolution](#resolving-conflicts)
   - [Panic-Mode Error Recovery (`error`)](#panic-mode-error-recovery)
   - [Operator Precedence (`%left`, `%right`, `%precedence`, `%prec`)](#operator-precedence)
-  - [Rule Priority (`%dprec`)](#rule-priority)
 - [Error Type (`%err` / `%error`)](#error-type-optional)
-- [LALR(1) Parser Generation (`%lalr`)](#lalr-parser-generation)
-- [GLR Parser Generation (`%glr`)](#glr-parser-generation)
 - [Disabling Table Optimization (`%nooptim`)](#no-optimization)
 - [Dense Parser Tables (`%dense`)](#dense-parser-table)
 - [Location Tracking (`%location`)](#location-tracking)
 - [Variable Substitution](#variable-substitution)
+- [Advanced Parser Controls](#advanced-parser-controls)
+  - [GLR Parser Generation (`%glr`)](#glr-parser-generation)
+  - [Advanced GLR Reduce Controls](#advanced-glr-reduce-controls)
+  - [Rule Priority (`%dprec`)](#rule-priority)
+  - [LALR(1) Parser Generation (`%lalr`)](#lalr-parser-generation)
 
 ---
 
@@ -311,22 +313,7 @@ Expr(i32) : Term {
 
 In GLR mode, user data is branch-local: when the parser forks, the current user data is cloned, and each branch receives its own independently mutable `UserData` value.
 
-### 5. Lookahead Token (`lookahead`)
-You can inspect the lookahead token that triggered the current reduction. It is exposed as `lookahead` (of type `&TerminalSymbol<TokenType>`):
-```rust
-Expr(i32) : Term {
-    if let Some(next_token) = lookahead.to_term() {
-        println!("Lookahead is: {:?}", next_token);
-    }
-    Term
-};
-```
-
-### 6. Shift Control (`shift`)
-For GLR parsing, you can dynamically control whether the parser should perform a shift action or prune the branch by modifying the mutable `shift` boolean:
-```rust
-*shift = false; // Disable shifting the next token, forcing reduction
-```
+GLR parsers also expose advanced reduce-action controls for inspecting lookahead and pruning shift branches. See [Advanced GLR Reduce Controls](#advanced-glr-reduce-controls).
 
 ### Variable Types for Patterns
 When matching regex patterns, the bindings yield the following Rust types:
@@ -481,19 +468,6 @@ BinOp : '+' | '*';
 ```
 Here, the rule's precedence matches the specific operator that `BinOp` resolved to.
 
-### Rule Priority
-
-```rust
-Expr
-    : Expr '+' Expr %dprec 2
-    | Expr '*' Expr %dprec 1
-    ;
-```
-
-Assigns static priority numbers to rules to resolve reduce/reduce conflicts. If two rules can be reduced at the same time, the parser resolves the conflict by choosing the rule with the highest `%dprec` value (default is `0`).
-
----
-
 ## Error Type (Optional)
 
 ```
@@ -502,30 +476,6 @@ Assigns static priority numbers to rules to resolve reduce/reduce conflicts. If 
 ```
 
 Defines a custom error type returned by reduce actions. If your reduce action returns a `Result`, returning an `Err(custom_error)` will stop execution (or prune the GLR branch) and bubble the error up wrapped in `ParseError::ReduceAction`.
-
----
-
-## LALR Parser Generation
-
-```
-%lalr;
-```
-
-Forces RustyLR to generate LALR(1) parsing tables. By default, RustyLR builds minimal-LR(1) (IELR-style) tables, which provide full LR(1) parsing strength while keeping table sizes close to LALR(1).
-
----
-
-## GLR Parser Generation
-
-```
-%glr;
-```
-
-Enables Generalized LR (GLR) parser generation. With `%glr;` enabled, shift/reduce and reduce/reduce conflicts are not treated as compiler errors. Instead, the parser splits into parallel execution branches at runtime.
-
-When a GLR parser splits, it also clones the current user data for each branch. Each active branch owns and mutates its own `UserData`, and `accept_all()` returns the final user data for every successful branch.
-
----
 
 ## No Optimization
 
@@ -584,17 +534,15 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `%location`
 - `%userdata`
 - `%errortype` (or `%error`)
-- `%moduleprefix`
 - `%token` terminal definitions
 - Non-terminal rule types
 - Reduce actions
 
 ### Supported Variables
 - `$tokentype` -> Evaluates to the type defined by `%tokentype`.
-- `$location` -> Evaluates to the type defined by `%location` (defaults to `$moduleprefix::DefaultLocation`).
+- `$location` -> Evaluates to the type defined by `%location` (defaults to `::rusty_lr::DefaultLocation`).
 - `$userdata` -> Evaluates to the type defined by `%userdata` (defaults to `()`).
-- `$error` or `$errortype` -> Evaluates to the type defined by `%errortype` / `%error` (defaults to `$moduleprefix::DefaultReduceActionError`).
-- `$moduleprefix` -> Evaluates to the path defined by `%moduleprefix` (defaults to `::rusty_lr`).
+- `$error` or `$errortype` -> Evaluates to the type defined by `%errortype` / `%error` (defaults to `::rusty_lr::DefaultReduceActionError`).
 - `$NonTerminalName` -> Evaluates to the `ruletype` defined for `NonTerminalName`.
 - `$terminal_name` -> Evaluates to the match pattern/definition of `<terminal_name>`.
 
@@ -645,3 +593,70 @@ let Token::Ident(ident) = ident else {
 ```
 
 This syntax sugar is extremely useful for reducing boilerplate code when processing token streams in your compiler's parser rules.
+
+---
+
+## Advanced Parser Controls
+
+The controls in this section are useful for ambiguous grammars, parser-mode tuning, or conflict cases that cannot be expressed cleanly with ordinary precedence declarations. Most grammars can start without these directives.
+
+### GLR Parser Generation
+
+```
+%glr;
+```
+
+Enables Generalized LR (GLR) parser generation. With `%glr;` enabled, shift/reduce and reduce/reduce conflicts are not treated as compiler errors. Instead, the parser splits into parallel execution branches at runtime.
+
+When a GLR parser splits, it also clones the current user data for each branch. Each active branch owns and mutates its own `UserData`, and `accept_all()` returns the final user data for every successful branch.
+
+For the full GLR guide, see [GLR.md](GLR.md).
+
+### Advanced GLR Reduce Controls
+
+GLR reduce actions expose two additional variables for advanced branch control:
+
+- **`lookahead`**: A reference of type `&TerminalSymbol<TokenType>` pointing to the next token in the input stream, either a user-supplied terminal or a special symbol like `error`.
+- **`shift`**: A mutable reference of type `&mut bool` that controls whether the parser is allowed to shift the next token.
+
+You can inspect the lookahead token that triggered the current reduction:
+
+```rust
+Expr(i32) : Term {
+    if let Some(next_token) = lookahead.to_term() {
+        println!("Lookahead is: {:?}", next_token);
+    }
+    Term
+};
+```
+
+You can also disable shifting on the current lookahead to force a reduction and prune the shift branch:
+
+```rust
+*shift = false;
+```
+
+Prefer `%left`, `%right`, `%precedence`, and `%prec` for ordinary operator precedence. These GLR controls are intended for cases where the grammar needs runtime branch pruning.
+
+### Rule Priority
+
+```rust
+Expr
+    : Expr '+' Expr %dprec 2
+    | Expr '*' Expr %dprec 1
+    ;
+```
+
+Assigns static priority numbers to rules to resolve reduce/reduce conflicts. If two rules can be reduced at the same time, the parser resolves the conflict by choosing the rule with the highest `%dprec` value (default is `0`).
+
+Use `%dprec` for reduce/reduce conflicts in advanced or GLR-oriented grammars. For ordinary expression parsing, operator precedence declarations are usually clearer.
+
+### LALR Parser Generation
+
+```
+%lalr;
+```
+
+Forces RustyLR to generate LALR(1) parsing tables. By default, RustyLR builds minimal-LR(1) (IELR-style) tables, which provide full LR(1) parsing strength while keeping table sizes close to LALR(1).
+
+Use `%lalr` when you specifically need LALR behavior or want to compare generated tables with a traditional LALR parser generator.

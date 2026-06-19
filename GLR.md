@@ -46,9 +46,9 @@ A GLR parser will execute all branches concurrently, tracking all possible parse
 
 ---
 
-## Resolving Ambiguities Dynamically
+## Advanced Dynamic Ambiguity Resolution
 
-RustyLR allows you to resolve grammar conflicts and prune parsing branches dynamically within your reduce actions.
+RustyLR allows you to resolve grammar conflicts and prune parsing branches dynamically within your reduce actions. This is an advanced GLR escape hatch; for ordinary operator precedence, prefer `%left`, `%right`, `%precedence`, and `%prec`.
 
 ### 1. Pruning Paths via `Err`
 If a reduce action evaluates to a semantic error and returns `Err`, the parser immediately discards that active parsing branch. By checking the lookahead token or parsing context, you can selectively fail unwanted paths.
