@@ -1084,6 +1084,10 @@ impl Grammar {
                     // Generate code to extract values and locations from the stacks for the reduce action.
                     // Since the data stack is a single unified vector, we pop from it in reverse chronological order (right to left).
                     let mut extract_data_stream = TokenStream::new();
+
+                    let mut location_maptos = Vec::with_capacity(rule.tokens.len());
+                    let mut data_maptos = Vec::with_capacity(rule.tokens.len());
+
                     for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
                         let variant_name = token_to_variant_name(token.token);
 
@@ -1126,16 +1130,7 @@ impl Grammar {
                                 None
                             }
                         };
-
-                        if let Some(loc_mapto) = location_mapto {
-                            extract_data_stream.extend(quote! {
-                                let mut #loc_mapto = __location_stack.pop().unwrap();
-                            });
-                        } else {
-                            extract_data_stream.extend(quote! {
-                                __location_stack.pop().unwrap();
-                            });
-                        }
+                        location_maptos.push(location_mapto);
 
                         // Determine mapto for data
                         let mapto = if variant_name != &empty_variant_name {
@@ -1176,28 +1171,107 @@ impl Grammar {
                         };
 
                         if variant_name != &empty_variant_name && mapto.is_some() {
-                            let data_mapto = mapto.unwrap();
                             let is_boxed = match token.token {
                                 Token::Term(_) => self.is_tokentype_boxed,
                                 Token::NonTerm(nonterm_idx) => {
                                     self.nonterminals[nonterm_idx].ruletype_boxed
                                 }
                             };
-                            let val_extracted = if is_boxed {
-                                quote! { *val }
-                            } else {
-                                quote! { val }
-                            };
-                            extract_data_stream.extend(quote! {
-                                let mut #data_mapto = match __data_stack.__stack.pop().unwrap() {
-                                    #data_enum_typename::#variant_name(val) => #val_extracted,
-                                    _ => unreachable!(),
-                                };
-                            });
+                            data_maptos.push(Some((
+                                variant_name.clone(),
+                                mapto.unwrap(),
+                                is_boxed,
+                            )));
                         } else {
-                            extract_data_stream.extend(quote! {
-                                __data_stack.__stack.pop().unwrap();
-                            });
+                            data_maptos.push(None);
+                        }
+                    }
+
+                    // 1. Generate location pops/truncates
+                    {
+                        let mut consecutive_unneeded = 0;
+                        for loc_mapto in &location_maptos {
+                            if let Some(loc_mapto) = loc_mapto {
+                                if consecutive_unneeded > 0 {
+                                    if consecutive_unneeded == 1 {
+                                        extract_data_stream.extend(quote! {
+                                            __location_stack.pop();
+                                        });
+                                    } else {
+                                        let consecutive_unneeded =
+                                            syn::Index::from(consecutive_unneeded);
+                                        extract_data_stream.extend(quote! {
+                                            __location_stack.truncate(__location_stack.len() - #consecutive_unneeded);
+                                        });
+                                    }
+                                    consecutive_unneeded = 0;
+                                }
+                                extract_data_stream.extend(quote! {
+                                    let mut #loc_mapto = __location_stack.pop().unwrap();
+                                });
+                            } else {
+                                consecutive_unneeded += 1;
+                            }
+                        }
+                        if consecutive_unneeded > 0 {
+                            if consecutive_unneeded == 1 {
+                                extract_data_stream.extend(quote! {
+                                    __location_stack.pop();
+                                });
+                            } else {
+                                let consecutive_unneeded = syn::Index::from(consecutive_unneeded);
+                                extract_data_stream.extend(quote! {
+                                    __location_stack.truncate(__location_stack.len() - #consecutive_unneeded);
+                                });
+                            }
+                        }
+                    }
+
+                    // 2. Generate data stack pops/truncates
+                    {
+                        let mut consecutive_unneeded = 0;
+                        for data_info in &data_maptos {
+                            if let Some((variant_name, data_mapto, is_boxed)) = data_info {
+                                if consecutive_unneeded > 0 {
+                                    if consecutive_unneeded == 1 {
+                                        extract_data_stream.extend(quote! {
+                                            __data_stack.__stack.pop();
+                                        });
+                                    } else {
+                                        let consecutive_unneeded =
+                                            syn::Index::from(consecutive_unneeded);
+                                        extract_data_stream.extend(quote! {
+                                            __data_stack.__stack.truncate(__data_stack.__stack.len() - #consecutive_unneeded);
+                                        });
+                                    }
+                                    consecutive_unneeded = 0;
+                                }
+                                let val_extracted = if *is_boxed {
+                                    quote! { *val }
+                                } else {
+                                    quote! { val }
+                                };
+                                extract_data_stream.extend(quote! {
+                                    let mut #data_mapto = match __data_stack.__stack.pop().unwrap() {
+                                        #data_enum_typename::#variant_name(val) => #val_extracted,
+                                        _ => unreachable!(),
+                                    };
+                                });
+                            } else {
+                                consecutive_unneeded += 1;
+                            }
+                        }
+                        if consecutive_unneeded > 0 {
+                            if consecutive_unneeded == 1 {
+                                extract_data_stream.extend(quote! {
+                                    __data_stack.__stack.pop();
+                                });
+                            } else {
+                                let consecutive_unneeded = syn::Index::from(consecutive_unneeded);
+                                extract_data_stream.extend(quote! {
+                                    __data_stack.__stack.truncate(__data_stack.__stack.len() - #consecutive_unneeded);
+                                });
+                            }
                         }
                     }
 
