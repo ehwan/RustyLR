@@ -192,6 +192,10 @@ pub enum JsonTerminalClasses {
 impl JsonTerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
+        debug_assert!(
+            value < 33usize, "Terminal class index {} is out of bounds (max {})", value,
+            33usize
+        );
         unsafe { ::std::mem::transmute(value) }
     }
 }
@@ -355,6 +359,10 @@ pub enum JsonNonTerminals {
 impl JsonNonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
+        debug_assert!(
+            value < 32usize, "Non-terminal index {} is out of bounds (max {})", value,
+            32usize
+        );
         unsafe { ::std::mem::transmute(value) }
     }
 }

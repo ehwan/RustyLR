@@ -80,6 +80,10 @@ pub enum ETerminalClasses {
 impl ETerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
+        debug_assert!(
+            value < 8usize, "Terminal class index {} is out of bounds (max {})", value,
+            8usize
+        );
         unsafe { ::std::mem::transmute(value) }
     }
 }
@@ -158,6 +162,10 @@ pub enum ENonTerminals {
 impl ENonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
+        debug_assert!(
+            value < 5usize, "Non-terminal index {} is out of bounds (max {})", value,
+            5usize
+        );
         unsafe { ::std::mem::transmute(value) }
     }
 }

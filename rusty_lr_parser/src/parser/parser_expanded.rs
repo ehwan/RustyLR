@@ -282,6 +282,12 @@ pub enum GrammarTerminalClasses {
 impl GrammarTerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
+        debug_assert!(
+            value < 48usize,
+            "Terminal class index {} is out of bounds (max {})",
+            value,
+            48usize
+        );
         unsafe { ::std::mem::transmute(value) }
     }
 }
@@ -471,6 +477,12 @@ pub enum GrammarNonTerminals {
 impl GrammarNonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
+        debug_assert!(
+            value < 32usize,
+            "Non-terminal index {} is out of bounds (max {})",
+            value,
+            32usize
+        );
         unsafe { ::std::mem::transmute(value) }
     }
 }

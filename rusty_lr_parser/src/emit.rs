@@ -358,6 +358,8 @@ impl Grammar {
             });
         }
 
+        let max_variants = self.terminal_classes.len() + 2;
+
         stream.extend(quote! {
             /// A enum that represents terminal classes
             #[allow(non_camel_case_types, dead_code)]
@@ -375,6 +377,7 @@ impl Grammar {
                 // This avoids verbose static enum instantiations and significantly reduces compiled binary size.
                 #[inline]
                 pub fn from_usize(value: usize) -> Self {
+                    debug_assert!(value < #max_variants, "Terminal class index {} is out of bounds (max {})", value, #max_variants);
                     unsafe { ::std::mem::transmute(value) }
                 }
             }
@@ -479,6 +482,8 @@ impl Grammar {
             }
         }
 
+        let max_variants = self.nonterminals.len();
+
         stream.extend(
     quote! {
             /// An enum that represents non-terminal symbols
@@ -495,6 +500,7 @@ impl Grammar {
                 // This avoids verbose static enum instantiations and significantly reduces compiled binary size.
                 #[inline]
                 pub fn from_usize(value: usize) -> Self {
+                    debug_assert!(value < #max_variants, "Non-terminal index {} is out of bounds (max {})", value, #max_variants);
                     unsafe { ::std::mem::transmute(value) }
                 }
             }
