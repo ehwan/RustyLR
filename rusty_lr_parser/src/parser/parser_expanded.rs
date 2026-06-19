@@ -715,21 +715,20 @@ impl GrammarDataStack {
                 4usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_colon = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut RuleLines = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant3(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_colon = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut RuleType = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant2(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -774,7 +773,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut parengroup = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -838,14 +837,14 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__variant3(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut RuleLine = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant4(val) => *val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut RuleLines = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant3(val) => val,
             _ => unreachable!(),
@@ -880,7 +879,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant4(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut RuleLine = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant4(val) => *val,
             _ => unreachable!(),
@@ -919,17 +918,15 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__variant11(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut Action = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant2(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut PrecDef = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut TokenMapped = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant11(val) => val,
             _ => unreachable!(),
@@ -977,15 +974,12 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant10(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
         if __push_data {
             __data_stack
@@ -1023,11 +1017,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1074,14 +1065,12 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_int_literal = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut int_literal = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __res = {
             let Lexed::IntLiteral(i) = int_literal else {
                 unreachable!("PrecDPrecArgs-DPrec");
@@ -1124,11 +1113,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1171,9 +1157,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1211,7 +1196,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant9(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -1252,14 +1237,13 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -1344,13 +1328,13 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_first = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut first = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -1401,11 +1385,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1488,13 +1469,13 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_first = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut first = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -1545,11 +1526,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1632,13 +1610,13 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_first = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut first = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -1689,11 +1667,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1742,19 +1717,18 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut TerminalSetItem = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant14(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut caret = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant13(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             TerminalSet {
                 negate: caret.is_some(),
@@ -1789,7 +1763,7 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_dot = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             let span = __rustylr_location_dot;
             TerminalSet {
@@ -1865,11 +1839,11 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_plus = __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut plus = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -1913,8 +1887,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_star = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -1955,8 +1929,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_question = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -1997,8 +1971,8 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_exclamation = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -2034,7 +2008,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant8(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut TerminalSet = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant8(val) => val,
             _ => unreachable!(),
@@ -2073,14 +2047,12 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__variant9(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut lh = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut p1 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -2125,14 +2097,14 @@ impl GrammarDataStack {
             );
         }
         let mut __rustylr_location_rparen = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_lparen = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut Pattern = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant16(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_lparen = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             PatternArgs::Group {
                 alternatives: Pattern,
@@ -2173,12 +2145,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -2368,14 +2338,12 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__variant9(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut p2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut p1 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -2439,31 +2407,25 @@ impl GrammarDataStack {
                 7usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 6);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let mut del = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut base = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2541,33 +2503,25 @@ impl GrammarDataStack {
                 8usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 7);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let mut del = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut base = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2645,33 +2599,25 @@ impl GrammarDataStack {
                 8usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 7);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let mut del = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut base = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2745,31 +2691,27 @@ impl GrammarDataStack {
                 7usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 4);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let mut del = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut base = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2854,33 +2796,27 @@ impl GrammarDataStack {
                 8usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 5);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         let mut del = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut base = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2933,7 +2869,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut bracegroup = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -3119,22 +3055,19 @@ impl GrammarDataStack {
                 4usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.pop();
         let mut __rustylr_data_3 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __rustylr_data_3 = Self::custom_reduce_action_0(
             __rustylr_data_3,
             data,
@@ -3184,14 +3117,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3234,14 +3163,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3284,17 +3209,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("StartDef-Ident");
@@ -3335,14 +3258,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3385,17 +3304,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -3434,12 +3351,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3482,17 +3397,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -3531,12 +3444,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3579,17 +3490,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_left = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_left = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         {
             data.precedences
                 .push((__rustylr_location_left, Some(ReduceType::Left), IdentOrLiteral));
@@ -3627,14 +3536,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3677,17 +3582,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_right = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_right = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         {
             data.precedences
                 .push((
@@ -3729,14 +3632,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3779,17 +3678,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         {
             data.precedences.push((__rustylr_location_precedence, None, IdentOrLiteral));
         };
@@ -3826,14 +3723,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3876,17 +3769,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -3925,12 +3816,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3973,17 +3862,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -4022,12 +3909,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4066,15 +3951,13 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.pop();
         let mut glr = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         {
             data.glr = true;
         };
@@ -4111,14 +3994,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4157,15 +4036,13 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.pop();
         let mut lalr = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         {
             data.lalr = true;
         };
@@ -4202,14 +4079,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4248,12 +4121,8 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.no_optim = true;
         };
@@ -4290,14 +4159,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4336,15 +4201,13 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.pop();
         let mut dense = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         {
             data.dense = true;
         };
@@ -4381,14 +4244,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4431,17 +4290,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.pop();
         let mut ident = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         {
             let idents = ident
                 .into_iter()
@@ -4486,14 +4343,10 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4536,20 +4389,19 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_filter = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_filter = __location_stack.pop().unwrap();
         let mut filter = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -4588,12 +4440,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_filter = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4636,17 +4486,15 @@ impl GrammarDataStack {
                 3usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_location = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        let mut __rustylr_location_location = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -4685,15 +4533,15 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_location = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         let mut location = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4732,12 +4580,10 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4768,7 +4614,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant1(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut Rule = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant1(val) => *val,
             _ => unreachable!(),
@@ -4797,7 +4643,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant6(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant6(val) => *val,
             _ => unreachable!(),
@@ -4832,12 +4678,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant11(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant6(val) => *val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant11(val) => val,
             _ => unreachable!(),
@@ -4871,7 +4716,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant11(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant11(val) => val,
             _ => unreachable!(),
@@ -4922,7 +4767,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant5(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant5(val) => *val,
             _ => unreachable!(),
@@ -4957,12 +4802,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant12(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant5(val) => *val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
@@ -4996,7 +4840,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant12(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
@@ -5047,7 +4891,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -5098,7 +4942,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant7(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant7(val) => val,
             _ => unreachable!(),
@@ -5133,12 +4977,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant14(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant7(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant14(val) => val,
             _ => unreachable!(),
@@ -5172,7 +5015,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant14(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant14(val) => val,
             _ => unreachable!(),
@@ -5223,7 +5066,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant9(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
@@ -5258,12 +5101,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant15(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
@@ -5297,7 +5139,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant15(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
@@ -5348,7 +5190,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant15(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
@@ -5387,14 +5229,12 @@ impl GrammarDataStack {
                 2usize), Some(& GrammarData::__variant16(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut __token1 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant16(val) => val,
             _ => unreachable!(),
@@ -5428,8 +5268,8 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
     }
@@ -5466,7 +5306,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -5501,12 +5341,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant17(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
@@ -5540,7 +5379,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant10(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant10(val) => val,
             _ => unreachable!(),
@@ -5575,12 +5414,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant18(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant10(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
@@ -5614,7 +5452,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
@@ -5649,12 +5487,11 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::__variant17(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut Ap = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
@@ -5688,7 +5525,7 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::__variant17(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut __token0 = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
@@ -5739,8 +5576,8 @@ impl GrammarDataStack {
                 0usize), Some(& GrammarData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
     }
@@ -5766,10 +5603,8 @@ impl GrammarDataStack {
                 1usize), Some(& GrammarData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
     }

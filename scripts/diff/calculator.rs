@@ -255,17 +255,15 @@ impl EDataStack {
                 2usize), Some(& EData::__variant1(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut a2 = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut plus = match __data_stack.__stack.pop().unwrap() {
             EData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),
@@ -300,7 +298,7 @@ impl EDataStack {
                 0usize), Some(& EData::__variant1(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut M = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),
@@ -339,14 +337,12 @@ impl EDataStack {
                 2usize), Some(& EData::__variant1(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
         let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let mut __rustylr_data_0 = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),
@@ -389,7 +385,7 @@ impl EDataStack {
                 0usize), Some(& EData::__terminals(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut num = match __data_stack.__stack.pop().unwrap() {
             EData::__terminals(val) => val,
             _ => unreachable!(),
@@ -434,15 +430,13 @@ impl EDataStack {
                 2usize), Some(& EData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.pop();
         let mut E = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),
         };
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __data_stack.__stack.pop();
         let __res = E;
         if __push_data {
             __data_stack.__stack.push(EData::__variant1(__res));
@@ -469,7 +463,7 @@ impl EDataStack {
                 0usize), Some(& EData::__variant1(_)))
             );
         }
-        __location_stack.pop().unwrap();
+        __location_stack.pop();
         let mut A = match __data_stack.__stack.pop().unwrap() {
             EData::__variant1(val) => val,
             _ => unreachable!(),

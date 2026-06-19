@@ -550,12 +550,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -585,12 +581,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -620,12 +612,10 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         {
             data.push(__rustylr_location_error.clone());
         };
@@ -650,8 +640,8 @@ impl JsonDataStack {
                 0usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -681,12 +671,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -724,16 +710,8 @@ impl JsonDataStack {
                 4usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 5);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 5);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -763,12 +741,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -798,12 +772,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -833,12 +803,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -864,10 +830,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -905,16 +869,8 @@ impl JsonDataStack {
                 4usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 5);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 5);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -944,12 +900,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -975,10 +927,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1004,10 +954,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1037,12 +985,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1072,12 +1016,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1107,12 +1047,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1138,10 +1074,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1167,10 +1101,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1204,14 +1136,8 @@ impl JsonDataStack {
                 3usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 4);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1249,16 +1175,8 @@ impl JsonDataStack {
                 4usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 5);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 5);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1292,14 +1210,8 @@ impl JsonDataStack {
                 3usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 4);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1321,8 +1233,8 @@ impl JsonDataStack {
                 0usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1352,12 +1264,8 @@ impl JsonDataStack {
                 2usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 3);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1394,8 +1302,8 @@ impl JsonDataStack {
                 0usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1421,10 +1329,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1461,8 +1367,8 @@ impl JsonDataStack {
                 0usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1488,10 +1394,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1513,8 +1417,8 @@ impl JsonDataStack {
                 0usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.pop();
+        __data_stack.__stack.pop();
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
@@ -1540,10 +1444,8 @@ impl JsonDataStack {
                 1usize), Some(& JsonData::Empty))
             );
         }
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
-        __location_stack.pop().unwrap();
-        __data_stack.__stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 2);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         __data_stack.__stack.push(JsonData::Empty);
         Ok(())
     }
