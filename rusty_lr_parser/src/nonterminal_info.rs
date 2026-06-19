@@ -106,6 +106,9 @@ pub struct NonTerminalInfo {
     /// The rule type of this non-terminal
     pub ruletype: Option<TokenStream>,
 
+    /// Whether the rule type of this non-terminal should be boxed in the Data enum
+    pub ruletype_boxed: bool,
+
     /// Every set of production rules
     pub rules: Vec<Rule>,
 

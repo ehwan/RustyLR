@@ -86,7 +86,7 @@ use rusty_lr_core::rule::ReduceType;
 
 %start Grammar;
 
-Rule(RuleDefArgs) : ident RuleType colon RuleLines semicolon {
+Rule(box RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let $ident = ident else { // "$ident" replaced with "$ident" in the macro expansion
         unreachable!( "Rule-Ident" );
     };
@@ -122,7 +122,7 @@ RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
 }
 ;
 
-RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
+RuleLine(box RuleLineArgs): TokenMapped* PrecDef* Action
 {
     RuleLineArgs {
         tokens: TokenMapped,
@@ -133,7 +133,7 @@ RuleLine(RuleLineArgs): TokenMapped* PrecDef* Action
 }
 ;
 
-PrecDef(PrecDPrecArgs)
+PrecDef(box PrecDPrecArgs)
     : percent! prec! IdentOrLiteral {
         PrecDPrecArgs::Prec(IdentOrLiteral)
     }
@@ -169,7 +169,7 @@ PrecDef(PrecDPrecArgs)
     }
     ;
 
-TokenMapped((Option<Located<String>>, PatternArgs)): Pattern {
+TokenMapped(box (Option<Located<String>>, PatternArgs)): Pattern {
     ( None, Pattern )
 }
 | ident equal Pattern {
