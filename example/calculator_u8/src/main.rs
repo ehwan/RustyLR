@@ -54,9 +54,13 @@ mod tests {
         let mut context = parser::EContext::new();
         let mut userdata: i32 = 0;
         for b in input.chars() {
-            context.feed(&parser, b, &mut userdata).expect("Failed to feed char");
+            context
+                .feed(&parser, b, &mut userdata)
+                .expect("Failed to feed char");
         }
-        let result = context.accept(&parser, &mut userdata).expect("Failed to accept");
+        let result = context
+            .accept(&parser, &mut userdata)
+            .expect("Failed to accept");
         assert_eq!(result, -139.0);
     }
 
@@ -66,7 +70,7 @@ mod tests {
         let parser = parser::EParser::new();
         let mut context = parser::EContext::new();
         let mut userdata: i32 = 0;
-        
+
         let mut has_err = false;
         for b in error_input.chars() {
             if context.feed(&parser, b, &mut userdata).is_err() {
@@ -77,4 +81,3 @@ mod tests {
         assert!(has_err);
     }
 }
-

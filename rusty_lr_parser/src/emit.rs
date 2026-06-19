@@ -924,26 +924,37 @@ impl Grammar {
         if self.terminal_classes.iter().any(|c| c.data_used) {
             terminal_data_used = true;
             let terminal_boxed = self.is_tokentype_boxed;
-            let key = format!("{}_boxed:{}", remove_whitespaces(self.token_typename.to_string()), terminal_boxed);
-            ruletype_variant_map.insert(
-                key,
-                terminal_variant_name.clone(),
+            let key = format!(
+                "{}_boxed:{}",
+                remove_whitespaces(self.token_typename.to_string()),
+                terminal_boxed
             );
-            variant_names_in_order
-                .push((terminal_variant_name.clone(), self.token_typename.clone(), terminal_boxed));
+            ruletype_variant_map.insert(key, terminal_variant_name.clone());
+            variant_names_in_order.push((
+                terminal_variant_name.clone(),
+                self.token_typename.clone(),
+                terminal_boxed,
+            ));
         }
 
         // iterates through nonterminals
         for nonterm in self.nonterminals.iter() {
             if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
                 let cur_len = ruletype_variant_map.len();
-                let key = format!("{}_boxed:{}", remove_whitespaces(ruletype_stream.to_string()), nonterm.ruletype_boxed);
+                let key = format!(
+                    "{}_boxed:{}",
+                    remove_whitespaces(ruletype_stream.to_string()),
+                    nonterm.ruletype_boxed
+                );
                 let variant_name = ruletype_variant_map
                     .entry(key)
                     .or_insert_with(|| {
                         let new_variant_name = format_ident!("__variant{}", cur_len);
-                        variant_names_in_order
-                            .push((new_variant_name.clone(), ruletype_stream.clone(), nonterm.ruletype_boxed));
+                        variant_names_in_order.push((
+                            new_variant_name.clone(),
+                            ruletype_stream.clone(),
+                            nonterm.ruletype_boxed,
+                        ));
                         new_variant_name
                     })
                     .clone();
@@ -1168,7 +1179,9 @@ impl Grammar {
                             let data_mapto = mapto.unwrap();
                             let is_boxed = match token.token {
                                 Token::Term(_) => self.is_tokentype_boxed,
-                                Token::NonTerm(nonterm_idx) => self.nonterminals[nonterm_idx].ruletype_boxed,
+                                Token::NonTerm(nonterm_idx) => {
+                                    self.nonterminals[nonterm_idx].ruletype_boxed
+                                }
                             };
                             let val_extracted = if is_boxed {
                                 quote! { *val }

@@ -119,3 +119,6 @@ fi
 rm "$test_out"
 
 echo "All tests passed."
+
+echo "Formatting project"
+cargo fmt --all --quiet --manifest-path "$rustylr_path/Cargo.toml" || true

@@ -192,7 +192,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
@@ -254,7 +255,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
@@ -322,7 +324,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
@@ -370,7 +373,8 @@ impl Pattern {
                         dprec: None,
                         is_used: true,
                     };
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
@@ -431,7 +435,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! {Option<#base_typename>}),
@@ -480,7 +485,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
@@ -547,7 +553,8 @@ impl Pattern {
                     };
                     rules.push(rule);
                 }
-                let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                let nonterm_info = NonTerminalInfo {
+                    ruletype_boxed: false,
                     name: newrule_name.clone(),
                     pretty_name: self.pretty_name.clone(),
                     ruletype: Some(grammar.token_typename.clone()),
@@ -599,7 +606,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(base_typename.clone()),
@@ -636,7 +644,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
@@ -770,7 +779,8 @@ impl Pattern {
                 }
                 let newrule_idx = grammar.nonterminals.len();
                 let newrule_name = Located::new(format!("_Group{}", newrule_idx), root_location);
-                let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                let nonterm_info = NonTerminalInfo {
+                    ruletype_boxed: false,
                     name: newrule_name.clone(),
                     pretty_name: self.pretty_name.clone(),
                     ruletype: ruletype.clone(),
@@ -833,7 +843,8 @@ impl Pattern {
                 };
 
                 let newrule_name = Located::new(newrule_name_str, str_loc);
-                let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                let nonterm_info = NonTerminalInfo {
+                    ruletype_boxed: false,
                     name: newrule_name.clone(),
                     pretty_name: syn::LitByteStr::new(s.value(), proc_macro2::Span::call_site())
                         .to_token_stream()
@@ -896,7 +907,8 @@ impl Pattern {
                 };
 
                 let newrule_name = Located::new(newrule_name_str, str_loc);
-                let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                let nonterm_info = NonTerminalInfo {
+                    ruletype_boxed: false,
                     name: newrule_name.clone(),
                     pretty_name: s.to_token_stream().to_string(),
                     ruletype: None,
@@ -985,7 +997,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
@@ -1050,7 +1063,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,
@@ -1119,7 +1133,8 @@ impl Pattern {
                         is_used: true,
                     };
 
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: Some(quote! { Vec<#base_typename> }),
@@ -1167,7 +1182,8 @@ impl Pattern {
                         dprec: None,
                         is_used: true,
                     };
-                    let nonterm_info = NonTerminalInfo { ruletype_boxed: false,
+                    let nonterm_info = NonTerminalInfo {
+                        ruletype_boxed: false,
                         name: newrule_name.clone(),
                         pretty_name: self.pretty_name.clone(),
                         ruletype: None,

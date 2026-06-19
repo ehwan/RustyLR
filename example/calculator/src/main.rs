@@ -67,9 +67,13 @@ mod tests {
         let mut context = parser::EContext::new();
         let mut userdata: i32 = 0;
         for token in input {
-            context.feed(&parser, token, &mut userdata).expect("Failed to feed token");
+            context
+                .feed(&parser, token, &mut userdata)
+                .expect("Failed to feed token");
         }
-        let res = context.accept(&parser, &mut userdata).expect("Failed to accept");
+        let res = context
+            .accept(&parser, &mut userdata)
+            .expect("Failed to accept");
         assert_eq!(res, 15);
         assert_eq!(userdata, 2);
     }
