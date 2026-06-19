@@ -744,17 +744,6 @@ impl ::rusty_lr::parser::Parser for EParser {
                     0u32, 0u32, 12u32, 12u32, 18u32, 18u32, 27u32, 36u32, 36u32, 48u32,
                     48u32, 60u32, 60u32, 60u32,
                 ];
-                static RULESET_DATA: &[u32] = &[
-                    0u32, 1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 65540u32, 0u32, 1u32,
-                    2u32, 3u32, 4u32, 5u32, 65541u32, 6u32, 65536u32, 65542u32, 0u32,
-                    131072u32, 1u32, 2u32, 3u32, 4u32, 5u32, 196608u32, 65537u32,
-                    65538u32, 2u32, 131074u32, 3u32, 4u32, 5u32, 196610u32, 131077u32,
-                    196613u32, 65543u32, 131079u32,
-                ];
-                static RULESET_OFFSETS: &[u32] = &[
-                    0u32, 8u32, 9u32, 17u32, 19u32, 26u32, 27u32, 29u32, 34u32, 35u32,
-                    36u32, 37u32, 38u32, 39u32,
-                ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
                     0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 ];
@@ -810,19 +799,6 @@ impl ::rusty_lr::parser::Parser for EParser {
                         reduce_map.push((term_class, rules));
                         idx += 2 + len;
                     }
-                    let ruleset_start = RULESET_OFFSETS[i] as usize;
-                    let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
-                    let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
-                    for idx in ruleset_start..ruleset_end {
-                        let val = RULESET_DATA[idx];
-                        let rule = (val & 0xffff) as usize;
-                        let shifted = (val >> 16) as usize;
-                        ruleset
-                            .push(::rusty_lr::rule::ShiftedRuleRef {
-                                rule,
-                                shifted,
-                            });
-                    }
                     let can_accept_error = match CAN_ACCEPT_ERROR[i] {
                         0 => ::rusty_lr::TriState::False,
                         1 => ::rusty_lr::TriState::True,
@@ -833,7 +809,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
-                        ruleset,
+                        ruleset: Vec::new(),
                         can_accept_error,
                     };
                     states.push(intermediate.into());

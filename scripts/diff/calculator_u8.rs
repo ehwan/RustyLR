@@ -995,28 +995,6 @@ impl ::rusty_lr::parser::Parser for EParser {
                     108u32, 108u32, 120u32, 132u32, 144u32, 153u32, 153u32, 165u32,
                     174u32, 195u32, 216u32, 228u32, 249u32, 261u32, 273u32, 282u32,
                 ];
-                static RULESET_DATA: &[u32] = &[
-                    2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 10u32, 11u32, 12u32, 13u32,
-                    16u32, 65539u32, 65541u32, 8u32, 9u32, 65552u32, 131088u32, 2u32,
-                    3u32, 4u32, 5u32, 131077u32, 6u32, 7u32, 10u32, 11u32, 12u32, 13u32,
-                    65541u32, 196613u32, 8u32, 9u32, 65547u32, 65548u32, 131083u32, 0u32,
-                    1u32, 65538u32, 65540u32, 65542u32, 14u32, 15u32, 2u32, 3u32, 4u32,
-                    131076u32, 5u32, 6u32, 7u32, 10u32, 11u32, 12u32, 13u32, 196612u32,
-                    65541u32, 8u32, 9u32, 262148u32, 10u32, 11u32, 12u32, 13u32,
-                    327684u32, 2u32, 3u32, 4u32, 5u32, 131077u32, 6u32, 7u32, 10u32,
-                    11u32, 12u32, 13u32, 65541u32, 196613u32, 8u32, 9u32, 0u32, 1u32,
-                    65538u32, 65540u32, 65542u32, 14u32, 15u32, 2u32, 3u32, 4u32, 5u32,
-                    6u32, 131078u32, 7u32, 10u32, 11u32, 12u32, 13u32, 65541u32,
-                    196614u32, 65536u32, 65550u32, 0u32, 1u32, 131074u32, 10u32, 11u32,
-                    12u32, 13u32, 65551u32, 131087u32, 196610u32, 2u32, 3u32, 4u32, 5u32,
-                    6u32, 131078u32, 7u32, 10u32, 11u32, 12u32, 13u32, 65541u32,
-                    196614u32,
-                ];
-                static RULESET_OFFSETS: &[u32] = &[
-                    0u32, 11u32, 12u32, 16u32, 17u32, 28u32, 32u32, 34u32, 35u32, 42u32,
-                    53u32, 57u32, 62u32, 63u32, 74u32, 78u32, 85u32, 96u32, 98u32, 99u32,
-                    100u32, 108u32, 109u32, 110u32, 121u32, 123u32,
-                ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
                     0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                     0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -1073,19 +1051,6 @@ impl ::rusty_lr::parser::Parser for EParser {
                         reduce_map.push((term_class, rules));
                         idx += 2 + len;
                     }
-                    let ruleset_start = RULESET_OFFSETS[i] as usize;
-                    let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
-                    let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
-                    for idx in ruleset_start..ruleset_end {
-                        let val = RULESET_DATA[idx];
-                        let rule = (val & 0xffff) as usize;
-                        let shifted = (val >> 16) as usize;
-                        ruleset
-                            .push(::rusty_lr::rule::ShiftedRuleRef {
-                                rule,
-                                shifted,
-                            });
-                    }
                     let can_accept_error = match CAN_ACCEPT_ERROR[i] {
                         0 => ::rusty_lr::TriState::False,
                         1 => ::rusty_lr::TriState::True,
@@ -1096,7 +1061,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
-                        ruleset,
+                        ruleset: Vec::new(),
                         can_accept_error,
                     };
                     states.push(intermediate.into());
