@@ -2072,11 +2072,12 @@ where
             nodes_pool: self.nodes_pool.clone(),
             empty_node_indices: self.empty_node_indices.clone(),
             current_nodes: self.current_nodes.clone(),
-            next_nodes: self.next_nodes.clone(),
-            fallback_nodes: self.fallback_nodes.clone(),
-            reduce_errors: self.reduce_errors.clone(),
-            no_precedences: self.no_precedences.clone(),
+            // next_nodes: self.next_nodes.clone(),
+            // fallback_nodes: self.fallback_nodes.clone(),
+            // reduce_errors: self.reduce_errors.clone(),
+            // no_precedences: self.no_precedences.clone(),
             _phantom: std::marker::PhantomData,
+            ..Default::default()
         }
     }
 }
