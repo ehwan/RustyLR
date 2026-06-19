@@ -95,6 +95,8 @@ E(i32)
 
 Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it. The GLR parser shares a similar interface to the deterministic parser: `accept()` returns the first successful `(parse_result, userdata)` pair, while `accept_all()` returns an iterator over all successful pairs. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
 
+In GLR mode, user data is branch-local. When the parser forks because of a conflict, the current user data is cloned, and each resulting branch owns and mutates its own `UserData` value independently. Results returned from `accept_all()` therefore include the final user data for each successful branch.
+
 ```rust
 // Include the generated parser module
 mod parser;
@@ -139,4 +141,4 @@ fn main() {
 - **`context.feed(token)`**: Feeds a token into all active parsing stacks.
 - **`context.feed_location(token, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
 - **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns the first successful `(parse_result, userdata)` pair.
-- **`context.accept_all()`**: Finalizes parsing and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches. When the GLR parser branches, each branch receives its own cloned user data.
+- **`context.accept_all()`**: Finalizes parsing and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches.

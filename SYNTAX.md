@@ -309,6 +309,8 @@ Expr(i32) : Term {
 };
 ```
 
+In GLR mode, user data is branch-local: when the parser forks, the current user data is cloned, and each branch receives its own independently mutable `UserData` value.
+
 ### 5. Lookahead Token (`lookahead`)
 You can inspect the lookahead token that triggered the current reduction. It is exposed as `lookahead` (of type `&TerminalSymbol<TokenType>`):
 ```rust
@@ -520,6 +522,8 @@ Forces RustyLR to generate LALR(1) parsing tables. By default, RustyLR builds mi
 ```
 
 Enables Generalized LR (GLR) parser generation. With `%glr;` enabled, shift/reduce and reduce/reduce conflicts are not treated as compiler errors. Instead, the parser splits into parallel execution branches at runtime.
+
+When a GLR parser splits, it also clones the current user data for each branch. Each active branch owns and mutates its own `UserData`, and `accept_all()` returns the final user data for every successful branch.
 
 ---
 

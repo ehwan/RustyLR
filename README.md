@@ -184,6 +184,8 @@ context.feed_location(token, token_location);
 
 RustyLR provides native support for Generalized LR (GLR) parsing. When you add the `%glr;` directive to a grammar, RustyLR generates a non-deterministic parser that forks state branches upon encountering shift/reduce or reduce/reduce conflicts. This is particularly useful for ambiguous grammars or complex programming languages.
 
+In GLR mode, user data is branch-local. When the parser forks, the current user data is cloned so each active branch owns and mutates an independent `UserData` value.
+
 For more details, see [GLR.md](GLR.md).
 
 ---

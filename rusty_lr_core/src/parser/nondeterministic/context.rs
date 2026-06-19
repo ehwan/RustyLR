@@ -126,6 +126,8 @@ impl<
     }
 
     /// Borrow the user data for the first active path.
+    ///
+    /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata(&self) -> &Data::UserData {
         self.current_userdatas
             .first()
@@ -133,11 +135,15 @@ impl<
     }
 
     /// Borrow the user data for every active path.
+    ///
+    /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_all(&self) -> impl Iterator<Item = &Data::UserData> {
         self.current_userdatas.iter()
     }
 
     /// Mutably borrow the user data for the first active path.
+    ///
+    /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_mut(&mut self) -> &mut Data::UserData {
         self.current_userdatas
             .first_mut()
@@ -145,6 +151,8 @@ impl<
     }
 
     /// Mutably borrow the user data for every active path.
+    ///
+    /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
         self.current_userdatas.iter_mut()
     }
