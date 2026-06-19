@@ -67,7 +67,6 @@ pub enum Lexed {
     NoOptim(Ident),      // %nooptim
     Dense(Ident),        // %dense
     DPrec(Ident),        // %dprec
-    Filter(Ident),       // %filter
     Location(Ident),     // %location
 }
 impl Lexed {
@@ -155,9 +154,6 @@ impl Lexed {
             Lexed::DPrec(ident) => {
                 stream.append(ident);
             }
-            Lexed::Filter(ident) => {
-                stream.append(ident);
-            }
             Lexed::Location(ident) => {
                 stream.append(ident);
             }
@@ -217,7 +213,6 @@ impl std::fmt::Display for Lexed {
             Lexed::NoOptim(_) => write!(f, "nooptim"),
             Lexed::Dense(_) => write!(f, "dense"),
             Lexed::DPrec(_) => write!(f, "dprec"),
-            Lexed::Filter(_) => write!(f, "filter"),
             Lexed::Location(_) => write!(f, "location"),
         }
     }
@@ -240,7 +235,6 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
         "nooptim" => Some(Lexed::NoOptim(ident)),
         "dense" => Some(Lexed::Dense(ident)),
         "dprec" => Some(Lexed::DPrec(ident)),
-        "filter" => Some(Lexed::Filter(ident)),
         "location" => Some(Lexed::Location(ident)),
         _ => None,
     }

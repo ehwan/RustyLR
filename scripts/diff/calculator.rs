@@ -12,9 +12,6 @@ pub enum Token {
     LParen,
     RParen,
 }
-fn filter(term: &Token) -> &Token {
-    term
-}
 
 // =================================User Codes End=================================
 /*
@@ -118,7 +115,7 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
     }
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
-        match filter(terminal) {
+        match terminal {
             Token::Num(_) => ETerminalClasses::num,
             Token::Plus => ETerminalClasses::plus,
             Token::Star => ETerminalClasses::star,

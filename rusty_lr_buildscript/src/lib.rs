@@ -450,26 +450,7 @@ impl Builder {
                                 vec!["Only one %location definition is allowed".to_string()],
                             )
                     }
-                    ArgError::MultipleFilterDefinition(locs) => {
-                        let mut labels = Vec::new();
-                        for (i, loc) in locs.iter().enumerate() {
-                            let range = grammar_args
-                                .span_manager
-                                .get_byterange(&loc)
-                                .unwrap_or(0..0);
-                            let message = if i == 0 {
-                                "First definition"
-                            } else {
-                                "Other definition"
-                            };
-                            labels.push(Label::primary(file_id, range).with_message(message));
-                        }
 
-                        Diagnostic::error()
-                            .with_message("Multiple %filter definition")
-                            .with_labels(labels)
-                            .with_notes(vec!["Only one %filter definition is allowed".to_string()])
-                    }
                     ArgError::MultipleEofDefinition(locs) => {
                         let mut labels = Vec::new();
                         for (i, loc) in locs.iter().enumerate() {
@@ -883,18 +864,6 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("recursion depth limit reached here")])
                             .with_notes(vec![
-                                "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
-                            ])
-                    }
-
-                    ParseError::FilterNotDefined(loc) => {
-                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
-                        Diagnostic::error()
-                            .with_message("Filter function not defined")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("referenced here")])
-                            .with_notes(vec![
-                                "Define the filter function using %filter <path>;".to_string(),
                                 "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
                             ])
                     }

@@ -137,16 +137,6 @@ pub struct Grammar {
     /// in the generated parser, the dense table `Vec` will be used instead of the sparse table `HashMap`.
     pub emit_dense: bool,
 
-    /// the filter function for the parser feed();
-    /// every terminal will be filtered by this function on classification.
-    /// the actual code will be:
-    /// ```text
-    /// let terminal_class: usize = match filter( terminal ) {
-    ///     ...
-    /// };
-    /// ```
-    pub filter: Option<TokenStream>,
-
     /// type for location
     pub location_typename: TokenStream,
 
@@ -230,18 +220,6 @@ impl Grammar {
             return Err(ArgError::MultipleLocationDefinition(
                 grammar_args
                     .location_typename
-                    .iter()
-                    .map(|(loc, _)| loc)
-                    .cloned()
-                    .collect(),
-            ));
-        }
-
-        // %filter
-        if grammar_args.filter.len() > 1 {
-            return Err(ArgError::MultipleFilterDefinition(
-                grammar_args
-                    .filter
                     .iter()
                     .map(|(loc, _)| loc)
                     .cloned()
@@ -448,9 +426,7 @@ impl Grammar {
             }
 
             if !providers.contains_key(name) {
-                if name == "filter" {
-                    return Err(ParseError::FilterNotDefined(ref_loc));
-                } else if name.starts_with("nonterm:") {
+                if name.starts_with("nonterm:") {
                     return Err(ParseError::NonTerminalNotDefined(ref_loc));
                 } else if name.starts_with("term:") {
                     return Err(ParseError::TerminalNotDefined(ref_loc));
@@ -537,19 +513,6 @@ impl Grammar {
                                 iter.next();
                                 let resolved = resolve_provider(
                                     "location",
-                                    providers,
-                                    span_manager,
-                                    stack,
-                                    depth,
-                                    max_depth,
-                                    ref_loc,
-                                )?;
-                                result.extend(resolved);
-                                continue;
-                            } else if ident_name == "filter" {
-                                iter.next();
-                                let resolved = resolve_provider(
-                                    "filter",
                                     providers,
                                     span_manager,
                                     stack,
@@ -755,18 +718,6 @@ impl Grammar {
             },
         );
 
-        if let Some((loc, stream)) = grammar_args.filter.first() {
-            providers.insert(
-                "filter".to_string(),
-                ProviderInfo {
-                    name: "filter".to_string(),
-                    location: *loc,
-                    stream: Some(stream.clone()),
-                    state: ResolveState::Unresolved,
-                },
-            );
-        }
-
         for (ident, stream) in &grammar_args.terminals {
             providers.insert(
                 format!("term:{}", ident.value()),
@@ -892,19 +843,6 @@ impl Grammar {
             }
         }
 
-        // Resolve and substitute variables inside the %filter expression itself
-        // (e.g. if the user uses defined type/location variables in the filter signature).
-        for (_, filter_stream) in &mut grammar_args.filter {
-            *filter_stream = substitute_stream(
-                filter_stream.clone(),
-                &mut providers,
-                &mut grammar_args.span_manager,
-                &mut stack,
-                0,
-                100,
-            )?;
-        }
-
         for rules_arg in &mut grammar_args.rules {
             for rule_line in &mut rules_arg.rule_lines {
                 if let Some(action_stream) = &mut rule_line.reduce_action {
@@ -967,7 +905,6 @@ impl Grammar {
             range_resolver: RangeResolver::new(),
 
             emit_dense: grammar_args.dense,
-            filter: grammar_args.filter.into_iter().next().map(|(_, s)| s),
 
             location_typename,
             error_precedence: None,
@@ -3324,67 +3261,6 @@ mod tests {
             assert!(path.contains(&"nonterm:Expr".to_string()));
             assert!(path.contains(&"nonterm:Term".to_string()));
         }
-    }
-
-    #[test]
-    fn test_variable_substitution_filter() {
-        // 1. Success case
-        let input = quote! {
-            %tokentype Token;
-            %filter my_filter;
-            %token a Token::A;
-            %start Expr;
-            Expr($filter) : a { $filter };
-        };
-
-        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
-        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-
-        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
-        assert_eq!(
-            grammar.nonterminals[*expr_idx]
-                .ruletype
-                .as_ref()
-                .unwrap()
-                .to_string(),
-            "my_filter"
-        );
-
-        // 2. Filter not defined error
-        let input_err = quote! {
-            %tokentype Token;
-            %token a Token::A;
-            %start Expr;
-            Expr($filter) : a { $filter };
-        };
-
-        let grammar_args_err =
-            Grammar::parse_args(input_err).expect("Failed to parse grammar args");
-        let grammar_err = Grammar::from_grammar_args(grammar_args_err);
-        assert!(grammar_err.is_err());
-        assert!(matches!(
-            grammar_err.err().unwrap(),
-            ParseError::FilterNotDefined(_)
-        ));
-
-        // 3. Multiple filter definitions error
-        let input_mult = quote! {
-            %tokentype Token;
-            %filter filter1;
-            %filter filter2;
-            %token a Token::A;
-            %start Expr;
-            Expr : a;
-        };
-
-        let grammar_args_mult =
-            Grammar::parse_args(input_mult).expect("Failed to parse grammar args");
-        let check_res = Grammar::arg_check_error(&grammar_args_mult);
-        assert!(check_res.is_err());
-        assert!(matches!(
-            check_res.err().unwrap(),
-            ArgError::MultipleFilterDefinition(_)
-        ));
     }
 
     #[test]
