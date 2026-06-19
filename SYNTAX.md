@@ -211,12 +211,24 @@ Expr(_): Term;
 > [!WARNING]
 > If a circular dependency exists (e.g., two rules trying to infer their types from one another without a base type), RustyLR will fail with a compilation error.
 
-### Memory Optimization with `Box`
+### Memory Optimization with `Box` / `box` keyword
 Internally, the generated parser stores all semantic values (the `%tokentype` and all non-terminals' `RuleType`s) in a single unified `enum` representing the parser's data stack.
 
 Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `RuleType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
 
-To avoid this, wrap large AST nodes or structures in a `Box` (e.g., `Box<MyLargeNode>`). This ensures the enum variant only takes up the size of a single pointer, optimizing stack memory usage.
+To avoid this, you can write the `box` keyword in front of `%tokentype` or any non-terminal's `RuleType` (inside the parentheses, e.g. `(box Type)`). The parser generator will automatically box that type in the data enum (generating `Box<Type>`), and will automatically wrap (`Box::new(...)`) or unwrap (`*val`) it in reduce actions so that you do not have to write `Box::new` or dereference it yourself:
+
+```rust
+%tokentype box MyToken;
+
+Expr (box MyLargeASTNode)
+    : left=Expr '+' right=Term {
+        // `left` and `right` are automatically unboxed (of type `MyLargeASTNode`),
+        // and the returned value is automatically wrapped in a `Box::new`.
+        MyLargeASTNode::Binary(left, right)
+    }
+    ;
+```
 
 ---
 

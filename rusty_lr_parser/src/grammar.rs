@@ -74,6 +74,7 @@ pub struct Grammar {
 
     /// %tokentype
     pub(crate) token_typename: TokenStream,
+    pub(crate) is_tokentype_boxed: bool,
 
     /// %userdata
     pub(crate) userdata_typename: TokenStream,
@@ -882,9 +883,16 @@ impl Grammar {
         let error_typename = grammar_args.error_typename.into_iter().next().unwrap().1;
         let location_typename = grammar_args.location_typename.into_iter().next().unwrap().1;
 
+        let (is_tokentype_boxed, token_typename) = {
+            let stream = grammar_args.token_typename.into_iter().next().unwrap().1;
+            let (boxed, stripped) = check_and_strip_box(stream);
+            (boxed, stripped)
+        };
+
         let mut grammar = Grammar {
             module_prefix,
-            token_typename: grammar_args.token_typename.into_iter().next().unwrap().1,
+            token_typename,
+            is_tokentype_boxed,
             userdata_typename: grammar_args.userdata_typename.into_iter().next().unwrap().1,
 
             error_typename,
@@ -1019,16 +1027,28 @@ impl Grammar {
 
         // insert rule typenames first, since it will be used when inserting rule definitions below
         for (rule_idx, rules_arg) in grammar_args.rules.iter().enumerate() {
-            let ruletype = if is_placeholder_type(&rules_arg.typename) {
+            let is_boxed = if let Some(rt) = &rules_arg.typename {
+                let (boxed, _) = check_and_strip_box(rt.clone());
+                boxed
+            } else {
+                false
+            };
+
+            let ruletype = if rules_arg.typename.is_none() {
+                None
+            } else if is_placeholder_type(&rules_arg.typename) {
                 let placeholder_name = format_ident!("__rustylr_placeholder_{}", rules_arg.name.value());
                 Some(quote! { #placeholder_name })
             } else {
-                rules_arg.typename.clone()
+                let (_, stripped) = check_and_strip_box(rules_arg.typename.clone().unwrap());
+                Some(stripped)
             };
+
             let nonterminal = NonTerminalInfo {
                 name: rules_arg.name.clone(),
                 pretty_name: rules_arg.name.value().clone(),
                 ruletype,
+                ruletype_boxed: is_boxed,
                 rules: Vec::new(), // production rules will be added later
                 root_location: None,
                 trace: false,
@@ -1734,6 +1754,7 @@ impl Grammar {
                 name: augmented_name.clone(),
                 pretty_name: utils::AUGMENTED_NAME.to_string(),
                 ruletype: None,
+                ruletype_boxed: false,
                 root_location: None,
                 rules: vec![augmented_rule],
                 trace: false,
@@ -2736,9 +2757,23 @@ impl Grammar {
     }
 }
 
+/// Checks if the first token in the token stream is the identifier `box`.
+/// If it is, returns `(true, stripped_stream)`. Otherwise, returns `(false, original_stream)`.
+pub(crate) fn check_and_strip_box(stream: TokenStream) -> (bool, TokenStream) {
+    let mut iter = stream.clone().into_iter();
+    if let Some(proc_macro2::TokenTree::Ident(ident)) = iter.next() {
+        if ident.to_string() == "box" {
+            let rest: TokenStream = iter.collect();
+            return (true, rest);
+        }
+    }
+    (false, stream)
+}
+
 fn is_placeholder_type(ruletype: &Option<TokenStream>) -> bool {
     if let Some(ts) = ruletype {
-        let mut it = ts.clone().into_iter();
+        let (_, stripped) = check_and_strip_box(ts.clone());
+        let mut it = stripped.into_iter();
         if let Some(proc_macro2::TokenTree::Ident(ident)) = it.next() {
             if ident.to_string() == "_" && it.next().is_none() {
                 return true;
@@ -3216,6 +3251,37 @@ mod tests {
             _ => panic!("Expected Custom reduce action"),
         };
         assert!(action.contains("$ unknown_var"));
+    }
+
+    #[test]
+    fn test_box_keyword_parsing() {
+        let input = quote! {
+            %tokentype box MyToken;
+            %token a MyToken::A;
+            %start Expr;
+            Expr(box MyType) : a { MyType };
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let grammar = Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+
+        assert!(grammar.is_tokentype_boxed);
+        assert_eq!(grammar.token_typename.to_string(), "MyToken");
+
+        let expr_idx = grammar.nonterminals_index.get("Expr").unwrap();
+        assert!(grammar.nonterminals[*expr_idx].ruletype_boxed);
+        assert_eq!(grammar.nonterminals[*expr_idx].ruletype.as_ref().unwrap().to_string(), "MyType");
+
+        let code = grammar.emit_compiletime();
+        let code_str = code.to_string();
+
+        // Ensure the data enum wraps in Box
+        assert!(code_str.contains("Box < MyType >") || code_str.contains("Box<MyType>") || code_str.contains("Box"), "Data enum variant should hold Boxed MyType");
+        assert!(code_str.contains("Box < MyToken >") || code_str.contains("Box<MyToken>") || code_str.contains("Box"), "Data enum variant should hold Boxed MyToken");
+        
+        // Ensure auto-wrap Box::new and auto-unwrap *val are emitted
+        assert!(code_str.contains("Box :: new") || code_str.contains("Box::new"), "Box::new should be generated to wrap reduce result");
+        assert!(code_str.contains("* val") || code_str.contains("*val"), "Dereference should be generated to extract boxed value");
     }
 }
 

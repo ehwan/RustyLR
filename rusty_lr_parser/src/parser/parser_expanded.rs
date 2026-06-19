@@ -635,12 +635,12 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub enum GrammarData {
     __terminals(Lexed),
-    __variant1(RuleDefArgs),
+    __variant1(::std::boxed::Box<RuleDefArgs>),
     __variant2(Option<Group>),
     __variant3(Vec<RuleLineArgs>),
-    __variant4(RuleLineArgs),
-    __variant5(PrecDPrecArgs),
-    __variant6((Option<Located<String>>, PatternArgs)),
+    __variant4(::std::boxed::Box<RuleLineArgs>),
+    __variant5(::std::boxed::Box<PrecDPrecArgs>),
+    __variant6(::std::boxed::Box<(Option<Located<String>>, PatternArgs)>),
     __variant7(TerminalSetItem),
     __variant8(TerminalSet),
     __variant9(PatternArgs),
@@ -756,7 +756,9 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant1(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant1(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -846,7 +848,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut RuleLine = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant4(val) => val,
+            GrammarData::__variant4(val) => *val,
             _ => unreachable!(),
         };
         let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
@@ -888,7 +890,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut RuleLine = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant4(val) => val,
+            GrammarData::__variant4(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![RuleLine] };
@@ -949,7 +951,9 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant4(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant4(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -992,7 +996,9 @@ impl GrammarDataStack {
         __data_stack.__stack.pop().unwrap();
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant5(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -1041,7 +1047,9 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant5(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -1089,7 +1097,9 @@ impl GrammarDataStack {
             PrecDPrecArgs::DPrec(Located::new(i, __rustylr_location_int_literal))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant5(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -1138,7 +1148,9 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant5(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -1181,7 +1193,9 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant5(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -1212,7 +1226,9 @@ impl GrammarDataStack {
         };
         let __res = { (None, Pattern) };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant6(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant6(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -1263,7 +1279,9 @@ impl GrammarDataStack {
             (Some(Located::new(ident.to_string(), __rustylr_location_ident)), Pattern)
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant6(__res));
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant6(::std::boxed::Box::new(__res)));
         } else {
             __data_stack.__stack.push(GrammarData::Empty);
         }
@@ -4760,7 +4778,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut Rule = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant1(val) => val,
+            GrammarData::__variant1(val) => *val,
             _ => unreachable!(),
         };
         {
@@ -4789,7 +4807,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut A = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant6(val) => val,
+            GrammarData::__variant6(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -4824,7 +4842,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut A = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant6(val) => val,
+            GrammarData::__variant6(val) => *val,
             _ => unreachable!(),
         };
         __location_stack.pop().unwrap();
@@ -4914,7 +4932,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut A = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant5(val) => val,
+            GrammarData::__variant5(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -4949,7 +4967,7 @@ impl GrammarDataStack {
         }
         __location_stack.pop().unwrap();
         let mut A = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__variant5(val) => val,
+            GrammarData::__variant5(val) => *val,
             _ => unreachable!(),
         };
         __location_stack.pop().unwrap();

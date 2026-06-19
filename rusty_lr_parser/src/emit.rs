@@ -905,12 +905,16 @@ impl Grammar {
         // variant name for each non-terminal
         let mut variant_names_for_nonterm = Vec::with_capacity(self.nonterminals.len());
 
+        fn remove_whitespaces(s: String) -> String {
+            s.chars().filter(|c| !c.is_whitespace()).collect()
+        }
+
         // Map containing (<RuleType as ToString>, variant_name).
         // This maps each rule type to its enum variant name (e.g. __variant0, __variant1), merging identical types.
         let mut ruletype_variant_map: rusty_lr_core::hash::HashMap<String, Ident> =
             Default::default();
 
-        // (variant_name, TokenStream for typename) sorted in insertion order
+        // (variant_name, TokenStream for typename, is_boxed) sorted in insertion order
         // for consistent output
         let mut variant_names_in_order = Vec::new();
 
@@ -919,28 +923,27 @@ impl Grammar {
         // insert variant for terminal token type
         if self.terminal_classes.iter().any(|c| c.data_used) {
             terminal_data_used = true;
+            let terminal_boxed = self.is_tokentype_boxed;
+            let key = format!("{}_boxed:{}", remove_whitespaces(self.token_typename.to_string()), terminal_boxed);
             ruletype_variant_map.insert(
-                self.token_typename.to_string(),
+                key,
                 terminal_variant_name.clone(),
             );
             variant_names_in_order
-                .push((terminal_variant_name.clone(), self.token_typename.clone()));
-        }
-
-        fn remove_whitespaces(s: String) -> String {
-            s.chars().filter(|c| !c.is_whitespace()).collect()
+                .push((terminal_variant_name.clone(), self.token_typename.clone(), terminal_boxed));
         }
 
         // iterates through nonterminals
         for nonterm in self.nonterminals.iter() {
             if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
                 let cur_len = ruletype_variant_map.len();
+                let key = format!("{}_boxed:{}", remove_whitespaces(ruletype_stream.to_string()), nonterm.ruletype_boxed);
                 let variant_name = ruletype_variant_map
-                    .entry(remove_whitespaces(ruletype_stream.to_string()))
+                    .entry(key)
                     .or_insert_with(|| {
                         let new_variant_name = format_ident!("__variant{}", cur_len);
                         variant_names_in_order
-                            .push((new_variant_name.clone(), ruletype_stream.clone()));
+                            .push((new_variant_name.clone(), ruletype_stream.clone(), nonterm.ruletype_boxed));
                         new_variant_name
                     })
                     .clone();
@@ -1163,9 +1166,18 @@ impl Grammar {
 
                         if variant_name != &empty_variant_name && mapto.is_some() {
                             let data_mapto = mapto.unwrap();
+                            let is_boxed = match token.token {
+                                Token::Term(_) => self.is_tokentype_boxed,
+                                Token::NonTerm(nonterm_idx) => self.nonterminals[nonterm_idx].ruletype_boxed,
+                            };
+                            let val_extracted = if is_boxed {
+                                quote! { *val }
+                            } else {
+                                quote! { val }
+                            };
                             extract_data_stream.extend(quote! {
                                 let mut #data_mapto = match __data_stack.__stack.pop().unwrap() {
-                                    #data_enum_typename::#variant_name(val) => val,
+                                    #data_enum_typename::#variant_name(val) => #val_extracted,
                                     _ => unreachable!(),
                                 };
                             });
@@ -1317,6 +1329,11 @@ impl Grammar {
                         } else {
                             quote! { #reduce_action_body }
                         };
+                        let push_val = if nonterm.ruletype_boxed {
+                            quote! { ::std::boxed::Box::new(__res) }
+                        } else {
+                            quote! { __res }
+                        };
                         fn_reduce_for_each_rule_stream.extend(quote! {
                             #[doc = #rule_debug_str]
                             #[inline]
@@ -1340,7 +1357,7 @@ impl Grammar {
 
                                 let __res = #res_expr;
                                 if __push_data {
-                                    __data_stack.__stack.push(#data_enum_typename::#variant_name(__res));
+                                    __data_stack.__stack.push(#data_enum_typename::#variant_name(#push_val));
                                 } else {
                                     __data_stack.__stack.push(#data_enum_typename::Empty);
                                 }
@@ -1402,12 +1419,19 @@ impl Grammar {
                 .unwrap()
                 .clone();
 
+            let is_start_boxed = self.nonterminals[start_idx].ruletype_boxed;
+            let val_expr = if is_start_boxed {
+                quote! { *val }
+            } else {
+                quote! { val }
+            };
+
             (
                 ruletype,
                 quote! {
                     self.__stack.pop();
                     match self.__stack.pop() {
-                        Some(#data_enum_typename::#start_variant_name(val)) => Some(val),
+                        Some(#data_enum_typename::#start_variant_name(val)) => Some(#val_expr),
                         _ => None,
                     }
                 },
@@ -1432,8 +1456,13 @@ impl Grammar {
         };
 
         let push_terminal_body_stream = if terminal_data_used {
+            let push_val = if self.is_tokentype_boxed {
+                quote! { ::std::boxed::Box::new(term) }
+            } else {
+                quote! { term }
+            };
             quote! {
-                self.__stack.push(#data_enum_typename::#terminal_variant_name(term));
+                self.__stack.push(#data_enum_typename::#terminal_variant_name(#push_val));
             }
         } else {
             quote! {
@@ -1446,10 +1475,16 @@ impl Grammar {
 
         let data_enum_definition = {
             let mut variants = TokenStream::new();
-            for (variant_name, typename) in &variant_names_in_order {
-                variants.extend(quote! {
-                    #variant_name(#typename),
-                });
+            for (variant_name, typename, boxed) in &variant_names_in_order {
+                if *boxed {
+                    variants.extend(quote! {
+                        #variant_name(::std::boxed::Box<#typename>),
+                    });
+                } else {
+                    variants.extend(quote! {
+                        #variant_name(#typename),
+                    });
+                }
             }
             variants.extend(quote! {
                 Empty,
