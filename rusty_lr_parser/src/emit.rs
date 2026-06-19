@@ -362,6 +362,7 @@ impl Grammar {
             /// A enum that represents terminal classes
             #[allow(non_camel_case_types, dead_code)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            // repr(usize) is used to ensure a stable memory layout compatible with integer casting and transmutes
             #[repr(usize)]
             pub enum #termclass_typename {
                 #(#class_variants),*,
@@ -370,6 +371,8 @@ impl Grammar {
             }
 
             impl #termclass_typename {
+                // Decodes a terminal class from its integer index stored in the serialized parser tables.
+                // This avoids verbose static enum instantiations and significantly reduces compiled binary size.
                 #[inline]
                 pub fn from_usize(value: usize) -> Self {
                     unsafe { ::std::mem::transmute(value) }
@@ -481,12 +484,15 @@ impl Grammar {
             /// An enum that represents non-terminal symbols
             #[allow(non_camel_case_types, dead_code)]
             #[derive(Clone, Copy, std::hash::Hash, std::cmp::PartialEq, std::cmp::Eq, std::cmp::PartialOrd, std::cmp::Ord)]
+            // repr(usize) is used to ensure a stable memory layout compatible with integer casting and transmutes
             #[repr(usize)]
             pub enum #enum_typename {
                 #comma_separated_variants
             }
 
             impl #enum_typename {
+                // Decodes a non-terminal from its integer index stored in the serialized parser tables.
+                // This avoids verbose static enum instantiations and significantly reduces compiled binary size.
                 #[inline]
                 pub fn from_usize(value: usize) -> Self {
                     unsafe { ::std::mem::transmute(value) }
@@ -865,9 +871,17 @@ impl Grammar {
                         #precedence_types_match_body_stream
                     }
                 }
+                // get_rules returns the list of CFG production rules.
+                // To keep the compiled binary size minimal, the rules data is serialized into flat static integer slices 
+                // and decoded lazily at runtime inside OnceLock.
                 fn get_rules() -> &'static [#rule_typename] {
                     static RULES: std::sync::OnceLock<Vec<#rule_typename>> = std::sync::OnceLock::new();
                     RULES.get_or_init(|| {
+                        // Serialized rule properties:
+                        // - RULE_NAMES: NonTerm enum value of the rule LHS name
+                        // - RULE_PRECEDENCES: Packed operator precedence level/index and type (prec_val & 3: 0 = None, 1 = Fixed, 2 = Dynamic)
+                        // - RULE_TOKENS_DATA: Packed token sequence (sym_idx << 1) | (is_nonterm)
+                        // - RULE_TOKENS_OFFSETS: Index boundaries separating tokens for each rule
                         static RULE_NAMES: &[u32] = &[ #(#rule_names),* ];
                         static RULE_PRECEDENCES: &[u32] = &[ #(#rule_precedences),* ];
                         static RULE_TOKENS_DATA: &[u32] = &[ #(#rule_tokens_data),* ];
@@ -910,9 +924,20 @@ impl Grammar {
                         rules
                     })
                 }
+                // get_states returns the DFA states table.
+                // The transitions, lookaheads, rulesets, and reduction maps are serialized into flat integer arrays
+                // and lazily decoded into SparseState/DenseState objects at runtime.
                 fn get_states() -> &'static [#state_typename] {
                     static STATES: std::sync::OnceLock<Vec<#state_typename>> = std::sync::OnceLock::new();
                     STATES.get_or_init(|| {
+                        // Serialized state properties:
+                        // - SHIFT_TERM_DATA & SHIFT_NONTERM_DATA: Packed transitions (push << 31) | (state_idx << 15) | (symbol_idx)
+                        // - SHIFT_TERM_OFFSETS & SHIFT_NONTERM_OFFSETS: Boundaries separating transitions for each state
+                        // - REDUCE_DATA: Variable-length reduce map encoding (term_class, len, rules...)
+                        // - REDUCE_OFFSETS: Boundaries separating reduce maps for each state
+                        // - RULESET_DATA: Packed shifted rule references (shifted_idx << 16) | (rule_idx)
+                        // - RULESET_OFFSETS: Boundaries separating ruleset references for each state
+                        // - CAN_ACCEPT_ERROR: TriState (0 = False, 1 = True, 2 = Maybe)
                         static SHIFT_TERM_DATA: &[u32] = &[ #(#shift_term_data),* ];
                         static SHIFT_TERM_OFFSETS: &[u32] = &[ #(#shift_term_offsets),* ];
                         static SHIFT_NONTERM_DATA: &[u32] = &[ #(#shift_nonterm_data),* ];
@@ -926,7 +951,7 @@ impl Grammar {
                         let num_states = #num_states;
                         let mut states = Vec::with_capacity(num_states);
                         for i in 0..num_states {
-                            // shift_goto_map_term
+                            // Decode shift transitions for terminals (terminal class, next state index, push flag)
                             let term_start = SHIFT_TERM_OFFSETS[i] as usize;
                             let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
                             let mut shift_goto_map_term = Vec::with_capacity(term_end - term_start);
@@ -938,7 +963,7 @@ impl Grammar {
                                 shift_goto_map_term.push((term_class, #module_prefix::parser::state::ShiftTarget::new(state, push)));
                             }
 
-                            // shift_goto_map_nonterm
+                            // Decode shift transitions for non-terminals (non-terminal index, next state index, push flag)
                             let nonterm_start = SHIFT_NONTERM_OFFSETS[i] as usize;
                             let nonterm_end = SHIFT_NONTERM_OFFSETS[i + 1] as usize;
                             let mut shift_goto_map_nonterm = Vec::with_capacity(nonterm_end - nonterm_start);
@@ -950,7 +975,7 @@ impl Grammar {
                                 shift_goto_map_nonterm.push((nonterm, #module_prefix::parser::state::ShiftTarget::new(state, push)));
                             }
 
-                            // reduce_map
+                            // Decode the reduce action map (variable-length encoding)
                             let reduce_start = REDUCE_OFFSETS[i] as usize;
                             let reduce_end = REDUCE_OFFSETS[i + 1] as usize;
                             let mut reduce_map = Vec::new();
@@ -967,7 +992,7 @@ impl Grammar {
                                 idx += 2 + len;
                             }
 
-                            // ruleset
+                            // Decode the ruleset containing shifted rule references (rule index, shifted dot index)
                             let ruleset_start = RULESET_OFFSETS[i] as usize;
                             let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
                             let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
