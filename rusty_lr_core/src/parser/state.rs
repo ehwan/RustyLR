@@ -12,6 +12,7 @@ pub struct ShiftTarget<StateIndex> {
     pub push: bool,
 }
 impl<StateIndex> ShiftTarget<StateIndex> {
+    #[inline]
     pub fn new(state: StateIndex, push: bool) -> Self {
         ShiftTarget { state, push }
     }
