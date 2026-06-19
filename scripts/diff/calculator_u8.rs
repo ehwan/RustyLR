@@ -40,7 +40,7 @@ pub type EContext = ::rusty_lr::parser::deterministic::Context<EParser, EDataSta
 pub type ERule = ::rusty_lr::rule::ProductionRule<ETerminalClasses, ENonTerminals>;
 /// type alias for DFA state
 #[allow(non_camel_case_types, dead_code)]
-pub type EState = ::rusty_lr::parser::state::SparseState<
+pub type EState = ::rusty_lr::parser::state::DenseState<
     ETerminalClasses,
     ENonTerminals,
     u8,

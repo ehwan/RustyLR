@@ -19,6 +19,7 @@ use crate::nonterminal_info::ReduceAction;
 use crate::nonterminal_info::Rule;
 use crate::parser::args::GrammarArgs;
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::args::TableLayout;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
 use crate::parser::location::SpanManager;
@@ -136,6 +137,8 @@ pub struct Grammar {
 
     /// in the generated parser, the dense table `Vec` will be used instead of the sparse table `HashMap`.
     pub emit_dense: bool,
+    pub layout: TableLayout,
+    pub dense_limit: usize,
 
     /// type for location
     pub location_typename: TokenStream,
@@ -904,7 +907,9 @@ impl Grammar {
             other_terminal_index: 0,
             range_resolver: RangeResolver::new(),
 
-            emit_dense: grammar_args.dense,
+            emit_dense: false,
+            layout: grammar_args.layout,
+            dense_limit: grammar_args.dense_limit,
 
             location_typename,
             error_precedence: None,
@@ -2726,6 +2731,77 @@ impl Grammar {
 
         self.states = new_states;
 
+        // Resolve table layout choice (DenseState vs SparseState) dynamically.
+        // Performance considerations:
+        // - DenseState: Uses O(1) direct array indexing lookup. It is extremely fast but requires a contiguous array
+        //   allocation spanning from min_symbol to max_symbol. This can lead to memory bloat for large, sparse tables.
+        // - SparseState: Uses O(log K) binary search on a sorted static slice. It has zero memory bloat but takes
+        //   slightly more CPU cycles and has higher branching overhead in the hot parsing loop.
+        // - Default/Auto mode: We calculate the estimated memory footprints for both layout types. If the estimated
+        //   DenseState table size fits within `dense_limit` (defaults to 32KB, which comfortably fits inside CPU L1/L2
+        //   caches), or if the ratio of Dense-to-Sparse size is small (< 2.5x), we favor the O(1) speed of DenseState.
+        //   Otherwise, we default to SparseState to minimize memory and binary footprint.
+        self.emit_dense = match self.layout {
+            TableLayout::Dense => true,
+            TableLayout::Sparse => false,
+            TableLayout::Auto => {
+                let mut total_dense_size = 0;
+                let mut total_sparse_size = 0;
+
+                let term_to_usize = |term: TerminalSymbol<usize>| -> usize {
+                    match term {
+                        TerminalSymbol::Term(t) => t,
+                        TerminalSymbol::Error => self.terminal_classes.len(),
+                        TerminalSymbol::Eof => self.terminal_classes.len() + 1,
+                    }
+                };
+
+                for state in &self.states {
+                    // Terminal class transitions
+                    let term_span = if !state.shift_goto_map_term.is_empty() {
+                        let min = term_to_usize(state.shift_goto_map_term.first().unwrap().0);
+                        let max = term_to_usize(state.shift_goto_map_term.last().unwrap().0);
+                        max - min + 1
+                    } else {
+                        0
+                    };
+                    let term_count = state.shift_goto_map_term.len();
+
+                    // Non-terminal transitions
+                    let nonterm_span = if !state.shift_goto_map_nonterm.is_empty() {
+                        let min = state.shift_goto_map_nonterm.first().unwrap().0;
+                        let max = state.shift_goto_map_nonterm.last().unwrap().0;
+                        max - min + 1
+                    } else {
+                        0
+                    };
+                    let nonterm_count = state.shift_goto_map_nonterm.len();
+
+                    // Reduce rule transitions
+                    let reduce_span = if !state.reduce_map.is_empty() {
+                        let min = term_to_usize(state.reduce_map.first().unwrap().0);
+                        let max = term_to_usize(state.reduce_map.last().unwrap().0);
+                        max - min + 1
+                    } else {
+                        0
+                    };
+                    let reduce_count = state.reduce_map.len();
+
+                    // Dense table memory estimation:
+                    // Each slot is an Option<ShiftTarget<StateIndex>>, which takes ~4 bytes (assuming 16-bit state index).
+                    total_dense_size += (term_span + nonterm_span + reduce_span) * 4;
+
+                    // Sparse table memory estimation:
+                    // Each slot stores a tuple (Symbol, ShiftTarget), taking ~8 bytes.
+                    total_sparse_size += (term_count + nonterm_count + reduce_count) * 8;
+                }
+
+                // Choose DenseState if it fits in the cache limit, or if the size overhead is reasonable.
+                total_dense_size <= self.dense_limit
+                    || (total_dense_size as f64 / total_sparse_size as f64) < 2.5
+            }
+        };
+
         collector
     }
 }
@@ -2905,13 +2981,12 @@ mod tests {
             %tokentype u8;
             %start Expr;
             %glr;
-            %dense;
             Expr : b'a';
         };
         let grammar_args = Grammar::parse_args(input).expect("Failed glr");
         assert!(grammar_args.error_recovered.is_empty());
         assert!(grammar_args.glr);
-        assert!(grammar_args.dense);
+        assert_eq!(grammar_args.layout, TableLayout::Auto);
     }
 
     #[test]

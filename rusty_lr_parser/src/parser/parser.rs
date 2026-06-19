@@ -77,7 +77,6 @@ use rusty_lr_core::rule::ReduceType;
 %token prec Lexed::Prec(_);
 %token precedence Lexed::Precedence(_);
 %token nooptim Lexed::NoOptim(_);
-%token dense Lexed::Dense(_);
 %token dprec Lexed::DPrec(_);
 %token location Lexed::Location(_);
 
@@ -616,16 +615,7 @@ Directive
             location: @error,
         });
     }
-    | percent dense semicolon {
-        data.dense = true;
-    }
-    | percent dense error semicolon {
-        data.error_recovered.push( RecoveredError {
-            message: "Expected semicolon".to_string(),
-            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#dense-parser-table".to_string(),
-            location: @error,
-        });
-    }
+
 
 
     | percent location! RustCode semicolon! {

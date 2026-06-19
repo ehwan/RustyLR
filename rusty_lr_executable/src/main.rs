@@ -31,9 +31,8 @@ fn main() {
     if let Some(glr) = args.glr {
         builder.glr(glr);
     }
-    if let Some(dense) = args.dense {
-        builder.dense(dense);
-    }
+    builder.layout(args.layout.into());
+    builder.dense_limit(args.dense_limit);
 
     let out = match builder.build_impl() {
         Ok(out) => out,

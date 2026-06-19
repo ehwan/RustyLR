@@ -16,6 +16,7 @@
 //!
 
 pub mod output;
+pub use rusty_lr_parser::TableLayout;
 mod split;
 mod utils;
 
@@ -68,7 +69,8 @@ pub struct Builder {
 
     /// if Some, override the settings with these values
     glr: Option<bool>,
-    dense: Option<bool>,
+    layout: Option<rusty_lr_parser::TableLayout>,
+    dense_limit: Option<usize>,
 }
 
 impl Builder {
@@ -83,7 +85,8 @@ impl Builder {
             is_executable: false,
 
             glr: None,
-            dense: None,
+            layout: None,
+            dense_limit: None,
         }
     }
 
@@ -93,8 +96,24 @@ impl Builder {
         self
     }
     /// override the settings
+    /// Set layout strategy (dense, sparse, auto)
+    pub fn layout(&mut self, layout: rusty_lr_parser::TableLayout) -> &mut Self {
+        self.layout = Some(layout);
+        self
+    }
+    /// Set dense limit in bytes for auto-layout detection
+    pub fn dense_limit(&mut self, limit: usize) -> &mut Self {
+        self.dense_limit = Some(limit);
+        self
+    }
+    /// Deprecated: use layout(TableLayout::Dense) instead
+    #[deprecated(since = "0.66.0", note = "Use `layout(TableLayout::Dense)` instead")]
     pub fn dense(&mut self, dense: bool) -> &mut Self {
-        self.dense = Some(dense);
+        self.layout = Some(if dense {
+            rusty_lr_parser::TableLayout::Dense
+        } else {
+            rusty_lr_parser::TableLayout::Sparse
+        });
         self
     }
 
@@ -576,8 +595,11 @@ impl Builder {
         if let Some(glr) = self.glr {
             grammar_args.glr = glr;
         }
-        if let Some(dense) = self.dense {
-            grammar_args.dense = dense;
+        if let Some(layout) = self.layout {
+            grammar_args.layout = layout;
+        }
+        if let Some(limit) = self.dense_limit {
+            grammar_args.dense_limit = limit;
         }
 
         let span_manager = grammar_args.span_manager.clone();

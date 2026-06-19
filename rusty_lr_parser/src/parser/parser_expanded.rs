@@ -25,8 +25,8 @@ use std::boxed::Box;
 /*
 ====================================Grammar=====================================
 
-# of terminal classes: 43
-# of states: 171
+# of terminal classes: 42
+# of states: 167
 
 0: Rule -> ident RuleType colon RuleLines semicolon
 1: RuleType -> parengroup
@@ -100,85 +100,82 @@ use std::boxed::Box;
 69: Directive -> percent lalr error semicolon
 70: Directive -> percent nooptim semicolon
 71: Directive -> percent nooptim error semicolon
-72: Directive -> percent dense semicolon
-73: Directive -> percent dense error semicolon
-74: Directive -> percent location [^semicolon]+ semicolon
-75: Directive -> percent location semicolon
-76: Directive -> percent error semicolon
-77: GrammarLine -> Rule
-78: GrammarLine -> Directive
-79: Grammar -> GrammarLine+
-80: TokenMapped+ -> TokenMapped
-81: TokenMapped+ -> TokenMapped+ TokenMapped
-82: TokenMapped* -> TokenMapped+
-83: TokenMapped* ->
-84: PrecDef+ -> PrecDef
-85: PrecDef+ -> PrecDef+ PrecDef
-86: PrecDef* -> PrecDef+
-87: PrecDef* ->
-88: caret? -> caret
-89: caret? ->
-90: TerminalSetItem+ -> TerminalSetItem
-91: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
-92: TerminalSetItem* -> TerminalSetItem+
-93: TerminalSetItem* ->
-94: Pattern+ -> Pattern
-95: Pattern+ -> Pattern+ Pattern
-96: Pattern* -> Pattern+
-97: Pattern* ->
-98: $sep(Pattern*, pipe, +) -> Pattern*
-99: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
-100: comma? -> comma
-101: comma? ->
-102: [^semicolon] -> ident
-103: [^semicolon] -> colon
-104: [^semicolon] -> pipe
-105: [^semicolon] -> percent
-106: [^semicolon] -> equal
-107: [^semicolon] -> plus
-108: [^semicolon] -> star
-109: [^semicolon] -> question
-110: [^semicolon] -> caret
-111: [^semicolon] -> minus
-112: [^semicolon] -> exclamation
-113: [^semicolon] -> dot
-114: [^semicolon] -> dollar
-115: [^semicolon] -> comma
-116: [^semicolon] -> int_literal
-117: [^semicolon] -> byte_literal
-118: [^semicolon] -> byte_str_literal
-119: [^semicolon] -> char_literal
-120: [^semicolon] -> str_literal
-121: [^semicolon] -> [other_literal, <Others>]
-122: [^semicolon] -> parengroup
-123: [^semicolon] -> bracegroup
-124: [^semicolon] -> lparen
-125: [^semicolon] -> rparen
-126: [^semicolon] -> lbracket
-127: [^semicolon] -> rbracket
-128: [^semicolon] -> left
-129: [^semicolon] -> right
-130: [^semicolon] -> token
-131: [^semicolon] -> start
-132: [^semicolon] -> tokentype
-133: [^semicolon] -> userdata
-134: [^semicolon] -> errortype
-135: [^semicolon] -> moduleprefix
-136: [^semicolon] -> lalr
-137: [^semicolon] -> glr
-138: [^semicolon] -> prec
-139: [^semicolon] -> precedence
-140: [^semicolon] -> nooptim
-141: [^semicolon] -> dense
-142: [^semicolon] -> dprec
-143: [^semicolon] -> location
-144: [^semicolon]+ -> [^semicolon]
-145: [^semicolon]+ -> [^semicolon]+ [^semicolon]
-146: IdentOrLiteral+ -> IdentOrLiteral
-147: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
-148: GrammarLine+ -> GrammarLine
-149: GrammarLine+ -> GrammarLine GrammarLine+
-150: Augmented -> Grammar eof
+72: Directive -> percent location [^semicolon]+ semicolon
+73: Directive -> percent location semicolon
+74: Directive -> percent error semicolon
+75: GrammarLine -> Rule
+76: GrammarLine -> Directive
+77: Grammar -> GrammarLine+
+78: TokenMapped+ -> TokenMapped
+79: TokenMapped+ -> TokenMapped+ TokenMapped
+80: TokenMapped* -> TokenMapped+
+81: TokenMapped* ->
+82: PrecDef+ -> PrecDef
+83: PrecDef+ -> PrecDef+ PrecDef
+84: PrecDef* -> PrecDef+
+85: PrecDef* ->
+86: caret? -> caret
+87: caret? ->
+88: TerminalSetItem+ -> TerminalSetItem
+89: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
+90: TerminalSetItem* -> TerminalSetItem+
+91: TerminalSetItem* ->
+92: Pattern+ -> Pattern
+93: Pattern+ -> Pattern+ Pattern
+94: Pattern* -> Pattern+
+95: Pattern* ->
+96: $sep(Pattern*, pipe, +) -> Pattern*
+97: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
+98: comma? -> comma
+99: comma? ->
+100: [^semicolon] -> ident
+101: [^semicolon] -> colon
+102: [^semicolon] -> pipe
+103: [^semicolon] -> percent
+104: [^semicolon] -> equal
+105: [^semicolon] -> plus
+106: [^semicolon] -> star
+107: [^semicolon] -> question
+108: [^semicolon] -> caret
+109: [^semicolon] -> minus
+110: [^semicolon] -> exclamation
+111: [^semicolon] -> dot
+112: [^semicolon] -> dollar
+113: [^semicolon] -> comma
+114: [^semicolon] -> int_literal
+115: [^semicolon] -> byte_literal
+116: [^semicolon] -> byte_str_literal
+117: [^semicolon] -> char_literal
+118: [^semicolon] -> str_literal
+119: [^semicolon] -> [other_literal, <Others>]
+120: [^semicolon] -> parengroup
+121: [^semicolon] -> bracegroup
+122: [^semicolon] -> lparen
+123: [^semicolon] -> rparen
+124: [^semicolon] -> lbracket
+125: [^semicolon] -> rbracket
+126: [^semicolon] -> left
+127: [^semicolon] -> right
+128: [^semicolon] -> token
+129: [^semicolon] -> start
+130: [^semicolon] -> tokentype
+131: [^semicolon] -> userdata
+132: [^semicolon] -> errortype
+133: [^semicolon] -> moduleprefix
+134: [^semicolon] -> lalr
+135: [^semicolon] -> glr
+136: [^semicolon] -> prec
+137: [^semicolon] -> precedence
+138: [^semicolon] -> nooptim
+139: [^semicolon] -> dprec
+140: [^semicolon] -> location
+141: [^semicolon]+ -> [^semicolon]
+142: [^semicolon]+ -> [^semicolon]+ [^semicolon]
+143: IdentOrLiteral+ -> IdentOrLiteral
+144: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
+145: GrammarLine+ -> GrammarLine
+146: GrammarLine+ -> GrammarLine GrammarLine+
+147: Augmented -> Grammar eof
 
 */
 // =============================Generated Codes Begin==============================
@@ -192,12 +189,8 @@ pub type GrammarRule =
     ::rusty_lr_core::rule::ProductionRule<GrammarTerminalClasses, GrammarNonTerminals>;
 /// type alias for DFA state
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState = ::rusty_lr_core::parser::state::SparseState<
-    GrammarTerminalClasses,
-    GrammarNonTerminals,
-    u8,
-    u8,
->;
+pub type GrammarState =
+    ::rusty_lr_core::parser::state::DenseState<GrammarTerminalClasses, GrammarNonTerminals, u8, u8>;
 /// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
@@ -252,7 +245,6 @@ pub enum GrammarTerminalClasses {
     prec,
     precedence,
     nooptim,
-    dense,
     dprec,
     location,
     semicolon,
@@ -268,10 +260,10 @@ impl GrammarTerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
-            value < 45usize,
+            value < 44usize,
             "Terminal class index {} is out of bounds (max {})",
             value,
-            45usize
+            44usize
         );
         unsafe { ::std::mem::transmute(value) }
     }
@@ -316,7 +308,6 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
             GrammarTerminalClasses::prec => "prec",
             GrammarTerminalClasses::precedence => "precedence",
             GrammarTerminalClasses::nooptim => "nooptim",
-            GrammarTerminalClasses::dense => "dense",
             GrammarTerminalClasses::dprec => "dprec",
             GrammarTerminalClasses::location => "location",
             GrammarTerminalClasses::semicolon => "semicolon",
@@ -381,7 +372,6 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
             Lexed::Prec(_) => GrammarTerminalClasses::prec,
             Lexed::Precedence(_) => GrammarTerminalClasses::precedence,
             Lexed::NoOptim(_) => GrammarTerminalClasses::nooptim,
-            Lexed::Dense(_) => GrammarTerminalClasses::dense,
             Lexed::DPrec(_) => GrammarTerminalClasses::dprec,
             Lexed::Location(_) => GrammarTerminalClasses::location,
             Lexed::Semicolon(_) => GrammarTerminalClasses::semicolon,
@@ -4085,94 +4075,9 @@ impl GrammarDataStack {
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
     }
-    ///Directive -> percent dense semicolon
-    #[inline]
-    fn reduce_Directive_25(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<Location>,
-        __push_data: bool,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut Location,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
-            );
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
-            );
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
-            );
-        }
-        __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.pop();
-        let mut dense = match __data_stack.__stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
-            _ => unreachable!(),
-        };
-        __data_stack.__stack.pop();
-        {
-            data.dense = true;
-        };
-        __data_stack.__stack.push(GrammarData::Empty);
-        Ok(())
-    }
-    ///Directive -> percent dense error semicolon
-    #[inline]
-    fn reduce_Directive_26(
-        __data_stack: &mut Self,
-        __location_stack: &mut Vec<Location>,
-        __push_data: bool,
-        shift: &mut bool,
-        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
-        data: &mut GrammarArgs,
-        __rustylr_location0: &mut Location,
-    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
-        #[cfg(debug_assertions)]
-        {
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
-            );
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
-            );
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
-            );
-            debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
-            );
-        }
-        __location_stack.pop();
-        let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
-        {
-            data.error_recovered
-                .push(RecoveredError {
-                    message: "Expected semicolon".to_string(),
-                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#dense-parser-table"
-                        .to_string(),
-                    location: __rustylr_location_error,
-                });
-        };
-        __data_stack.__stack.push(GrammarData::Empty);
-        Ok(())
-    }
     ///Directive -> percent location [^semicolon]+ semicolon
     #[inline]
-    fn reduce_Directive_27(
+    fn reduce_Directive_25(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4223,7 +4128,7 @@ impl GrammarDataStack {
     }
     ///Directive -> percent location semicolon
     #[inline]
-    fn reduce_Directive_28(
+    fn reduce_Directive_26(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4270,7 +4175,7 @@ impl GrammarDataStack {
     }
     ///Directive -> percent error semicolon
     #[inline]
-    fn reduce_Directive_29(
+    fn reduce_Directive_27(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -6084,28 +5989,6 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             75usize => {
-                Self::reduce_Directive_28(
-                    data_stack,
-                    location_stack,
-                    push_data,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
-            76usize => {
-                Self::reduce_Directive_29(
-                    data_stack,
-                    location_stack,
-                    push_data,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
-            77usize => {
                 Self::reduce_GrammarLine_0(
                     data_stack,
                     location_stack,
@@ -6116,7 +5999,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            80usize => {
+            78usize => {
                 Self::reduce__TokenMappedPlus15_0(
                     data_stack,
                     location_stack,
@@ -6127,7 +6010,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            81usize => {
+            79usize => {
                 Self::reduce__TokenMappedPlus15_1(
                     data_stack,
                     location_stack,
@@ -6138,7 +6021,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            82usize => {
+            80usize => {
                 Self::reduce__TokenMappedStar16_0(
                     data_stack,
                     location_stack,
@@ -6149,7 +6032,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            83usize => {
+            81usize => {
                 Self::reduce__TokenMappedStar16_1(
                     data_stack,
                     location_stack,
@@ -6160,7 +6043,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            84usize => {
+            82usize => {
                 Self::reduce__PrecDefPlus17_0(
                     data_stack,
                     location_stack,
@@ -6171,7 +6054,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            85usize => {
+            83usize => {
                 Self::reduce__PrecDefPlus17_1(
                     data_stack,
                     location_stack,
@@ -6182,7 +6065,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            86usize => {
+            84usize => {
                 Self::reduce__PrecDefStar18_0(
                     data_stack,
                     location_stack,
@@ -6193,7 +6076,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            87usize => {
+            85usize => {
                 Self::reduce__PrecDefStar18_1(
                     data_stack,
                     location_stack,
@@ -6204,7 +6087,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            88usize => {
+            86usize => {
                 Self::reduce__caretQuestion19_0(
                     data_stack,
                     location_stack,
@@ -6215,7 +6098,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            89usize => {
+            87usize => {
                 Self::reduce__caretQuestion19_1(
                     data_stack,
                     location_stack,
@@ -6226,7 +6109,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            90usize => {
+            88usize => {
                 Self::reduce__TerminalSetItemPlus20_0(
                     data_stack,
                     location_stack,
@@ -6237,7 +6120,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            91usize => {
+            89usize => {
                 Self::reduce__TerminalSetItemPlus20_1(
                     data_stack,
                     location_stack,
@@ -6248,7 +6131,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            92usize => {
+            90usize => {
                 Self::reduce__TerminalSetItemStar21_0(
                     data_stack,
                     location_stack,
@@ -6259,7 +6142,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            93usize => {
+            91usize => {
                 Self::reduce__TerminalSetItemStar21_1(
                     data_stack,
                     location_stack,
@@ -6270,7 +6153,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            94usize => {
+            92usize => {
                 Self::reduce__PatternPlus22_0(
                     data_stack,
                     location_stack,
@@ -6281,7 +6164,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            95usize => {
+            93usize => {
                 Self::reduce__PatternPlus22_1(
                     data_stack,
                     location_stack,
@@ -6292,7 +6175,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            96usize => {
+            94usize => {
                 Self::reduce__PatternStar23_0(
                     data_stack,
                     location_stack,
@@ -6303,7 +6186,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            97usize => {
+            95usize => {
                 Self::reduce__PatternStar23_1(
                     data_stack,
                     location_stack,
@@ -6314,7 +6197,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            98usize => {
+            96usize => {
                 Self::reduce___PatternStar23SepPlus24_0(
                     data_stack,
                     location_stack,
@@ -6325,7 +6208,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            99usize => {
+            97usize => {
                 Self::reduce___PatternStar23SepPlus24_1(
                     data_stack,
                     location_stack,
@@ -6336,7 +6219,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            100usize => {
+            98usize => {
                 Self::reduce__commaQuestion25_0(
                     data_stack,
                     location_stack,
@@ -6347,7 +6230,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            101usize => {
+            99usize => {
                 Self::reduce__commaQuestion25_1(
                     data_stack,
                     location_stack,
@@ -6358,7 +6241,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            144usize => {
+            141usize => {
                 Self::reduce___TermSet26Plus27_0(
                     data_stack,
                     location_stack,
@@ -6369,7 +6252,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            145usize => {
+            142usize => {
                 Self::reduce___TermSet26Plus27_1(
                     data_stack,
                     location_stack,
@@ -6380,7 +6263,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            146usize => {
+            143usize => {
                 Self::reduce__IdentOrLiteralPlus28_0(
                     data_stack,
                     location_stack,
@@ -6391,7 +6274,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            147usize => {
+            144usize => {
                 Self::reduce__IdentOrLiteralPlus28_1(
                     data_stack,
                     location_stack,
@@ -6402,7 +6285,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            148usize => {
+            145usize => {
                 Self::reduce__GrammarLinePlus29_0(
                     data_stack,
                     location_stack,
@@ -6413,7 +6296,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            149usize => {
+            146usize => {
                 Self::reduce__GrammarLinePlus29_1(
                     data_stack,
                     location_stack,
@@ -6471,14 +6354,14 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     10u32, 10u32, 10u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32,
                     11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32,
                     11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32, 11u32,
-                    11u32, 11u32, 11u32, 12u32, 12u32, 13u32, 14u32, 14u32, 15u32, 15u32,
-                    16u32, 16u32, 17u32, 17u32, 18u32, 18u32, 19u32, 19u32, 20u32, 20u32,
-                    21u32, 21u32, 22u32, 22u32, 23u32, 23u32, 24u32, 24u32, 25u32, 25u32,
+                    11u32, 12u32, 12u32, 13u32, 14u32, 14u32, 15u32, 15u32, 16u32, 16u32,
+                    17u32, 17u32, 18u32, 18u32, 19u32, 19u32, 20u32, 20u32, 21u32, 21u32,
+                    22u32, 22u32, 23u32, 23u32, 24u32, 24u32, 25u32, 25u32, 25u32, 25u32,
                     25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
                     25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
                     25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
-                    25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32,
-                    26u32, 26u32, 27u32, 27u32, 28u32, 28u32, 29u32,
+                    25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 25u32, 26u32, 26u32, 27u32,
+                    27u32, 28u32, 28u32, 29u32,
                 ];
                 static RULE_PRECEDENCES: &[u32] = &[
                     0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
@@ -6494,41 +6377,40 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
                     0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
                     0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
-                    0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32, 0u32,
+                    0u32, 0u32, 0u32, 0u32, 0u32,
                 ];
                 static RULE_TOKENS_DATA: &[u32] = &[
-                    0u32, 3u32, 4u32, 5u32, 74u32, 30u32, 5u32, 6u32, 7u32, 7u32, 31u32,
-                    35u32, 19u32, 8u32, 62u32, 21u32, 8u32, 62u32, 86u32, 8u32, 70u32,
-                    20u32, 8u32, 70u32, 86u32, 8u32, 86u32, 17u32, 0u32, 10u32, 17u32,
-                    0u32, 0u32, 84u32, 0u32, 0u32, 84u32, 86u32, 26u32, 26u32, 84u32,
-                    26u32, 26u32, 84u32, 86u32, 22u32, 22u32, 84u32, 22u32, 22u32, 84u32,
-                    86u32, 38u32, 37u32, 41u32, 40u32, 14u32, 0u32, 17u32, 76u32, 17u32,
-                    78u32, 17u32, 80u32, 17u32, 82u32, 15u32, 34u32, 47u32, 36u32, 34u32,
-                    86u32, 36u32, 22u32, 24u32, 26u32, 28u32, 17u32, 84u32, 17u32, 16u32,
+                    0u32, 3u32, 4u32, 5u32, 72u32, 30u32, 5u32, 6u32, 7u32, 7u32, 31u32,
+                    35u32, 19u32, 8u32, 62u32, 21u32, 8u32, 62u32, 84u32, 8u32, 68u32,
+                    20u32, 8u32, 68u32, 84u32, 8u32, 84u32, 17u32, 0u32, 10u32, 17u32,
+                    0u32, 0u32, 82u32, 0u32, 0u32, 82u32, 84u32, 26u32, 26u32, 82u32,
+                    26u32, 26u32, 82u32, 84u32, 22u32, 22u32, 82u32, 22u32, 22u32, 82u32,
+                    84u32, 38u32, 37u32, 41u32, 40u32, 14u32, 0u32, 17u32, 74u32, 17u32,
+                    76u32, 17u32, 78u32, 17u32, 80u32, 15u32, 34u32, 47u32, 36u32, 34u32,
+                    84u32, 36u32, 22u32, 24u32, 26u32, 28u32, 17u32, 82u32, 17u32, 16u32,
                     0u32, 34u32, 17u32, 18u32, 17u32, 49u32, 36u32, 16u32, 0u32, 34u32,
-                    17u32, 18u32, 17u32, 18u32, 76u32, 36u32, 16u32, 0u32, 34u32, 17u32,
-                    18u32, 17u32, 18u32, 78u32, 36u32, 16u32, 0u32, 34u32, 17u32, 18u32,
-                    17u32, 86u32, 36u32, 16u32, 0u32, 34u32, 17u32, 18u32, 17u32, 18u32,
-                    86u32, 36u32, 32u32, 0u32, 22u32, 26u32, 8u32, 46u32, 0u32, 53u32,
-                    74u32, 8u32, 46u32, 0u32, 74u32, 8u32, 46u32, 86u32, 74u32, 8u32,
-                    48u32, 0u32, 74u32, 8u32, 48u32, 86u32, 74u32, 8u32, 50u32, 53u32,
-                    74u32, 8u32, 50u32, 74u32, 8u32, 52u32, 53u32, 74u32, 8u32, 52u32,
-                    74u32, 8u32, 42u32, 55u32, 74u32, 8u32, 42u32, 86u32, 74u32, 8u32,
-                    44u32, 55u32, 74u32, 8u32, 44u32, 86u32, 74u32, 8u32, 64u32, 55u32,
-                    74u32, 8u32, 64u32, 86u32, 74u32, 8u32, 54u32, 53u32, 74u32, 8u32,
-                    54u32, 74u32, 8u32, 56u32, 53u32, 74u32, 8u32, 56u32, 74u32, 8u32,
-                    60u32, 74u32, 8u32, 60u32, 86u32, 74u32, 8u32, 58u32, 74u32, 8u32,
-                    58u32, 86u32, 74u32, 8u32, 66u32, 74u32, 8u32, 66u32, 86u32, 74u32,
-                    8u32, 68u32, 74u32, 8u32, 68u32, 86u32, 74u32, 8u32, 72u32, 53u32,
-                    74u32, 8u32, 72u32, 74u32, 8u32, 86u32, 74u32, 1u32, 23u32, 57u32,
-                    11u32, 29u32, 11u32, 29u32, 9u32, 33u32, 9u32, 33u32, 12u32, 13u32,
-                    39u32, 13u32, 39u32, 17u32, 43u32, 17u32, 43u32, 45u32, 47u32, 6u32,
-                    45u32, 18u32, 0u32, 4u32, 6u32, 8u32, 10u32, 76u32, 78u32, 80u32,
-                    12u32, 84u32, 82u32, 14u32, 16u32, 18u32, 20u32, 22u32, 24u32, 26u32,
-                    28u32, 2u32, 30u32, 32u32, 34u32, 36u32, 38u32, 40u32, 42u32, 44u32,
-                    46u32, 48u32, 50u32, 52u32, 54u32, 56u32, 58u32, 60u32, 62u32, 64u32,
-                    66u32, 68u32, 70u32, 72u32, 51u32, 53u32, 51u32, 21u32, 55u32, 21u32,
-                    25u32, 25u32, 57u32, 27u32, 88u32,
+                    17u32, 18u32, 17u32, 18u32, 74u32, 36u32, 16u32, 0u32, 34u32, 17u32,
+                    18u32, 17u32, 18u32, 76u32, 36u32, 16u32, 0u32, 34u32, 17u32, 18u32,
+                    17u32, 84u32, 36u32, 16u32, 0u32, 34u32, 17u32, 18u32, 17u32, 18u32,
+                    84u32, 36u32, 32u32, 0u32, 22u32, 26u32, 8u32, 46u32, 0u32, 53u32,
+                    72u32, 8u32, 46u32, 0u32, 72u32, 8u32, 46u32, 84u32, 72u32, 8u32,
+                    48u32, 0u32, 72u32, 8u32, 48u32, 84u32, 72u32, 8u32, 50u32, 53u32,
+                    72u32, 8u32, 50u32, 72u32, 8u32, 52u32, 53u32, 72u32, 8u32, 52u32,
+                    72u32, 8u32, 42u32, 55u32, 72u32, 8u32, 42u32, 84u32, 72u32, 8u32,
+                    44u32, 55u32, 72u32, 8u32, 44u32, 84u32, 72u32, 8u32, 64u32, 55u32,
+                    72u32, 8u32, 64u32, 84u32, 72u32, 8u32, 54u32, 53u32, 72u32, 8u32,
+                    54u32, 72u32, 8u32, 56u32, 53u32, 72u32, 8u32, 56u32, 72u32, 8u32,
+                    60u32, 72u32, 8u32, 60u32, 84u32, 72u32, 8u32, 58u32, 72u32, 8u32,
+                    58u32, 84u32, 72u32, 8u32, 66u32, 72u32, 8u32, 66u32, 84u32, 72u32,
+                    8u32, 70u32, 53u32, 72u32, 8u32, 70u32, 72u32, 8u32, 84u32, 72u32,
+                    1u32, 23u32, 57u32, 11u32, 29u32, 11u32, 29u32, 9u32, 33u32, 9u32,
+                    33u32, 12u32, 13u32, 39u32, 13u32, 39u32, 17u32, 43u32, 17u32, 43u32,
+                    45u32, 47u32, 6u32, 45u32, 18u32, 0u32, 4u32, 6u32, 8u32, 10u32,
+                    74u32, 76u32, 78u32, 12u32, 82u32, 80u32, 14u32, 16u32, 18u32, 20u32,
+                    22u32, 24u32, 26u32, 28u32, 2u32, 30u32, 32u32, 34u32, 36u32, 38u32,
+                    40u32, 42u32, 44u32, 46u32, 48u32, 50u32, 52u32, 54u32, 56u32, 58u32,
+                    60u32, 62u32, 64u32, 66u32, 68u32, 70u32, 51u32, 53u32, 51u32, 21u32,
+                    55u32, 21u32, 25u32, 25u32, 57u32, 27u32, 86u32,
                 ];
                 static RULE_TOKENS_OFFSETS: &[u32] = &[
                     0u32, 5u32, 6u32, 6u32, 9u32, 10u32, 13u32, 16u32, 19u32, 22u32,
@@ -6539,18 +6421,18 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     132u32, 136u32, 140u32, 144u32, 148u32, 152u32, 155u32, 159u32,
                     162u32, 166u32, 170u32, 174u32, 178u32, 182u32, 186u32, 190u32,
                     193u32, 197u32, 200u32, 203u32, 207u32, 210u32, 214u32, 217u32,
-                    221u32, 224u32, 228u32, 232u32, 235u32, 238u32, 239u32, 240u32,
-                    241u32, 242u32, 244u32, 245u32, 245u32, 246u32, 248u32, 249u32,
-                    249u32, 250u32, 250u32, 251u32, 253u32, 254u32, 254u32, 255u32,
-                    257u32, 258u32, 258u32, 259u32, 262u32, 263u32, 263u32, 264u32,
-                    265u32, 266u32, 267u32, 268u32, 269u32, 270u32, 271u32, 272u32,
-                    273u32, 274u32, 275u32, 276u32, 277u32, 278u32, 279u32, 280u32,
-                    281u32, 282u32, 283u32, 284u32, 285u32, 286u32, 287u32, 288u32,
-                    289u32, 290u32, 291u32, 292u32, 293u32, 294u32, 295u32, 296u32,
-                    297u32, 298u32, 299u32, 300u32, 301u32, 302u32, 303u32, 304u32,
-                    305u32, 306u32, 308u32, 309u32, 311u32, 312u32, 314u32, 316u32,
+                    221u32, 225u32, 228u32, 231u32, 232u32, 233u32, 234u32, 235u32,
+                    237u32, 238u32, 238u32, 239u32, 241u32, 242u32, 242u32, 243u32,
+                    243u32, 244u32, 246u32, 247u32, 247u32, 248u32, 250u32, 251u32,
+                    251u32, 252u32, 255u32, 256u32, 256u32, 257u32, 258u32, 259u32,
+                    260u32, 261u32, 262u32, 263u32, 264u32, 265u32, 266u32, 267u32,
+                    268u32, 269u32, 270u32, 271u32, 272u32, 273u32, 274u32, 275u32,
+                    276u32, 277u32, 278u32, 279u32, 280u32, 281u32, 282u32, 283u32,
+                    284u32, 285u32, 286u32, 287u32, 288u32, 289u32, 290u32, 291u32,
+                    292u32, 293u32, 294u32, 295u32, 296u32, 297u32, 298u32, 300u32,
+                    301u32, 303u32, 304u32, 306u32, 308u32,
                 ];
-                let num_rules = 151usize;
+                let num_rules = 148usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
                     let name = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
@@ -6616,49 +6498,49 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     2147876875u32, 2147909644u32, 2147942413u32, 2147975182u32,
                     2148007953u32, 2148040723u32, 2147713024u32, 2147745799u32,
                     2147778568u32, 2147876875u32, 2147909644u32, 2147942413u32,
-                    2147975182u32, 2148007953u32, 2148040723u32, 2148794411u32,
+                    2147975182u32, 2148007953u32, 2148040723u32, 2148794410u32,
                     2148073478u32, 2148139008u32, 2148270091u32, 2148401165u32,
-                    2148171818u32, 2148204544u32, 2148237355u32, 2148302890u32,
-                    2148335627u32, 2148368427u32, 2148433962u32, 2148466701u32,
-                    2148499499u32, 2148139008u32, 2148270091u32, 2148401165u32,
-                    2148663316u32, 2148761609u32, 2148892710u32, 2148925479u32,
-                    2148958248u32, 2148991017u32, 2149023786u32, 2147713024u32,
+                    2148171817u32, 2148204544u32, 2148237354u32, 2148302889u32,
+                    2148335627u32, 2148368426u32, 2148433961u32, 2148466701u32,
+                    2148499498u32, 2148139008u32, 2148270091u32, 2148401165u32,
+                    2148663316u32, 2148761609u32, 2148892709u32, 2148925478u32,
+                    2148958247u32, 2148991016u32, 2149023785u32, 2147713024u32,
                     2147745799u32, 2147778568u32, 2147876875u32, 2147909644u32,
                     2147942413u32, 2147975182u32, 2148007953u32, 2148040723u32,
-                    2148827154u32, 2148892710u32, 2148925479u32, 2148958248u32,
-                    2148991017u32, 2149023786u32, 2147713024u32, 2147745799u32,
+                    2148827154u32, 2148892709u32, 2148925478u32, 2148958247u32,
+                    2148991016u32, 2149023785u32, 2147713024u32, 2147745799u32,
                     2147778568u32, 2147876875u32, 2147909644u32, 2147942413u32,
-                    2147975182u32, 2148007953u32, 2148040723u32, 2148892710u32,
-                    2148925479u32, 2148958248u32, 2148991017u32, 2147713024u32,
+                    2147975182u32, 2148007953u32, 2148040723u32, 2148892709u32,
+                    2148925478u32, 2148958247u32, 2148991016u32, 2147713024u32,
                     2147745799u32, 2147778568u32, 2147876875u32, 2147909644u32,
                     2147942413u32, 2147975182u32, 2148007953u32, 2148040723u32,
-                    2148892710u32, 2148925479u32, 2148958248u32, 2148991017u32,
-                    2149023786u32, 2149220355u32, 2149285906u32, 2147713024u32,
+                    2148892709u32, 2148925478u32, 2148958247u32, 2148991016u32,
+                    2149023785u32, 2149220355u32, 2149285906u32, 2147713024u32,
                     2147745799u32, 2147778568u32, 2147876875u32, 2147909644u32,
                     2147942413u32, 2147975182u32, 2148007953u32, 2148040723u32,
-                    2149351433u32, 2148892710u32, 2148925479u32, 2148958248u32,
-                    2148991017u32, 2149023786u32, 2149580843u32, 2149384230u32,
-                    2149449767u32, 2149515307u32, 2149416978u32, 2149482514u32,
-                    2149548050u32, 2149613586u32, 2149679122u32, 2148892710u32,
-                    2148925479u32, 2148958248u32, 2148991017u32, 2149023786u32,
-                    2149777411u32, 3080229u32, 2147647488u32, 2147745799u32,
+                    2149351433u32, 2148892709u32, 2148925478u32, 2148958247u32,
+                    2148991016u32, 2149023785u32, 2149580842u32, 2149384229u32,
+                    2149449766u32, 2149515306u32, 2149416978u32, 2149482514u32,
+                    2149548050u32, 2149613586u32, 2149679122u32, 2148892709u32,
+                    2148925478u32, 2148958247u32, 2148991016u32, 2149023785u32,
+                    2149777411u32, 3080228u32, 2147647488u32, 2147745799u32,
                     2147778568u32, 2147876875u32, 2147909644u32, 2147942413u32,
-                    2147975182u32, 2148007953u32, 2148040723u32, 2148892710u32,
-                    2148925479u32, 2148958248u32, 2148991017u32, 2149023786u32,
+                    2147975182u32, 2148007953u32, 2148040723u32, 2148892709u32,
+                    2148925478u32, 2148958247u32, 2148991016u32, 2149023785u32,
                     2147647488u32, 2147745799u32, 2147778568u32, 2147876875u32,
                     2147909644u32, 2147942413u32, 2147975182u32, 2148007953u32,
-                    2148040723u32, 2150006788u32, 2150039583u32, 2150236195u32,
-                    2150334507u32, 2150072320u32, 2150105099u32, 2150137869u32,
-                    2150170667u32, 2150268938u32, 2150301739u32, 2150006788u32,
+                    2148040723u32, 2150006788u32, 2150039583u32, 2150236194u32,
+                    2150334506u32, 2150072320u32, 2150105099u32, 2150137869u32,
+                    2150170666u32, 2150268938u32, 2150301738u32, 2150006788u32,
                     2150498320u32, 2150662165u32, 2150891542u32, 2151055383u32,
                     2151350296u32, 2151514137u32, 2151645210u32, 2151776283u32,
                     2151907356u32, 2152038429u32, 2152169502u32, 2152300576u32,
-                    2152464417u32, 2152595490u32, 2152726564u32, 2152857643u32,
-                    2150072320u32, 2150105099u32, 2150137869u32, 2150694955u32,
-                    3244069u32, 2150072320u32, 2150105099u32, 2150137869u32, 3342373u32,
-                    2150072320u32, 2150105099u32, 2150137869u32, 2150924331u32,
-                    3473445u32, 2150072320u32, 2150105099u32, 2150137869u32, 3538981u32,
-                    2151088128u32, 2151284779u32, 2151153664u32, 2151153665u32,
+                    2152464417u32, 2152595491u32, 2152726570u32, 2150072320u32,
+                    2150105099u32, 2150137869u32, 2150694954u32, 3244068u32,
+                    2150072320u32, 2150105099u32, 2150137869u32, 3342372u32,
+                    2150072320u32, 2150105099u32, 2150137869u32, 2150924330u32,
+                    3473444u32, 2150072320u32, 2150105099u32, 2150137869u32, 3538980u32,
+                    2151088128u32, 2151284778u32, 2151153664u32, 2151153665u32,
                     2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
                     2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
                     2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
@@ -6667,31 +6549,118 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
                     2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
                     2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
-                    2151153698u32, 2151153699u32, 2151153700u32, 3637285u32,
+                    2151153698u32, 2151153699u32, 3637284u32, 2151153701u32,
                     2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
-                    2151153706u32, 2151251968u32, 2151251969u32, 2151251970u32,
-                    2151251971u32, 2151251972u32, 2151251973u32, 2151251974u32,
-                    2151251975u32, 2151251976u32, 2151251977u32, 2151251978u32,
-                    2151251979u32, 2151251980u32, 2151251981u32, 2151251982u32,
-                    2151251983u32, 2151251984u32, 2151251985u32, 2151251986u32,
-                    2151251987u32, 2151251988u32, 2151251989u32, 2151251990u32,
-                    2151251991u32, 2151251992u32, 2151251993u32, 2151251994u32,
-                    2151251995u32, 2151251996u32, 2151251997u32, 2151251998u32,
-                    2151251999u32, 2151252000u32, 2151252001u32, 2151252002u32,
-                    2151252003u32, 2151252004u32, 3735589u32, 2151252006u32,
-                    2151252007u32, 2151252008u32, 2151252009u32, 2151252010u32,
-                    3833893u32, 2151383040u32, 2151448619u32, 3932197u32, 3997733u32,
-                    2151153664u32, 2151153665u32, 2151153666u32, 2151153667u32,
-                    2151153668u32, 2151153669u32, 2151153670u32, 2151153671u32,
-                    2151153672u32, 2151153673u32, 2151153674u32, 2151153675u32,
-                    2151153676u32, 2151153677u32, 2151153678u32, 2151153679u32,
-                    2151153680u32, 2151153681u32, 2151153682u32, 2151153683u32,
-                    2151153684u32, 2151153685u32, 2151153686u32, 2151153687u32,
-                    2151153688u32, 2151153689u32, 2151153690u32, 2151153691u32,
-                    2151153692u32, 2151153693u32, 2151153694u32, 2151153695u32,
-                    2151153696u32, 2151153697u32, 2151153698u32, 2151153699u32,
-                    2151153700u32, 4063269u32, 2151153702u32, 2151153703u32,
-                    2151153704u32, 2151153705u32, 2151153706u32, 2151251968u32,
+                    2151251968u32, 2151251969u32, 2151251970u32, 2151251971u32,
+                    2151251972u32, 2151251973u32, 2151251974u32, 2151251975u32,
+                    2151251976u32, 2151251977u32, 2151251978u32, 2151251979u32,
+                    2151251980u32, 2151251981u32, 2151251982u32, 2151251983u32,
+                    2151251984u32, 2151251985u32, 2151251986u32, 2151251987u32,
+                    2151251988u32, 2151251989u32, 2151251990u32, 2151251991u32,
+                    2151251992u32, 2151251993u32, 2151251994u32, 2151251995u32,
+                    2151251996u32, 2151251997u32, 2151251998u32, 2151251999u32,
+                    2151252000u32, 2151252001u32, 2151252002u32, 2151252003u32,
+                    3735588u32, 2151252005u32, 2151252006u32, 2151252007u32,
+                    2151252008u32, 2151252009u32, 3833892u32, 2151383040u32,
+                    2151448618u32, 3932196u32, 3997732u32, 2151153664u32, 2151153665u32,
+                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
+                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
+                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
+                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
+                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
+                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
+                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
+                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
+                    2151153698u32, 2151153699u32, 4063268u32, 2151153701u32,
+                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
+                    2151251968u32, 2151251969u32, 2151251970u32, 2151251971u32,
+                    2151251972u32, 2151251973u32, 2151251974u32, 2151251975u32,
+                    2151251976u32, 2151251977u32, 2151251978u32, 2151251979u32,
+                    2151251980u32, 2151251981u32, 2151251982u32, 2151251983u32,
+                    2151251984u32, 2151251985u32, 2151251986u32, 2151251987u32,
+                    2151251988u32, 2151251989u32, 2151251990u32, 2151251991u32,
+                    2151251992u32, 2151251993u32, 2151251994u32, 2151251995u32,
+                    2151251996u32, 2151251997u32, 2151251998u32, 2151251999u32,
+                    2151252000u32, 2151252001u32, 2151252002u32, 2151252003u32,
+                    4128804u32, 2151252005u32, 2151252006u32, 2151252007u32,
+                    2151252008u32, 2151252009u32, 2151153664u32, 2151153665u32,
+                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
+                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
+                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
+                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
+                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
+                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
+                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
+                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
+                    2151153698u32, 2151153699u32, 4194340u32, 2151153701u32,
+                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
+                    2151251968u32, 2151251969u32, 2151251970u32, 2151251971u32,
+                    2151251972u32, 2151251973u32, 2151251974u32, 2151251975u32,
+                    2151251976u32, 2151251977u32, 2151251978u32, 2151251979u32,
+                    2151251980u32, 2151251981u32, 2151251982u32, 2151251983u32,
+                    2151251984u32, 2151251985u32, 2151251986u32, 2151251987u32,
+                    2151251988u32, 2151251989u32, 2151251990u32, 2151251991u32,
+                    2151251992u32, 2151251993u32, 2151251994u32, 2151251995u32,
+                    2151251996u32, 2151251997u32, 2151251998u32, 2151251999u32,
+                    2151252000u32, 2151252001u32, 2151252002u32, 2151252003u32,
+                    4259876u32, 2151252005u32, 2151252006u32, 2151252007u32,
+                    2151252008u32, 2151252009u32, 2151153664u32, 2151153665u32,
+                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
+                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
+                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
+                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
+                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
+                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
+                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
+                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
+                    2151153698u32, 2151153699u32, 4325412u32, 2151153701u32,
+                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
+                    2151251968u32, 2151251969u32, 2151251970u32, 2151251971u32,
+                    2151251972u32, 2151251973u32, 2151251974u32, 2151251975u32,
+                    2151251976u32, 2151251977u32, 2151251978u32, 2151251979u32,
+                    2151251980u32, 2151251981u32, 2151251982u32, 2151251983u32,
+                    2151251984u32, 2151251985u32, 2151251986u32, 2151251987u32,
+                    2151251988u32, 2151251989u32, 2151251990u32, 2151251991u32,
+                    2151251992u32, 2151251993u32, 2151251994u32, 2151251995u32,
+                    2151251996u32, 2151251997u32, 2151251998u32, 2151251999u32,
+                    2151252000u32, 2151252001u32, 2151252002u32, 2151252003u32,
+                    4390948u32, 2151252005u32, 2151252006u32, 2151252007u32,
+                    2151252008u32, 2151252009u32, 2151153664u32, 2151153665u32,
+                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
+                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
+                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
+                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
+                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
+                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
+                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
+                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
+                    2151153698u32, 2151153699u32, 4456484u32, 2151153701u32,
+                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
+                    2151251968u32, 2151251969u32, 2151251970u32, 2151251971u32,
+                    2151251972u32, 2151251973u32, 2151251974u32, 2151251975u32,
+                    2151251976u32, 2151251977u32, 2151251978u32, 2151251979u32,
+                    2151251980u32, 2151251981u32, 2151251982u32, 2151251983u32,
+                    2151251984u32, 2151251985u32, 2151251986u32, 2151251987u32,
+                    2151251988u32, 2151251989u32, 2151251990u32, 2151251991u32,
+                    2151251992u32, 2151251993u32, 2151251994u32, 2151251995u32,
+                    2151251996u32, 2151251997u32, 2151251998u32, 2151251999u32,
+                    2151252000u32, 2151252001u32, 2151252002u32, 2151252003u32,
+                    4522020u32, 2151252005u32, 2151252006u32, 2151252007u32,
+                    2151252008u32, 2151252009u32, 4587556u32, 2152103978u32, 4653092u32,
+                    4718628u32, 2152235050u32, 4784164u32, 2150072320u32, 2150105099u32,
+                    2150137869u32, 2152333354u32, 4882468u32, 2150072320u32,
+                    2150105099u32, 2150137869u32, 4948004u32, 5013540u32, 2152529962u32,
+                    5079076u32, 2151153664u32, 2151153665u32, 2151153666u32,
+                    2151153667u32, 2151153668u32, 2151153669u32, 2151153670u32,
+                    2151153671u32, 2151153672u32, 2151153673u32, 2151153674u32,
+                    2151153675u32, 2151153676u32, 2151153677u32, 2151153678u32,
+                    2151153679u32, 2151153680u32, 2151153681u32, 2151153682u32,
+                    2151153683u32, 2151153684u32, 2151153685u32, 2151153686u32,
+                    2151153687u32, 2151153688u32, 2151153689u32, 2151153690u32,
+                    2151153691u32, 2151153692u32, 2151153693u32, 2151153694u32,
+                    2151153695u32, 2151153696u32, 2151153697u32, 2151153698u32,
+                    2151153699u32, 5144612u32, 2151153701u32, 2151153702u32,
+                    2151153703u32, 2151153704u32, 2151153705u32, 2151251968u32,
                     2151251969u32, 2151251970u32, 2151251971u32, 2151251972u32,
                     2151251973u32, 2151251974u32, 2151251975u32, 2151251976u32,
                     2151251977u32, 2151251978u32, 2151251979u32, 2151251980u32,
@@ -6700,100 +6669,10 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     2151251989u32, 2151251990u32, 2151251991u32, 2151251992u32,
                     2151251993u32, 2151251994u32, 2151251995u32, 2151251996u32,
                     2151251997u32, 2151251998u32, 2151251999u32, 2151252000u32,
-                    2151252001u32, 2151252002u32, 2151252003u32, 2151252004u32,
-                    4128805u32, 2151252006u32, 2151252007u32, 2151252008u32,
-                    2151252009u32, 2151252010u32, 2151153664u32, 2151153665u32,
-                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
-                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
-                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
-                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
-                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
-                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
-                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
-                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
-                    2151153698u32, 2151153699u32, 2151153700u32, 4194341u32,
-                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
-                    2151153706u32, 2151251968u32, 2151251969u32, 2151251970u32,
-                    2151251971u32, 2151251972u32, 2151251973u32, 2151251974u32,
-                    2151251975u32, 2151251976u32, 2151251977u32, 2151251978u32,
-                    2151251979u32, 2151251980u32, 2151251981u32, 2151251982u32,
-                    2151251983u32, 2151251984u32, 2151251985u32, 2151251986u32,
-                    2151251987u32, 2151251988u32, 2151251989u32, 2151251990u32,
-                    2151251991u32, 2151251992u32, 2151251993u32, 2151251994u32,
-                    2151251995u32, 2151251996u32, 2151251997u32, 2151251998u32,
-                    2151251999u32, 2151252000u32, 2151252001u32, 2151252002u32,
-                    2151252003u32, 2151252004u32, 4259877u32, 2151252006u32,
-                    2151252007u32, 2151252008u32, 2151252009u32, 2151252010u32,
-                    2151153664u32, 2151153665u32, 2151153666u32, 2151153667u32,
-                    2151153668u32, 2151153669u32, 2151153670u32, 2151153671u32,
-                    2151153672u32, 2151153673u32, 2151153674u32, 2151153675u32,
-                    2151153676u32, 2151153677u32, 2151153678u32, 2151153679u32,
-                    2151153680u32, 2151153681u32, 2151153682u32, 2151153683u32,
-                    2151153684u32, 2151153685u32, 2151153686u32, 2151153687u32,
-                    2151153688u32, 2151153689u32, 2151153690u32, 2151153691u32,
-                    2151153692u32, 2151153693u32, 2151153694u32, 2151153695u32,
-                    2151153696u32, 2151153697u32, 2151153698u32, 2151153699u32,
-                    2151153700u32, 4325413u32, 2151153702u32, 2151153703u32,
-                    2151153704u32, 2151153705u32, 2151153706u32, 2151251968u32,
-                    2151251969u32, 2151251970u32, 2151251971u32, 2151251972u32,
-                    2151251973u32, 2151251974u32, 2151251975u32, 2151251976u32,
-                    2151251977u32, 2151251978u32, 2151251979u32, 2151251980u32,
-                    2151251981u32, 2151251982u32, 2151251983u32, 2151251984u32,
-                    2151251985u32, 2151251986u32, 2151251987u32, 2151251988u32,
-                    2151251989u32, 2151251990u32, 2151251991u32, 2151251992u32,
-                    2151251993u32, 2151251994u32, 2151251995u32, 2151251996u32,
-                    2151251997u32, 2151251998u32, 2151251999u32, 2151252000u32,
-                    2151252001u32, 2151252002u32, 2151252003u32, 2151252004u32,
-                    4390949u32, 2151252006u32, 2151252007u32, 2151252008u32,
-                    2151252009u32, 2151252010u32, 2151153664u32, 2151153665u32,
-                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
-                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
-                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
-                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
-                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
-                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
-                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
-                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
-                    2151153698u32, 2151153699u32, 2151153700u32, 4456485u32,
-                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
-                    2151153706u32, 2151251968u32, 2151251969u32, 2151251970u32,
-                    2151251971u32, 2151251972u32, 2151251973u32, 2151251974u32,
-                    2151251975u32, 2151251976u32, 2151251977u32, 2151251978u32,
-                    2151251979u32, 2151251980u32, 2151251981u32, 2151251982u32,
-                    2151251983u32, 2151251984u32, 2151251985u32, 2151251986u32,
-                    2151251987u32, 2151251988u32, 2151251989u32, 2151251990u32,
-                    2151251991u32, 2151251992u32, 2151251993u32, 2151251994u32,
-                    2151251995u32, 2151251996u32, 2151251997u32, 2151251998u32,
-                    2151251999u32, 2151252000u32, 2151252001u32, 2151252002u32,
-                    2151252003u32, 2151252004u32, 4522021u32, 2151252006u32,
-                    2151252007u32, 2151252008u32, 2151252009u32, 2151252010u32,
-                    4587557u32, 2152103979u32, 4653093u32, 4718629u32, 2152235051u32,
-                    4784165u32, 2150072320u32, 2150105099u32, 2150137869u32,
-                    2152333355u32, 4882469u32, 2150072320u32, 2150105099u32,
-                    2150137869u32, 4948005u32, 5013541u32, 2152529963u32, 5079077u32,
-                    5144613u32, 2152661035u32, 5210149u32, 2151153664u32, 2151153665u32,
-                    2151153666u32, 2151153667u32, 2151153668u32, 2151153669u32,
-                    2151153670u32, 2151153671u32, 2151153672u32, 2151153673u32,
-                    2151153674u32, 2151153675u32, 2151153676u32, 2151153677u32,
-                    2151153678u32, 2151153679u32, 2151153680u32, 2151153681u32,
-                    2151153682u32, 2151153683u32, 2151153684u32, 2151153685u32,
-                    2151153686u32, 2151153687u32, 2151153688u32, 2151153689u32,
-                    2151153690u32, 2151153691u32, 2151153692u32, 2151153693u32,
-                    2151153694u32, 2151153695u32, 2151153696u32, 2151153697u32,
-                    2151153698u32, 2151153699u32, 2151153700u32, 5275685u32,
-                    2151153702u32, 2151153703u32, 2151153704u32, 2151153705u32,
-                    2151153706u32, 2151251968u32, 2151251969u32, 2151251970u32,
-                    2151251971u32, 2151251972u32, 2151251973u32, 2151251974u32,
-                    2151251975u32, 2151251976u32, 2151251977u32, 2151251978u32,
-                    2151251979u32, 2151251980u32, 2151251981u32, 2151251982u32,
-                    2151251983u32, 2151251984u32, 2151251985u32, 2151251986u32,
-                    2151251987u32, 2151251988u32, 2151251989u32, 2151251990u32,
-                    2151251991u32, 2151251992u32, 2151251993u32, 2151251994u32,
-                    2151251995u32, 2151251996u32, 2151251997u32, 2151251998u32,
-                    2151251999u32, 2151252000u32, 2151252001u32, 2151252002u32,
-                    2151252003u32, 2151252004u32, 5341221u32, 2151252006u32,
-                    2151252007u32, 2151252008u32, 2151252009u32, 2151252010u32,
-                    5406757u32, 2147516416u32, 2150629380u32, 2153054252u32,
+                    2151252001u32, 2151252002u32, 2151252003u32, 5210148u32,
+                    2151252005u32, 2151252006u32, 2151252007u32, 2151252008u32,
+                    2151252009u32, 5275684u32, 2147516416u32, 2150629380u32,
+                    2152923179u32,
                 ];
                 static SHIFT_TERM_OFFSETS: &[u32] = &[
                     0u32, 2u32, 3u32, 3u32, 4u32, 13u32, 14u32, 23u32, 23u32, 23u32,
@@ -6806,20 +6685,19 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     134u32, 135u32, 135u32, 140u32, 142u32, 151u32, 151u32, 151u32,
                     156u32, 165u32, 165u32, 166u32, 169u32, 173u32, 173u32, 173u32,
                     173u32, 173u32, 173u32, 175u32, 175u32, 175u32, 175u32, 175u32,
-                    176u32, 176u32, 177u32, 177u32, 177u32, 177u32, 177u32, 192u32,
-                    196u32, 197u32, 197u32, 197u32, 201u32, 201u32, 201u32, 205u32,
-                    206u32, 206u32, 210u32, 210u32, 212u32, 255u32, 255u32, 255u32,
-                    298u32, 298u32, 298u32, 299u32, 299u32, 301u32, 302u32, 302u32,
-                    303u32, 303u32, 346u32, 346u32, 389u32, 389u32, 432u32, 432u32,
-                    475u32, 475u32, 518u32, 518u32, 561u32, 561u32, 604u32, 604u32,
-                    647u32, 647u32, 649u32, 649u32, 650u32, 650u32, 652u32, 652u32,
-                    653u32, 653u32, 657u32, 658u32, 658u32, 662u32, 662u32, 664u32,
-                    664u32, 665u32, 665u32, 667u32, 667u32, 668u32, 668u32, 711u32,
-                    711u32, 754u32, 754u32, 755u32, 755u32, 755u32, 757u32, 757u32,
-                    758u32, 758u32,
+                    176u32, 176u32, 177u32, 177u32, 177u32, 177u32, 177u32, 191u32,
+                    195u32, 196u32, 196u32, 196u32, 200u32, 200u32, 200u32, 204u32,
+                    205u32, 205u32, 209u32, 209u32, 211u32, 253u32, 253u32, 253u32,
+                    295u32, 295u32, 295u32, 296u32, 296u32, 298u32, 299u32, 299u32,
+                    300u32, 300u32, 342u32, 342u32, 384u32, 384u32, 426u32, 426u32,
+                    468u32, 468u32, 510u32, 510u32, 552u32, 552u32, 594u32, 594u32,
+                    636u32, 636u32, 638u32, 638u32, 639u32, 639u32, 641u32, 641u32,
+                    642u32, 642u32, 646u32, 647u32, 647u32, 651u32, 651u32, 653u32,
+                    653u32, 654u32, 654u32, 696u32, 696u32, 738u32, 738u32, 739u32,
+                    739u32, 739u32, 741u32, 741u32, 742u32, 742u32,
                 ];
                 static SHIFT_NONTERM_DATA: &[u32] = &[
-                    2152923136u32, 5472267u32, 2152955916u32, 2153021453u32, 5537820u32,
+                    2152792064u32, 5341195u32, 2152824844u32, 2152890381u32, 5406748u32,
                     2147581953u32, 2149744642u32, 2150596611u32, 2149842949u32,
                     2148696071u32, 2149875720u32, 2149908494u32, 2149974031u32,
                     2148696071u32, 2149711880u32, 2148696071u32, 2148728840u32,
@@ -6838,8 +6716,8 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     2151153689u32, 2151710746u32, 2151251993u32, 2151153689u32,
                     2151841818u32, 2151251993u32, 2151153689u32, 2151972890u32,
                     2151251993u32, 2150760458u32, 2152398875u32, 2150858762u32,
-                    2151153689u32, 2152792090u32, 2151251993u32, 2152923136u32,
-                    5472267u32, 2152955916u32, 2152988700u32,
+                    2151153689u32, 2152661018u32, 2151251993u32, 2152792064u32,
+                    5341195u32, 2152824844u32, 2152857628u32,
                 ];
                 static SHIFT_NONTERM_OFFSETS: &[u32] = &[
                     0u32, 5u32, 6u32, 6u32, 6u32, 13u32, 13u32, 15u32, 15u32, 15u32,
@@ -6857,59 +6735,58 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     62u32, 62u32, 62u32, 62u32, 64u32, 64u32, 65u32, 65u32, 67u32, 67u32,
                     68u32, 68u32, 70u32, 70u32, 71u32, 71u32, 73u32, 73u32, 74u32, 74u32,
                     74u32, 74u32, 74u32, 74u32, 74u32, 74u32, 74u32, 74u32, 76u32, 76u32,
-                    76u32, 77u32, 77u32, 77u32, 77u32, 77u32, 77u32, 77u32, 77u32, 77u32,
-                    77u32, 79u32, 79u32, 80u32, 80u32, 80u32, 80u32, 80u32, 84u32, 84u32,
-                    84u32, 84u32,
+                    76u32, 77u32, 77u32, 77u32, 77u32, 77u32, 77u32, 79u32, 79u32, 80u32,
+                    80u32, 80u32, 80u32, 80u32, 84u32, 84u32, 84u32, 84u32,
                 ];
                 static REDUCE_DATA: &[u32] = &[
-                    2u32, 1u32, 2u32, 2u32, 1u32, 1u32, 3u32, 1u32, 83u32, 4u32, 1u32,
-                    83u32, 16u32, 1u32, 83u32, 37u32, 1u32, 83u32, 0u32, 1u32, 24u32,
+                    2u32, 1u32, 2u32, 2u32, 1u32, 1u32, 3u32, 1u32, 81u32, 4u32, 1u32,
+                    81u32, 16u32, 1u32, 81u32, 36u32, 1u32, 81u32, 0u32, 1u32, 24u32,
                     3u32, 1u32, 24u32, 4u32, 1u32, 24u32, 7u32, 1u32, 24u32, 8u32, 1u32,
                     24u32, 11u32, 1u32, 24u32, 12u32, 1u32, 24u32, 13u32, 1u32, 24u32,
                     14u32, 1u32, 24u32, 16u32, 1u32, 24u32, 17u32, 1u32, 24u32, 19u32,
-                    1u32, 24u32, 37u32, 1u32, 24u32, 38u32, 1u32, 24u32, 39u32, 1u32,
-                    24u32, 40u32, 1u32, 24u32, 41u32, 1u32, 24u32, 42u32, 1u32, 24u32,
+                    1u32, 24u32, 36u32, 1u32, 24u32, 37u32, 1u32, 24u32, 38u32, 1u32,
+                    24u32, 39u32, 1u32, 24u32, 40u32, 1u32, 24u32, 41u32, 1u32, 24u32,
                     0u32, 1u32, 24u32, 3u32, 1u32, 24u32, 4u32, 1u32, 24u32, 7u32, 1u32,
                     24u32, 8u32, 1u32, 24u32, 9u32, 1u32, 24u32, 11u32, 1u32, 24u32,
                     12u32, 1u32, 24u32, 13u32, 1u32, 24u32, 14u32, 1u32, 24u32, 16u32,
                     1u32, 24u32, 17u32, 1u32, 24u32, 18u32, 1u32, 24u32, 19u32, 1u32,
-                    24u32, 37u32, 1u32, 24u32, 38u32, 1u32, 24u32, 39u32, 1u32, 24u32,
-                    40u32, 1u32, 24u32, 41u32, 1u32, 24u32, 42u32, 1u32, 24u32, 43u32,
+                    24u32, 36u32, 1u32, 24u32, 37u32, 1u32, 24u32, 38u32, 1u32, 24u32,
+                    39u32, 1u32, 24u32, 40u32, 1u32, 24u32, 41u32, 1u32, 24u32, 42u32,
                     1u32, 24u32, 0u32, 1u32, 23u32, 3u32, 1u32, 23u32, 4u32, 1u32, 23u32,
                     7u32, 1u32, 23u32, 8u32, 1u32, 23u32, 9u32, 1u32, 23u32, 11u32, 1u32,
                     23u32, 12u32, 1u32, 23u32, 13u32, 1u32, 23u32, 14u32, 1u32, 23u32,
                     16u32, 1u32, 23u32, 17u32, 1u32, 23u32, 18u32, 1u32, 23u32, 19u32,
-                    1u32, 23u32, 37u32, 1u32, 23u32, 38u32, 1u32, 23u32, 39u32, 1u32,
-                    23u32, 40u32, 1u32, 23u32, 41u32, 1u32, 23u32, 42u32, 1u32, 23u32,
-                    43u32, 1u32, 23u32, 0u32, 1u32, 32u32, 3u32, 1u32, 32u32, 4u32, 1u32,
+                    1u32, 23u32, 36u32, 1u32, 23u32, 37u32, 1u32, 23u32, 38u32, 1u32,
+                    23u32, 39u32, 1u32, 23u32, 40u32, 1u32, 23u32, 41u32, 1u32, 23u32,
+                    42u32, 1u32, 23u32, 0u32, 1u32, 32u32, 3u32, 1u32, 32u32, 4u32, 1u32,
                     32u32, 7u32, 1u32, 32u32, 8u32, 1u32, 32u32, 9u32, 1u32, 32u32,
                     11u32, 1u32, 32u32, 12u32, 1u32, 32u32, 13u32, 1u32, 32u32, 14u32,
                     1u32, 32u32, 16u32, 1u32, 32u32, 17u32, 1u32, 32u32, 18u32, 1u32,
-                    32u32, 19u32, 1u32, 32u32, 37u32, 1u32, 32u32, 38u32, 1u32, 32u32,
-                    39u32, 1u32, 32u32, 40u32, 1u32, 32u32, 41u32, 1u32, 32u32, 42u32,
-                    1u32, 32u32, 43u32, 1u32, 32u32, 0u32, 1u32, 33u32, 3u32, 1u32,
+                    32u32, 19u32, 1u32, 32u32, 36u32, 1u32, 32u32, 37u32, 1u32, 32u32,
+                    38u32, 1u32, 32u32, 39u32, 1u32, 32u32, 40u32, 1u32, 32u32, 41u32,
+                    1u32, 32u32, 42u32, 1u32, 32u32, 0u32, 1u32, 33u32, 3u32, 1u32,
                     33u32, 4u32, 1u32, 33u32, 7u32, 1u32, 33u32, 8u32, 1u32, 33u32, 9u32,
                     1u32, 33u32, 11u32, 1u32, 33u32, 12u32, 1u32, 33u32, 13u32, 1u32,
                     33u32, 14u32, 1u32, 33u32, 16u32, 1u32, 33u32, 17u32, 1u32, 33u32,
-                    18u32, 1u32, 33u32, 19u32, 1u32, 33u32, 37u32, 1u32, 33u32, 38u32,
-                    1u32, 33u32, 39u32, 1u32, 33u32, 40u32, 1u32, 33u32, 41u32, 1u32,
-                    33u32, 42u32, 1u32, 33u32, 43u32, 1u32, 33u32, 0u32, 1u32, 34u32,
+                    18u32, 1u32, 33u32, 19u32, 1u32, 33u32, 36u32, 1u32, 33u32, 37u32,
+                    1u32, 33u32, 38u32, 1u32, 33u32, 39u32, 1u32, 33u32, 40u32, 1u32,
+                    33u32, 41u32, 1u32, 33u32, 42u32, 1u32, 33u32, 0u32, 1u32, 34u32,
                     3u32, 1u32, 34u32, 4u32, 1u32, 34u32, 7u32, 1u32, 34u32, 8u32, 1u32,
                     34u32, 9u32, 1u32, 34u32, 11u32, 1u32, 34u32, 12u32, 1u32, 34u32,
                     13u32, 1u32, 34u32, 14u32, 1u32, 34u32, 16u32, 1u32, 34u32, 17u32,
-                    1u32, 34u32, 18u32, 1u32, 34u32, 19u32, 1u32, 34u32, 37u32, 1u32,
-                    34u32, 38u32, 1u32, 34u32, 39u32, 1u32, 34u32, 40u32, 1u32, 34u32,
-                    41u32, 1u32, 34u32, 42u32, 1u32, 34u32, 43u32, 1u32, 34u32, 0u32,
+                    1u32, 34u32, 18u32, 1u32, 34u32, 19u32, 1u32, 34u32, 36u32, 1u32,
+                    34u32, 37u32, 1u32, 34u32, 38u32, 1u32, 34u32, 39u32, 1u32, 34u32,
+                    40u32, 1u32, 34u32, 41u32, 1u32, 34u32, 42u32, 1u32, 34u32, 0u32,
                     1u32, 35u32, 3u32, 1u32, 35u32, 4u32, 1u32, 35u32, 7u32, 1u32, 35u32,
                     8u32, 1u32, 35u32, 9u32, 1u32, 35u32, 11u32, 1u32, 35u32, 12u32,
                     1u32, 35u32, 13u32, 1u32, 35u32, 14u32, 1u32, 35u32, 16u32, 1u32,
                     35u32, 17u32, 1u32, 35u32, 18u32, 1u32, 35u32, 19u32, 1u32, 35u32,
-                    37u32, 1u32, 35u32, 38u32, 1u32, 35u32, 39u32, 1u32, 35u32, 40u32,
-                    1u32, 35u32, 41u32, 1u32, 35u32, 42u32, 1u32, 35u32, 43u32, 1u32,
-                    35u32, 3u32, 1u32, 97u32, 18u32, 1u32, 97u32, 0u32, 1u32, 89u32,
-                    11u32, 1u32, 89u32, 13u32, 1u32, 89u32, 20u32, 1u32, 89u32, 0u32,
-                    1u32, 88u32, 11u32, 1u32, 88u32, 13u32, 1u32, 88u32, 20u32, 1u32,
-                    88u32, 20u32, 1u32, 93u32, 0u32, 1u32, 13u32, 11u32, 1u32, 13u32,
+                    36u32, 1u32, 35u32, 37u32, 1u32, 35u32, 38u32, 1u32, 35u32, 39u32,
+                    1u32, 35u32, 40u32, 1u32, 35u32, 41u32, 1u32, 35u32, 42u32, 1u32,
+                    35u32, 3u32, 1u32, 95u32, 18u32, 1u32, 95u32, 0u32, 1u32, 87u32,
+                    11u32, 1u32, 87u32, 13u32, 1u32, 87u32, 20u32, 1u32, 87u32, 0u32,
+                    1u32, 86u32, 11u32, 1u32, 86u32, 13u32, 1u32, 86u32, 20u32, 1u32,
+                    86u32, 20u32, 1u32, 91u32, 0u32, 1u32, 13u32, 11u32, 1u32, 13u32,
                     13u32, 1u32, 13u32, 20u32, 1u32, 13u32, 0u32, 1u32, 14u32, 11u32,
                     1u32, 14u32, 13u32, 1u32, 14u32, 20u32, 1u32, 14u32, 0u32, 1u32,
                     15u32, 11u32, 1u32, 15u32, 13u32, 1u32, 15u32, 20u32, 1u32, 15u32,
@@ -6920,199 +6797,197 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     1u32, 16u32, 13u32, 1u32, 16u32, 20u32, 1u32, 16u32, 0u32, 1u32,
                     17u32, 11u32, 1u32, 17u32, 13u32, 1u32, 17u32, 20u32, 1u32, 17u32,
                     0u32, 1u32, 18u32, 11u32, 1u32, 18u32, 13u32, 1u32, 18u32, 20u32,
-                    1u32, 18u32, 0u32, 1u32, 90u32, 11u32, 1u32, 90u32, 13u32, 1u32,
-                    90u32, 20u32, 1u32, 90u32, 20u32, 1u32, 92u32, 0u32, 1u32, 91u32,
-                    11u32, 1u32, 91u32, 13u32, 1u32, 91u32, 20u32, 1u32, 91u32, 0u32,
+                    1u32, 18u32, 0u32, 1u32, 88u32, 11u32, 1u32, 88u32, 13u32, 1u32,
+                    88u32, 20u32, 1u32, 88u32, 20u32, 1u32, 90u32, 0u32, 1u32, 89u32,
+                    11u32, 1u32, 89u32, 13u32, 1u32, 89u32, 20u32, 1u32, 89u32, 0u32,
                     1u32, 22u32, 3u32, 1u32, 22u32, 4u32, 1u32, 22u32, 7u32, 1u32, 22u32,
                     8u32, 1u32, 22u32, 9u32, 1u32, 22u32, 11u32, 1u32, 22u32, 12u32,
                     1u32, 22u32, 13u32, 1u32, 22u32, 14u32, 1u32, 22u32, 16u32, 1u32,
                     22u32, 17u32, 1u32, 22u32, 18u32, 1u32, 22u32, 19u32, 1u32, 22u32,
-                    37u32, 1u32, 22u32, 38u32, 1u32, 22u32, 39u32, 1u32, 22u32, 40u32,
-                    1u32, 22u32, 41u32, 1u32, 22u32, 42u32, 1u32, 22u32, 43u32, 1u32,
+                    36u32, 1u32, 22u32, 37u32, 1u32, 22u32, 38u32, 1u32, 22u32, 39u32,
+                    1u32, 22u32, 40u32, 1u32, 22u32, 41u32, 1u32, 22u32, 42u32, 1u32,
                     22u32, 0u32, 1u32, 29u32, 3u32, 1u32, 29u32, 4u32, 1u32, 29u32, 7u32,
                     1u32, 29u32, 8u32, 1u32, 29u32, 9u32, 1u32, 29u32, 11u32, 1u32,
                     29u32, 12u32, 1u32, 29u32, 13u32, 1u32, 29u32, 14u32, 1u32, 29u32,
                     16u32, 1u32, 29u32, 17u32, 1u32, 29u32, 18u32, 1u32, 29u32, 19u32,
-                    1u32, 29u32, 37u32, 1u32, 29u32, 38u32, 1u32, 29u32, 39u32, 1u32,
-                    29u32, 40u32, 1u32, 29u32, 41u32, 1u32, 29u32, 42u32, 1u32, 29u32,
-                    43u32, 1u32, 29u32, 0u32, 1u32, 31u32, 3u32, 1u32, 31u32, 4u32, 1u32,
+                    1u32, 29u32, 36u32, 1u32, 29u32, 37u32, 1u32, 29u32, 38u32, 1u32,
+                    29u32, 39u32, 1u32, 29u32, 40u32, 1u32, 29u32, 41u32, 1u32, 29u32,
+                    42u32, 1u32, 29u32, 0u32, 1u32, 31u32, 3u32, 1u32, 31u32, 4u32, 1u32,
                     31u32, 7u32, 1u32, 31u32, 8u32, 1u32, 31u32, 9u32, 1u32, 31u32,
                     11u32, 1u32, 31u32, 12u32, 1u32, 31u32, 13u32, 1u32, 31u32, 14u32,
                     1u32, 31u32, 16u32, 1u32, 31u32, 17u32, 1u32, 31u32, 18u32, 1u32,
-                    31u32, 19u32, 1u32, 31u32, 37u32, 1u32, 31u32, 38u32, 1u32, 31u32,
-                    39u32, 1u32, 31u32, 40u32, 1u32, 31u32, 41u32, 1u32, 31u32, 42u32,
-                    1u32, 31u32, 43u32, 1u32, 31u32, 0u32, 1u32, 94u32, 3u32, 1u32,
-                    94u32, 7u32, 1u32, 94u32, 8u32, 1u32, 94u32, 11u32, 1u32, 94u32,
-                    12u32, 1u32, 94u32, 13u32, 1u32, 94u32, 14u32, 1u32, 94u32, 17u32,
-                    1u32, 94u32, 18u32, 1u32, 94u32, 19u32, 1u32, 94u32, 0u32, 1u32,
+                    31u32, 19u32, 1u32, 31u32, 36u32, 1u32, 31u32, 37u32, 1u32, 31u32,
+                    38u32, 1u32, 31u32, 39u32, 1u32, 31u32, 40u32, 1u32, 31u32, 41u32,
+                    1u32, 31u32, 42u32, 1u32, 31u32, 0u32, 1u32, 92u32, 3u32, 1u32,
+                    92u32, 7u32, 1u32, 92u32, 8u32, 1u32, 92u32, 11u32, 1u32, 92u32,
+                    12u32, 1u32, 92u32, 13u32, 1u32, 92u32, 14u32, 1u32, 92u32, 17u32,
+                    1u32, 92u32, 18u32, 1u32, 92u32, 19u32, 1u32, 92u32, 0u32, 1u32,
                     25u32, 3u32, 1u32, 25u32, 4u32, 1u32, 25u32, 7u32, 1u32, 25u32, 8u32,
                     1u32, 25u32, 9u32, 1u32, 25u32, 11u32, 1u32, 25u32, 12u32, 1u32,
                     25u32, 13u32, 1u32, 25u32, 14u32, 1u32, 25u32, 16u32, 1u32, 25u32,
-                    17u32, 1u32, 25u32, 18u32, 1u32, 25u32, 19u32, 1u32, 25u32, 37u32,
-                    1u32, 25u32, 38u32, 1u32, 25u32, 39u32, 1u32, 25u32, 40u32, 1u32,
-                    25u32, 41u32, 1u32, 25u32, 42u32, 1u32, 25u32, 43u32, 1u32, 25u32,
+                    17u32, 1u32, 25u32, 18u32, 1u32, 25u32, 19u32, 1u32, 25u32, 36u32,
+                    1u32, 25u32, 37u32, 1u32, 25u32, 38u32, 1u32, 25u32, 39u32, 1u32,
+                    25u32, 40u32, 1u32, 25u32, 41u32, 1u32, 25u32, 42u32, 1u32, 25u32,
                     0u32, 1u32, 26u32, 3u32, 1u32, 26u32, 4u32, 1u32, 26u32, 7u32, 1u32,
                     26u32, 8u32, 1u32, 26u32, 9u32, 1u32, 26u32, 11u32, 1u32, 26u32,
                     12u32, 1u32, 26u32, 13u32, 1u32, 26u32, 14u32, 1u32, 26u32, 16u32,
                     1u32, 26u32, 17u32, 1u32, 26u32, 18u32, 1u32, 26u32, 19u32, 1u32,
-                    26u32, 37u32, 1u32, 26u32, 38u32, 1u32, 26u32, 39u32, 1u32, 26u32,
-                    40u32, 1u32, 26u32, 41u32, 1u32, 26u32, 42u32, 1u32, 26u32, 43u32,
+                    26u32, 36u32, 1u32, 26u32, 37u32, 1u32, 26u32, 38u32, 1u32, 26u32,
+                    39u32, 1u32, 26u32, 40u32, 1u32, 26u32, 41u32, 1u32, 26u32, 42u32,
                     1u32, 26u32, 0u32, 1u32, 27u32, 3u32, 1u32, 27u32, 4u32, 1u32, 27u32,
                     7u32, 1u32, 27u32, 8u32, 1u32, 27u32, 9u32, 1u32, 27u32, 11u32, 1u32,
                     27u32, 12u32, 1u32, 27u32, 13u32, 1u32, 27u32, 14u32, 1u32, 27u32,
                     16u32, 1u32, 27u32, 17u32, 1u32, 27u32, 18u32, 1u32, 27u32, 19u32,
-                    1u32, 27u32, 37u32, 1u32, 27u32, 38u32, 1u32, 27u32, 39u32, 1u32,
-                    27u32, 40u32, 1u32, 27u32, 41u32, 1u32, 27u32, 42u32, 1u32, 27u32,
-                    43u32, 1u32, 27u32, 0u32, 1u32, 28u32, 3u32, 1u32, 28u32, 4u32, 1u32,
+                    1u32, 27u32, 36u32, 1u32, 27u32, 37u32, 1u32, 27u32, 38u32, 1u32,
+                    27u32, 39u32, 1u32, 27u32, 40u32, 1u32, 27u32, 41u32, 1u32, 27u32,
+                    42u32, 1u32, 27u32, 0u32, 1u32, 28u32, 3u32, 1u32, 28u32, 4u32, 1u32,
                     28u32, 7u32, 1u32, 28u32, 8u32, 1u32, 28u32, 9u32, 1u32, 28u32,
                     11u32, 1u32, 28u32, 12u32, 1u32, 28u32, 13u32, 1u32, 28u32, 14u32,
                     1u32, 28u32, 16u32, 1u32, 28u32, 17u32, 1u32, 28u32, 18u32, 1u32,
-                    28u32, 19u32, 1u32, 28u32, 37u32, 1u32, 28u32, 38u32, 1u32, 28u32,
-                    39u32, 1u32, 28u32, 40u32, 1u32, 28u32, 41u32, 1u32, 28u32, 42u32,
-                    1u32, 28u32, 43u32, 1u32, 28u32, 0u32, 1u32, 36u32, 3u32, 1u32,
+                    28u32, 19u32, 1u32, 28u32, 36u32, 1u32, 28u32, 37u32, 1u32, 28u32,
+                    38u32, 1u32, 28u32, 39u32, 1u32, 28u32, 40u32, 1u32, 28u32, 41u32,
+                    1u32, 28u32, 42u32, 1u32, 28u32, 0u32, 1u32, 36u32, 3u32, 1u32,
                     36u32, 4u32, 1u32, 36u32, 7u32, 1u32, 36u32, 8u32, 1u32, 36u32, 9u32,
                     1u32, 36u32, 11u32, 1u32, 36u32, 12u32, 1u32, 36u32, 13u32, 1u32,
                     36u32, 14u32, 1u32, 36u32, 16u32, 1u32, 36u32, 17u32, 1u32, 36u32,
-                    18u32, 1u32, 36u32, 19u32, 1u32, 36u32, 37u32, 1u32, 36u32, 42u32,
-                    1u32, 36u32, 43u32, 1u32, 36u32, 3u32, 1u32, 96u32, 18u32, 1u32,
-                    96u32, 0u32, 1u32, 95u32, 3u32, 1u32, 95u32, 7u32, 1u32, 95u32, 8u32,
-                    1u32, 95u32, 11u32, 1u32, 95u32, 12u32, 1u32, 95u32, 13u32, 1u32,
-                    95u32, 14u32, 1u32, 95u32, 17u32, 1u32, 95u32, 18u32, 1u32, 95u32,
-                    19u32, 1u32, 95u32, 3u32, 1u32, 98u32, 18u32, 1u32, 98u32, 3u32,
-                    1u32, 97u32, 18u32, 1u32, 97u32, 3u32, 1u32, 99u32, 18u32, 1u32,
-                    99u32, 0u32, 1u32, 30u32, 3u32, 1u32, 30u32, 4u32, 1u32, 30u32, 7u32,
+                    18u32, 1u32, 36u32, 19u32, 1u32, 36u32, 36u32, 1u32, 36u32, 41u32,
+                    1u32, 36u32, 42u32, 1u32, 36u32, 3u32, 1u32, 94u32, 18u32, 1u32,
+                    94u32, 0u32, 1u32, 93u32, 3u32, 1u32, 93u32, 7u32, 1u32, 93u32, 8u32,
+                    1u32, 93u32, 11u32, 1u32, 93u32, 12u32, 1u32, 93u32, 13u32, 1u32,
+                    93u32, 14u32, 1u32, 93u32, 17u32, 1u32, 93u32, 18u32, 1u32, 93u32,
+                    19u32, 1u32, 93u32, 3u32, 1u32, 96u32, 18u32, 1u32, 96u32, 3u32,
+                    1u32, 95u32, 18u32, 1u32, 95u32, 3u32, 1u32, 97u32, 18u32, 1u32,
+                    97u32, 0u32, 1u32, 30u32, 3u32, 1u32, 30u32, 4u32, 1u32, 30u32, 7u32,
                     1u32, 30u32, 8u32, 1u32, 30u32, 9u32, 1u32, 30u32, 11u32, 1u32,
                     30u32, 12u32, 1u32, 30u32, 13u32, 1u32, 30u32, 14u32, 1u32, 30u32,
                     16u32, 1u32, 30u32, 17u32, 1u32, 30u32, 18u32, 1u32, 30u32, 19u32,
-                    1u32, 30u32, 37u32, 1u32, 30u32, 38u32, 1u32, 30u32, 39u32, 1u32,
-                    30u32, 40u32, 1u32, 30u32, 41u32, 1u32, 30u32, 42u32, 1u32, 30u32,
-                    43u32, 1u32, 30u32, 18u32, 1u32, 101u32, 18u32, 1u32, 100u32, 0u32,
+                    1u32, 30u32, 36u32, 1u32, 30u32, 37u32, 1u32, 30u32, 38u32, 1u32,
+                    30u32, 39u32, 1u32, 30u32, 40u32, 1u32, 30u32, 41u32, 1u32, 30u32,
+                    42u32, 1u32, 30u32, 18u32, 1u32, 99u32, 18u32, 1u32, 98u32, 0u32,
                     1u32, 38u32, 3u32, 1u32, 38u32, 4u32, 1u32, 38u32, 7u32, 1u32, 38u32,
                     8u32, 1u32, 38u32, 9u32, 1u32, 38u32, 11u32, 1u32, 38u32, 12u32,
                     1u32, 38u32, 13u32, 1u32, 38u32, 14u32, 1u32, 38u32, 16u32, 1u32,
                     38u32, 17u32, 1u32, 38u32, 18u32, 1u32, 38u32, 19u32, 1u32, 38u32,
-                    37u32, 1u32, 38u32, 38u32, 1u32, 38u32, 39u32, 1u32, 38u32, 40u32,
-                    1u32, 38u32, 41u32, 1u32, 38u32, 42u32, 1u32, 38u32, 43u32, 1u32,
+                    36u32, 1u32, 38u32, 37u32, 1u32, 38u32, 38u32, 1u32, 38u32, 39u32,
+                    1u32, 38u32, 40u32, 1u32, 38u32, 41u32, 1u32, 38u32, 42u32, 1u32,
                     38u32, 0u32, 1u32, 39u32, 3u32, 1u32, 39u32, 4u32, 1u32, 39u32, 7u32,
                     1u32, 39u32, 8u32, 1u32, 39u32, 9u32, 1u32, 39u32, 11u32, 1u32,
                     39u32, 12u32, 1u32, 39u32, 13u32, 1u32, 39u32, 14u32, 1u32, 39u32,
                     16u32, 1u32, 39u32, 17u32, 1u32, 39u32, 18u32, 1u32, 39u32, 19u32,
-                    1u32, 39u32, 37u32, 1u32, 39u32, 38u32, 1u32, 39u32, 39u32, 1u32,
-                    39u32, 40u32, 1u32, 39u32, 41u32, 1u32, 39u32, 42u32, 1u32, 39u32,
-                    43u32, 1u32, 39u32, 0u32, 1u32, 41u32, 3u32, 1u32, 41u32, 4u32, 1u32,
+                    1u32, 39u32, 36u32, 1u32, 39u32, 37u32, 1u32, 39u32, 38u32, 1u32,
+                    39u32, 39u32, 1u32, 39u32, 40u32, 1u32, 39u32, 41u32, 1u32, 39u32,
+                    42u32, 1u32, 39u32, 0u32, 1u32, 41u32, 3u32, 1u32, 41u32, 4u32, 1u32,
                     41u32, 7u32, 1u32, 41u32, 8u32, 1u32, 41u32, 9u32, 1u32, 41u32,
                     11u32, 1u32, 41u32, 12u32, 1u32, 41u32, 13u32, 1u32, 41u32, 14u32,
                     1u32, 41u32, 16u32, 1u32, 41u32, 17u32, 1u32, 41u32, 18u32, 1u32,
-                    41u32, 19u32, 1u32, 41u32, 37u32, 1u32, 41u32, 38u32, 1u32, 41u32,
-                    39u32, 1u32, 41u32, 40u32, 1u32, 41u32, 41u32, 1u32, 41u32, 42u32,
-                    1u32, 41u32, 43u32, 1u32, 41u32, 0u32, 1u32, 40u32, 3u32, 1u32,
+                    41u32, 19u32, 1u32, 41u32, 36u32, 1u32, 41u32, 37u32, 1u32, 41u32,
+                    38u32, 1u32, 41u32, 39u32, 1u32, 41u32, 40u32, 1u32, 41u32, 41u32,
+                    1u32, 41u32, 42u32, 1u32, 41u32, 0u32, 1u32, 40u32, 3u32, 1u32,
                     40u32, 4u32, 1u32, 40u32, 7u32, 1u32, 40u32, 8u32, 1u32, 40u32, 9u32,
                     1u32, 40u32, 11u32, 1u32, 40u32, 12u32, 1u32, 40u32, 13u32, 1u32,
                     40u32, 14u32, 1u32, 40u32, 16u32, 1u32, 40u32, 17u32, 1u32, 40u32,
-                    18u32, 1u32, 40u32, 19u32, 1u32, 40u32, 37u32, 1u32, 40u32, 38u32,
-                    1u32, 40u32, 39u32, 1u32, 40u32, 40u32, 1u32, 40u32, 41u32, 1u32,
-                    40u32, 42u32, 1u32, 40u32, 43u32, 1u32, 40u32, 0u32, 1u32, 37u32,
+                    18u32, 1u32, 40u32, 19u32, 1u32, 40u32, 36u32, 1u32, 40u32, 37u32,
+                    1u32, 40u32, 38u32, 1u32, 40u32, 39u32, 1u32, 40u32, 40u32, 1u32,
+                    40u32, 41u32, 1u32, 40u32, 42u32, 1u32, 40u32, 0u32, 1u32, 37u32,
                     3u32, 1u32, 37u32, 4u32, 1u32, 37u32, 7u32, 1u32, 37u32, 8u32, 1u32,
                     37u32, 9u32, 1u32, 37u32, 11u32, 1u32, 37u32, 12u32, 1u32, 37u32,
                     13u32, 1u32, 37u32, 14u32, 1u32, 37u32, 16u32, 1u32, 37u32, 17u32,
-                    1u32, 37u32, 18u32, 1u32, 37u32, 19u32, 1u32, 37u32, 37u32, 1u32,
-                    37u32, 38u32, 1u32, 37u32, 39u32, 1u32, 37u32, 40u32, 1u32, 37u32,
-                    41u32, 1u32, 37u32, 42u32, 1u32, 37u32, 43u32, 1u32, 37u32, 0u32,
+                    1u32, 37u32, 18u32, 1u32, 37u32, 19u32, 1u32, 37u32, 36u32, 1u32,
+                    37u32, 37u32, 1u32, 37u32, 38u32, 1u32, 37u32, 39u32, 1u32, 37u32,
+                    40u32, 1u32, 37u32, 41u32, 1u32, 37u32, 42u32, 1u32, 37u32, 0u32,
                     1u32, 12u32, 3u32, 1u32, 12u32, 4u32, 1u32, 12u32, 7u32, 1u32, 12u32,
                     8u32, 1u32, 12u32, 11u32, 1u32, 12u32, 12u32, 1u32, 12u32, 13u32,
                     1u32, 12u32, 14u32, 1u32, 12u32, 16u32, 1u32, 12u32, 17u32, 1u32,
-                    12u32, 19u32, 1u32, 12u32, 37u32, 1u32, 12u32, 3u32, 1u32, 83u32,
-                    4u32, 1u32, 83u32, 16u32, 1u32, 83u32, 37u32, 1u32, 83u32, 3u32,
-                    1u32, 3u32, 37u32, 1u32, 3u32, 0u32, 1u32, 80u32, 3u32, 1u32, 80u32,
-                    4u32, 1u32, 80u32, 7u32, 1u32, 80u32, 8u32, 1u32, 80u32, 11u32, 1u32,
-                    80u32, 12u32, 1u32, 80u32, 13u32, 1u32, 80u32, 14u32, 1u32, 80u32,
-                    16u32, 1u32, 80u32, 17u32, 1u32, 80u32, 19u32, 1u32, 80u32, 37u32,
-                    1u32, 80u32, 0u32, 1u32, 11u32, 3u32, 1u32, 11u32, 4u32, 1u32, 11u32,
+                    12u32, 19u32, 1u32, 12u32, 36u32, 1u32, 12u32, 3u32, 1u32, 81u32,
+                    4u32, 1u32, 81u32, 16u32, 1u32, 81u32, 36u32, 1u32, 81u32, 3u32,
+                    1u32, 3u32, 36u32, 1u32, 3u32, 0u32, 1u32, 78u32, 3u32, 1u32, 78u32,
+                    4u32, 1u32, 78u32, 7u32, 1u32, 78u32, 8u32, 1u32, 78u32, 11u32, 1u32,
+                    78u32, 12u32, 1u32, 78u32, 13u32, 1u32, 78u32, 14u32, 1u32, 78u32,
+                    16u32, 1u32, 78u32, 17u32, 1u32, 78u32, 19u32, 1u32, 78u32, 36u32,
+                    1u32, 78u32, 0u32, 1u32, 11u32, 3u32, 1u32, 11u32, 4u32, 1u32, 11u32,
                     7u32, 1u32, 11u32, 8u32, 1u32, 11u32, 11u32, 1u32, 11u32, 12u32,
                     1u32, 11u32, 13u32, 1u32, 11u32, 14u32, 1u32, 11u32, 16u32, 1u32,
-                    11u32, 17u32, 1u32, 11u32, 19u32, 1u32, 11u32, 37u32, 1u32, 11u32,
-                    3u32, 1u32, 82u32, 4u32, 1u32, 82u32, 16u32, 1u32, 82u32, 37u32,
-                    1u32, 82u32, 0u32, 1u32, 81u32, 3u32, 1u32, 81u32, 4u32, 1u32, 81u32,
-                    7u32, 1u32, 81u32, 8u32, 1u32, 81u32, 11u32, 1u32, 81u32, 12u32,
-                    1u32, 81u32, 13u32, 1u32, 81u32, 14u32, 1u32, 81u32, 16u32, 1u32,
-                    81u32, 17u32, 1u32, 81u32, 19u32, 1u32, 81u32, 37u32, 1u32, 81u32,
-                    3u32, 1u32, 87u32, 16u32, 1u32, 87u32, 37u32, 1u32, 87u32, 0u32,
+                    11u32, 17u32, 1u32, 11u32, 19u32, 1u32, 11u32, 36u32, 1u32, 11u32,
+                    3u32, 1u32, 80u32, 4u32, 1u32, 80u32, 16u32, 1u32, 80u32, 36u32,
+                    1u32, 80u32, 0u32, 1u32, 79u32, 3u32, 1u32, 79u32, 4u32, 1u32, 79u32,
+                    7u32, 1u32, 79u32, 8u32, 1u32, 79u32, 11u32, 1u32, 79u32, 12u32,
+                    1u32, 79u32, 13u32, 1u32, 79u32, 14u32, 1u32, 79u32, 16u32, 1u32,
+                    79u32, 17u32, 1u32, 79u32, 19u32, 1u32, 79u32, 36u32, 1u32, 79u32,
+                    3u32, 1u32, 85u32, 16u32, 1u32, 85u32, 36u32, 1u32, 85u32, 0u32,
                     1u32, 44u32, 3u32, 1u32, 44u32, 4u32, 1u32, 44u32, 11u32, 1u32,
-                    44u32, 13u32, 1u32, 44u32, 16u32, 1u32, 44u32, 37u32, 1u32, 44u32,
+                    44u32, 13u32, 1u32, 44u32, 16u32, 1u32, 44u32, 36u32, 1u32, 44u32,
                     0u32, 1u32, 45u32, 3u32, 1u32, 45u32, 4u32, 1u32, 45u32, 11u32, 1u32,
-                    45u32, 13u32, 1u32, 45u32, 16u32, 1u32, 45u32, 37u32, 1u32, 45u32,
+                    45u32, 13u32, 1u32, 45u32, 16u32, 1u32, 45u32, 36u32, 1u32, 45u32,
                     0u32, 1u32, 46u32, 3u32, 1u32, 46u32, 4u32, 1u32, 46u32, 11u32, 1u32,
-                    46u32, 13u32, 1u32, 46u32, 16u32, 1u32, 46u32, 37u32, 1u32, 46u32,
-                    3u32, 1u32, 7u32, 4u32, 1u32, 7u32, 16u32, 1u32, 7u32, 37u32, 1u32,
-                    7u32, 3u32, 1u32, 6u32, 4u32, 1u32, 6u32, 16u32, 1u32, 6u32, 37u32,
+                    46u32, 13u32, 1u32, 46u32, 16u32, 1u32, 46u32, 36u32, 1u32, 46u32,
+                    3u32, 1u32, 7u32, 4u32, 1u32, 7u32, 16u32, 1u32, 7u32, 36u32, 1u32,
+                    7u32, 3u32, 1u32, 6u32, 4u32, 1u32, 6u32, 16u32, 1u32, 6u32, 36u32,
                     1u32, 6u32, 3u32, 1u32, 8u32, 4u32, 1u32, 8u32, 16u32, 1u32, 8u32,
-                    37u32, 1u32, 8u32, 3u32, 1u32, 9u32, 4u32, 1u32, 9u32, 16u32, 1u32,
-                    9u32, 37u32, 1u32, 9u32, 3u32, 1u32, 10u32, 4u32, 1u32, 10u32, 16u32,
-                    1u32, 10u32, 37u32, 1u32, 10u32, 3u32, 1u32, 84u32, 4u32, 1u32,
-                    84u32, 16u32, 1u32, 84u32, 37u32, 1u32, 84u32, 3u32, 1u32, 86u32,
-                    16u32, 1u32, 86u32, 37u32, 1u32, 86u32, 3u32, 1u32, 85u32, 4u32,
-                    1u32, 85u32, 16u32, 1u32, 85u32, 37u32, 1u32, 85u32, 3u32, 1u32,
-                    43u32, 37u32, 1u32, 43u32, 3u32, 1u32, 42u32, 37u32, 1u32, 42u32,
-                    3u32, 1u32, 5u32, 37u32, 1u32, 5u32, 0u32, 1u32, 0u32, 4u32, 1u32,
-                    0u32, 44u32, 1u32, 0u32, 3u32, 1u32, 4u32, 37u32, 1u32, 4u32, 0u32,
-                    1u32, 57u32, 4u32, 1u32, 57u32, 44u32, 1u32, 57u32, 0u32, 1u32,
-                    146u32, 11u32, 1u32, 146u32, 13u32, 1u32, 146u32, 37u32, 1u32,
-                    146u32, 0u32, 1u32, 56u32, 4u32, 1u32, 56u32, 44u32, 1u32, 56u32,
-                    0u32, 1u32, 147u32, 11u32, 1u32, 147u32, 13u32, 1u32, 147u32, 37u32,
-                    1u32, 147u32, 0u32, 1u32, 59u32, 4u32, 1u32, 59u32, 44u32, 1u32,
-                    59u32, 0u32, 1u32, 58u32, 4u32, 1u32, 58u32, 44u32, 1u32, 58u32,
-                    0u32, 1u32, 48u32, 4u32, 1u32, 48u32, 44u32, 1u32, 48u32, 0u32, 1u32,
-                    144u32, 1u32, 1u32, 144u32, 2u32, 1u32, 144u32, 3u32, 1u32, 144u32,
-                    4u32, 1u32, 144u32, 5u32, 1u32, 144u32, 6u32, 1u32, 144u32, 7u32,
-                    1u32, 144u32, 8u32, 1u32, 144u32, 9u32, 1u32, 144u32, 10u32, 1u32,
-                    144u32, 11u32, 1u32, 144u32, 12u32, 1u32, 144u32, 13u32, 1u32,
-                    144u32, 14u32, 1u32, 144u32, 15u32, 1u32, 144u32, 16u32, 1u32,
-                    144u32, 17u32, 1u32, 144u32, 18u32, 1u32, 144u32, 19u32, 1u32,
-                    144u32, 20u32, 1u32, 144u32, 21u32, 1u32, 144u32, 22u32, 1u32,
-                    144u32, 23u32, 1u32, 144u32, 24u32, 1u32, 144u32, 25u32, 1u32,
-                    144u32, 26u32, 1u32, 144u32, 27u32, 1u32, 144u32, 28u32, 1u32,
-                    144u32, 29u32, 1u32, 144u32, 30u32, 1u32, 144u32, 31u32, 1u32,
-                    144u32, 32u32, 1u32, 144u32, 33u32, 1u32, 144u32, 34u32, 1u32,
-                    144u32, 35u32, 1u32, 144u32, 36u32, 1u32, 144u32, 37u32, 1u32,
-                    144u32, 38u32, 1u32, 144u32, 39u32, 1u32, 144u32, 40u32, 1u32,
-                    144u32, 41u32, 1u32, 144u32, 42u32, 1u32, 144u32, 0u32, 1u32, 47u32,
-                    4u32, 1u32, 47u32, 44u32, 1u32, 47u32, 0u32, 1u32, 145u32, 1u32,
-                    1u32, 145u32, 2u32, 1u32, 145u32, 3u32, 1u32, 145u32, 4u32, 1u32,
-                    145u32, 5u32, 1u32, 145u32, 6u32, 1u32, 145u32, 7u32, 1u32, 145u32,
-                    8u32, 1u32, 145u32, 9u32, 1u32, 145u32, 10u32, 1u32, 145u32, 11u32,
-                    1u32, 145u32, 12u32, 1u32, 145u32, 13u32, 1u32, 145u32, 14u32, 1u32,
-                    145u32, 15u32, 1u32, 145u32, 16u32, 1u32, 145u32, 17u32, 1u32,
-                    145u32, 18u32, 1u32, 145u32, 19u32, 1u32, 145u32, 20u32, 1u32,
-                    145u32, 21u32, 1u32, 145u32, 22u32, 1u32, 145u32, 23u32, 1u32,
-                    145u32, 24u32, 1u32, 145u32, 25u32, 1u32, 145u32, 26u32, 1u32,
-                    145u32, 27u32, 1u32, 145u32, 28u32, 1u32, 145u32, 29u32, 1u32,
-                    145u32, 30u32, 1u32, 145u32, 31u32, 1u32, 145u32, 32u32, 1u32,
-                    145u32, 33u32, 1u32, 145u32, 34u32, 1u32, 145u32, 35u32, 1u32,
-                    145u32, 36u32, 1u32, 145u32, 37u32, 1u32, 145u32, 38u32, 1u32,
-                    145u32, 39u32, 1u32, 145u32, 40u32, 1u32, 145u32, 41u32, 1u32,
-                    145u32, 42u32, 1u32, 145u32, 0u32, 1u32, 49u32, 4u32, 1u32, 49u32,
-                    44u32, 1u32, 49u32, 0u32, 1u32, 50u32, 4u32, 1u32, 50u32, 44u32,
-                    1u32, 50u32, 0u32, 1u32, 51u32, 4u32, 1u32, 51u32, 44u32, 1u32,
-                    51u32, 0u32, 1u32, 53u32, 4u32, 1u32, 53u32, 44u32, 1u32, 53u32,
-                    0u32, 1u32, 52u32, 4u32, 1u32, 52u32, 44u32, 1u32, 52u32, 0u32, 1u32,
-                    55u32, 4u32, 1u32, 55u32, 44u32, 1u32, 55u32, 0u32, 1u32, 54u32,
-                    4u32, 1u32, 54u32, 44u32, 1u32, 54u32, 0u32, 1u32, 63u32, 4u32, 1u32,
-                    63u32, 44u32, 1u32, 63u32, 0u32, 1u32, 62u32, 4u32, 1u32, 62u32,
-                    44u32, 1u32, 62u32, 0u32, 1u32, 65u32, 4u32, 1u32, 65u32, 44u32,
-                    1u32, 65u32, 0u32, 1u32, 64u32, 4u32, 1u32, 64u32, 44u32, 1u32,
-                    64u32, 0u32, 1u32, 68u32, 4u32, 1u32, 68u32, 44u32, 1u32, 68u32,
-                    0u32, 1u32, 69u32, 4u32, 1u32, 69u32, 44u32, 1u32, 69u32, 0u32, 1u32,
-                    66u32, 4u32, 1u32, 66u32, 44u32, 1u32, 66u32, 0u32, 1u32, 67u32,
-                    4u32, 1u32, 67u32, 44u32, 1u32, 67u32, 0u32, 1u32, 61u32, 4u32, 1u32,
-                    61u32, 44u32, 1u32, 61u32, 0u32, 1u32, 60u32, 4u32, 1u32, 60u32,
-                    44u32, 1u32, 60u32, 0u32, 1u32, 70u32, 4u32, 1u32, 70u32, 44u32,
-                    1u32, 70u32, 0u32, 1u32, 71u32, 4u32, 1u32, 71u32, 44u32, 1u32,
-                    71u32, 0u32, 1u32, 72u32, 4u32, 1u32, 72u32, 44u32, 1u32, 72u32,
-                    0u32, 1u32, 73u32, 4u32, 1u32, 73u32, 44u32, 1u32, 73u32, 0u32, 1u32,
-                    75u32, 4u32, 1u32, 75u32, 44u32, 1u32, 75u32, 0u32, 1u32, 74u32,
-                    4u32, 1u32, 74u32, 44u32, 1u32, 74u32, 0u32, 1u32, 76u32, 4u32, 1u32,
-                    76u32, 44u32, 1u32, 76u32, 0u32, 1u32, 77u32, 4u32, 1u32, 77u32,
-                    44u32, 1u32, 77u32, 44u32, 1u32, 148u32, 44u32, 1u32, 149u32,
+                    36u32, 1u32, 8u32, 3u32, 1u32, 9u32, 4u32, 1u32, 9u32, 16u32, 1u32,
+                    9u32, 36u32, 1u32, 9u32, 3u32, 1u32, 10u32, 4u32, 1u32, 10u32, 16u32,
+                    1u32, 10u32, 36u32, 1u32, 10u32, 3u32, 1u32, 82u32, 4u32, 1u32,
+                    82u32, 16u32, 1u32, 82u32, 36u32, 1u32, 82u32, 3u32, 1u32, 84u32,
+                    16u32, 1u32, 84u32, 36u32, 1u32, 84u32, 3u32, 1u32, 83u32, 4u32,
+                    1u32, 83u32, 16u32, 1u32, 83u32, 36u32, 1u32, 83u32, 3u32, 1u32,
+                    43u32, 36u32, 1u32, 43u32, 3u32, 1u32, 42u32, 36u32, 1u32, 42u32,
+                    3u32, 1u32, 5u32, 36u32, 1u32, 5u32, 0u32, 1u32, 0u32, 4u32, 1u32,
+                    0u32, 43u32, 1u32, 0u32, 3u32, 1u32, 4u32, 36u32, 1u32, 4u32, 0u32,
+                    1u32, 57u32, 4u32, 1u32, 57u32, 43u32, 1u32, 57u32, 0u32, 1u32,
+                    143u32, 11u32, 1u32, 143u32, 13u32, 1u32, 143u32, 36u32, 1u32,
+                    143u32, 0u32, 1u32, 56u32, 4u32, 1u32, 56u32, 43u32, 1u32, 56u32,
+                    0u32, 1u32, 144u32, 11u32, 1u32, 144u32, 13u32, 1u32, 144u32, 36u32,
+                    1u32, 144u32, 0u32, 1u32, 59u32, 4u32, 1u32, 59u32, 43u32, 1u32,
+                    59u32, 0u32, 1u32, 58u32, 4u32, 1u32, 58u32, 43u32, 1u32, 58u32,
+                    0u32, 1u32, 48u32, 4u32, 1u32, 48u32, 43u32, 1u32, 48u32, 0u32, 1u32,
+                    141u32, 1u32, 1u32, 141u32, 2u32, 1u32, 141u32, 3u32, 1u32, 141u32,
+                    4u32, 1u32, 141u32, 5u32, 1u32, 141u32, 6u32, 1u32, 141u32, 7u32,
+                    1u32, 141u32, 8u32, 1u32, 141u32, 9u32, 1u32, 141u32, 10u32, 1u32,
+                    141u32, 11u32, 1u32, 141u32, 12u32, 1u32, 141u32, 13u32, 1u32,
+                    141u32, 14u32, 1u32, 141u32, 15u32, 1u32, 141u32, 16u32, 1u32,
+                    141u32, 17u32, 1u32, 141u32, 18u32, 1u32, 141u32, 19u32, 1u32,
+                    141u32, 20u32, 1u32, 141u32, 21u32, 1u32, 141u32, 22u32, 1u32,
+                    141u32, 23u32, 1u32, 141u32, 24u32, 1u32, 141u32, 25u32, 1u32,
+                    141u32, 26u32, 1u32, 141u32, 27u32, 1u32, 141u32, 28u32, 1u32,
+                    141u32, 29u32, 1u32, 141u32, 30u32, 1u32, 141u32, 31u32, 1u32,
+                    141u32, 32u32, 1u32, 141u32, 33u32, 1u32, 141u32, 34u32, 1u32,
+                    141u32, 35u32, 1u32, 141u32, 36u32, 1u32, 141u32, 37u32, 1u32,
+                    141u32, 38u32, 1u32, 141u32, 39u32, 1u32, 141u32, 40u32, 1u32,
+                    141u32, 41u32, 1u32, 141u32, 0u32, 1u32, 47u32, 4u32, 1u32, 47u32,
+                    43u32, 1u32, 47u32, 0u32, 1u32, 142u32, 1u32, 1u32, 142u32, 2u32,
+                    1u32, 142u32, 3u32, 1u32, 142u32, 4u32, 1u32, 142u32, 5u32, 1u32,
+                    142u32, 6u32, 1u32, 142u32, 7u32, 1u32, 142u32, 8u32, 1u32, 142u32,
+                    9u32, 1u32, 142u32, 10u32, 1u32, 142u32, 11u32, 1u32, 142u32, 12u32,
+                    1u32, 142u32, 13u32, 1u32, 142u32, 14u32, 1u32, 142u32, 15u32, 1u32,
+                    142u32, 16u32, 1u32, 142u32, 17u32, 1u32, 142u32, 18u32, 1u32,
+                    142u32, 19u32, 1u32, 142u32, 20u32, 1u32, 142u32, 21u32, 1u32,
+                    142u32, 22u32, 1u32, 142u32, 23u32, 1u32, 142u32, 24u32, 1u32,
+                    142u32, 25u32, 1u32, 142u32, 26u32, 1u32, 142u32, 27u32, 1u32,
+                    142u32, 28u32, 1u32, 142u32, 29u32, 1u32, 142u32, 30u32, 1u32,
+                    142u32, 31u32, 1u32, 142u32, 32u32, 1u32, 142u32, 33u32, 1u32,
+                    142u32, 34u32, 1u32, 142u32, 35u32, 1u32, 142u32, 36u32, 1u32,
+                    142u32, 37u32, 1u32, 142u32, 38u32, 1u32, 142u32, 39u32, 1u32,
+                    142u32, 40u32, 1u32, 142u32, 41u32, 1u32, 142u32, 0u32, 1u32, 49u32,
+                    4u32, 1u32, 49u32, 43u32, 1u32, 49u32, 0u32, 1u32, 50u32, 4u32, 1u32,
+                    50u32, 43u32, 1u32, 50u32, 0u32, 1u32, 51u32, 4u32, 1u32, 51u32,
+                    43u32, 1u32, 51u32, 0u32, 1u32, 53u32, 4u32, 1u32, 53u32, 43u32,
+                    1u32, 53u32, 0u32, 1u32, 52u32, 4u32, 1u32, 52u32, 43u32, 1u32,
+                    52u32, 0u32, 1u32, 55u32, 4u32, 1u32, 55u32, 43u32, 1u32, 55u32,
+                    0u32, 1u32, 54u32, 4u32, 1u32, 54u32, 43u32, 1u32, 54u32, 0u32, 1u32,
+                    63u32, 4u32, 1u32, 63u32, 43u32, 1u32, 63u32, 0u32, 1u32, 62u32,
+                    4u32, 1u32, 62u32, 43u32, 1u32, 62u32, 0u32, 1u32, 65u32, 4u32, 1u32,
+                    65u32, 43u32, 1u32, 65u32, 0u32, 1u32, 64u32, 4u32, 1u32, 64u32,
+                    43u32, 1u32, 64u32, 0u32, 1u32, 68u32, 4u32, 1u32, 68u32, 43u32,
+                    1u32, 68u32, 0u32, 1u32, 69u32, 4u32, 1u32, 69u32, 43u32, 1u32,
+                    69u32, 0u32, 1u32, 66u32, 4u32, 1u32, 66u32, 43u32, 1u32, 66u32,
+                    0u32, 1u32, 67u32, 4u32, 1u32, 67u32, 43u32, 1u32, 67u32, 0u32, 1u32,
+                    61u32, 4u32, 1u32, 61u32, 43u32, 1u32, 61u32, 0u32, 1u32, 60u32,
+                    4u32, 1u32, 60u32, 43u32, 1u32, 60u32, 0u32, 1u32, 70u32, 4u32, 1u32,
+                    70u32, 43u32, 1u32, 70u32, 0u32, 1u32, 71u32, 4u32, 1u32, 71u32,
+                    43u32, 1u32, 71u32, 0u32, 1u32, 73u32, 4u32, 1u32, 73u32, 43u32,
+                    1u32, 73u32, 0u32, 1u32, 72u32, 4u32, 1u32, 72u32, 43u32, 1u32,
+                    72u32, 0u32, 1u32, 74u32, 4u32, 1u32, 74u32, 43u32, 1u32, 74u32,
+                    0u32, 1u32, 75u32, 4u32, 1u32, 75u32, 43u32, 1u32, 75u32, 43u32,
+                    1u32, 145u32, 43u32, 1u32, 146u32,
                 ];
                 static REDUCE_OFFSETS: &[u32] = &[
                     0u32, 0u32, 3u32, 6u32, 6u32, 18u32, 72u32, 72u32, 135u32, 198u32,
@@ -7130,15 +7005,14 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     1941u32, 1947u32, 1953u32, 1962u32, 1968u32, 1968u32, 1968u32,
                     1968u32, 1977u32, 1989u32, 1989u32, 1998u32, 2010u32, 2010u32,
                     2010u32, 2019u32, 2019u32, 2028u32, 2028u32, 2028u32, 2037u32,
-                    2166u32, 2166u32, 2175u32, 2304u32, 2304u32, 2313u32, 2313u32,
-                    2313u32, 2322u32, 2322u32, 2331u32, 2331u32, 2340u32, 2340u32,
-                    2349u32, 2349u32, 2358u32, 2358u32, 2367u32, 2367u32, 2376u32,
-                    2376u32, 2385u32, 2385u32, 2394u32, 2394u32, 2403u32, 2403u32,
-                    2412u32, 2412u32, 2421u32, 2421u32, 2430u32, 2430u32, 2439u32,
-                    2439u32, 2439u32, 2448u32, 2448u32, 2457u32, 2457u32, 2466u32,
-                    2466u32, 2475u32, 2475u32, 2484u32, 2484u32, 2493u32, 2493u32,
-                    2502u32, 2502u32, 2511u32, 2511u32, 2520u32, 2529u32, 2532u32,
-                    2535u32, 2535u32, 2535u32,
+                    2163u32, 2163u32, 2172u32, 2298u32, 2298u32, 2307u32, 2307u32,
+                    2307u32, 2316u32, 2316u32, 2325u32, 2325u32, 2334u32, 2334u32,
+                    2343u32, 2343u32, 2352u32, 2352u32, 2361u32, 2361u32, 2370u32,
+                    2370u32, 2379u32, 2379u32, 2388u32, 2388u32, 2397u32, 2397u32,
+                    2406u32, 2406u32, 2415u32, 2415u32, 2424u32, 2424u32, 2433u32,
+                    2433u32, 2433u32, 2442u32, 2442u32, 2451u32, 2451u32, 2460u32,
+                    2460u32, 2469u32, 2469u32, 2478u32, 2478u32, 2487u32, 2487u32,
+                    2496u32, 2505u32, 2508u32, 2511u32, 2511u32, 2511u32,
                 ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
                     0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 2u8, 0u8, 0u8, 0u8, 2u8, 2u8,
@@ -7152,10 +7026,9 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                     0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8,
                     0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8,
-                    0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
-                    0u8, 0u8, 0u8,
+                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
                 ];
-                let num_states = 171usize;
+                let num_states = 167usize;
                 let mut states = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;
