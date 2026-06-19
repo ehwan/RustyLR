@@ -97,6 +97,40 @@ Initialize the state context with initial user data (or `with_default_userdata()
 
 In GLR mode, user data is branch-local. When the parser forks because of a conflict, the current user data is cloned, and each resulting branch owns and mutates its own `UserData` value independently. Results returned from `accept_all()` therefore include the final user data for each successful branch.
 
+For example, this ambiguous grammar creates two branches for the same input token. Each branch mutates its own cloned `Vec<&'static str>`:
+
+```rust
+use rusty_lr::lr1;
+
+lr1! {
+    %glr;
+    %tokentype char;
+    %userdata Vec<&'static str>;
+    %start S;
+
+    S(i32): A;
+    A(i32): 'a' {
+        data.push("left");
+        1
+    }
+    | 'a' {
+        data.push("right");
+        2
+    };
+}
+
+let mut context = SContext::new(Vec::new());
+context.feed('a').unwrap();
+
+let mut results = context.accept_all().unwrap().collect::<Vec<_>>();
+results.sort_by_key(|(value, _)| *value);
+
+assert_eq!(results, vec![
+    (1, vec!["left"]),
+    (2, vec!["right"]),
+]);
+```
+
 ```rust
 // Include the generated parser module
 mod parser;
