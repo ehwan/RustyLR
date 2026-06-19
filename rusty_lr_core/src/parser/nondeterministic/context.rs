@@ -267,7 +267,7 @@ impl<
     }
 
     /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
-    /// Retuns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
+    /// Returns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
     /// and other stack containing the (data_stack.len() - reduce_token_count) number of elements.
     fn prepare_reduce_node(
         &mut self,
