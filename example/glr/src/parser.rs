@@ -1,7 +1,7 @@
 use rusty_lr::lr1;
 
 lr1! {
-    %err String;
+    %error String;
     %glr;
     %tokentype char;
     %start E;

@@ -78,7 +78,7 @@ pub struct Grammar {
     /// %userdata
     pub(crate) userdata_typename: TokenStream,
 
-    /// %err
+    /// %error
     pub(crate) error_typename: TokenStream,
 
     /// %start
