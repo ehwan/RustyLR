@@ -9,8 +9,6 @@ pub trait NonTerminal: Copy {
     fn is_augmented(&self) -> bool {
         self.nonterm_type() == Some(NonTerminalType::Augmented)
     }
-    /// whether this non-terminal is set as %trace
-    fn is_trace(&self) -> bool;
 
     /// for internal use only;
     /// If this non-terminal is auto-generated, gets the pattern where this non-terminal was generated from.

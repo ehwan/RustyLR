@@ -1093,7 +1093,6 @@ impl Grammar {
                 ruletype_boxed: is_boxed,
                 rules: Vec::new(), // production rules will be added later
                 root_location: None,
-                trace: false,
                 protected: false,
                 nonterm_type: None,
             };
@@ -1835,7 +1834,6 @@ impl Grammar {
                 ruletype_boxed: false,
                 root_location: None,
                 rules: vec![augmented_rule],
-                trace: false,
                 protected: true,
                 nonterm_type: Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Augmented),
             };
@@ -1847,17 +1845,6 @@ impl Grammar {
             grammar
                 .nonterminals_index
                 .insert(augmented_name.into_value(), augmented_idx);
-        }
-
-        // set `%trace`
-        for trace in grammar_args.traces.into_iter() {
-            if let Some(&nonterm_idx) = grammar.nonterminals_index.get(trace.value().as_str()) {
-                grammar.nonterminals[nonterm_idx].trace = true;
-                grammar.nonterminals[nonterm_idx].protected = true;
-            } else {
-                return Err(ParseError::NonTerminalNotDefined(trace.location()));
-                // no such rule
-            }
         }
 
         // initialize terminal classes with one-terminal-one-class

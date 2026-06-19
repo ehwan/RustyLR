@@ -166,7 +166,6 @@ let mut context = ExprContext::new();
 
 context.expected_token();    // Returns the expected symbols for the current state
 context.can_feed(&token);  // Checks if a terminal can be fed next
-context.trace();             // Retrieves active `%trace` non-terminals
 println!("{}", context.backtrace()); // Prints the stack trace of parser states
 println!("{}", context);     // Formats the state tree (requires 'tree' feature)
 ```

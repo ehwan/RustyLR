@@ -206,19 +206,6 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::Augmented => "Augmented",
         }
     }
-    fn is_trace(&self) -> bool {
-        match self {
-            ENonTerminals::Digit => false,
-            ENonTerminals::Number => false,
-            ENonTerminals::P => false,
-            ENonTerminals::E => false,
-            ENonTerminals::Op => false,
-            ENonTerminals::__LiteralChar0Plus6 => false,
-            ENonTerminals::__LiteralChar0Star7 => false,
-            ENonTerminals::_DigitPlus9 => false,
-            ENonTerminals::Augmented => false,
-        }
-    }
     fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
             ENonTerminals::Digit => None,
