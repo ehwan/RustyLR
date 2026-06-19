@@ -75,6 +75,8 @@ impl Grammar {
             &format!("{}ParseError", self.start_rule_name),
             start_rule_span,
         );
+        let parser_struct_name =
+            Ident::new(&format!("{}Parser", self.start_rule_name), start_rule_span);
         let context_struct_name =
             Ident::new(&format!("{}Context", self.start_rule_name), start_rule_span);
         let data_stack_typename = Ident::new(
@@ -133,7 +135,7 @@ impl Grammar {
             quote! {
                     /// type alias for `Context`
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#data_stack_typename, #state_index_typename, #max_reduce_rules>;
+                    pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
@@ -150,7 +152,7 @@ impl Grammar {
         quote! {
                 /// type alias for `Context`
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#data_stack_typename, #state_index_typename>;
+                pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
@@ -811,12 +813,7 @@ impl Grammar {
             /// it is extremely cheap to instantiate, copy, or clone, and takes very little space.
             #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
             #[derive(Clone, Copy)]
-            pub struct #parser_struct_name {
-                /// production rules
-                pub rules: &'static [#rule_typename],
-                /// states
-                pub states: &'static [#state_typename],
-            }
+            pub struct #parser_struct_name;
 
             unsafe impl ::std::marker::Send for #parser_struct_name {}
             unsafe impl ::std::marker::Sync for #parser_struct_name {}
@@ -829,35 +826,23 @@ impl Grammar {
 
                 const ERROR_USED:bool = #error_used;
 
-                fn precedence_types(&self, level: u8) -> Option<#module_prefix::rule::ReduceType> {
+                fn precedence_types(level: u8) -> Option<#module_prefix::rule::ReduceType> {
                     #[allow(unreachable_patterns)]
                     match level {
                         #precedence_types_match_body_stream
                     }
                 }
-                fn get_rules(&self) -> &[#rule_typename] {
-                    self.rules
-                }
-                fn get_states(&self) -> &[#state_typename] {
-                    self.states
-                }
-            }
-
-            /// Calculates the static parser tables from the grammar.
-            #[rustfmt::skip]
-            #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-            impl #parser_struct_name {
-                /// Calculates the states and parser tables from the grammar.
-                #[allow(clippy::clone_on_copy)]
-                pub fn new() -> Self {
+                fn get_rules() -> &'static [#rule_typename] {
                     static RULES: std::sync::OnceLock<Vec<#rule_typename>> = std::sync::OnceLock::new();
-                    let rules = RULES.get_or_init(|| {
+                    RULES.get_or_init(|| {
                         vec![
                             #production_rules_body_stream
                         ]
-                    });
+                    })
+                }
+                fn get_states() -> &'static [#state_typename] {
                     static STATES: std::sync::OnceLock<Vec<#state_typename>> = std::sync::OnceLock::new();
-                    let states = STATES.get_or_init(|| {
+                    STATES.get_or_init(|| {
                         let states: Vec<#module_prefix::parser::state::IntermediateState<
                             #termclass_typename, #nonterminals_enum_name, #state_index_typename, #rule_index_typename
                         >> = vec![
@@ -866,12 +851,7 @@ impl Grammar {
                         states.into_iter().map(
                             |state| state.into(),
                         ).collect()
-                    });
-
-                    Self {
-                        rules: rules.as_slice(),
-                        states: states.as_slice(),
-                    }
+                    })
                 }
             }
         });

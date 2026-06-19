@@ -16,11 +16,10 @@ fn main() {
         Token::RParen,
     ];
 
-    let parser = parser::EParser::new();
     let mut context = parser::EContext::new();
     let mut userdata: i32 = 0;
     for token in input {
-        match context.feed(&parser, token, &mut userdata) {
+        match context.feed(token, &mut userdata) {
             //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
             //                           |- feed token
             Ok(_) => {}
@@ -30,7 +29,7 @@ fn main() {
             }
         }
 
-        let (terms, nonterms) = context.expected_token_str(&parser);
+        let (terms, nonterms) = context.expected_token_str();
         let terms = terms.map(String::from).collect::<Vec<_>>().join(", ");
         let nonterms = nonterms.map(String::from).collect::<Vec<_>>().join(", ");
         println!(
@@ -39,7 +38,7 @@ fn main() {
         );
     }
     // res = value of start symbol ( E(i32) )
-    let res = context.accept(&parser, &mut userdata).unwrap();
+    let res = context.accept(&mut userdata).unwrap();
     println!("{}", res);
     println!("userdata: {}", userdata);
 }
@@ -63,17 +62,14 @@ mod tests {
             Token::RParen,
         ];
 
-        let parser = parser::EParser::new();
         let mut context = parser::EContext::new();
         let mut userdata: i32 = 0;
         for token in input {
             context
-                .feed(&parser, token, &mut userdata)
+                .feed(token, &mut userdata)
                 .expect("Failed to feed token");
         }
-        let res = context
-            .accept(&parser, &mut userdata)
-            .expect("Failed to accept");
+        let res = context.accept(&mut userdata).expect("Failed to accept");
         assert_eq!(res, 15);
         assert_eq!(userdata, 2);
     }

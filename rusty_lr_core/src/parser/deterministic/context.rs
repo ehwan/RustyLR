@@ -14,7 +14,11 @@ use crate::parser::State;
 use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
-pub struct Context<Data: DataStack, StateIndex> {
+pub struct Context<
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+    Data: DataStack,
+    StateIndex,
+> {
     /// stacks hold the values associated with each shifted symbol.
     pub state_stack: Vec<StateIndex>,
     pub(crate) data_stack: Data,
@@ -23,9 +27,15 @@ pub struct Context<Data: DataStack, StateIndex> {
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
+    pub(crate) _phantom: std::marker::PhantomData<P>,
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > Context<P, Data, StateIndex>
+{
     /// Create a new context.
     /// `state_stack` is initialized with [0] (root state).
     pub fn new() -> Self {
@@ -38,6 +48,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
+            _phantom: std::marker::PhantomData,
         }
     }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
@@ -56,12 +67,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
+            _phantom: std::marker::PhantomData,
         }
     }
     /// End this context and pop the value of the start symbol from the data stack.
-    pub fn accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn accept(
         mut self,
-        parser: &P,
         userdata: &mut Data::UserData,
     ) -> Result<Data::StartType, ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -69,17 +80,14 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Data::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        self.feed_eof(parser, userdata)?;
+        self.feed_eof(userdata)?;
 
         // data_stack must be <Start> in this point
         Ok(self.data_stack.pop_start().unwrap())
     }
 
     /// Check if current context can be terminated and get the value of the start symbol.
-    pub fn can_accept<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> bool
+    pub fn can_accept(&self) -> bool
     where
         P::State: State<StateIndex = StateIndex>,
     {
@@ -90,7 +98,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             self.precedence_stack.len(),
             &mut extra_state_stack,
             &mut extra_precedence_stack,
-            parser,
             P::TermClass::EOF,
             Precedence::none(),
         ) == Some(true)
@@ -124,10 +131,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Simulate parser and get next expected (terminals, non-terminals) for current context.
-    pub fn expected_token<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> (BTreeSet<P::TermClass>, BTreeSet<P::NonTerm>)
+    pub fn expected_token(&self) -> (BTreeSet<P::TermClass>, BTreeSet<P::NonTerm>)
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
@@ -139,7 +143,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         self.expected_token_impl(
             &mut extra_state_stack,
             self.precedence_stack.len(),
-            parser,
             &mut terms,
             &mut nonterms,
         );
@@ -147,9 +150,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         (terms, nonterms)
     }
     /// Same as `expected_token()`, but returns as printable type.
-    pub fn expected_token_str<'a, P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn expected_token_str<'a>(
         &self,
-        parser: &P,
     ) -> (
         impl Iterator<Item = &'static str>,
         impl Iterator<Item = &'static str>,
@@ -159,18 +161,17 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         P::NonTerm: Ord,
         P::State: State<StateIndex = StateIndex>,
     {
-        let (terms, nonterms) = self.expected_token(parser);
+        let (terms, nonterms) = self.expected_token();
         (
             terms.into_iter().map(|term| term.as_str()),
             nonterms.into_iter().map(|nonterm| nonterm.as_str()),
         )
     }
 
-    fn expected_token_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn expected_token_impl(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
         stack_len: usize,
-        parser: &P,
         terms: &mut BTreeSet<P::TermClass>,
         nonterms: &mut BTreeSet<P::NonTerm>,
     ) where
@@ -178,7 +179,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         P::NonTerm: Ord,
         P::State: State<StateIndex = StateIndex>,
     {
-        let state = &parser.get_states()[extra_state_stack
+        let state = &P::get_states()[extra_state_stack
             .last()
             .copied()
             .unwrap_or_else(|| self.state_stack[stack_len])
@@ -189,7 +190,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
         let mut reduce_nonterms = BTreeSet::new();
         for reduce_rule in state.expected_reduce_rule() {
-            let prod_rule = &parser.get_rules()[reduce_rule.into_usize()];
+            let prod_rule = &P::get_rules()[reduce_rule.into_usize()];
             reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
@@ -201,29 +202,22 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             } else {
                 extra_state_stack[..extra_state_stack.len() - tokens_len].to_vec()
             };
-            let state = &parser.get_states()[extra_state_stack
+            let state = &P::get_states()[extra_state_stack
                 .last()
                 .copied()
                 .unwrap_or_else(|| self.state_stack[stack_len])
                 .into_usize()];
             if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
                 extra_state_stack.push(next_state.state);
-                self.expected_token_impl(
-                    &mut extra_state_stack,
-                    stack_len,
-                    parser,
-                    terms,
-                    nonterms,
-                );
+                self.expected_token_impl(&mut extra_state_stack, stack_len, terms, nonterms);
             }
         }
     }
 
     /// Feed one terminal to parser, and update stacks.
     /// This will use `Default::default()` for location.
-    pub fn feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn feed(
         &mut self,
-        parser: &P,
         term: Data::Term,
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
@@ -233,7 +227,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         P::State: State<StateIndex = StateIndex>,
     {
         self.feed_location(
-            parser,
             term,
             userdata,
             Data::Location::new(self.location_stack.iter().rev(), 0),
@@ -241,9 +234,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 
     /// Feed one terminal with location to parser, and update stacks.
-    pub fn feed_location<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    pub fn feed_location(
         &mut self,
-        parser: &P,
         term: P::Term,
         userdata: &mut Data::UserData,
         location: Data::Location,
@@ -258,7 +250,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         let shift_prec = class.precedence();
 
         match self.feed_location_impl(
-            parser,
             TerminalSymbol::Term(term),
             class,
             shift_prec,
@@ -283,7 +274,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let mut pop_count = 0;
                 let mut found = false;
                 for &s in self.state_stack.iter().rev() {
-                    match parser.get_states()[s.into_usize()].can_accept_error() {
+                    match P::get_states()[s.into_usize()].can_accept_error() {
                         TriState::False => {}
                         TriState::Maybe => {
                             extra_precedence_stack.clear();
@@ -293,7 +284,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                                 self.precedence_stack.len() - pop_count,
                                 &mut extra_state_stack,
                                 &mut extra_precedence_stack,
-                                parser,
                                 P::TermClass::ERROR,
                                 error_prec,
                             ) == Some(true)
@@ -333,7 +323,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 }
 
                 match self.feed_location_impl(
-                    parser,
                     TerminalSymbol::Error,
                     P::TermClass::ERROR,
                     error_prec,
@@ -344,7 +333,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         // try shift given term again
                         // to check if the given terminal should be merged with `error` token
                         // or it can be shift right after the error token
-                        if let Some(next_state) = parser.get_states()
+                        if let Some(next_state) = P::get_states()
                             [self.state_stack.last().unwrap().into_usize()]
                         .shift_goto_class(class)
                         {
@@ -385,9 +374,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         }
     }
 
-    fn feed_location_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn feed_location_impl(
         &mut self,
-        parser: &P,
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
         shift_prec: Precedence,
@@ -403,12 +391,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         use crate::Location;
 
         let shift_to = loop {
-            let state = &parser.get_states()[self.state_stack.last().unwrap().into_usize()];
+            let state = &P::get_states()[self.state_stack.last().unwrap().into_usize()];
 
             let shift = state.shift_goto_class(class);
             if let Some(reduce_rule) = state.reduce(class) {
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
-                let rule = &parser.get_rules()[reduce_rule.into_usize()];
+                let rule = &P::get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
 
                 let reduce_prec = match rule.precedence {
@@ -434,7 +422,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         Ordering::Equal => {
                             // check for reduce type
                             use crate::rule::ReduceType;
-                            match parser.precedence_types(reduce_prec) {
+                            match P::precedence_types(reduce_prec) {
                                 Some(ReduceType::Left) => {
                                     // no shift
                                     // shift = None;
@@ -478,7 +466,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 let mut new_location =
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
-                let Some(next_nonterm_shift) = parser.get_states()
+                let Some(next_nonterm_shift) = P::get_states()
                     [self.state_stack.last().unwrap().into_usize()]
                 .shift_goto_nonterm(rule.name) else {
                     unreachable!(
@@ -572,11 +560,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     /// This does not simulate for reduce action error, or panic mode.
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
-    pub fn can_feed<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-        term: &Data::Term,
-    ) -> bool
+    pub fn can_feed(&self, term: &Data::Term) -> bool
     where
         P::State: State<StateIndex = StateIndex>,
     {
@@ -589,17 +573,13 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             self.precedence_stack.len(),
             &mut extra_state_stack,
             &mut extra_precedence_stack,
-            parser,
             class,
             shift_prec,
         ) == Some(true)
     }
 
     /// Check if current context can enter panic mode
-    pub fn can_panic<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> bool
+    pub fn can_panic(&self) -> bool
     where
         P::State: State<StateIndex = StateIndex>,
     {
@@ -619,7 +599,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 stack_len,
                 &mut extra_state_stack,
                 &mut extra_precedence_stack,
-                parser,
                 error,
                 error_prec,
             ) {
@@ -638,12 +617,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         }
     }
 
-    fn can_feed_impl<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn can_feed_impl(
         &self,
         mut stack_len: usize,
         extra_state_stack: &mut Vec<StateIndex>,
         extra_precedence_stack: &mut Vec<Precedence>,
-        parser: &P,
         class: P::TermClass,
         shift_prec: Precedence,
     ) -> Option<bool>
@@ -651,7 +629,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         P::State: State<StateIndex = StateIndex>,
     {
         let shift_to = loop {
-            let state = &parser.get_states()[extra_state_stack
+            let state = &P::get_states()[extra_state_stack
                 .last()
                 .copied()
                 .unwrap_or_else(|| self.state_stack[stack_len])
@@ -661,7 +639,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
             if let Some(reduce_rule) = state.reduce(class) {
                 use super::super::state::ReduceRules;
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
-                let rule = &parser.get_rules()[reduce_rule.into_usize()];
+                let rule = &P::get_rules()[reduce_rule.into_usize()];
                 let tokens_len = rule.rule.len();
 
                 let reduce_prec = match rule.precedence {
@@ -692,7 +670,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         Ordering::Equal => {
                             // check for reduce type
                             use crate::rule::ReduceType;
-                            match parser.precedence_types(reduce_prec) {
+                            match P::precedence_types(reduce_prec) {
                                 Some(ReduceType::Left) => {
                                     // no shift
                                     // shift = None;
@@ -729,7 +707,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                 extra_precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) = parser.get_states()[extra_state_stack
+                if let Some(next_state_id) = P::get_states()[extra_state_stack
                     .last()
                     .copied()
                     .unwrap_or_else(|| self.state_stack[stack_len])
@@ -757,9 +735,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         Some(shift_to.is_some())
     }
 
-    fn feed_eof<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
+    fn feed_eof(
         &mut self,
-        parser: &P,
         userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -769,7 +746,6 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     {
         let eof_location = Data::Location::new(self.location_stack.iter().rev(), 0);
         self.feed_location_impl(
-            parser,
             TerminalSymbol::Eof,
             P::TermClass::EOF,
             Precedence::none(),
@@ -787,18 +763,24 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     ///
     /// Then the returned set will be:
     /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
-    pub fn trace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> crate::hash::HashSet<Data::NonTerm>
+    /// Get set of `%trace` non-terminal symbols that current context is trying to parse.
+    ///
+    /// The order of the returned set does not mean anything.
+    /// If the current context is attempting to recognize following grammar:
+    ///
+    /// Chunk -> Statement -> IfStatement -> ReturnStatement -> ...
+    ///
+    /// Then the returned set will be:
+    /// [`Chunk`, `Statement`, `IfStatement`, `ReturnStatement`]
+    pub fn trace(&self) -> crate::hash::HashSet<Data::NonTerm>
     where
         P::NonTerm: Hash + Eq,
     {
         use crate::hash::HashSet;
         use crate::token::Token;
 
-        let rules = parser.get_rules();
-        let states = parser.get_states();
+        let rules = P::get_rules();
+        let states = P::get_states();
 
         let mut zero_shifted_rules = BTreeSet::new();
         let mut non_zero_shifted_rules = BTreeSet::new();
@@ -880,10 +862,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
     /// Get backtrace information for current state.
     /// What current state is trying to parse, and where it comes from.
-    pub fn backtrace<P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>>(
-        &self,
-        parser: &P,
-    ) -> crate::Backtrace<P::TermClass, P::NonTerm>
+    pub fn backtrace(&self) -> crate::Backtrace<P::TermClass, P::NonTerm>
     where
         P::NonTerm: Hash + Eq,
     {
@@ -895,11 +874,11 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         use std::collections::BTreeSet;
 
         if self.state_stack.len() == 1 {
-            let state0 = &parser.get_states()[0];
+            let state0 = &P::get_states()[0];
             let mut rules = Vec::with_capacity(state0.get_rules().len());
             for rule in state0.get_rules().iter() {
                 rules.push(ShiftedRule {
-                    rule: parser.get_rules()[rule.rule].clone(),
+                    rule: P::get_rules()[rule.rule].clone(),
                     shifted: rule.shifted,
                 });
             }
@@ -910,7 +889,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
         }
 
         let mut traces = Vec::new();
-        let mut current_rules: BTreeSet<_> = parser.get_states()
+        let mut current_rules: BTreeSet<_> = P::get_states()
             [self.state_stack.last().unwrap().into_usize()]
         .get_rules()
         .iter()
@@ -931,7 +910,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                         shifted: rule.shifted - 1,
                     });
                     if rule.shifted == 1 {
-                        zero_shifted_rules.insert(parser.get_rules()[rule.rule].name.clone());
+                        zero_shifted_rules.insert(P::get_rules()[rule.rule].name.clone());
                     }
                 }
             }
@@ -942,11 +921,8 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
 
             loop {
                 let len0 = current_rules.len();
-                for rule in parser.get_states()[state_idx.into_usize()]
-                    .get_rules()
-                    .iter()
-                {
-                    let prod_rule = &parser.get_rules()[rule.rule];
+                for rule in P::get_states()[state_idx.into_usize()].get_rules().iter() {
+                    let prod_rule = &P::get_rules()[rule.rule];
                     if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
                         if zero_shifted_rules.contains(nonterm) {
                             current_rules.insert(*rule);
@@ -971,7 +947,7 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
                     rules
                         .into_iter()
                         .map(|rule| ShiftedRule {
-                            rule: parser.get_rules()[rule.rule].clone(),
+                            rule: P::get_rules()[rule.rule].clone(),
                             shifted: rule.shifted,
                         })
                         .collect()
@@ -981,13 +957,22 @@ impl<Data: DataStack, StateIndex: Index + Copy> Context<Data, StateIndex> {
     }
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Default for Context<Data, StateIndex> {
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > Default for Context<P, Data, StateIndex>
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<Data: DataStack, StateIndex: Index + Copy> Clone for Context<Data, StateIndex>
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > Clone for Context<P, Data, StateIndex>
 where
     Data: Clone,
     Data::Term: Clone,
@@ -1002,12 +987,17 @@ where
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),
+            _phantom: std::marker::PhantomData,
         }
     }
 }
 
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Display for Context<Data, StateIndex>
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > std::fmt::Display for Context<P, Data, StateIndex>
 where
     Data::Term: std::fmt::Display + Clone,
     Data::NonTerm: std::fmt::Display + Clone + NonTerminal,
@@ -1017,7 +1007,11 @@ where
     }
 }
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::fmt::Debug for Context<Data, StateIndex>
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > std::fmt::Debug for Context<P, Data, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + NonTerminal,
@@ -1028,7 +1022,12 @@ where
 }
 
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::ops::Deref for Context<Data, StateIndex> {
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > std::ops::Deref for Context<P, Data, StateIndex>
+{
     type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
     fn deref(&self) -> &Self::Target {
         &self.tree_stack
@@ -1036,7 +1035,12 @@ impl<Data: DataStack, StateIndex: Index + Copy> std::ops::Deref for Context<Data
 }
 
 #[cfg(feature = "tree")]
-impl<Data: DataStack, StateIndex: Index + Copy> std::ops::DerefMut for Context<Data, StateIndex> {
+impl<
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        Data: DataStack,
+        StateIndex: Index + Copy,
+    > std::ops::DerefMut for Context<P, Data, StateIndex>
+{
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.tree_stack
     }

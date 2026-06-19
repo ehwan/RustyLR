@@ -116,7 +116,11 @@
 // =============================Generated Codes Begin==============================
 /// type alias for `Context`
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonContext = ::rusty_lr::parser::deterministic::Context<JsonDataStack, u8>;
+pub type JsonContext = ::rusty_lr::parser::deterministic::Context<
+    JsonParser,
+    JsonDataStack,
+    u8,
+>;
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
 pub type JsonRule = ::rusty_lr::rule::ProductionRule<
@@ -1925,12 +1929,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
 /// it is extremely cheap to instantiate, copy, or clone, and takes very little space.
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 #[derive(Clone, Copy)]
-pub struct JsonParser {
-    /// production rules
-    pub rules: &'static [JsonRule],
-    /// states
-    pub states: &'static [JsonState],
-}
+pub struct JsonParser;
 unsafe impl ::std::marker::Send for JsonParser {}
 unsafe impl ::std::marker::Sync for JsonParser {}
 #[rustfmt::skip]
@@ -1940,28 +1939,15 @@ impl ::rusty_lr::parser::Parser for JsonParser {
     type NonTerm = JsonNonTerminals;
     type State = JsonState;
     const ERROR_USED: bool = true;
-    fn precedence_types(&self, level: u8) -> Option<::rusty_lr::rule::ReduceType> {
+    fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
         #[allow(unreachable_patterns)]
         match level {
             _ => None,
         }
     }
-    fn get_rules(&self) -> &[JsonRule] {
-        self.rules
-    }
-    fn get_states(&self) -> &[JsonState] {
-        self.states
-    }
-}
-/// Calculates the static parser tables from the grammar.
-#[rustfmt::skip]
-#[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-impl JsonParser {
-    /// Calculates the states and parser tables from the grammar.
-    #[allow(clippy::clone_on_copy)]
-    pub fn new() -> Self {
+    fn get_rules() -> &'static [JsonRule] {
         static RULES: std::sync::OnceLock<Vec<JsonRule>> = std::sync::OnceLock::new();
-        let rules = RULES
+        RULES
             .get_or_init(|| {
                 vec![
                     ::rusty_lr::rule::ProductionRule { name : JsonNonTerminals::Json,
@@ -2309,9 +2295,11 @@ impl JsonParser {
                     ::rusty_lr::Token::Term(JsonTerminalClasses::eof),], precedence :
                     None, },
                 ]
-            });
+            })
+    }
+    fn get_states() -> &'static [JsonState] {
         static STATES: std::sync::OnceLock<Vec<JsonState>> = std::sync::OnceLock::new();
-        let states = STATES
+        STATES
             .get_or_init(|| {
                 let states: Vec<
                     ::rusty_lr::parser::state::IntermediateState<
@@ -4721,11 +4709,7 @@ impl JsonParser {
                     ::rusty_lr::TriState::False, },
                 ];
                 states.into_iter().map(|state| state.into()).collect()
-            });
-        Self {
-            rules: rules.as_slice(),
-            states: states.as_slice(),
-        }
+            })
     }
 }
 

@@ -196,7 +196,8 @@ use std::boxed::Box;
 // =============================Generated Codes Begin==============================
 /// type alias for `Context`
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<GrammarDataStack, u8>;
+pub type GrammarContext =
+    ::rusty_lr_core::parser::deterministic::Context<GrammarParser, GrammarDataStack, u8>;
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule =
@@ -6951,12 +6952,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     unused_mut
 )]
 #[derive(Clone, Copy)]
-pub struct GrammarParser {
-    /// production rules
-    pub rules: &'static [GrammarRule],
-    /// states
-    pub states: &'static [GrammarState],
-}
+pub struct GrammarParser;
 unsafe impl ::std::marker::Send for GrammarParser {}
 unsafe impl ::std::marker::Sync for GrammarParser {}
 #[rustfmt::skip]
@@ -6966,29 +6962,16 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type NonTerm = GrammarNonTerminals;
     type State = GrammarState;
     const ERROR_USED: bool = true;
-    fn precedence_types(&self, level: u8) -> Option<::rusty_lr_core::rule::ReduceType> {
+    fn precedence_types(level: u8) -> Option<::rusty_lr_core::rule::ReduceType> {
         #[allow(unreachable_patterns)]
         match level {
             0..=2 => Some(::rusty_lr_core::rule::ReduceType::Left),
             _ => None,
         }
     }
-    fn get_rules(&self) -> &[GrammarRule] {
-        self.rules
-    }
-    fn get_states(&self) -> &[GrammarState] {
-        self.states
-    }
-}
-/// Calculates the static parser tables from the grammar.
-#[rustfmt::skip]
-#[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-impl GrammarParser {
-    /// Calculates the states and parser tables from the grammar.
-    #[allow(clippy::clone_on_copy)]
-    pub fn new() -> Self {
+    fn get_rules() -> &'static [GrammarRule] {
         static RULES: std::sync::OnceLock<Vec<GrammarRule>> = std::sync::OnceLock::new();
-        let rules = RULES
+        RULES
             .get_or_init(|| {
                 vec![
                     ::rusty_lr_core::rule::ProductionRule { name :
@@ -7674,9 +7657,11 @@ impl GrammarParser {
                     ::rusty_lr_core::Token::Term(GrammarTerminalClasses::eof),],
                     precedence : None, },
                 ]
-            });
+            })
+    }
+    fn get_states() -> &'static [GrammarState] {
         static STATES: std::sync::OnceLock<Vec<GrammarState>> = std::sync::OnceLock::new();
-        let states = STATES
+        STATES
             .get_or_init(|| {
                 let states: Vec<
                     ::rusty_lr_core::parser::state::IntermediateState<
@@ -13231,11 +13216,7 @@ impl GrammarParser {
                     ::rusty_lr_core::TriState::False, },
                 ];
                 states.into_iter().map(|state| state.into()).collect()
-            });
-        Self {
-            rules: rules.as_slice(),
-            states: states.as_slice(),
-        }
+            })
     }
 }
 

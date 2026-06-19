@@ -34,7 +34,7 @@
 // =============================Generated Codes Begin==============================
 /// type alias for `Context`
 #[allow(non_camel_case_types, dead_code)]
-pub type EContext = ::rusty_lr::parser::deterministic::Context<EDataStack, u8>;
+pub type EContext = ::rusty_lr::parser::deterministic::Context<EParser, EDataStack, u8>;
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
 pub type ERule = ::rusty_lr::rule::ProductionRule<ETerminalClasses, ENonTerminals>;
@@ -828,12 +828,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
 /// it is extremely cheap to instantiate, copy, or clone, and takes very little space.
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 #[derive(Clone, Copy)]
-pub struct EParser {
-    /// production rules
-    pub rules: &'static [ERule],
-    /// states
-    pub states: &'static [EState],
-}
+pub struct EParser;
 unsafe impl ::std::marker::Send for EParser {}
 unsafe impl ::std::marker::Sync for EParser {}
 #[rustfmt::skip]
@@ -843,29 +838,16 @@ impl ::rusty_lr::parser::Parser for EParser {
     type NonTerm = ENonTerminals;
     type State = EState;
     const ERROR_USED: bool = false;
-    fn precedence_types(&self, level: u8) -> Option<::rusty_lr::rule::ReduceType> {
+    fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
         #[allow(unreachable_patterns)]
         match level {
             0..=1 => Some(::rusty_lr::rule::ReduceType::Left),
             _ => None,
         }
     }
-    fn get_rules(&self) -> &[ERule] {
-        self.rules
-    }
-    fn get_states(&self) -> &[EState] {
-        self.states
-    }
-}
-/// Calculates the static parser tables from the grammar.
-#[rustfmt::skip]
-#[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
-impl EParser {
-    /// Calculates the states and parser tables from the grammar.
-    #[allow(clippy::clone_on_copy)]
-    pub fn new() -> Self {
+    fn get_rules() -> &'static [ERule] {
         static RULES: std::sync::OnceLock<Vec<ERule>> = std::sync::OnceLock::new();
-        let rules = RULES
+        RULES
             .get_or_init(|| {
                 vec![
                     ::rusty_lr::rule::ProductionRule { name : ENonTerminals::Digit, rule
@@ -932,9 +914,11 @@ impl EParser {
                     ::rusty_lr::Token::Term(ETerminalClasses::eof),], precedence : None,
                     },
                 ]
-            });
+            })
+    }
+    fn get_states() -> &'static [EState] {
         static STATES: std::sync::OnceLock<Vec<EState>> = std::sync::OnceLock::new();
-        let states = STATES
+        STATES
             .get_or_init(|| {
                 let states: Vec<
                     ::rusty_lr::parser::state::IntermediateState<
@@ -1399,11 +1383,7 @@ impl EParser {
                     ::rusty_lr::TriState::False, },
                 ];
                 states.into_iter().map(|state| state.into()).collect()
-            });
-        Self {
-            rules: rules.as_slice(),
-            states: states.as_slice(),
-        }
+            })
     }
 }
 
