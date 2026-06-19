@@ -116,8 +116,7 @@ pub struct NonTerminalInfo {
     /// the location of that pattern is stored here for error reporting.
     pub(crate) root_location: Option<Location>,
 
-    pub(crate) trace: bool,
-    /// protected from optimization removal; trace rules are always protected
+    /// protected from optimization removal
     pub(crate) protected: bool,
 
     /// if this non-terminal is auto-generated, the pattern that generated this rule.

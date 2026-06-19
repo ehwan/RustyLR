@@ -79,7 +79,6 @@ use rusty_lr_core::rule::ReduceType;
 %token precedence Lexed::Precedence(_);
 %token nooptim Lexed::NoOptim(_);
 %token dense Lexed::Dense(_);
-%token trace Lexed::Trace(_);
 %token dprec Lexed::DPrec(_);
 %token filter Lexed::Filter(_);
 %token location Lexed::Location(_);
@@ -633,22 +632,7 @@ Directive
             location: @error,
         });
     }
-    | percent trace ident* semicolon {
-        let idents = ident.into_iter().map(|t| {
-            let $ident = t else {
-                unreachable!( "Trace-Ident" );
-            };
-            Located::new(ident.to_string(), @ident)
-        });
-        data.traces.extend( idents );
-    }
-    | percent trace error semicolon {
-        data.error_recovered.push( RecoveredError {
-            message: "Expected ident".to_string(),
-            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#tracing-non-terminals".to_string(),
-            location: @error,
-        });
-    }
+
     | percent filter! RustCode semicolon! {
         data.filter.push((@filter, RustCode));
     }

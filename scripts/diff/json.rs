@@ -415,42 +415,6 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
             JsonNonTerminals::Augmented => "Augmented",
         }
     }
-    fn is_trace(&self) -> bool {
-        match self {
-            JsonNonTerminals::Json => false,
-            JsonNonTerminals::Value => false,
-            JsonNonTerminals::Object => false,
-            JsonNonTerminals::Members => false,
-            JsonNonTerminals::Member => false,
-            JsonNonTerminals::Array => false,
-            JsonNonTerminals::Element => false,
-            JsonNonTerminals::String => false,
-            JsonNonTerminals::Character => false,
-            JsonNonTerminals::Escape => false,
-            JsonNonTerminals::Hex => false,
-            JsonNonTerminals::Number => false,
-            JsonNonTerminals::Integer => false,
-            JsonNonTerminals::Exponent => false,
-            JsonNonTerminals::Sign => false,
-            JsonNonTerminals::WS => false,
-            JsonNonTerminals::_LiteralString22 => false,
-            JsonNonTerminals::_LiteralString23 => false,
-            JsonNonTerminals::_LiteralString24 => false,
-            JsonNonTerminals::_ElementSepPlus25 => false,
-            JsonNonTerminals::_ElementSepStar26 => false,
-            JsonNonTerminals::_CharacterPlus27 => false,
-            JsonNonTerminals::_CharacterStar28 => false,
-            JsonNonTerminals::_TermSet29 => false,
-            JsonNonTerminals::_TermSet30 => false,
-            JsonNonTerminals::_TermSet31 => false,
-            JsonNonTerminals::_DigitPlus32 => false,
-            JsonNonTerminals::_TermSet33 => false,
-            JsonNonTerminals::_Group34 => false,
-            JsonNonTerminals::__Group34Question35 => false,
-            JsonNonTerminals::_LiteralString36 => false,
-            JsonNonTerminals::Augmented => false,
-        }
-    }
     fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
             JsonNonTerminals::Json => None,

@@ -199,7 +199,6 @@ impl Pattern {
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusLeft),
                     };
@@ -262,7 +261,6 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusRight),
                     };
@@ -331,7 +329,6 @@ impl Pattern {
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
                     };
@@ -380,7 +377,6 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
                     };
@@ -442,7 +438,6 @@ impl Pattern {
                         ruletype: Some(quote! {Option<#base_typename>}),
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Optional),
                     };
@@ -492,7 +487,6 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Optional),
                     };
@@ -560,7 +554,6 @@ impl Pattern {
                     ruletype: Some(grammar.token_typename.clone()),
                     rules,
                     root_location: Some(root_location),
-                    trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::TerminalSet),
                 };
@@ -613,7 +606,6 @@ impl Pattern {
                         ruletype: Some(base_typename.clone()),
                         rules: vec![rule],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Lookahead),
                     };
@@ -651,7 +643,6 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![rule],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Lookahead),
                     };
@@ -786,7 +777,6 @@ impl Pattern {
                     ruletype: ruletype.clone(),
                     rules,
                     root_location: Some(root_location),
-                    trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::Group),
                 };
@@ -852,7 +842,6 @@ impl Pattern {
                     ruletype: None,
                     rules: vec![rule],
                     root_location: Some(str_loc),
-                    trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::LiteralString),
                 };
@@ -914,7 +903,6 @@ impl Pattern {
                     ruletype: None,
                     rules: vec![rule],
                     root_location: Some(str_loc),
-                    trace: false,
                     protected: false,
                     nonterm_type: Some(NonTerminalType::LiteralString),
                 };
@@ -1004,7 +992,6 @@ impl Pattern {
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![rule1, rule2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusLeft),
                     };
@@ -1070,7 +1057,6 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![rule1, rule2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::PlusRight),
                     };
@@ -1140,7 +1126,6 @@ impl Pattern {
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
                     };
@@ -1189,7 +1174,6 @@ impl Pattern {
                         ruletype: None,
                         rules: vec![line1, line2],
                         root_location: Some(root_location),
-                        trace: false,
                         protected: false,
                         nonterm_type: Some(NonTerminalType::Star),
                     };

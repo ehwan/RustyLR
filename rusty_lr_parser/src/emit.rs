@@ -440,7 +440,6 @@ impl Grammar {
 
         let mut comma_separated_variants = TokenStream::new();
         let mut case_as_str = TokenStream::new();
-        let mut nonterm_trait_is_trace_case = TokenStream::new();
         let mut nonterm_type_case = TokenStream::new();
         for nonterm in self.nonterminals.iter() {
             let name = utils::ident_from_located(
@@ -459,16 +458,6 @@ impl Grammar {
                 #enum_typename::#name => #display_str,
             });
 
-            let is_trace = if nonterm.name.value().as_str() == utils::AUGMENTED_NAME {
-                false
-            } else {
-                // non-term is auto-generated if nonterm.regex_span.is_some()
-                nonterm.trace
-            };
-
-            nonterm_trait_is_trace_case.extend(quote! {
-                #enum_typename::#name => #is_trace,
-            });
             if let Some(enum_name) = &nonterm.nonterm_type {
                 let enum_name = format!("{:?}", enum_name);
                 let enum_name = Ident::new(&enum_name, Span::call_site());
@@ -521,11 +510,6 @@ impl Grammar {
                 fn as_str(&self) -> &'static str {
                     match self {
                         #case_as_str
-                    }
-                }
-                fn is_trace(&self) -> bool {
-                    match self {
-                        #nonterm_trait_is_trace_case
                     }
                 }
                 fn nonterm_type(&self) -> Option<#module_prefix::parser::nonterminal::NonTerminalType> {
