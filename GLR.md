@@ -93,39 +93,38 @@ E(i32)
 
 ## Parsing with the GLR Parser
 
-Simply initialize the state context using `Context::new()`, and feed your tokens to it. The GLR parser shares a similar interface to the deterministic parser, but instead of producing a single result, its `accept()` method returns an iterator over all successful parse tree results. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
+Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it. The GLR parser shares a similar interface to the deterministic parser, but instead of producing a single result, its `accept()` method returns an iterator over all successful `(parse_result, userdata)` pairs. You can feed tokens using either `feed` (basic) or `feed_location` (location-aware).
 
 ```rust
 // Include the generated parser module
 mod parser;
 
 fn main() {
-    let mut context = parser::EContext::new();
-    let mut userdata = (); // Custom userdata if defined by %userdata
+    let mut context = parser::EContext::with_default_userdata();
 
     let input = vec!['1', '+', '2', '*', '3', '+', '4'];
 
     // Feed tokens to the GLR parser
     for token in input {
         // basic feeding:
-        if let Err(e) = context.feed(token, &mut userdata) {
+        if let Err(e) = context.feed(token) {
             eprintln!("Fatal parse error: {}", e);
             return;
         }
 
         // or location-aware feeding (if %location is configured in the grammar):
         // let span = MySpan { start: ..., end: ... };
-        // if let Err(e) = context.feed_location(token, &mut userdata, span) {
+        // if let Err(e) = context.feed_location(token, span) {
         //     eprintln!("Fatal parse error: {}", e);
         //     return;
         // }
     }
 
     // Retrieve all valid parse tree results
-    match context.accept(&mut userdata) {
+    match context.accept() {
         Ok(results) => {
-            for result in results {
-                println!("Parse tree result: {:?}", result);
+            for (result, userdata) in results {
+                println!("Parse tree result: {:?}, userdata: {:?}", result, userdata);
             }
         }
         Err(e) => {
@@ -136,7 +135,7 @@ fn main() {
 ```
 
 ### Key API Components
-- **`EContext::new()`**: Initializes a new GLR state context.
-- **`context.feed(token, &mut userdata)`**: Feeds a token into all active parsing stacks.
-- **`context.feed_location(token, &mut userdata, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
-- **`context.accept(&mut userdata)`**: Finalizes parsing (feeding the end-of-file symbol) and returns an iterator over all successful parse results from all active branches.
+- **`EContext::new(userdata)`**: Initializes a new GLR state context with initial user data. Use `EContext::with_default_userdata()` when `UserData: Default`.
+- **`context.feed(token)`**: Feeds a token into all active parsing stacks.
+- **`context.feed_location(token, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
+- **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches. When the GLR parser branches, each branch receives its own cloned user data.

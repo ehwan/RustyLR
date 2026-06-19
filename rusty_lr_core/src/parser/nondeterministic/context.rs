@@ -69,12 +69,15 @@ pub struct Context<
 
     /// each element represents an end-point of diverged paths.
     pub(crate) current_nodes: Vec<usize>,
+    pub(crate) current_userdatas: Vec<Data::UserData>,
 
     /// temporary storage
     pub(crate) next_nodes: Vec<usize>,
+    pub(crate) next_userdatas: Vec<Data::UserData>,
 
     /// For recovery from error
     pub(crate) fallback_nodes: Vec<usize>,
+    pub(crate) fallback_userdatas: Vec<Data::UserData>,
 
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
@@ -95,8 +98,51 @@ impl<
 {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(userdata: Data::UserData) -> Self {
+        let mut context = Context {
+            nodes_pool: Default::default(),
+            empty_node_indices: Default::default(),
+            current_nodes: Default::default(),
+            current_userdatas: Default::default(),
+            next_nodes: Default::default(),
+            next_userdatas: Default::default(),
+            reduce_errors: Default::default(),
+            fallback_nodes: Default::default(),
+            fallback_userdatas: Default::default(),
+            no_precedences: Default::default(),
+            _phantom: std::marker::PhantomData,
+        };
+        let root_node = context.new_node();
+        context.current_nodes.push(root_node);
+        context.current_userdatas.push(userdata);
+        context
+    }
+
+    pub fn with_default_userdata() -> Self
+    where
+        Data::UserData: Default,
+    {
+        Self::new(Default::default())
+    }
+
+    /// Borrow the user data for the only active path.
+    pub fn userdata(&self) -> &Data::UserData {
+        assert_eq!(
+            self.current_userdatas.len(),
+            1,
+            "userdata() requires exactly one active GLR path"
+        );
+        &self.current_userdatas[0]
+    }
+
+    /// Mutably borrow the user data for the only active path.
+    pub fn userdata_mut(&mut self) -> &mut Data::UserData {
+        assert_eq!(
+            self.current_userdatas.len(),
+            1,
+            "userdata_mut() requires exactly one active GLR path"
+        );
+        &mut self.current_userdatas[0]
     }
 
     pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
@@ -519,29 +565,52 @@ impl<
         self.current_nodes.is_empty()
     }
 
-    /// End this context and return iterator of the start value from the data stack.
+    /// End this context and return iterator of the start value and user data from each successful path.
     pub fn accept(
         mut self,
-        userdata: &mut Data::UserData,
     ) -> Result<
-        impl Iterator<Item = Data::StartType>,
+        impl Iterator<Item = (Data::StartType, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
         Data: Clone,
+        Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        self.feed_eof(userdata)?;
+        self.feed_eof()?;
         // since `eof` is feeded, every node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
         let nodes = std::mem::take(&mut self.current_nodes);
-        Ok(nodes.into_iter().map(move |node| {
-            // let node = self.pop(eof_node).unwrap();
-            self.nodes_pool[node].data_stack.pop_start().unwrap()
-        }))
+        let userdatas = std::mem::take(&mut self.current_userdatas);
+        Ok(nodes
+            .into_iter()
+            .zip(userdatas)
+            .map(move |(node, userdata)| {
+                // let node = self.pop(eof_node).unwrap();
+                (
+                    self.nodes_pool[node].data_stack.pop_start().unwrap(),
+                    userdata,
+                )
+            }))
+    }
+    /// End this context and return the first successful start symbol and user data pair.
+    pub fn accept_one(
+        self,
+    ) -> Result<
+        (Data::StartType, Data::UserData),
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
+    where
+        Data: Clone,
+        Data::UserData: Clone,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
+    {
+        Ok(self.accept()?.next().unwrap())
     }
 
     /// For debugging.
@@ -700,13 +769,13 @@ impl<
     pub fn feed(
         &mut self,
         term: Data::Term,
-        userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
         Data: Clone,
+        Data::UserData: Clone,
     {
         use crate::parser::State;
         use crate::Location;
@@ -714,15 +783,18 @@ impl<
         self.reduce_errors.clear();
         self.no_precedences.clear();
         self.fallback_nodes.clear();
+        self.fallback_userdatas.clear();
         self.next_nodes.clear();
+        self.next_userdatas.clear();
 
         let class = P::TermClass::from_term(&term);
         let shift_prec = class.precedence();
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
-        for node in current_nodes.drain(..) {
+        let mut current_userdatas = std::mem::take(&mut self.current_userdatas);
+        for (node, userdata) in current_nodes.drain(..).zip(current_userdatas.drain(..)) {
             let location = Data::Location::new(self.location_iter(node), 0);
-            if let Err((node, _, _)) = self.feed_location_impl(
+            if let Err((node, _, _, userdata)) = self.feed_location_impl(
                 node,
                 TerminalSymbol::Term(term.clone()),
                 class,
@@ -731,20 +803,22 @@ impl<
                 userdata,
             ) {
                 self.fallback_nodes.push(node);
+                self.fallback_userdatas.push(userdata);
             }
         }
         self.current_nodes = current_nodes;
+        self.current_userdatas = current_userdatas;
 
         if self.next_nodes.is_empty() {
             if !P::ERROR_USED {
-                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
-
                 let err_location = if let Some(&first_node) = self.fallback_nodes.first() {
                     Data::Location::new(self.location_iter(first_node), 0)
                 } else {
                     Data::Location::new(std::iter::empty(), 0)
                 };
 
+                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+                std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
                 return Err(ParseError {
                     term: TerminalSymbol::Term(term),
                     location: err_location,
@@ -757,6 +831,8 @@ impl<
             let error_prec = P::TermClass::ERROR.precedence();
 
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
+            let mut fallback_userdatas = std::mem::take(&mut self.fallback_userdatas);
+            let root_userdata = fallback_userdatas.first().cloned();
             let mut extra_state_stack = Vec::new();
             let mut extra_precedence_stack = Vec::new();
             let mut error_location = if let Some(&first_node) = fallback_nodes.first() {
@@ -764,7 +840,7 @@ impl<
             } else {
                 Data::Location::new(std::iter::empty(), 0)
             };
-            for node in fallback_nodes.drain(..) {
+            for (node, userdata) in fallback_nodes.drain(..).zip(fallback_userdatas.drain(..)) {
                 error_location = self.panic_mode(
                     node,
                     error_prec,
@@ -774,25 +850,28 @@ impl<
                 );
             }
             self.fallback_nodes = fallback_nodes;
+            self.fallback_userdatas = fallback_userdatas;
 
             if self.next_nodes.is_empty() {
                 if P::get_states()[0].can_accept_error() == crate::TriState::True {
-                    let node = self.new_node();
-                    if let Err(_) = self.feed_location_impl(
-                        node,
-                        TerminalSymbol::Error,
-                        P::TermClass::ERROR,
-                        error_prec,
-                        error_location,
-                        userdata,
-                    ) {
-                        return Err(ParseError {
-                            term: TerminalSymbol::Term(term),
-                            location: Data::Location::new(std::iter::empty(), 0),
-                            reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                            no_precedences: std::mem::take(&mut self.no_precedences),
-                            states: self.states().collect(),
-                        });
+                    if let Some(userdata) = root_userdata {
+                        let node = self.new_node();
+                        if let Err(_) = self.feed_location_impl(
+                            node,
+                            TerminalSymbol::Error,
+                            P::TermClass::ERROR,
+                            error_prec,
+                            error_location,
+                            userdata,
+                        ) {
+                            return Err(ParseError {
+                                term: TerminalSymbol::Term(term),
+                                location: Data::Location::new(std::iter::empty(), 0),
+                                reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                                no_precedences: std::mem::take(&mut self.no_precedences),
+                                states: self.states().collect(),
+                            });
+                        }
                     }
                 }
             }
@@ -805,6 +884,7 @@ impl<
                 };
 
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+                std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
                 return Err(ParseError {
                     term: TerminalSymbol::Term(term),
                     location: err_location,
@@ -816,9 +896,9 @@ impl<
         }
 
         self.current_nodes = std::mem::take(&mut self.next_nodes);
+        self.current_userdatas = std::mem::take(&mut self.next_userdatas);
         Ok(())
     }
-
     fn skip_last_n(&self, mut node: usize, mut count: usize) -> Option<(usize, usize)> {
         loop {
             let node_ = self.node(node);
@@ -842,10 +922,19 @@ impl<
         class: P::TermClass,
         shift_prec: Precedence,
         location: Data::Location,
-        userdata: &mut Data::UserData,
-    ) -> Result<(), (usize, TerminalSymbol<P::Term>, Data::Location)>
+        userdata: Data::UserData,
+    ) -> Result<
+        (),
+        (
+            usize,
+            TerminalSymbol<P::Term>,
+            Data::Location,
+            Data::UserData,
+        ),
+    >
     where
         Data: Clone,
+        Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
@@ -917,13 +1006,14 @@ impl<
 
             let mut shifted = false;
             let mut reduced_node = node;
+            let mut reduced_userdata = userdata.clone();
             if !reduces.is_empty() {
-                // call every reduce action
-                // and check if every reduce action revoked shift
+                // Each GLR branch receives its own user data copy before running reduce actions.
                 let mut shift_ = false;
                 let l = reduces.len();
                 for (idx, (reduce_rule, precedence)) in reduces.into_iter().enumerate() {
                     let mut pass = shift.is_some();
+                    let mut branch_userdata = userdata.clone();
 
                     // in `self.reduce()`, it will delete the node if it is leaf node.
                     // but there are multiple reduce actions for this node and also shift action,
@@ -939,7 +1029,7 @@ impl<
                         node,
                         &term,
                         &mut pass,
-                        userdata,
+                        &mut branch_userdata,
                     ) {
                         Ok(next_node) => {
                             shift_ |= pass;
@@ -951,13 +1041,14 @@ impl<
                                 class,
                                 shift_prec,
                                 location.clone(),
-                                userdata,
+                                branch_userdata,
                             ) {
                                 Ok(_) => {
                                     shifted = true;
                                 }
-                                Err((reduced_node_, _, _)) => {
+                                Err((reduced_node_, _, _, userdata_)) => {
                                     reduced_node = reduced_node_;
+                                    reduced_userdata = userdata_;
                                 }
                             }
                         }
@@ -1011,13 +1102,12 @@ impl<
                 }
 
                 self.next_nodes.push(node);
+                self.next_userdatas.push(userdata);
+                Ok(())
+            } else if shifted {
                 Ok(())
             } else {
-                if shifted {
-                    Ok(())
-                } else {
-                    Err((reduced_node, term, location))
-                }
+                Err((reduced_node, term, location, reduced_userdata))
             }
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
@@ -1047,23 +1137,24 @@ impl<
             }
 
             self.next_nodes.push(node);
+            self.next_userdatas.push(userdata);
             Ok(())
         } else {
             // no reduce, no shift
-            Err((node, term, location))
+            Err((node, term, location, userdata))
         }
     }
-
     fn panic_mode(
         &mut self,
         mut node: usize,
         error_prec: Precedence,
-        userdata: &mut Data::UserData,
+        userdata: Data::UserData,
         extra_state_stack: &mut Vec<StateIndex>,
         extra_precedence_stack: &mut Vec<Precedence>,
     ) -> Data::Location
     where
         Data: Clone,
+        Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
@@ -1165,18 +1256,16 @@ impl<
             userdata,
         ) {
             Ok(()) => {}
-            Err((err_node, _, _)) => {
+            Err((err_node, _, _, _)) => {
                 self.try_remove_node(err_node);
             } // other errors
         }
         error_location
     }
-
     /// Feed one terminal with location to parser, and update state stack.
     pub fn feed_location(
         &mut self,
         term: P::Term,
-        userdata: &mut Data::UserData,
         location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -1184,6 +1273,7 @@ impl<
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
         Data: Clone,
+        Data::UserData: Clone,
     {
         use crate::parser::State;
         use crate::Location;
@@ -1191,14 +1281,17 @@ impl<
         self.reduce_errors.clear();
         self.no_precedences.clear();
         self.fallback_nodes.clear();
+        self.fallback_userdatas.clear();
         self.next_nodes.clear();
+        self.next_userdatas.clear();
 
         let class = P::TermClass::from_term(&term);
         let shift_prec = class.precedence();
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
-        for node in current_nodes.drain(..) {
-            if let Err((node, _, _)) = self.feed_location_impl(
+        let mut current_userdatas = std::mem::take(&mut self.current_userdatas);
+        for (node, userdata) in current_nodes.drain(..).zip(current_userdatas.drain(..)) {
+            if let Err((node, _, _, userdata)) = self.feed_location_impl(
                 node,
                 TerminalSymbol::Term(term.clone()),
                 class,
@@ -1208,10 +1301,12 @@ impl<
             ) {
                 // store to fallback nodes in case of all nodes failed to shift
                 self.fallback_nodes.push(node);
+                self.fallback_userdatas.push(userdata);
             }
         }
         // put back for reused allocated memory
         self.current_nodes = current_nodes;
+        self.current_userdatas = current_userdatas;
 
         // next_nodes is empty; invalid terminal was given
         // check for panic mode
@@ -1220,6 +1315,7 @@ impl<
             // early return if `error` token is not used in the grammar
             if !P::ERROR_USED {
                 std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+                std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
 
                 return Err(ParseError {
                     term: TerminalSymbol::Term(term),
@@ -1233,6 +1329,8 @@ impl<
             let error_prec = P::TermClass::ERROR.precedence();
 
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
+            let mut fallback_userdatas = std::mem::take(&mut self.fallback_userdatas);
+            let root_userdata = fallback_userdatas.first().cloned();
             let mut extra_state_stack = Vec::new();
             let mut extra_precedence_stack = Vec::new();
             let mut error_location = if let Some(&first_node) = fallback_nodes.first() {
@@ -1241,7 +1339,7 @@ impl<
                 location.clone()
             };
             // try enter panic mode and store error nodes to next_nodes
-            for node in fallback_nodes.drain(..) {
+            for (node, userdata) in fallback_nodes.drain(..).zip(fallback_userdatas.drain(..)) {
                 error_location = self.panic_mode(
                     node,
                     error_prec,
@@ -1252,28 +1350,31 @@ impl<
             }
             // put back for reuse allocated memory
             self.fallback_nodes = fallback_nodes;
+            self.fallback_userdatas = fallback_userdatas;
 
             if self.next_nodes.is_empty() {
                 // for-loop above doesn't check for root state (0).
                 // check for 0 state here
                 if P::get_states()[0].can_accept_error() == crate::TriState::True {
-                    // all nodes were deleted, so create new
-                    let node = self.new_node();
-                    if let Err(_) = self.feed_location_impl(
-                        node,
-                        TerminalSymbol::Error,
-                        P::TermClass::ERROR,
-                        error_prec,
-                        error_location,
-                        userdata,
-                    ) {
-                        return Err(ParseError {
-                            term: TerminalSymbol::Term(term),
-                            location,
-                            reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                            no_precedences: std::mem::take(&mut self.no_precedences),
-                            states: self.states().collect(),
-                        });
+                    if let Some(userdata) = root_userdata {
+                        // all nodes were deleted, so create new
+                        let node = self.new_node();
+                        if let Err(_) = self.feed_location_impl(
+                            node,
+                            TerminalSymbol::Error,
+                            P::TermClass::ERROR,
+                            error_prec,
+                            error_location,
+                            userdata,
+                        ) {
+                            return Err(ParseError {
+                                term: TerminalSymbol::Term(term),
+                                location,
+                                reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                                no_precedences: std::mem::take(&mut self.no_precedences),
+                                states: self.states().collect(),
+                            });
+                        }
                     }
                 }
             }
@@ -1291,7 +1392,8 @@ impl<
             } else {
                 // try shift term to error state
                 let mut next_nodes = std::mem::take(&mut self.next_nodes);
-                for error_node in next_nodes.drain(..) {
+                let mut next_userdatas = std::mem::take(&mut self.next_userdatas);
+                for (error_node, userdata) in next_nodes.drain(..).zip(next_userdatas.drain(..)) {
                     let last_state = self.state(error_node);
                     if let Some(next_state) = P::get_states()[last_state].shift_goto_class(class) {
                         // A -> a . error b
@@ -1312,6 +1414,7 @@ impl<
                         }
 
                         self.current_nodes.push(error_node);
+                        self.current_userdatas.push(userdata);
                     } else {
                         // here, fed token is in `error` non-terminal
                         // so merge location with previous
@@ -1324,17 +1427,19 @@ impl<
                         *node.location_stack.last_mut().unwrap() = new_location;
 
                         self.current_nodes.push(error_node);
+                        self.current_userdatas.push(userdata);
                     }
                 }
                 self.next_nodes = next_nodes;
+                self.next_userdatas = next_userdatas;
                 Ok(())
             }
         } else {
             std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);
+            std::mem::swap(&mut self.current_userdatas, &mut self.next_userdatas);
             Ok(())
         }
     }
-
     /// Feed one terminal with location to parser, and update state stack.
     fn can_feed_impl(
         &self,
@@ -1689,20 +1794,22 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     /// Feed eof symbol with default zero-length location from the end of stream.
     fn feed_eof(
         &mut self,
-        userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
         Data: Clone,
+        Data::UserData: Clone,
     {
         use crate::location::Location;
 
         self.reduce_errors.clear();
         self.no_precedences.clear();
         self.fallback_nodes.clear();
+        self.fallback_userdatas.clear();
         self.next_nodes.clear();
+        self.next_userdatas.clear();
 
         let eof_location = if let Some(&node) = self.current_nodes.first() {
             Data::Location::new(self.location_iter(node), 0)
@@ -1711,9 +1818,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         };
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
-        for node in current_nodes.drain(..) {
+        let mut current_userdatas = std::mem::take(&mut self.current_userdatas);
+        for (node, userdata) in current_nodes.drain(..).zip(current_userdatas.drain(..)) {
             let node_eof_location = Data::Location::new(self.location_iter(node), 0);
-            if let Err((node, _, _)) = self.feed_location_impl(
+            if let Err((node, _, _, userdata)) = self.feed_location_impl(
                 node,
                 TerminalSymbol::Eof,
                 P::TermClass::EOF,
@@ -1722,15 +1830,18 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 userdata,
             ) {
                 self.fallback_nodes.push(node);
+                self.fallback_userdatas.push(userdata);
             }
         }
         self.current_nodes = current_nodes;
+        self.current_userdatas = current_userdatas;
 
         // next_nodes is empty; invalid terminal was given
         // check for panic mode
         // and restore nodes to original state from fallback_nodes
         if self.next_nodes.is_empty() {
             std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
+            std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
 
             Err(ParseError {
                 term: TerminalSymbol::Eof,
@@ -1741,6 +1852,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             })
         } else {
             std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);
+            std::mem::swap(&mut self.current_userdatas, &mut self.next_userdatas);
             Ok(())
         }
     }
@@ -1781,20 +1893,26 @@ impl<
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
     > Default for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+where
+    Data::UserData: Default,
 {
     fn default() -> Self {
         let mut context = Context {
             nodes_pool: Default::default(),
             empty_node_indices: Default::default(),
             current_nodes: Default::default(),
+            current_userdatas: Default::default(),
             next_nodes: Default::default(),
+            next_userdatas: Default::default(),
             reduce_errors: Default::default(),
             fallback_nodes: Default::default(),
+            fallback_userdatas: Default::default(),
             no_precedences: Default::default(),
             _phantom: std::marker::PhantomData,
         };
         let root_node = context.new_node();
         context.current_nodes.push(root_node);
+        context.current_userdatas.push(Default::default());
         context
     }
 }
@@ -1808,12 +1926,14 @@ impl<
 where
     Node<Data, StateIndex>: Clone,
     Data::ReduceActionError: Clone,
+    Data::UserData: Clone + Default,
 {
     fn clone(&self) -> Self {
         Context {
             nodes_pool: self.nodes_pool.clone(),
             empty_node_indices: self.empty_node_indices.clone(),
             current_nodes: self.current_nodes.clone(),
+            current_userdatas: self.current_userdatas.clone(),
             // next_nodes: self.next_nodes.clone(),
             // fallback_nodes: self.fallback_nodes.clone(),
             // reduce_errors: self.reduce_errors.clone(),

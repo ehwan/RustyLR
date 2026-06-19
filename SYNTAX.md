@@ -301,7 +301,7 @@ Expr(i32) : Expr '+' Expr { $1 + $3 };
 ```
 
 ### 4. User Data (`data`)
-Access mutable user data passed to the `feed()` function. It is exposed in reduce actions as `data` (of type `&mut UserData`):
+Access mutable user data owned by the parsing context. It is exposed in reduce actions as `data` (of type `&mut UserData`):
 ```rust
 Expr(i32) : Term { 
     *data += 1; // Increment a parse counter
@@ -559,7 +559,7 @@ pub trait Location: Default + Clone {
 
 To feed locations, use `feed_location` instead of `feed`:
 ```rust
-context.feed_location(&parser, token, &mut userdata, span);
+context.feed_location(token, span);
 ```
 
 Within reduce actions, access symbol spans using the `@` prefix:

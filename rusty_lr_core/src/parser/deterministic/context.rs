@@ -23,6 +23,7 @@ pub struct Context<
     pub(crate) data_stack: Data,
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) precedence_stack: Vec<Precedence>,
+    pub(crate) userdata: Data::UserData,
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
@@ -37,22 +38,30 @@ impl<
 {
     /// Create a new context.
     /// `state_stack` is initialized with [0] (root state).
-    pub fn new() -> Self {
+    pub fn new(userdata: Data::UserData) -> Self {
         Context {
             state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
             data_stack: Default::default(),
             location_stack: Vec::new(),
             precedence_stack: Vec::new(),
+            userdata,
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
             _phantom: std::marker::PhantomData,
         }
     }
+    /// Create a new context using `Default::default()` as user data.
+    pub fn with_default_userdata() -> Self
+    where
+        Data::UserData: Default,
+    {
+        Self::new(Default::default())
+    }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
     /// `state_stack` is initialized with [0] (root state).
-    pub fn with_capacity(capacity: usize) -> Self {
+    pub fn with_capacity(capacity: usize, userdata: Data::UserData) -> Self {
         let mut state_stack = Vec::with_capacity(capacity);
         state_stack.push(
             StateIndex::from_usize_unchecked(0), // root state
@@ -63,26 +72,61 @@ impl<
             data_stack: Data::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
+            userdata,
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
             _phantom: std::marker::PhantomData,
         }
     }
+    /// Create a new context with capacity using `Default::default()` as user data.
+    pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
+    where
+        Data::UserData: Default,
+    {
+        Self::with_capacity(capacity, Default::default())
+    }
+    /// Borrow the user data owned by this context.
+    pub fn userdata(&self) -> &Data::UserData {
+        &self.userdata
+    }
+
+    /// Mutably borrow the user data owned by this context.
+    pub fn userdata_mut(&mut self) -> &mut Data::UserData {
+        &mut self.userdata
+    }
+
     /// End this context and pop the value of the start symbol from the data stack.
     pub fn accept(
         mut self,
-        userdata: &mut Data::UserData,
-    ) -> Result<Data::StartType, ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<
+        (Data::StartType, Data::UserData),
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
     where
         Data::Term: Clone,
         Data::NonTerm: std::fmt::Debug,
         P::State: State<StateIndex = StateIndex>,
     {
-        self.feed_eof(userdata)?;
+        self.feed_eof()?;
 
         // data_stack must be <Start> in this point
-        Ok(self.data_stack.pop_start().unwrap())
+        Ok((self.data_stack.pop_start().unwrap(), self.userdata))
+    }
+
+    /// End this context and return the start symbol together with the final user data.
+    pub fn accept_one(
+        self,
+    ) -> Result<
+        (Data::StartType, Data::UserData),
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
+    where
+        Data::Term: Clone,
+        Data::NonTerm: std::fmt::Debug,
+        P::State: State<StateIndex = StateIndex>,
+    {
+        self.accept()
     }
 
     /// Check if current context can be terminated and get the value of the start symbol.
@@ -218,7 +262,6 @@ impl<
     pub fn feed(
         &mut self,
         term: Data::Term,
-        userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
@@ -227,7 +270,6 @@ impl<
     {
         self.feed_location(
             term,
-            userdata,
             Data::Location::new(self.location_stack.iter().rev(), 0),
         )
     }
@@ -236,7 +278,6 @@ impl<
     pub fn feed_location(
         &mut self,
         term: P::Term,
-        userdata: &mut Data::UserData,
         location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -248,13 +289,7 @@ impl<
         let class = P::TermClass::from_term(&term);
         let shift_prec = class.precedence();
 
-        match self.feed_location_impl(
-            TerminalSymbol::Term(term),
-            class,
-            shift_prec,
-            userdata,
-            location,
-        ) {
+        match self.feed_location_impl(TerminalSymbol::Term(term), class, shift_prec, location) {
             Ok(()) => Ok(()),
             Err(ParseError::NoAction(err)) => {
                 // nothing shifted; enters panic mode
@@ -325,7 +360,6 @@ impl<
                     TerminalSymbol::Error,
                     P::TermClass::ERROR,
                     error_prec,
-                    userdata,
                     error_location,
                 ) {
                     Ok(()) => {
@@ -378,7 +412,6 @@ impl<
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
         shift_prec: Precedence,
-        userdata: &mut Data::UserData,
         location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -483,7 +516,7 @@ impl<
                     reduce_rule.into_usize(),
                     &mut shift,
                     &term,
-                    userdata,
+                    &mut self.userdata,
                     &mut new_location,
                 ) {
                     Ok(_) => {}
@@ -736,7 +769,6 @@ impl<
 
     fn feed_eof(
         &mut self,
-        userdata: &mut Data::UserData,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
         P::Term: Clone,
@@ -748,7 +780,6 @@ impl<
             TerminalSymbol::Eof,
             P::TermClass::EOF,
             Precedence::none(),
-            userdata,
             eof_location,
         )
     }
@@ -759,9 +790,11 @@ impl<
         Data: DataStack,
         StateIndex: Index + Copy,
     > Default for Context<P, Data, StateIndex>
+where
+    Data::UserData: Default,
 {
     fn default() -> Self {
-        Self::new()
+        Self::with_default_userdata()
     }
 }
 
@@ -774,6 +807,7 @@ where
     Data: Clone,
     Data::Term: Clone,
     Data::NonTerm: Clone,
+    Data::UserData: Clone,
 {
     fn clone(&self) -> Self {
         Context {
@@ -781,6 +815,7 @@ where
             data_stack: self.data_stack.clone(),
             location_stack: self.location_stack.clone(),
             precedence_stack: self.precedence_stack.clone(),
+            userdata: self.userdata.clone(),
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),

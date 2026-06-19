@@ -641,6 +641,7 @@ pub struct RuleDefArgs {
     pub rule_lines: Vec<RuleLineArgs>,
 }
 
+#[derive(Clone)]
 pub struct RecoveredError {
     pub message: String,
     pub link: String,
@@ -648,6 +649,7 @@ pub struct RecoveredError {
 }
 
 /// parsed arguments for the grammar
+#[derive(Clone)]
 pub struct GrammarArgs {
     pub module_prefix: Vec<(Location, TokenStream)>,
     pub token_typename: Vec<(Location, TokenStream)>,
