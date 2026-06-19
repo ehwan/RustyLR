@@ -24,8 +24,6 @@ pub enum ArgError {
     MultipleErrorDefinition(Vec<Location>),
     /// multiple %tokentype in the same grammar
     MultipleTokenTypeDefinition(Vec<Location>),
-    /// multiple %eof in the same grammar
-    MultipleEofDefinition(Vec<Location>),
     /// multiple %start in the same grammar
     MultipleStartDefinition(Vec<Location>),
     /// multiple %prec in the same rule
@@ -36,7 +34,6 @@ pub enum ArgError {
     MultipleLocationDefinition(Vec<Location>),
 
     StartNotDefined,
-    EofNotDefined,
     TokenTypeNotDefined,
 
     /// duplicated name for terminal symbols or non-terminal symbols
@@ -159,7 +156,6 @@ impl ArgError {
             | ArgError::MultipleErrorDefinition(locs)
             | ArgError::MultipleTokenTypeDefinition(locs)
             | ArgError::MultipleLocationDefinition(locs)
-            | ArgError::MultipleEofDefinition(locs)
             | ArgError::MultipleStartDefinition(locs)
             | ArgError::MultiplePrecDefinition(locs)
             | ArgError::MultipleDPrecDefinition(locs) => locs.clone(),
@@ -178,12 +174,10 @@ impl ArgError {
             ArgError::MultipleErrorDefinition(_) => "Multiple %error definition".into(),
             ArgError::MultipleTokenTypeDefinition(_) => "Multiple %tokentype definition".into(),
             ArgError::MultipleLocationDefinition(_) => "Multiple %location definition".into(),
-            ArgError::MultipleEofDefinition(_) => "Multiple %eof definition".into(),
             ArgError::MultipleStartDefinition(_) => "Multiple %start definition".into(),
             ArgError::MultiplePrecDefinition(_) => "Multiple %prec definition".into(),
             ArgError::MultipleDPrecDefinition(_) => "Multiple %dprec definition".into(),
             ArgError::StartNotDefined => "Start rule not defined\n>>> %start <rule_name>;".into(),
-            ArgError::EofNotDefined => "Eof not defined\n>>> %eof <eof_token_value>;".into(),
             ArgError::TokenTypeNotDefined => {
                 "Token type not defined\n>>> %tokentype <token_type_name>;".into()
             }

@@ -451,26 +451,6 @@ impl Builder {
                             )
                     }
 
-                    ArgError::MultipleEofDefinition(locs) => {
-                        let mut labels = Vec::new();
-                        for (i, loc) in locs.iter().enumerate() {
-                            let range = grammar_args
-                                .span_manager
-                                .get_byterange(&loc)
-                                .unwrap_or(0..0);
-                            let message = if i == 0 {
-                                "First definition"
-                            } else {
-                                "Other definition"
-                            };
-                            labels.push(Label::primary(file_id, range).with_message(message));
-                        }
-
-                        Diagnostic::error()
-                            .with_message("Multiple %eof definition")
-                            .with_labels(labels)
-                            .with_notes(vec!["Only one %eof definition is allowed".to_string()])
-                    }
                     ArgError::MultipleStartDefinition(locs) => {
                         let mut labels = Vec::new();
                         for (i, loc) in locs.iter().enumerate() {
@@ -538,13 +518,6 @@ impl Builder {
                         .with_notes(vec![
                             "%start must be defined".to_string(),
                             ">>> %start <non-terminal>".to_string(),
-                        ]),
-                    ArgError::EofNotDefined => Diagnostic::error()
-                        .with_message("%eof not defined")
-                        .with_labels(vec![])
-                        .with_notes(vec![
-                            "%eof must be defined".to_string(),
-                            ">>> %eof <terminal>".to_string(),
                         ]),
                     ArgError::TokenTypeNotDefined => Diagnostic::error()
                         .with_message("%tokentype not defined")
