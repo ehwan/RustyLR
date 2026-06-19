@@ -1,4 +1,3 @@
-use std::hash::Hash;
 use std::num::NonZeroUsize;
 
 use super::Node;
@@ -268,7 +267,7 @@ impl<
     }
 
     /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
-    /// Returns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
+    /// Retuns the index of node that it's data_stack, location_stack and tree_stack have more elements than reduce_token_count,
     /// and other stack containing the (data_stack.len() - reduce_token_count) number of elements.
     fn prepare_reduce_node(
         &mut self,
@@ -560,153 +559,6 @@ impl<
             trees.reverse();
             crate::tree::TreeList { trees }
         })
-    }
-
-    fn backtrace_impl(&self, node: usize) -> crate::Backtrace<P::TermClass, P::NonTerm>
-    where
-        P::Term: Clone,
-        P::NonTerm: std::hash::Hash + Eq,
-    {
-        use crate::hash::HashSet;
-        use crate::rule::ShiftedRule;
-        use crate::rule::ShiftedRuleRef;
-        use crate::Backtrace;
-        use crate::Token;
-        use std::collections::BTreeSet;
-
-        // root
-        if self.node(node).len() == 0 && self.node(node).parent.is_none() {
-            let state0 = &P::get_states()[0];
-            let mut rules = Vec::with_capacity(state0.get_rules().len());
-            for rule in state0.get_rules().iter() {
-                rules.push(ShiftedRule {
-                    rule: P::get_rules()[rule.rule].clone(),
-                    shifted: rule.shifted,
-                });
-            }
-
-            return Backtrace {
-                traces: vec![rules],
-            };
-        }
-
-        let mut traces = Vec::new();
-        let mut current_rules: BTreeSet<_> = P::get_states()[self.state(node)]
-            .get_rules()
-            .iter()
-            // .filter(|rule| rule.shifted > 0)
-            .copied()
-            .collect();
-        let mut next_rules = BTreeSet::new();
-        traces.push(current_rules.clone());
-        let mut zero_shifted_rules: HashSet<Data::NonTerm> = Default::default();
-
-        for state_idx in self.state_iter(node).skip(1) {
-            zero_shifted_rules.clear();
-            next_rules.clear();
-            for rule in current_rules.iter() {
-                if rule.shifted > 0 {
-                    next_rules.insert(ShiftedRuleRef {
-                        rule: rule.rule,
-                        shifted: rule.shifted - 1,
-                    });
-                    if rule.shifted == 1 {
-                        zero_shifted_rules.insert(P::get_rules()[rule.rule].name.clone());
-                    }
-                }
-            }
-            std::mem::swap(&mut current_rules, &mut next_rules);
-            if zero_shifted_rules.is_empty() {
-                continue;
-            }
-
-            loop {
-                let len0 = current_rules.len();
-                for rule in P::get_states()[state_idx].get_rules().iter() {
-                    let prod_rule = &P::get_rules()[rule.rule];
-                    if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
-                        if zero_shifted_rules.contains(nonterm) {
-                            current_rules.insert(*rule);
-                            if rule.shifted == 0 {
-                                zero_shifted_rules.insert(prod_rule.name.clone());
-                            }
-                        }
-                    }
-                }
-                if len0 == current_rules.len() {
-                    break;
-                }
-            }
-            traces.push(current_rules.clone());
-        }
-
-        // node.iter() does not include root node.
-        // so explicitly add root node.
-        {
-            let state_idx = 0;
-            zero_shifted_rules.clear();
-            next_rules.clear();
-            for rule in current_rules.iter() {
-                if rule.shifted > 0 {
-                    next_rules.insert(ShiftedRuleRef {
-                        rule: rule.rule,
-                        shifted: rule.shifted - 1,
-                    });
-                    if rule.shifted == 1 {
-                        zero_shifted_rules.insert(P::get_rules()[rule.rule].name.clone());
-                    }
-                }
-            }
-            std::mem::swap(&mut current_rules, &mut next_rules);
-            if !zero_shifted_rules.is_empty() {
-                loop {
-                    let len0 = current_rules.len();
-                    for rule in P::get_states()[state_idx].get_rules().iter() {
-                        let prod_rule = &P::get_rules()[rule.rule];
-                        if let Some(Token::NonTerm(nonterm)) = prod_rule.rule.get(rule.shifted) {
-                            if zero_shifted_rules.contains(nonterm) {
-                                current_rules.insert(*rule);
-                                if rule.shifted == 0 {
-                                    zero_shifted_rules.insert(prod_rule.name.clone());
-                                }
-                            }
-                        }
-                    }
-                    if len0 == current_rules.len() {
-                        break;
-                    }
-                }
-                traces.push(current_rules.clone());
-            }
-        }
-
-        Backtrace {
-            traces: traces
-                .into_iter()
-                .map(|rules| {
-                    rules
-                        .into_iter()
-                        .map(|rule| ShiftedRule {
-                            rule: P::get_rules()[rule.rule].clone(),
-                            shifted: rule.shifted,
-                        })
-                        .collect()
-                })
-                .collect(),
-        }
-    }
-
-    /// Get backtrace infos for all paths.
-    pub fn backtraces<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = crate::Backtrace<P::TermClass, P::NonTerm>> + 'a
-    where
-        Data::Term: Clone,
-        Data::NonTerm: Hash + Eq,
-    {
-        self.current_nodes
-            .iter()
-            .map(|&node| self.backtrace_impl(node))
     }
 
     fn expected_token_impl(
