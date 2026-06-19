@@ -24,5 +24,5 @@ pub use parser::location::Location;
 /// Gets the version of the rusty_lr_core crate that current crate is targeting.
 /// If the version is not matched, there will be a compile-time error.
 pub fn target_rusty_lr_version() -> (usize, usize, usize) {
-    (3, 37, 0)
+    (4, 0, 0)
 }
