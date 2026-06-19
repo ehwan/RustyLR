@@ -105,7 +105,7 @@ rustylr src/grammar.rs src/parser.rs
 ```
 
 ### 5. Parse a Token Stream
-Simply initialize the state context using `Context::new()`, and feed your tokens to it:
+Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it:
 
 ```rust
 // src/main.rs
@@ -122,18 +122,17 @@ fn main() {
         Token::Num(2),
     ];
 
-    let mut context = parser::ExprContext::new();
-    let mut userdata = (); // No custom user data needed
+    let mut context = parser::ExprContext::with_default_userdata();
 
     for token in tokens {
-        if let Err(err) = context.feed(token, &mut userdata) {
+        if let Err(err) = context.feed(token) {
             eprintln!("Parse error: {}", err);
             return;
         }
     }
 
-    match context.accept(&mut userdata) {
-        Ok(result) => {
+    match context.accept() {
+        Ok((result, _userdata)) => {
             println!("Parsed result: {}", result); // Output: 11
         }
         Err(err) => {
@@ -160,7 +159,7 @@ The generated parser module contains several generated components tailored to yo
 ### Interacting with the Parsing Context
 The `<Start>Context` offers helpful utilities for inspecting and tracing:
 ```rust
-let mut context = ExprContext::new();
+let mut context = ExprContext::with_default_userdata();
 
 // ... feed tokens ...
 
@@ -173,10 +172,10 @@ println!("{}", context);     // Formats the state tree (requires 'tree' feature)
 You can feed terminal symbols either with or without location information:
 ```rust
 // Basic feeding
-context.feed(token, &mut userdata);
+context.feed(token);
 
 // Location-aware feeding (requires %location in grammar)
-context.feed_location(token, &mut userdata, token_location);
+context.feed_location(token, token_location);
 ```
 
 ---
@@ -184,6 +183,8 @@ context.feed_location(token, &mut userdata, token_location);
 ## GLR Parsing
 
 RustyLR provides native support for Generalized LR (GLR) parsing. When you add the `%glr;` directive to a grammar, RustyLR generates a non-deterministic parser that forks state branches upon encountering shift/reduce or reduce/reduce conflicts. This is particularly useful for ambiguous grammars or complex programming languages.
+
+In GLR mode, user data is branch-local. When the parser forks, the current user data is cloned so each active branch owns and mutates an independent `UserData` value.
 
 For more details, see [GLR.md](GLR.md).
 

@@ -169,11 +169,9 @@ impl Grammar {
     }
 
     pub fn parse_args(input: TokenStream) -> Result<GrammarArgs, (ParseArgError, SpanManager)> {
-        let mut context = GrammarContext::new();
+        let mut context = GrammarContext::new(GrammarArgs::default());
 
-        let mut grammar_args = GrammarArgs::default();
-
-        match crate::parser::lexer::feed_recursive(input, &mut context, &mut grammar_args) {
+        match crate::parser::lexer::feed_recursive(input, &mut context) {
             Ok(_) => {}
             Err(err) => {
                 let message = err.to_string();
@@ -182,12 +180,14 @@ impl Grammar {
                         location: err.location().clone(),
                         message,
                     },
-                    grammar_args.span_manager,
+                    context.userdata().span_manager.clone(),
                 ));
             }
         }
-        match context.accept(&mut grammar_args) {
-            Ok(_) => {}
+
+        let span_manager = context.userdata().span_manager.clone();
+        let (_, grammar_args) = match context.accept() {
+            Ok(result) => result,
             Err(err) => {
                 let message = err.to_string();
                 return Err((
@@ -195,10 +195,10 @@ impl Grammar {
                         location: *err.location(),
                         message,
                     },
-                    grammar_args.span_manager,
+                    span_manager,
                 ));
             }
-        }
+        };
 
         Ok(grammar_args)
     }

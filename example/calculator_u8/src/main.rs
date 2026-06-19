@@ -4,10 +4,9 @@ use parser_expanded as parser;
 fn main() {
     let input = "  1 +  -20 *   (3 + 4 )   ";
 
-    let mut context = parser::EContext::new();
-    let mut userdata: i32 = 0;
+    let mut context = parser::EContext::new(0);
     for b in input.chars() {
-        match context.feed(b, &mut userdata) {
+        match context.feed(b) {
             // feed userdata here
             Ok(_) => {}
             Err(e) => {
@@ -18,16 +17,15 @@ fn main() {
     }
     println!("{:?}", context);
 
-    let result = context.accept(&mut userdata).unwrap(); // get value of start 'E'
+    let (result, userdata) = context.accept().unwrap(); // get value of start 'E'
     println!("result: {}", result);
     println!("userdata: {}", userdata);
 
     // invalid input, expect error
     let error_input = "1+2**(3+4)";
-    let mut context = parser::EContext::new();
-    let mut userdata: i32 = 0;
+    let mut context = parser::EContext::new(0);
     for b in error_input.chars() {
-        match context.feed(b, &mut userdata) {
+        match context.feed(b) {
             // feed userdata here
             Ok(_) => {}
             Err(e) => {
@@ -39,7 +37,7 @@ fn main() {
             }
         }
     }
-    context.feed(0 as char, &mut userdata).unwrap(); // feed EOF
+    context.feed(0 as char).unwrap(); // feed EOF
 }
 
 #[cfg(test)]
@@ -49,24 +47,22 @@ mod tests {
     #[test]
     fn test_calculator_u8_success() {
         let input = "  1 +  -20 *   (3 + 4 )   ";
-        let mut context = parser::EContext::new();
-        let mut userdata: i32 = 0;
+        let mut context = parser::EContext::new(0);
         for b in input.chars() {
-            context.feed(b, &mut userdata).expect("Failed to feed char");
+            context.feed(b).expect("Failed to feed char");
         }
-        let result = context.accept(&mut userdata).expect("Failed to accept");
+        let (result, _) = context.accept().expect("Failed to accept");
         assert_eq!(result, -139.0);
     }
 
     #[test]
     fn test_calculator_u8_invalid_input() {
         let error_input = "1+2**(3+4)";
-        let mut context = parser::EContext::new();
-        let mut userdata: i32 = 0;
+        let mut context = parser::EContext::new(0);
 
         let mut has_err = false;
         for b in error_input.chars() {
-            if context.feed(b, &mut userdata).is_err() {
+            if context.feed(b).is_err() {
                 has_err = true;
                 break;
             }

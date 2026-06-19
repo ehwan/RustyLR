@@ -49,13 +49,12 @@ fn main() {
     println!("#states: {}", parser::JsonParser::get_states().len());
 
     fn try_once() {
-        let mut context = parser::JsonContext::new();
+        let mut context = parser::JsonContext::new(Vec::new());
         let mut range_start = 0;
-        let mut userdata = Vec::new();
         for ch in TEST_JSON.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(ch, &mut userdata, range_start..range_end)
+                .feed_location(ch, range_start..range_end)
                 .expect("Error parsing character");
             range_start = range_end;
         }
@@ -75,23 +74,22 @@ mod tests {
 
     #[test]
     fn test_json_parse_success() {
-        let mut context = parser::JsonContext::new();
+        let mut context = parser::JsonContext::new(Vec::new());
         let input = r#"{"name": "test", "active": true}"#;
 
-        let mut userdata = Vec::new();
         let mut range_start = 0;
         for ch in input.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(ch, &mut userdata, range_start..range_end)
+                .feed_location(ch, range_start..range_end)
                 .expect("Failed to feed character");
             range_start = range_end;
         }
 
         // Verify accept yields Ok(()) - start data of Json (empty type)
-        let result = context.accept(&mut userdata);
+        let result = context.accept();
         assert!(result.is_ok(), "Accept failed: {:?}", result.err());
-        assert_eq!(result.unwrap(), ());
+        let (_, userdata) = result.unwrap();
 
         // No errors should have occurred
         assert!(userdata.is_empty());
@@ -99,22 +97,21 @@ mod tests {
 
     #[test]
     fn test_json_error_recovery_exact_location() {
-        let mut context = parser::JsonContext::new();
+        let mut context = parser::JsonContext::new(Vec::new());
 
         // "invalid" causes syntax error inside { }
         let input = r#"{"name": "test", invalid}"#;
 
-        let mut userdata = Vec::new();
         let mut range_start = 0;
         for ch in input.chars() {
             let range_end = range_start + ch.len_utf8();
             // We ignore individual feed errors here, as panic mode / recovery will proceed
-            let _ = context.feed_location(ch, &mut userdata, range_start..range_end);
+            let _ = context.feed_location(ch, range_start..range_end);
             range_start = range_end;
         }
 
         // Trigger accept (which feeds EOF and resolves recovery)
-        let _ = context.accept(&mut userdata);
+        let (_, userdata) = context.accept().expect("Failed to accept recovered JSON");
 
         // Verify that the error recovery action successfully captured the exact range of the error token
         // In an LR parser, the 'error' token location spans the entire popped/unwound region:
@@ -131,21 +128,20 @@ mod tests {
 
     #[test]
     fn test_unclosed_object_eof_location() {
-        let mut context = parser::JsonContext::new();
+        let mut context = parser::JsonContext::new(Vec::new());
         let input = r#"{"name": "test""#; // unclosed {
 
-        let mut userdata = Vec::new();
         let mut range_start = 0;
         for ch in input.chars() {
             let range_end = range_start + ch.len_utf8();
             context
-                .feed_location(ch, &mut userdata, range_start..range_end)
+                .feed_location(ch, range_start..range_end)
                 .expect("Failed to feed character");
             range_start = range_end;
         }
 
         // Accept should fail because of EOF while parsing object
-        let result = context.accept(&mut userdata);
+        let result = context.accept();
         assert!(result.is_err());
 
         let err = result.err().unwrap();

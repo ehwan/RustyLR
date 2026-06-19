@@ -301,13 +301,15 @@ Expr(i32) : Expr '+' Expr { $1 + $3 };
 ```
 
 ### 4. User Data (`data`)
-Access mutable user data passed to the `feed()` function. It is exposed in reduce actions as `data` (of type `&mut UserData`):
+Access mutable user data owned by the parsing context. It is exposed in reduce actions as `data` (of type `&mut UserData`):
 ```rust
 Expr(i32) : Term { 
     *data += 1; // Increment a parse counter
     Term 
 };
 ```
+
+In GLR mode, user data is branch-local: when the parser forks, the current user data is cloned, and each branch receives its own independently mutable `UserData` value.
 
 ### 5. Lookahead Token (`lookahead`)
 You can inspect the lookahead token that triggered the current reduction. It is exposed as `lookahead` (of type `&TerminalSymbol<TokenType>`):
@@ -521,6 +523,8 @@ Forces RustyLR to generate LALR(1) parsing tables. By default, RustyLR builds mi
 
 Enables Generalized LR (GLR) parser generation. With `%glr;` enabled, shift/reduce and reduce/reduce conflicts are not treated as compiler errors. Instead, the parser splits into parallel execution branches at runtime.
 
+When a GLR parser splits, it also clones the current user data for each branch. Each active branch owns and mutates its own `UserData`, and `accept_all()` returns the final user data for every successful branch.
+
 ---
 
 ## No Optimization
@@ -559,7 +563,7 @@ pub trait Location: Default + Clone {
 
 To feed locations, use `feed_location` instead of `feed`:
 ```rust
-context.feed_location(&parser, token, &mut userdata, span);
+context.feed_location(token, span);
 ```
 
 Within reduce actions, access symbol spans using the `@` prefix:

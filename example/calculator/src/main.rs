@@ -16,12 +16,10 @@ fn main() {
         Token::RParen,
     ];
 
-    let mut context = parser::EContext::new();
-    let mut userdata: i32 = 0;
+    let mut context = parser::EContext::new(0);
     for token in input {
-        match context.feed(token, &mut userdata) {
-            //                          ^^^^^   ^^^^^^^^^^^^ userdata passed here as `&mut i32`
-            //                           |- feed token
+        match context.feed(token) {
+            // feed token
             Ok(_) => {}
             Err(e) => {
                 println!("{:?}", e);
@@ -38,7 +36,7 @@ fn main() {
         );
     }
     // res = value of start symbol ( E(i32) )
-    let res = context.accept(&mut userdata).unwrap();
+    let (res, userdata) = context.accept().unwrap();
     println!("{}", res);
     println!("userdata: {}", userdata);
 }
@@ -62,14 +60,11 @@ mod tests {
             Token::RParen,
         ];
 
-        let mut context = parser::EContext::new();
-        let mut userdata: i32 = 0;
+        let mut context = parser::EContext::new(0);
         for token in input {
-            context
-                .feed(token, &mut userdata)
-                .expect("Failed to feed token");
+            context.feed(token).expect("Failed to feed token");
         }
-        let res = context.accept(&mut userdata).expect("Failed to accept");
+        let (res, userdata) = context.accept().expect("Failed to accept");
         assert_eq!(res, 15);
         assert_eq!(userdata, 2);
     }

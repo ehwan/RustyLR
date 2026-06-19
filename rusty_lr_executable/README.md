@@ -113,12 +113,12 @@ $ rustylr my_grammar.rs my_parser.rs
 This will create `my_parser.rs` containing the generated parser code.
 
 **Using the generated parser:**
-Simply initialize the state context using `Context::new()`, and feed your tokens to it:
+Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it:
 ```rust
 include!("my_parser.rs");
 
 fn main() {
-    let mut context = EContext::new();
+    let mut context = EContext::with_default_userdata();
 
     // Parse some tokens
     let tokens = vec![
@@ -128,14 +128,14 @@ fn main() {
     ];
 
     for token in tokens {
-        match context.feed(token, &mut ()) {
+        match context.feed(token) {
             Ok(_) => println!("Token accepted"),
             Err(e) => println!("Parse error: {}", e),
         }
     }
 
     // Get the final result
-    if let Ok(result) = context.accept(&mut ()) {
+    if let Ok((result, _userdata)) = context.accept() {
         println!("Parse successful: {:?}", result);
     }
 }
