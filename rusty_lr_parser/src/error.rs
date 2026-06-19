@@ -34,8 +34,6 @@ pub enum ArgError {
     MultipleDPrecDefinition(Vec<Location>),
     /// multiple %location in the same grammar
     MultipleLocationDefinition(Vec<Location>),
-    /// multiple %filter in the same grammar
-    MultipleFilterDefinition(Vec<Location>),
 
     StartNotDefined,
     EofNotDefined,
@@ -135,9 +133,6 @@ pub enum ParseError {
         location: Location,
         max_depth: usize,
     },
-
-    /// $filter was used in variable substitution but %filter function not defined
-    FilterNotDefined(Location),
 }
 impl ArgError {
     pub fn to_compile_error(
@@ -164,7 +159,6 @@ impl ArgError {
             | ArgError::MultipleErrorDefinition(locs)
             | ArgError::MultipleTokenTypeDefinition(locs)
             | ArgError::MultipleLocationDefinition(locs)
-            | ArgError::MultipleFilterDefinition(locs)
             | ArgError::MultipleEofDefinition(locs)
             | ArgError::MultipleStartDefinition(locs)
             | ArgError::MultiplePrecDefinition(locs)
@@ -184,7 +178,6 @@ impl ArgError {
             ArgError::MultipleErrorDefinition(_) => "Multiple %error definition".into(),
             ArgError::MultipleTokenTypeDefinition(_) => "Multiple %tokentype definition".into(),
             ArgError::MultipleLocationDefinition(_) => "Multiple %location definition".into(),
-            ArgError::MultipleFilterDefinition(_) => "Multiple %filter definition".into(),
             ArgError::MultipleEofDefinition(_) => "Multiple %eof definition".into(),
             ArgError::MultipleStartDefinition(_) => "Multiple %start definition".into(),
             ArgError::MultiplePrecDefinition(_) => "Multiple %prec definition".into(),
@@ -283,7 +276,6 @@ impl ParseError {
             ParseError::TypeInferenceFailed(location) => vec![*location],
             ParseError::CircularDependency { location, .. } => vec![*location],
             ParseError::MaxSubstitutionDepthExceeded { location, .. } => vec![*location],
-            ParseError::FilterNotDefined(loc) => vec![*loc],
         }
     }
 
@@ -358,9 +350,6 @@ impl ParseError {
                     "Maximum variable substitution depth ({}) exceeded",
                     max_depth
                 )
-            }
-            ParseError::FilterNotDefined(_) => {
-                "Filter function not defined. Define it using %filter <path>;".to_string()
             }
         }
     }

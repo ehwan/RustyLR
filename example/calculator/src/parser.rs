@@ -7,9 +7,7 @@ pub enum Token {
     RParen,
 }
 
-fn filter( term: &Token ) -> &Token {
-    term
-}
+
 
 %%
 
@@ -41,7 +39,6 @@ fn filter( term: &Token ) -> &Token {
 %left plus;
 %left star;
 
-%filter filter;
 
 // data that each token holds can be accessed by its name
 // s is slice of shifted terminal symbols captured by current rule

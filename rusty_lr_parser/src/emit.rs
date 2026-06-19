@@ -251,11 +251,6 @@ impl Grammar {
 
         let other_class_id = self.other_terminal_class_id;
 
-        let match_terminal_filter_expression = if let Some(filter) = &self.filter {
-            quote! { #filter(terminal) }
-        } else {
-            quote! {terminal}
-        };
         let mut from_term_match_stream = TokenStream::new();
 
         // building terminal-class_id map
@@ -404,7 +399,7 @@ impl Grammar {
                 }
                 fn from_term(terminal: &Self::Term) -> Self {
                     #[allow(unreachable_patterns, unused_variables)]
-                    match #match_terminal_filter_expression {
+                    match terminal {
                         #from_term_match_stream
                     }
                 }

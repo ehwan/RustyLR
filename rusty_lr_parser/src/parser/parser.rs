@@ -80,7 +80,6 @@ use rusty_lr_core::rule::ReduceType;
 %token nooptim Lexed::NoOptim(_);
 %token dense Lexed::Dense(_);
 %token dprec Lexed::DPrec(_);
-%token filter Lexed::Filter(_);
 %token location Lexed::Location(_);
 
 %start Grammar;
@@ -633,16 +632,7 @@ Directive
         });
     }
 
-    | percent filter! RustCode semicolon! {
-        data.filter.push((@filter, RustCode));
-    }
-    | percent filter! semicolon! {
-        data.error_recovered.push( RecoveredError {
-            message: "Expected filter definition".to_string(),
-            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#filter-directive".to_string(),
-            location: @filter,
-        });
-    }
+
     | percent location! RustCode semicolon! {
         data.location_typename.push((@location, RustCode));
     }

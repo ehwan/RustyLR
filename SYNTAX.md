@@ -8,7 +8,6 @@ This document provides a comprehensive guide to the grammar definition syntax us
 
 - [Token Type (`%tokentype`)](#token-type-must-defined)
 - [Token Definition (`%token`)](#token-definition-must-defined)
-- [Filter Directive (`%filter`)](#filter-directive)
 - [Production Rules](#production-rules)
 - [Patterns](#patterns)
 - [RuleType (Non-Terminal Types)](#ruletype-optional)
@@ -69,23 +68,34 @@ pub enum Token {
 %token name <MatchPattern> ;
 ```
 
-Binds a grammar terminal symbol (`name`) to a pattern (`<MatchPattern>`) used to classify tokens. Under the hood, RustyLR generates a `match` statement to identify the token:
+Binds a grammar terminal symbol (`name`) to a pattern (`<MatchPattern>`) used to classify input tokens. 
+
+### How it works under the hood
+Under the hood, RustyLR generates a standard Rust `match` statement where each `<MatchPattern>` is used directly as a match arm pattern to identify the token:
 
 ```rust
 match terminal_token {
-    <MatchPattern> => { /* Classified as `name` */ },
+    // The <MatchPattern> you wrote is placed here verbatim:
+    <MatchPattern> => { /* Classified as terminal `name` */ },
     ...
 }
 ```
 
-### Example
+Because of this direct translation, **any pattern that is valid in a Rust `match` arm is valid as a `<MatchPattern>`**. This gives you full control and flexibility without requiring separate adapter functions or external filter layers.
+
+---
+
+### Simple Example: Enum Tokens
+If your token type is a simple flat enum:
+
 ```rust
 %tokentype Token;
 
-%token id Token::Ident(_);   // Matches Token::Ident("foo")
-%token num Token::Num(_);     // Matches Token::Num(42)
-%token plus Token::Plus;       // Matches Token::Plus
-%token minus Token::Minus;     // Matches Token::Minus
+// Simple patterns matching enum variants
+%token id    Token::Ident(_); // Matches Token::Ident("foo")
+%token num   Token::Num(_);   // Matches Token::Num(42)
+%token plus  Token::Plus;     // Matches Token::Plus
+%token minus Token::Minus;    // Matches Token::Minus
 
 Expr
     : id plus num
@@ -93,44 +103,52 @@ Expr
     ;
 ```
 
+---
+
+### Complex Example: Struct/Wrapped Tokens (Structural Pattern Matching)
+If you wrap your tokens inside a metadata struct (for example, to carry location spans, comments, or line numbers), you can perform **structural pattern matching** (destructuring) directly inside the `%token` definitions. 
+
+Simply write the pattern that matches the struct's fields exactly as you would in a Rust `match` arm:
+
+1. **Define the Types in Rust:**
+   ```rust
+   pub struct WrappedToken {
+       pub value: Token,
+       pub span: Span,
+   }
+
+   pub enum Token {
+       Num(i32),
+       Plus,
+   }
+   ```
+
+2. **Define the `%token` patterns in the grammar:**
+   ```rust
+   %tokentype WrappedToken;
+
+   // Think of how you would write the match arm pattern for WrappedToken.
+   // You want to destructure the 'value' field and ignore the rest using `..`.
+   %token num  WrappedToken { value: Token::Num(_), .. };
+   %token plus WrappedToken { value: Token::Plus, .. };
+   ```
+
+Under the hood, this translates directly to:
+```rust
+match terminal_token {
+    WrappedToken { value: Token::Num(_), .. } => TerminalClasses::num,
+    WrappedToken { value: Token::Plus, .. } => TerminalClasses::plus,
+    _ => ...
+}
+```
+
+Using this approach:
+- The entire `WrappedToken` is pushed onto the parser stack, so it is fully accessible inside your `ReduceAction` blocks (allowing you to read `span` or other metadata).
+- Complex matching is achieved purely through native Rust pattern matching, avoiding any runtime overhead or intermediate conversion boilerplate.
+
 ### Notes
 - **Literal Tokens:** If `%tokentype` is set to `char` or `u8`, you do not need to define tokens using `%token`. Instead, use character literals (`'+'`, `'a'`) or byte literals (`b'+'`, `b'a'`) directly in the grammar.
 - **Incomplete Token Space:** You do not need to exhaustively define every single possible enum variant. Any tokens not explicitly matched can still be captured using negation sets (e.g., `[^ plus minus]`).
-
----
-
-## %filter Directive
-
-```
-%filter <Path> ;
-```
-
-When your `%tokentype` cannot be matched directly in a simple Rust `match` pattern (e.g., if it contains generic parameters, references, or requires complex validation), you can define a custom filter function.
-
-When specified, the generated classification `match` will wrap the input terminal in the filter function:
-
-```rust
-match filter_fn(terminal_token) {
-    <MatchPattern> => { /* ... */ }
-    ...
-}
-```
-
-The filter function signature must be: `fn(&Terminal) -> MatchType` or `fn(Terminal) -> MatchType` depending on your wrapper design.
-
-### Example
-```rust
-fn my_filter(token: &Token) -> TokenKind {
-    match token {
-        Token::Ident(_) => TokenKind::Ident,
-        Token::Num(_) => TokenKind::Num,
-        Token::Plus => TokenKind::Plus,
-    }
-}
-
-// In the grammar:
-%filter my_filter;
-```
 
 ---
 
@@ -563,7 +581,6 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `%userdata`
 - `%errortype` (or `%error`)
 - `%moduleprefix`
-- `%filter`
 - `%token` terminal definitions
 - Non-terminal rule types
 - Reduce actions
@@ -574,14 +591,12 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `$userdata` -> Evaluates to the type defined by `%userdata` (defaults to `()`).
 - `$error` or `$errortype` -> Evaluates to the type defined by `%errortype` / `%error` (defaults to `$moduleprefix::DefaultReduceActionError`).
 - `$moduleprefix` -> Evaluates to the path defined by `%moduleprefix` (defaults to `::rusty_lr`).
-- `$filter` -> Evaluates to the filter expression/function defined by `%filter`.
 - `$NonTerminalName` -> Evaluates to the `ruletype` defined for `NonTerminalName`.
 - `$terminal_name` -> Evaluates to the match pattern/definition of `<terminal_name>`.
 
 ### Substitution Errors
 - **Circular Dependency**: If you introduce circular dependencies among type/definition variables, a compile-time error (`CircularDependency`) is returned.
 - **Max Depth Exceeded**: A maximum recursion limit of `100` is enforced to prevent infinite compilation loops. If exceeded, a compile-time error (`MaxSubstitutionDepthExceeded`) is returned.
-- **Filter Not Defined**: If `$filter` is used inside a reduce action block but `%filter` directive is not defined, a compile-time error (`FilterNotDefined`) is returned.
 
 ### Example
 ```rust
