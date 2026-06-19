@@ -19,12 +19,15 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Conflict Resolution](#resolving-conflicts)
   - [Panic-Mode Error Recovery (`error`)](#panic-mode-error-recovery)
   - [Operator Precedence (`%left`, `%right`, `%precedence`, `%prec`)](#operator-precedence)
-- [Error Type (`%err` / `%error`)](#error-type-optional)
+- [Error Type (`%error`)](#error-type-optional)
 - [Disabling Table Optimization (`%nooptim`)](#no-optimization)
 - [Dense Parser Tables (`%dense`)](#dense-parser-table)
 - [Location Tracking (`%location`)](#location-tracking)
 - [Variable Substitution](#variable-substitution)
 - [Advanced Parser Controls](#advanced-parser-controls)
+  - [Memory Optimization with `box`](#memory-optimization-with-box)
+  - [Custom Token Ranges](#custom-token-ranges)
+  - [Dynamic Precedence with Non-Terminals](#dynamic-precedence-with-non-terminals)
   - [GLR Parser Generation (`%glr`)](#glr-parser-generation)
   - [Advanced GLR Reduce Controls](#advanced-glr-reduce-controls)
   - [Rule Priority (`%dprec`)](#rule-priority)
@@ -191,21 +194,7 @@ RustyLR supports rich regular expression patterns on the right-hand side of prod
 - **`"abcd"` / `b"abcd"`** : String/byte string literals (only valid if `%tokentype` is `char` or `u8`).
 - **`P - TerminalSet`** : Matches pattern `P` but excludes any terminal in the `TerminalSet`.
 
-### Range Patterns (`[first-last]`)
-When defining ranges of custom tokens (e.g. `[zero-nine]`), the range ordering is determined by the **declaration order of your `%token` directives**, rather than the inherent values of the enum elements.
-
-#### Example
-If tokens are declared as:
-```rust
-%token zero Token::Num(0);
-%token one  Token::Num(1);
-%token two  Token::Num(2);
-// ...
-%token nine Token::Num(9);
-```
-The range `[zero-two]` matches `zero`, `one`, and `two`.
-
-If the `%tokentype` is `char` or `u8`, literal character ranges like `['0'-'9']` or `[b'0'-b'9']` are resolved using standard ASCII values.
+Literal character and byte ranges such as `['0'-'9']` or `[b'0'-b'9']` are resolved by their literal values. Custom token ranges are also supported for advanced grammars; see [Custom Token Ranges](#custom-token-ranges).
 
 ---
 
@@ -229,24 +218,7 @@ Expr(_): Term;
 > [!WARNING]
 > If a circular dependency exists (e.g., two rules trying to infer their types from one another without a base type), RustyLR will fail with a compilation error.
 
-### Memory Optimization with `Box` / `box` keyword
-Internally, the generated parser stores all semantic values (the `%tokentype` and all non-terminals' `RuleType`s) in a single unified `enum` representing the parser's data stack.
-
-Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `RuleType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
-
-To avoid this, you can write the `box` keyword in front of `%tokentype` or any non-terminal's `RuleType` (inside the parentheses, e.g. `(box Type)`). The parser generator will automatically box that type in the data enum (generating `Box<Type>`), and will automatically wrap (`Box::new(...)`) or unwrap (`*val`) it in reduce actions so that you do not have to write `Box::new` or dereference it yourself:
-
-```rust
-%tokentype box MyToken;
-
-Expr (box MyLargeASTNode)
-    : left=Expr '+' right=Term {
-        // `left` and `right` are automatically unboxed (of type `MyLargeASTNode`),
-        // and the returned value is automatically wrapped in a `Box::new`.
-        MyLargeASTNode::Binary(left, right)
-    }
-    ;
-```
+For large semantic values, RustyLR also supports boxing selected stack variants. See [Memory Optimization with `box`](#memory-optimization-with-box).
 
 ---
 
@@ -459,18 +431,11 @@ Expr
     ;
 ```
 
-You can also use a non-terminal in `%prec` if the operator is determined dynamically:
-```rust
-Expr : Expr op=BinOp Expr %prec op { ... };
-
-BinOp : '+' | '*';
-```
-Here, the rule's precedence matches the specific operator that `BinOp` resolved to.
+For cases where the operator is represented by a non-terminal, see [Dynamic Precedence with Non-Terminals](#dynamic-precedence-with-non-terminals).
 
 ## Error Type (Optional)
 
 ```
-%err <RustType> ;
 %error <RustType> ;
 ```
 
@@ -532,7 +497,7 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `%tokentype`
 - `%location`
 - `%userdata`
-- `%errortype` (or `%error`)
+- `%error`
 - `%token` terminal definitions
 - Non-terminal rule types
 - Reduce actions
@@ -598,6 +563,58 @@ This syntax sugar is extremely useful for reducing boilerplate code when process
 ## Advanced Parser Controls
 
 The controls in this section are useful for ambiguous grammars, parser-mode tuning, or conflict cases that cannot be expressed cleanly with ordinary precedence declarations. Most grammars can start without these directives.
+
+### Memory Optimization with `box`
+
+Internally, the generated parser stores all semantic values (the `%tokentype` and all non-terminals' `RuleType`s) in a single unified `enum` representing the parser's data stack.
+
+Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `RuleType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
+
+To avoid this, you can write the `box` keyword in front of `%tokentype` or any non-terminal's `RuleType` (inside the parentheses, e.g. `(box Type)`). The parser generator will automatically box that type in the data enum (generating `Box<Type>`), and will automatically wrap (`Box::new(...)`) or unwrap (`*val`) it in reduce actions so that you do not have to write `Box::new` or dereference it yourself:
+
+```rust
+%tokentype box MyToken;
+
+Expr (box MyLargeASTNode)
+    : left=Expr '+' right=Term {
+        // `left` and `right` are automatically unboxed (of type `MyLargeASTNode`),
+        // and the returned value is automatically wrapped in a `Box::new`.
+        MyLargeASTNode::Binary(left, right)
+    }
+    ;
+```
+
+### Custom Token Ranges
+
+When defining ranges of custom tokens (e.g. `[zero-nine]`), the range ordering is determined by the **declaration order of your `%token` directives**, rather than the inherent values of the enum elements.
+
+If tokens are declared as:
+
+```rust
+%token zero Token::Num(0);
+%token one  Token::Num(1);
+%token two  Token::Num(2);
+// ...
+%token nine Token::Num(9);
+```
+
+The range `[zero-two]` matches `zero`, `one`, and `two`.
+
+For ordinary grammars, prefer explicit terminal sets like `[zero one two]` unless declaration-order ranges materially simplify the grammar.
+
+### Dynamic Precedence with Non-Terminals
+
+You can use a non-terminal in `%prec` if the operator is determined dynamically:
+
+```rust
+Expr : Expr op=BinOp Expr %prec op { ... };
+
+BinOp : '+' | '*';
+```
+
+Here, the rule's precedence matches the specific operator that `BinOp` resolved to.
+
+For ordinary unary and binary operators, a named precedence marker such as `UnaryMinus` is usually clearer.
 
 ### GLR Parser Generation
 

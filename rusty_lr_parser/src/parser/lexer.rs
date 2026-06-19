@@ -56,7 +56,7 @@ pub enum Lexed {
     Start(Ident),        // %start
     TokenType(Ident),    // %tokentype
     UserData(Ident),     // %userdata
-    ErrorType(Ident),    // %err %error
+    ErrorType(Ident),    // %error
     ModulePrefix(Ident), // %moduleprefix
     Lalr(Ident),         // %lalr
     Glr(Ident),          // %glr
@@ -222,7 +222,7 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
         "start" => Some(Lexed::Start(ident)),
         "tokentype" => Some(Lexed::TokenType(ident)),
         "userdata" => Some(Lexed::UserData(ident)),
-        "err" | "error" => Some(Lexed::ErrorType(ident)),
+        "error" => Some(Lexed::ErrorType(ident)),
         "moduleprefix" => Some(Lexed::ModulePrefix(ident)),
         "lalr" => Some(Lexed::Lalr(ident)),
         "glr" => Some(Lexed::Glr(ident)),

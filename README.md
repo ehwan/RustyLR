@@ -152,21 +152,8 @@ fn main() {
 The generated parser module contains several generated components tailored to your start symbol:
 - **`<Start>Parser`**: A lightweight struct containing the static parsing tables. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/trait.Parser.html)
 - **`<Start>Context`**: A mutable state context that keeps track of the stack and parsed symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/deterministic/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nondeterministic/struct.Context.html)
-- **`<Start>State`**: An internal type representing individual states in the parser. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/state/trait.State.html)
-- **`<Start>Rule`**: An internal enum representing production rules. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/rule/struct.ProductionRule.html)
-- **`<Start>NonTerminals`**: An enum representing all non-terminal symbols. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nonterminal/trait.NonTerminal.html)
 
-### Interacting with the Parsing Context
-The `<Start>Context` offers helpful utilities for inspecting and tracing:
-```rust
-let mut context = ExprContext::with_default_userdata();
-
-// ... feed tokens ...
-
-context.expected_token();    // Returns the expected symbols for the current state
-context.can_feed(&token);  // Checks if a terminal can be fed next
-println!("{}", context);     // Formats the state tree (requires 'tree' feature)
-```
+The generated module also includes internal state, rule, and non-terminal types used by the runtime and debugging APIs.
 
 ### Feeding Tokens
 You can feed terminal symbols either with or without location information:
@@ -234,6 +221,18 @@ rustylr --state src/grammar.rs
 ```
 
 ![State Machine Debug](images/state_option.png)
+
+The `<Start>Context` also offers inspection utilities that are useful while debugging a parser:
+
+```rust
+let mut context = ExprContext::with_default_userdata();
+
+// ... feed tokens ...
+
+context.expected_token();  // Returns the expected symbols for the current state
+context.can_feed(&token);  // Checks if a terminal can be fed next
+println!("{}", context);   // Formats the state tree (requires 'tree' feature)
+```
 
 ---
 

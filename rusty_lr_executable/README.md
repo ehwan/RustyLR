@@ -9,7 +9,16 @@ cargo install rustylr
 
 ## Usage
 ```bash
-$ rustylr --help
+$ rustylr my_grammar.rs my_parser.rs
+```
+
+The first argument is the grammar file. The optional second argument is the generated Rust output file; when omitted, RustyLR writes `out.tab.rs`.
+
+## Advanced CLI Options
+
+The options below are mainly useful for formatting control, parser-mode overrides, and diagnostics.
+
+```bash
 Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
 
 Arguments:
@@ -58,6 +67,12 @@ Options:
   -V, --version
           Print version
 ```
+
+### Diagnostic and Debug Options
+
+- `--state <STATE>` prints details for a specific generated state.
+- `--no-conflict`, `--no-conflict-resolve`, and `--no-backtrace` reduce conflict diagnostic output.
+- `--glr <true|false>` and `--dense <true|false>` override parser-mode settings from the grammar file.
 
 ## Grammar File Format
 The program searches for `%%` in the input file to separate Rust code from grammar definitions.

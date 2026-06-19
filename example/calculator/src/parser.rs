@@ -26,7 +26,7 @@ pub enum Token {
 %start E;
 
 // error type
-%err String;
+%error String;
 
 // define tokens
 %token num Token::Num(_); // `num` maps to `Token::Num(0)`
