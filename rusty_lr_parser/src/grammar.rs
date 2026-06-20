@@ -2886,8 +2886,8 @@ impl Grammar {
         for (max_priority, reduce_rules, deleted_rules) in &collector.reduce_reduce_resolved {
             self.infos.push(Info::ReduceReduceConflictResolved {
                 max_priority: *max_priority,
-                reduce_rules: reduce_rules.iter().cloned().collect(),
-                deleted_rules: deleted_rules.iter().cloned().collect(),
+                reduce_rules: reduce_rules.iter().copied().collect(),
+                deleted_rules: deleted_rules.iter().copied().collect(),
             });
         }
 
