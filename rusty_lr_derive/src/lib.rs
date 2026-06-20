@@ -118,5 +118,9 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         }
     }
 
-    grammar.emit_compiletime().into()
+    let mut output = grammar.emit_compiletime();
+    for warning in &grammar.warnings {
+        output.extend(warning.to_compile_warning(&grammar, &span_manager));
+    }
+    output.into()
 }

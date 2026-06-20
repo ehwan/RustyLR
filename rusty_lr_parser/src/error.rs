@@ -407,6 +407,81 @@ pub enum Warning {
     UnusedTerminals { class_idx: usize },
 }
 
+impl Warning {
+    pub fn to_compile_warning(
+        &self,
+        grammar: &crate::grammar::Grammar,
+        span_manager: &crate::parser::location::SpanManager,
+    ) -> TokenStream {
+        let mut output = TokenStream::new();
+        let message = self.short_message(grammar);
+        let locs = self.locations();
+        if locs.is_empty() {
+            let span = Span::call_site();
+            output.extend(quote_spanned! {
+                span=>
+                const _: () = {
+                    #[deprecated(since = "0.0.0", note = #message)]
+                    struct Warning;
+                    let _ = Warning;
+                };
+            });
+        } else {
+            for loc in locs {
+                for span in span_manager.get_spans_in_location(&loc) {
+                    output.extend(quote_spanned! {
+                        span=>
+                        const _: () = {
+                            #[deprecated(since = "0.0.0", note = #message)]
+                            struct Warning;
+                            let _ = Warning;
+                        };
+                    });
+                }
+            }
+        }
+        output
+    }
+
+    pub fn locations(&self) -> Vec<Location> {
+        match self {
+            Warning::NonTermNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::Cycle { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::NonTermDataNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::UnusedTerminals { .. } => Vec::new(),
+        }
+    }
+
+    pub fn short_message(&self, grammar: &crate::grammar::Grammar) -> String {
+        match self {
+            Warning::NonTermNotUsed { nonterm_idx } => {
+                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+                format!("Non-terminal `{name}` is not used in the grammar")
+            }
+            Warning::Cycle { nonterm_idx } => {
+                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+                format!("Cycle detected: non-terminal `{name}` is involved in a bad cycle")
+            }
+            Warning::NonTermDataNotUsed { nonterm_idx } => {
+                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+                format!("Non-terminal `{name}`'s data type is not used in any reduce action")
+            }
+            Warning::UnusedTerminals { class_idx } => {
+                let class_name = grammar.class_pretty_name_abbr(*class_idx);
+                let terminals = grammar.terminal_classes[*class_idx]
+                    .terminals
+                    .iter()
+                    .map(|&term| grammar.term_pretty_name(term))
+                    .collect::<Vec<_>>();
+                format!(
+                    "These terminals are not used: {class_name}: {}",
+                    terminals.join(", ")
+                )
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Info {
     TerminalsMerged {
