@@ -143,33 +143,75 @@ pub struct Grammar {
 
     pub warnings: Vec<Warning>,
     pub infos: Vec<Info>,
-    pub allowed_diagnostics: HashMap<String, HashSet<Option<String>>>,
+    pub allowed_diagnostics: HashMap<String, Vec<Option<ResolvedAllowTarget>>>,
+}
+
+#[derive(Debug, Clone)]
+pub enum ResolvedAllowTarget {
+    Name(String),
+    Terminals(BTreeSet<Terminal>),
 }
 
 impl Grammar {
-    pub fn is_warning_allowed(&self, warning: &Warning) -> bool {
-        if let Some(scopes) = self.allowed_diagnostics.get(warning.name()) {
-            if scopes.contains(&None) {
-                return true;
+    fn is_terminal_allowed_by_target(&self, term: Terminal, target: &ResolvedAllowTarget) -> bool {
+        match target {
+            ResolvedAllowTarget::Name(name) => {
+                let t_name = self.term_pretty_name(term);
+                if &t_name == name {
+                    return true;
+                }
+                let class_idx = self.terminal_class_id[term];
+                let class_name = self.class_pretty_name_abbr(class_idx);
+                if &class_name == name {
+                    return true;
+                }
+                false
             }
-            match warning {
-                Warning::NonTermUnreachable { nonterm_name }
-                | Warning::UnusedNonTermData { nonterm_name }
-                | Warning::NonTermUnproductive { nonterm_name } => {
-                    if scopes.contains(&Some(nonterm_name.value().clone())) {
-                        return true;
+            ResolvedAllowTarget::Terminals(set) => set.contains(&term),
+        }
+    }
+
+    fn is_symbol_allowed(
+        &self,
+        term: &TerminalSymbol<TerminalClass>,
+        scopes: &[Option<ResolvedAllowTarget>],
+    ) -> bool {
+        match term {
+            TerminalSymbol::Error => {
+                for opt_target in scopes {
+                    match opt_target {
+                        None => return true,
+                        Some(ResolvedAllowTarget::Name(name)) if name == "error" => return true,
+                        _ => {}
                     }
                 }
-                Warning::UnusedTerminals { class_idx } => {
-                    let class_name = self.class_pretty_name_abbr(*class_idx);
-                    if scopes.contains(&Some(class_name)) {
-                        return true;
+            }
+            TerminalSymbol::Eof => {
+                for opt_target in scopes {
+                    match opt_target {
+                        None => return true,
+                        Some(ResolvedAllowTarget::Name(name)) if name == "$" => return true,
+                        _ => {}
                     }
-                    let terminals = &self.terminal_classes[*class_idx].terminals;
-                    for &t in terminals {
-                        let t_name = self.term_pretty_name(t);
-                        if scopes.contains(&Some(t_name)) {
-                            return true;
+                }
+            }
+            TerminalSymbol::Term(class_idx) => {
+                let class_name = self.class_pretty_name_abbr(*class_idx);
+                for opt_target in scopes {
+                    match opt_target {
+                        None => return true,
+                        Some(target) => {
+                            if let ResolvedAllowTarget::Name(name) = target {
+                                if name == &class_name {
+                                    return true;
+                                }
+                            }
+                            let terminals = &self.terminal_classes[*class_idx].terminals;
+                            for &t in terminals {
+                                if self.is_terminal_allowed_by_target(t, target) {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
@@ -178,106 +220,150 @@ impl Grammar {
         false
     }
 
+    pub fn is_warning_allowed(&self, warning: &Warning) -> bool {
+        if let Some(scopes) = self.allowed_diagnostics.get(warning.name()) {
+            for opt_target in scopes {
+                match opt_target {
+                    None => return true,
+                    Some(target) => match warning {
+                        Warning::NonTermUnreachable { nonterm_name }
+                        | Warning::UnusedNonTermData { nonterm_name }
+                        | Warning::NonTermUnproductive { nonterm_name } => {
+                            if let ResolvedAllowTarget::Name(name) = target {
+                                if name == nonterm_name.value() {
+                                    return true;
+                                }
+                            }
+                        }
+                        Warning::UnusedTerminals { class_idx } => {
+                            if let ResolvedAllowTarget::Name(name) = target {
+                                let class_name = self.class_pretty_name_abbr(*class_idx);
+                                if name == &class_name {
+                                    return true;
+                                }
+                            }
+                        }
+                    },
+                }
+            }
+
+            if let Warning::UnusedTerminals { class_idx } = warning {
+                let class_def = &self.terminal_classes[*class_idx];
+                let unused_terms: Vec<Terminal> = class_def
+                    .terminals
+                    .iter()
+                    .copied()
+                    .filter(|&t| t != self.other_terminal_index)
+                    .collect();
+
+                if unused_terms.is_empty() {
+                    return true;
+                }
+
+                let mut all_unused_ignored = true;
+                for &t in &unused_terms {
+                    let mut t_ignored = false;
+                    for opt_target in scopes {
+                        match opt_target {
+                            None => {
+                                t_ignored = true;
+                                break;
+                            }
+                            Some(target) => {
+                                if self.is_terminal_allowed_by_target(t, target) {
+                                    t_ignored = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if !t_ignored {
+                        all_unused_ignored = false;
+                        break;
+                    }
+                }
+                if all_unused_ignored {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     pub fn is_info_allowed(&self, info: &Info) -> bool {
         if let Some(scopes) = self.allowed_diagnostics.get(info.name()) {
-            if scopes.contains(&None) {
-                return true;
+            for opt_target in scopes {
+                if opt_target.is_none() {
+                    return true;
+                }
             }
             match info {
                 Info::UnitProductionEliminated { nonterm_name, .. } => {
-                    if scopes.contains(&Some(nonterm_name.value().clone())) {
-                        return true;
+                    for opt_target in scopes {
+                        if let Some(ResolvedAllowTarget::Name(name)) = opt_target {
+                            if name == nonterm_name.value() {
+                                return true;
+                            }
+                        }
                     }
                 }
                 Info::RedundantRuleRemoved { rule_location } => {
                     for nonterm in &self.nonterminals {
                         for rule in &nonterm.rules {
                             if rule.location() == *rule_location {
-                                if scopes.contains(&Some(nonterm.name.value().clone())) {
-                                    return true;
+                                for opt_target in scopes {
+                                    if let Some(ResolvedAllowTarget::Name(name)) = opt_target {
+                                        if name == nonterm.name.value() {
+                                            return true;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 Info::TerminalsMerged { class_idx } => {
-                    let class_name = format!(
-                        "TerminalClass{}",
-                        self.terminal_classes[*class_idx].multiterm_counter
-                    );
-                    if scopes.contains(&Some(class_name)) {
-                        return true;
-                    }
-                    let terminals = &self.terminal_classes[*class_idx].terminals;
-                    for &t in terminals {
-                        let t_name = self.term_pretty_name(t);
-                        if scopes.contains(&Some(t_name)) {
-                            return true;
+                    let class_name = self.class_pretty_name_abbr(*class_idx);
+                    for opt_target in scopes {
+                        if let Some(target) = opt_target {
+                            if let ResolvedAllowTarget::Name(name) = target {
+                                if name == &class_name {
+                                    return true;
+                                }
+                            }
+                            let terminals = &self.terminal_classes[*class_idx].terminals;
+                            for &t in terminals {
+                                if self.is_terminal_allowed_by_target(t, target) {
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
                 Info::ReduceReduceConflictResolved { reduce_rules, .. } => {
                     for &r in reduce_rules {
                         if let Some((nonterm, _)) = self.get_rule_by_id(r) {
-                            if scopes.contains(&Some(nonterm.name.value().clone())) {
-                                return true;
+                            for opt_target in scopes {
+                                if let Some(ResolvedAllowTarget::Name(name)) = opt_target {
+                                    if name == nonterm.name.value() {
+                                        return true;
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 Info::ShiftReduceConflictResolvedShift { term, .. }
                 | Info::ShiftReduceConflictResolvedReduce { term, .. }
-                | Info::ShiftReduceConflictGLR { term, .. } => match term {
-                    TerminalSymbol::Error => {
-                        if scopes.contains(&Some("error".to_string())) {
-                            return true;
-                        }
+                | Info::ShiftReduceConflictGLR { term, .. } => {
+                    if self.is_symbol_allowed(term, scopes) {
+                        return true;
                     }
-                    TerminalSymbol::Eof => {
-                        if scopes.contains(&Some("$".to_string())) {
-                            return true;
-                        }
-                    }
-                    TerminalSymbol::Term(class_idx) => {
-                        let class_name = self.class_pretty_name_abbr(*class_idx);
-                        if scopes.contains(&Some(class_name)) {
-                            return true;
-                        }
-                        let terminals = &self.terminal_classes[*class_idx].terminals;
-                        for &t in terminals {
-                            let t_name = self.term_pretty_name(t);
-                            if scopes.contains(&Some(t_name)) {
-                                return true;
-                            }
-                        }
-                    }
-                },
+                }
                 Info::ReduceReduceConflictGLR { terms, .. } => {
                     for term in terms {
-                        match term {
-                            TerminalSymbol::Error => {
-                                if scopes.contains(&Some("error".to_string())) {
-                                    return true;
-                                }
-                            }
-                            TerminalSymbol::Eof => {
-                                if scopes.contains(&Some("$".to_string())) {
-                                    return true;
-                                }
-                            }
-                            TerminalSymbol::Term(class_idx) => {
-                                let class_name = self.class_pretty_name_abbr(*class_idx);
-                                if scopes.contains(&Some(class_name)) {
-                                    return true;
-                                }
-                                let terminals = &self.terminal_classes[*class_idx].terminals;
-                                for &t in terminals {
-                                    let t_name = self.term_pretty_name(t);
-                                    if scopes.contains(&Some(t_name)) {
-                                        return true;
-                                    }
-                                }
-                            }
+                        if self.is_symbol_allowed(term, scopes) {
+                            return true;
                         }
                     }
                 }
@@ -1004,39 +1090,6 @@ impl Grammar {
             (boxed, stripped)
         };
 
-        let mut allowed_diagnostics: HashMap<String, HashSet<Option<String>>> = HashMap::default();
-        let valid_diagnostics: HashSet<&str> = [
-            "nonterm_unreachable",
-            "unused_nonterm_data",
-            "nonterm_unproductive",
-            "unused_terminals",
-            "terminals_merged",
-            "redundant_rule_removed",
-            "unit_production_eliminated",
-            "reduce_reduce_conflict_resolved",
-            "shift_reduce_conflict_resolved",
-            "shift_reduce_conflict_glr",
-            "reduce_reduce_conflict_glr",
-        ]
-        .iter()
-        .copied()
-        .collect();
-
-        for (allowed_loc, target) in grammar_args.allowed_diagnostics {
-            let name = allowed_loc.value();
-            if !valid_diagnostics.contains(name.as_str()) {
-                return Err(ParseError::InvalidAllowDiagnostic {
-                    location: allowed_loc.location(),
-                    name: name.clone(),
-                });
-            }
-            let target_str = target.map(|t| t.to_string_repr());
-            allowed_diagnostics
-                .entry(name.clone())
-                .or_default()
-                .insert(target_str);
-        }
-
         let mut grammar = Grammar {
             module_prefix,
             token_typename,
@@ -1085,7 +1138,7 @@ impl Grammar {
 
             warnings: Vec::new(),
             infos: Vec::new(),
-            allowed_diagnostics,
+            allowed_diagnostics: HashMap::default(),
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -1927,6 +1980,44 @@ impl Grammar {
                 }
             }
         }
+        let mut allowed_diagnostics: HashMap<String, Vec<Option<ResolvedAllowTarget>>> =
+            HashMap::default();
+        let valid_diagnostics: HashSet<&str> = [
+            "nonterm_unreachable",
+            "unused_nonterm_data",
+            "nonterm_unproductive",
+            "unused_terminals",
+            "terminals_merged",
+            "redundant_rule_removed",
+            "unit_production_eliminated",
+            "reduce_reduce_conflict_resolved",
+            "shift_reduce_conflict_resolved",
+            "shift_reduce_conflict_glr",
+            "reduce_reduce_conflict_glr",
+        ]
+        .iter()
+        .copied()
+        .collect();
+
+        for (allowed_loc, target) in grammar_args.allowed_diagnostics {
+            let name = allowed_loc.value();
+            if !valid_diagnostics.contains(name.as_str()) {
+                return Err(ParseError::InvalidAllowDiagnostic {
+                    location: allowed_loc.location(),
+                    name: name.clone(),
+                });
+            }
+            let resolved_target = match target {
+                None => None,
+                Some(t) => Some(t.resolve(&mut grammar)?),
+            };
+            allowed_diagnostics
+                .entry(name.clone())
+                .or_default()
+                .push(resolved_target);
+        }
+
+        grammar.allowed_diagnostics = allowed_diagnostics;
 
         Ok(grammar)
     }
@@ -2620,16 +2711,11 @@ impl Grammar {
     /// returns either 'term' or 'TerminalClassX'
     pub fn class_pretty_name_abbr(&self, class_idx: TerminalClass) -> String {
         let class = &self.terminal_classes[class_idx];
-        let len: usize = class
-            .terminals
-            .iter()
-            .map(|term| self.terminals[*term].name.count())
-            .sum();
-        if len == 1 {
-            // Exactly one single-character/token terminal is matched. Print it directly.
+        if class.terminals.len() == 1 {
+            // Exactly one terminal (could be character/byte range or ident) is matched. Print it directly.
             self.term_pretty_name(class.terminals[0])
         } else {
-            // Matches multiple characters (e.g. range 'a'-'z') or multiple terminals.
+            // Matches multiple terminals.
             // Use abbreviated class name to keep diagnostics concise.
             format!("TerminalClass{}", class.multiterm_counter)
         }
@@ -3910,7 +3996,10 @@ mod tests {
             .allowed_diagnostics
             .get("nonterm_unreachable")
             .unwrap();
-        assert!(scopes.contains(&Some("Unused1".to_string())));
+        assert!(scopes.iter().any(|opt_target| match opt_target {
+            Some(ResolvedAllowTarget::Name(name)) => name == "Unused1",
+            _ => false,
+        }));
 
         grammar.optimize(25);
 
@@ -3972,5 +4061,108 @@ mod tests {
                 panic!("Expected ParseError::InvalidAllowDiagnostic, got Ok");
             }
         }
+    }
+
+    #[test]
+    fn test_diagnostic_suppression_unused_terminal_success() {
+        // Scenario 1: Only TokB allowed -> Warning NOT suppressed
+        let input1 = quote! {
+            %tokentype Token;
+            %start Expr;
+            %allow unused_terminals(TokB);
+
+            %token TokA Token::TokA;
+            %token TokB Token::TokB;
+            %token TokC Token::TokC;
+
+            Expr : TokA;
+        };
+
+        let grammar_args1 = Grammar::parse_args(input1).expect("Failed to parse grammar");
+        let mut grammar1 =
+            Grammar::from_grammar_args(grammar_args1).expect("Failed to construct grammar");
+        grammar1.optimize(25);
+
+        let warning1 = grammar1
+            .warnings
+            .iter()
+            .find(|w| matches!(w, Warning::UnusedTerminals { .. }))
+            .expect("Expected unused warning");
+        assert!(!grammar1.is_warning_allowed(warning1));
+
+        // Scenario 2: Both TokB and TokC allowed -> Warning suppressed
+        let input2 = quote! {
+            %tokentype Token;
+            %start Expr;
+            %allow unused_terminals(TokB);
+            %allow unused_terminals(TokC);
+
+            %token TokA Token::TokA;
+            %token TokB Token::TokB;
+            %token TokC Token::TokC;
+
+            Expr : TokA;
+        };
+
+        let grammar_args2 = Grammar::parse_args(input2).expect("Failed to parse grammar");
+        let mut grammar2 =
+            Grammar::from_grammar_args(grammar_args2).expect("Failed to construct grammar");
+        grammar2.optimize(25);
+
+        let warning2 = grammar2
+            .warnings
+            .iter()
+            .find(|w| matches!(w, Warning::UnusedTerminals { .. }))
+            .expect("Expected unused warning");
+        assert!(grammar2.is_warning_allowed(warning2));
+
+        // Scenario 3: Suppressed via TerminalSet -> Warning suppressed
+        let input3 = quote! {
+            %tokentype Token;
+            %start Expr;
+            %allow unused_terminals([ TokB TokC ]);
+
+            %token TokA Token::TokA;
+            %token TokB Token::TokB;
+            %token TokC Token::TokC;
+
+            Expr : TokA;
+        };
+
+        let grammar_args3 = Grammar::parse_args(input3).expect("Failed to parse grammar");
+        let mut grammar3 =
+            Grammar::from_grammar_args(grammar_args3).expect("Failed to construct grammar");
+        grammar3.optimize(25);
+
+        let warning3 = grammar3
+            .warnings
+            .iter()
+            .find(|w| matches!(w, Warning::UnusedTerminals { .. }))
+            .expect("Expected unused warning");
+        assert!(grammar3.is_warning_allowed(warning3));
+    }
+
+    #[test]
+    fn test_diagnostic_suppression_range_terminal_success() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %allow terminals_merged('b'-'d');
+
+            Expr : 'a' | [ 'b'-'d' ];
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
+        grammar.optimize(25);
+
+        // TerminalsMerged info for 'b'-'d' should be suppressed
+        let info = grammar
+            .infos
+            .iter()
+            .find(|i| matches!(i, Info::TerminalsMerged { .. }))
+            .expect("Expected TerminalsMerged info");
+        assert!(grammar.is_info_allowed(info));
     }
 }

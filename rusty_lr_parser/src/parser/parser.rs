@@ -3,6 +3,7 @@ use crate::parser::args::GrammarArgs;
 use crate::parser::args::RuleDefArgs;
 use crate::parser::args::RuleLineArgs;
 use crate::parser::args::IdentOrLiteral;
+use crate::parser::args::AllowTarget;
 use crate::parser::args::PrecDPrecArgs;
 use crate::parser::args::RecoveredError;
 use crate::parser::lexer::Lexed;
@@ -474,6 +475,47 @@ IdentOrLiteral(IdentOrLiteral): ident {
 }
 ;
 
+AllowTarget(AllowTarget): ident {
+    let Lexed::Ident(ident) = ident else {
+        unreachable!( "AllowTarget-Ident" );
+    };
+    AllowTarget::Ident( Located::new(ident.to_string(), @ident) )
+}
+| byte_literal {
+    let Lexed::ByteLiteral(b) = byte_literal else {
+        unreachable!( "AllowTarget-ByteLiteral" );
+    };
+    AllowTarget::Byte(Located::new(b.value(), @byte_literal))
+}
+| char_literal {
+    let Lexed::CharLiteral(c) = char_literal else {
+        unreachable!( "AllowTarget-CharLiteral" );
+    };
+    AllowTarget::Char(Located::new(c.value(), @char_literal))
+}
+| first=char_literal minus last=char_literal {
+    let Lexed::CharLiteral(first) = first else {
+        unreachable!( "AllowTarget-CharLiteralRange1" );
+    };
+    let Lexed::CharLiteral(last) = last else {
+        unreachable!( "AllowTarget-CharLiteralRange2" );
+    };
+    AllowTarget::CharRange(Located::new(first.value(), @first), Located::new(last.value(), @last))
+}
+| first=byte_literal minus last=byte_literal {
+    let Lexed::ByteLiteral(first) = first else {
+        unreachable!( "AllowTarget-ByteLiteralRange1" );
+    };
+    let Lexed::ByteLiteral(last) = last else {
+        unreachable!( "AllowTarget-ByteLiteralRange2" );
+    };
+    AllowTarget::ByteRange(Located::new(first.value(), @first), Located::new(last.value(), @last))
+}
+| TerminalSet {
+    AllowTarget::TerminalSet(TerminalSet)
+}
+;
+
 RustCode(TokenStream): t=[^semicolon]+ {
     let mut tokens = TokenStream::new();
     for token in t.into_iter() {
@@ -635,11 +677,11 @@ Directive
         };
         data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), None));
     }
-    | percent allow ident lparen IdentOrLiteral rparen semicolon {
+    | percent allow ident lparen AllowTarget rparen semicolon {
         let $ident = ident else {
             unreachable!( "AllowDef-Ident" );
         };
-        data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), Some(IdentOrLiteral)));
+        data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), Some(AllowTarget)));
     }
     | percent allow error semicolon {
         data.error_recovered.push( RecoveredError {

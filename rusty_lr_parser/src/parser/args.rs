@@ -5,6 +5,7 @@ use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
+use crate::grammar::Terminal;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
 use crate::pattern::Pattern;
@@ -17,6 +18,142 @@ pub enum IdentOrLiteral {
     Ident(Located<String>),
     Byte(Located<u8>),
     Char(Located<char>),
+}
+
+#[derive(Debug, Clone)]
+pub enum AllowTarget {
+    Ident(Located<String>),
+    Byte(Located<u8>),
+    Char(Located<char>),
+    ByteRange(Located<u8>, Located<u8>),
+    CharRange(Located<char>, Located<char>),
+    TerminalSet(TerminalSet),
+}
+
+impl AllowTarget {
+    pub fn to_string_repr(&self) -> String {
+        match self {
+            AllowTarget::Ident(ident) => ident.value().clone(),
+            AllowTarget::Byte(b) => {
+                let byte = *b.value();
+                let b_tok =
+                    syn::LitByte::new(byte, proc_macro2::Span::call_site()).to_token_stream();
+                format!("{b_tok}")
+            }
+            AllowTarget::Char(c) => {
+                let character = *c.value();
+                let c_tok =
+                    syn::LitChar::new(character, proc_macro2::Span::call_site()).to_token_stream();
+                format!("{c_tok}")
+            }
+            AllowTarget::ByteRange(start, end) => {
+                let s_byte = *start.value();
+                let e_byte = *end.value();
+                let s_tok =
+                    syn::LitByte::new(s_byte, proc_macro2::Span::call_site()).to_token_stream();
+                let e_tok =
+                    syn::LitByte::new(e_byte, proc_macro2::Span::call_site()).to_token_stream();
+                format!("{s_tok}-{e_tok}")
+            }
+            AllowTarget::CharRange(start, end) => {
+                let s_char = *start.value();
+                let e_char = *end.value();
+                let s_tok =
+                    syn::LitChar::new(s_char, proc_macro2::Span::call_site()).to_token_stream();
+                let e_tok =
+                    syn::LitChar::new(e_char, proc_macro2::Span::call_site()).to_token_stream();
+                format!("{s_tok}-{e_tok}")
+            }
+            AllowTarget::TerminalSet(ts) => {
+                format!("{ts}")
+            }
+        }
+    }
+
+    pub fn location(&self) -> Location {
+        match self {
+            AllowTarget::Ident(ident) => ident.location(),
+            AllowTarget::Byte(l) => l.location(),
+            AllowTarget::Char(l) => l.location(),
+            AllowTarget::ByteRange(s, e) => s.location().merge(&e.location()),
+            AllowTarget::CharRange(s, e) => s.location().merge(&e.location()),
+            AllowTarget::TerminalSet(ts) => ts.location(),
+        }
+    }
+
+    pub fn resolve(
+        &self,
+        grammar: &mut Grammar,
+    ) -> Result<crate::grammar::ResolvedAllowTarget, ParseError> {
+        match self {
+            AllowTarget::Ident(ident) => Ok(crate::grammar::ResolvedAllowTarget::Name(
+                ident.value().clone(),
+            )),
+            AllowTarget::Byte(b) => {
+                let val = *b.value();
+                let name: TerminalName = (val, val).into();
+                if let Some(&idx) = grammar.terminals_index.get(&name) {
+                    Ok(crate::grammar::ResolvedAllowTarget::Terminals(
+                        BTreeSet::from([idx]),
+                    ))
+                } else {
+                    Err(ParseError::TerminalNotDefined(b.location()))
+                }
+            }
+            AllowTarget::Char(c) => {
+                let val = *c.value();
+                let name: TerminalName = (val, val).into();
+                if let Some(&idx) = grammar.terminals_index.get(&name) {
+                    Ok(crate::grammar::ResolvedAllowTarget::Terminals(
+                        BTreeSet::from([idx]),
+                    ))
+                } else {
+                    Err(ParseError::TerminalNotDefined(c.location()))
+                }
+            }
+            AllowTarget::ByteRange(start, end) => {
+                let first_val = *start.value();
+                let last_val = *end.value();
+                if first_val > last_val {
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
+                }
+                let set: BTreeSet<Terminal> = grammar
+                    .get_terminal_indices_from_char_range(first_val as char, last_val as char)
+                    .collect();
+                Ok(crate::grammar::ResolvedAllowTarget::Terminals(set))
+            }
+            AllowTarget::CharRange(start, end) => {
+                let first_val = *start.value();
+                let last_val = *end.value();
+                if first_val > last_val {
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
+                }
+                let set: BTreeSet<Terminal> = grammar
+                    .get_terminal_indices_from_char_range(first_val, last_val)
+                    .collect();
+                Ok(crate::grammar::ResolvedAllowTarget::Terminals(set))
+            }
+            AllowTarget::TerminalSet(ts) => {
+                let (_negate, set) = ts.to_terminal_set(grammar)?;
+                let terminal_set = if _negate {
+                    grammar.negate_terminal_set(&set)
+                } else {
+                    set
+                };
+                Ok(crate::grammar::ResolvedAllowTarget::Terminals(terminal_set))
+            }
+        }
+    }
+}
+
+impl From<IdentOrLiteral> for AllowTarget {
+    fn from(val: IdentOrLiteral) -> Self {
+        match val {
+            IdentOrLiteral::Ident(i) => AllowTarget::Ident(i),
+            IdentOrLiteral::Byte(b) => AllowTarget::Byte(b),
+            IdentOrLiteral::Char(c) => AllowTarget::Char(c),
+        }
+    }
 }
 impl IdentOrLiteral {
     pub fn to_string_repr(&self) -> String {
@@ -652,7 +789,7 @@ pub struct GrammarArgs {
     pub layout: TableLayout,
     pub dense_limit: usize,
     pub location_typename: Vec<(Location, TokenStream)>,
-    pub allowed_diagnostics: Vec<(Located<String>, Option<IdentOrLiteral>)>,
+    pub allowed_diagnostics: Vec<(Located<String>, Option<AllowTarget>)>,
 
     pub error_recovered: Vec<RecoveredError>,
     pub span_manager: crate::parser::location::SpanManager,

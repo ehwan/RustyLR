@@ -1057,7 +1057,9 @@ impl Builder {
                     let terminals = grammar.terminal_classes[*class_idx]
                         .terminals
                         .iter()
-                        .map(|&term| grammar.term_pretty_name(term))
+                        .copied()
+                        .filter(|&term| term != grammar.other_terminal_index)
+                        .map(|term| grammar.term_pretty_name(term))
                         .collect::<Vec<_>>();
                     let notes = vec![format!("{}: {}", class_name, terminals.join(", "))];
                     Diagnostic::warning()
