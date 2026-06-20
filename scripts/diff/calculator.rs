@@ -103,16 +103,6 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
     fn to_usize(&self) -> usize {
         *self as usize
     }
-    fn precedence(&self) -> ::rusty_lr::parser::Precedence {
-        match self {
-            ETerminalClasses::plus => ::rusty_lr::parser::Precedence::new(0),
-            ETerminalClasses::star => ::rusty_lr::parser::Precedence::new(1),
-            ETerminalClasses::eof => {
-                unreachable!("eof token cannot be used in precedence levels")
-            }
-            _ => ::rusty_lr::parser::Precedence::none(),
-        }
-    }
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
@@ -636,19 +626,11 @@ impl ::rusty_lr::parser::Parser for EParser {
     type ReduceRules = u8;
     type Tables = ETables;
     const ERROR_USED: bool = false;
-    fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
-        #[allow(unreachable_patterns)]
-        match level {
-            0..=1 => Some(::rusty_lr::rule::ReduceType::Left),
-            _ => None,
-        }
-    }
     fn get_tables() -> &'static ETables {
         static TABLES: std::sync::OnceLock<ETables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[0, 0, 1, 1, 2, 2, 3, 4];
-                static RULE_PRECEDENCES: &[u32] = &[1, 0, 5, 0, 0, 0, 0, 0];
                 static RULE_LENGTHS: &[u32] = &[3, 1, 3, 1, 1, 3, 1, 2];
                 static SHIFT_TERM_DATA: &[u32] = &[
                     2147516416, 65539, 2147516416, 65539, 2147614721, 2147516416, 65539,
@@ -680,24 +662,10 @@ impl ::rusty_lr::parser::Parser for EParser {
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
                     let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => ::rusty_lr::rule::Precedence::None,
-                        1 => {
-                            ::rusty_lr::rule::Precedence::Fixed((prec_val >> 2) as usize)
-                        }
-                        2 => {
-                            ::rusty_lr::rule::Precedence::Dynamic(
-                                (prec_val >> 2) as usize,
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
                             name,
                             len: RULE_LENGTHS[i] as usize,
-                            precedence,
                         });
                 }
                 let num_states = 13usize;

@@ -18,19 +18,18 @@ P(f32): Number { Number as f32 }
 | WS0 '(' E ')' WS0 { E }
 ;
 
-E(_) : E Op e2=E %prec Op {
+E(_) : E '+' e2=E {
     *data += 1; // access userdata by `data`
-    println!( "{:?} {:?} {:?}", E, Op, e2 );
-    match Op {
-        '+' => E + e2,
-        '*' => E * e2,
-        _ => panic!("Unknown operator: {:?}", Op),
-    }
+    println!( "{:?} '+' {:?}", E, e2 );
+    E + e2
+}
+| E '*' e2=E {
+    *data += 1; // access userdata by `data`
+    println!( "{:?} '*' {:?}", E, e2 );
+    E * e2
 }
 | WS0 '-' E %prec UMINUS {
     -E
 }
 | P
 ;
-
-Op(_): '+' | '*' ;

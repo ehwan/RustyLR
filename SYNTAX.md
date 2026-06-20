@@ -26,7 +26,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Advanced Parser Controls](#advanced-parser-controls)
   - [Memory Optimization with `box`](#memory-optimization-with-box)
   - [Custom Token Ranges](#custom-token-ranges)
-  - [Dynamic Precedence with Non-Terminals](#dynamic-precedence-with-non-terminals)
+
   - [GLR Parser Generation (`%glr`)](#glr-parser-generation)
   - [Advanced GLR Reduce Controls](#advanced-glr-reduce-controls)
   - [Rule Priority (`%dprec`)](#rule-priority)
@@ -430,7 +430,7 @@ Expr
     ;
 ```
 
-For cases where the operator is represented by a non-terminal, see [Dynamic Precedence with Non-Terminals](#dynamic-precedence-with-non-terminals).
+
 
 ## Error Type (Optional)
 
@@ -591,19 +591,6 @@ The range `[zero-two]` matches `zero`, `one`, and `two`.
 
 For ordinary grammars, prefer explicit terminal sets like `[zero one two]` unless declaration-order ranges materially simplify the grammar.
 
-### Dynamic Precedence with Non-Terminals
-
-You can use a non-terminal in `%prec` if the operator is determined dynamically:
-
-```rust
-Expr : Expr op=BinOp Expr %prec op { ... };
-
-BinOp : '+' | '*';
-```
-
-Here, the rule's precedence matches the specific operator that `BinOp` resolved to.
-
-For ordinary unary and binary operators, a named precedence marker such as `UnaryMinus` is usually clearer.
 
 ### GLR Parser Generation
 

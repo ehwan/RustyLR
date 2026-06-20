@@ -10,25 +10,24 @@
 ====================================Grammar=====================================
 
 # of terminal classes: 9
-# of states: 25
+# of states: 27
 
 0: Digit -> '0'
 1: Digit -> ['1', '2', ..., '6'-'9']
 2: Number -> ' '* Digit+ ' '*
 3: P -> Number
 4: P -> ' '* '(' E ')' ' '*
-5: E -> E Op E
-6: E -> ' '* '-' E
-7: E -> P
-8: Op -> '+'
-9: Op -> '*'
-10: ' '+ -> ' '
-11: ' '+ -> ' '+ ' '
-12: ' '* -> ' '+
-13: ' '* -> 
-14: Digit+ -> Digit
-15: Digit+ -> Digit+ Digit
-16: Augmented -> E eof
+5: E -> E '+' E
+6: E -> E '*' E
+7: E -> ' '* '-' E
+8: E -> P
+9: ' '+ -> ' '
+10: ' '+ -> ' '+ ' '
+11: ' '* -> ' '+
+12: ' '* -> 
+13: Digit+ -> Digit
+14: Digit+ -> Digit+ Digit
+15: Augmented -> E eof
 
 */
 // =============================Generated Codes Begin==============================
@@ -110,16 +109,6 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
     fn to_usize(&self) -> usize {
         *self as usize
     }
-    fn precedence(&self) -> ::rusty_lr::parser::Precedence {
-        match self {
-            ETerminalClasses::TermClass8 => ::rusty_lr::parser::Precedence::new(0),
-            ETerminalClasses::TermClass7 => ::rusty_lr::parser::Precedence::new(1),
-            ETerminalClasses::eof => {
-                unreachable!("eof token cannot be used in precedence levels")
-            }
-            _ => ::rusty_lr::parser::Precedence::none(),
-        }
-    }
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
@@ -164,18 +153,17 @@ pub enum ENonTerminals {
     Number,
     P,
     E,
-    Op,
-    __LiteralChar0Plus6,
-    __LiteralChar0Star7,
-    _DigitPlus9,
+    __LiteralChar0Plus5,
+    __LiteralChar0Star6,
+    _DigitPlus8,
     Augmented,
 }
 impl ENonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
-            value < 9usize, "Non-terminal index {} is out of bounds (max {})", value,
-            9usize
+            value < 8usize, "Non-terminal index {} is out of bounds (max {})", value,
+            8usize
         );
         unsafe { ::std::mem::transmute(value) }
     }
@@ -199,10 +187,9 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::Number => "Number",
             ENonTerminals::P => "P",
             ENonTerminals::E => "E",
-            ENonTerminals::Op => "Op",
-            ENonTerminals::__LiteralChar0Plus6 => "' '+",
-            ENonTerminals::__LiteralChar0Star7 => "' '*",
-            ENonTerminals::_DigitPlus9 => "Digit+",
+            ENonTerminals::__LiteralChar0Plus5 => "' '+",
+            ENonTerminals::__LiteralChar0Star6 => "' '*",
+            ENonTerminals::_DigitPlus8 => "Digit+",
             ENonTerminals::Augmented => "Augmented",
         }
     }
@@ -212,14 +199,13 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
             ENonTerminals::Number => None,
             ENonTerminals::P => None,
             ENonTerminals::E => None,
-            ENonTerminals::Op => None,
-            ENonTerminals::__LiteralChar0Plus6 => {
+            ENonTerminals::__LiteralChar0Plus5 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            ENonTerminals::__LiteralChar0Star7 => {
+            ENonTerminals::__LiteralChar0Star6 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
-            ENonTerminals::_DigitPlus9 => {
+            ENonTerminals::_DigitPlus8 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusLeft)
             }
             ENonTerminals::Augmented => {
@@ -411,7 +397,7 @@ impl EDataStack {
         }
         Ok(())
     }
-    ///E -> E Op E
+    ///E -> E '+' E
     #[inline]
     fn reduce_E_0(
         __data_stack: &mut Self,
@@ -430,7 +416,7 @@ impl EDataStack {
             );
             debug_assert!(
                 matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& EData::__terminals(_)))
+                1usize), Some(& EData::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
@@ -442,22 +428,63 @@ impl EDataStack {
             EData::__variant2(val) => val,
             _ => unreachable!(),
         };
-        let mut Op = match __data_stack.__stack.pop().unwrap() {
-            EData::__terminals(val) => val,
-            _ => unreachable!(),
-        };
+        __data_stack.__stack.pop();
         let mut E = match __data_stack.__stack.pop().unwrap() {
             EData::__variant2(val) => val,
             _ => unreachable!(),
         };
         let __res = {
             *data += 1;
-            println!("{:?} {:?} {:?}", E, Op, e2);
-            match Op {
-                '+' => E + e2,
-                '*' => E * e2,
-                _ => panic!("Unknown operator: {:?}", Op),
-            }
+            println!("{:?} '+' {:?}", E, e2);
+            E + e2
+        };
+        if __push_data {
+            __data_stack.__stack.push(EData::__variant2(__res));
+        } else {
+            __data_stack.__stack.push(EData::Empty);
+        }
+        Ok(())
+    }
+    ///E -> E '*' E
+    #[inline]
+    fn reduce_E_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
+        __push_data: bool,
+        shift: &mut bool,
+        lookahead: &::rusty_lr::TerminalSymbol<char>,
+        data: &mut i32,
+        __rustylr_location0: &mut ::rusty_lr::DefaultLocation,
+    ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& EData::__variant2(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& EData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& EData::__variant2(_)))
+            );
+        }
+        __location_stack.truncate(__location_stack.len() - 3);
+        let mut e2 = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
+        __data_stack.__stack.pop();
+        let mut E = match __data_stack.__stack.pop().unwrap() {
+            EData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
+        let __res = {
+            *data += 1;
+            println!("{:?} '*' {:?}", E, e2);
+            E * e2
         };
         if __push_data {
             __data_stack.__stack.push(EData::__variant2(__res));
@@ -468,7 +495,7 @@ impl EDataStack {
     }
     ///E -> ' '* '-' E
     #[inline]
-    fn reduce_E_1(
+    fn reduce_E_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -508,7 +535,7 @@ impl EDataStack {
     }
     ///' '+ -> ' '+ ' '
     #[inline]
-    fn reduce___LiteralChar0Plus6_1(
+    fn reduce___LiteralChar0Plus5_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -535,7 +562,7 @@ impl EDataStack {
     }
     ///' '* -> ' '+
     #[inline]
-    fn reduce___LiteralChar0Star7_0(
+    fn reduce___LiteralChar0Star6_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -558,7 +585,7 @@ impl EDataStack {
     }
     ///' '* ->
     #[inline]
-    fn reduce___LiteralChar0Star7_1(
+    fn reduce___LiteralChar0Star6_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -573,7 +600,7 @@ impl EDataStack {
     }
     ///Digit+ -> Digit
     #[inline]
-    fn reduce__DigitPlus9_0(
+    fn reduce__DigitPlus8_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -604,7 +631,7 @@ impl EDataStack {
     }
     ///Digit+ -> Digit+ Digit
     #[inline]
-    fn reduce__DigitPlus9_1(
+    fn reduce__DigitPlus8_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<::rusty_lr::DefaultLocation>,
         __push_data: bool,
@@ -770,8 +797,30 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                     location0,
                 )
             }
+            7usize => {
+                Self::reduce_E_2(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            10usize => {
+                Self::reduce___LiteralChar0Plus5_1(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
             11usize => {
-                Self::reduce___LiteralChar0Plus6_1(
+                Self::reduce___LiteralChar0Star6_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -782,7 +831,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 )
             }
             12usize => {
-                Self::reduce___LiteralChar0Star7_0(
+                Self::reduce___LiteralChar0Star6_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -793,7 +842,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 )
             }
             13usize => {
-                Self::reduce___LiteralChar0Star7_1(
+                Self::reduce__DigitPlus8_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -804,18 +853,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for EDataStack {
                 )
             }
             14usize => {
-                Self::reduce__DigitPlus9_0(
-                    data_stack,
-                    location_stack,
-                    push_data,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
-            15usize => {
-                Self::reduce__DigitPlus9_1(
+                Self::reduce__DigitPlus8_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -849,101 +887,78 @@ impl ::rusty_lr::parser::Parser for EParser {
     type ReduceRules = u8;
     type Tables = ETables;
     const ERROR_USED: bool = false;
-    fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
-        #[allow(unreachable_patterns)]
-        match level {
-            0..=1 => Some(::rusty_lr::rule::ReduceType::Left),
-            _ => None,
-        }
-    }
     fn get_tables() -> &'static ETables {
         static TABLES: std::sync::OnceLock<ETables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
-                    0, 0, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
-                ];
-                static RULE_PRECEDENCES: &[u32] = &[
-                    0, 0, 0, 0, 0, 6, 9, 0, 1, 5, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7,
                 ];
                 static RULE_LENGTHS: &[u32] = &[
-                    1, 1, 3, 1, 5, 3, 3, 1, 1, 1, 1, 2, 1, 0, 1, 2, 2,
+                    1, 1, 3, 1, 5, 3, 3, 3, 1, 1, 2, 1, 0, 1, 2, 2,
                 ];
                 static SHIFT_TERM_DATA: &[u32] = &[
-                    196608, 2147614727, 2147614728, 2147581962, 196608, 2147614727,
-                    2147614728, 229376, 294914, 753668, 589829, 2148106246, 196608,
-                    360451, 2147909639, 2147909640, 196608, 196608, 2147909639,
-                    2147909640, 294914, 524292, 589829, 2148106246, 196608, 196608,
-                    589829, 2148171782, 196608,
+                    163840, 98311, 786440, 2148335626, 163840, 196608, 262146, 753668,
+                    589829, 2148106246, 163840, 327683, 393223, 458760, 163840, 163840,
+                    262146, 524292, 589829, 2148106246, 163840, 393223, 163840, 163840,
+                    589829, 2148171782, 163840, 163840, 98311,
                 ];
                 static SHIFT_TERM_OFFSETS: &[u32] = &[
-                    0, 1, 1, 4, 4, 5, 7, 8, 8, 12, 13, 16, 17, 17, 18, 20, 24, 25, 25,
-                    25, 25, 28, 28, 28, 29, 29,
+                    0, 1, 1, 4, 5, 5, 6, 6, 10, 11, 14, 15, 15, 16, 20, 21, 22, 23, 23,
+                    23, 23, 26, 26, 26, 27, 28, 29, 29,
                 ];
                 static SHIFT_NONTERM_DATA: &[u32] = &[
-                    2147516417, 2147549186, 2147549187, 2147680261, 2147745798,
-                    2147614724, 2147516417, 2147647490, 2147647491, 2147680261,
-                    2147745798, 2147614724, 2148106240, 2148139015, 2147516417,
-                    2147811330, 2147811331, 2147680261, 2147975174, 2147909636,
-                    2147680261, 2147876870, 2147516417, 2147942402, 2147942403,
-                    2147680261, 2147975174, 2147909636, 2148106240, 2148139015,
-                    2147516417, 2148040706, 2148040707, 2147680261, 2147975174,
-                    2147909636, 2148171776, 2147680261, 2148204550, 2147516417,
-                    2148270082, 2148270083, 2147680261, 2147745798, 2147614724,
+                    2147516417, 2147549186, 2147549187, 2147647492, 2147713029,
+                    2147516417, 2147614722, 2147614723, 2147647492, 2147713029,
+                    2148106240, 2148139014, 2147516417, 2147778562, 2147778563,
+                    2147647492, 2147909637, 2147647492, 2147844101, 2147516417,
+                    2147614722, 2147614723, 2147647492, 2147909637, 2148106240,
+                    2148139014, 2147516417, 2147975170, 2147975171, 2147647492,
+                    2147909637, 2147516417, 2148040706, 2148040707, 2147647492,
+                    2147909637, 2148171776, 2147647492, 2148204549, 2147516417,
+                    2148040706, 2148040707, 2147647492, 2147713029, 2147516417,
+                    2148302850, 2148302851, 2147647492, 2147713029,
                 ];
                 static SHIFT_NONTERM_OFFSETS: &[u32] = &[
-                    0, 5, 5, 6, 6, 11, 12, 12, 12, 14, 19, 20, 22, 22, 27, 28, 30, 35,
-                    36, 36, 36, 39, 39, 39, 44, 45,
+                    0, 5, 5, 5, 10, 10, 10, 10, 12, 17, 17, 19, 19, 24, 26, 31, 31, 36,
+                    36, 36, 36, 39, 39, 39, 44, 49, 49, 49,
                 ];
                 static REDUCE_DATA: &[u32] = &[
-                    2, 1, 13, 4, 1, 13, 5, 1, 13, 6, 1, 13, 3, 1, 3, 7, 1, 3, 8, 1, 3,
-                    10, 1, 3, 2, 1, 13, 4, 1, 13, 5, 1, 13, 6, 1, 13, 7, 1, 5, 8, 1, 5,
-                    10, 1, 5, 2, 1, 12, 3, 1, 12, 4, 1, 12, 5, 1, 12, 6, 1, 12, 7, 1, 12,
-                    8, 1, 12, 10, 1, 12, 0, 1, 11, 2, 1, 11, 3, 1, 11, 4, 1, 11, 5, 1,
-                    11, 6, 1, 11, 7, 1, 11, 8, 1, 11, 10, 1, 11, 2, 1, 13, 4, 1, 13, 5,
-                    1, 13, 6, 1, 13, 3, 1, 13, 7, 1, 13, 8, 1, 13, 10, 1, 13, 3, 1, 4, 7,
-                    1, 4, 8, 1, 4, 10, 1, 4, 2, 1, 13, 4, 1, 13, 5, 1, 13, 6, 1, 13, 3,
-                    1, 5, 7, 1, 5, 8, 1, 5, 2, 1, 13, 4, 1, 13, 5, 1, 13, 6, 1, 13, 3, 1,
-                    6, 7, 1, 6, 8, 1, 6, 0, 1, 0, 3, 1, 0, 5, 1, 0, 6, 1, 0, 7, 1, 0, 8,
-                    1, 0, 10, 1, 0, 0, 1, 14, 3, 1, 14, 5, 1, 14, 6, 1, 14, 7, 1, 14, 8,
-                    1, 14, 10, 1, 14, 3, 1, 13, 7, 1, 13, 8, 1, 13, 10, 1, 13, 0, 1, 15,
-                    3, 1, 15, 5, 1, 15, 6, 1, 15, 7, 1, 15, 8, 1, 15, 10, 1, 15, 3, 1, 2,
-                    7, 1, 2, 8, 1, 2, 10, 1, 2, 2, 1, 13, 4, 1, 13, 5, 1, 13, 6, 1, 13,
-                    7, 1, 6, 8, 1, 6, 10, 1, 6,
+                    2, 1, 12, 4, 1, 12, 5, 1, 12, 6, 1, 12, 3, 1, 3, 7, 1, 3, 8, 1, 3,
+                    10, 1, 3, 2, 1, 12, 4, 1, 12, 5, 1, 12, 6, 1, 12, 3, 1, 6, 7, 1, 6,
+                    8, 1, 6, 10, 1, 6, 2, 1, 11, 3, 1, 11, 4, 1, 11, 5, 1, 11, 6, 1, 11,
+                    7, 1, 11, 8, 1, 11, 10, 1, 11, 0, 1, 10, 2, 1, 10, 3, 1, 10, 4, 1,
+                    10, 5, 1, 10, 6, 1, 10, 7, 1, 10, 8, 1, 10, 10, 1, 10, 2, 1, 12, 4,
+                    1, 12, 5, 1, 12, 6, 1, 12, 3, 1, 12, 7, 1, 12, 8, 1, 12, 10, 1, 12,
+                    3, 1, 4, 7, 1, 4, 8, 1, 4, 10, 1, 4, 2, 1, 12, 4, 1, 12, 5, 1, 12, 6,
+                    1, 12, 2, 1, 12, 4, 1, 12, 5, 1, 12, 6, 1, 12, 3, 1, 5, 8, 1, 5, 2,
+                    1, 12, 4, 1, 12, 5, 1, 12, 6, 1, 12, 3, 1, 7, 7, 1, 7, 8, 1, 7, 10,
+                    1, 7, 0, 1, 0, 3, 1, 0, 5, 1, 0, 6, 1, 0, 7, 1, 0, 8, 1, 0, 10, 1, 0,
+                    0, 1, 13, 3, 1, 13, 5, 1, 13, 6, 1, 13, 7, 1, 13, 8, 1, 13, 10, 1,
+                    13, 3, 1, 12, 7, 1, 12, 8, 1, 12, 10, 1, 12, 0, 1, 14, 3, 1, 14, 5,
+                    1, 14, 6, 1, 14, 7, 1, 14, 8, 1, 14, 10, 1, 14, 3, 1, 2, 7, 1, 2, 8,
+                    1, 2, 10, 1, 2, 2, 1, 12, 4, 1, 12, 5, 1, 12, 6, 1, 12, 2, 1, 12, 4,
+                    1, 12, 5, 1, 12, 6, 1, 12, 8, 1, 5, 10, 1, 5,
                 ];
                 static REDUCE_OFFSETS: &[u32] = &[
-                    0, 12, 24, 24, 24, 36, 45, 69, 96, 96, 108, 108, 120, 132, 144, 153,
-                    153, 165, 174, 195, 216, 228, 249, 261, 273, 282,
+                    0, 12, 24, 24, 36, 48, 72, 99, 99, 111, 111, 123, 135, 147, 147, 159,
+                    165, 177, 189, 210, 231, 243, 264, 276, 288, 300, 306, 306,
                 ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0,
+                    0, 0, 0, 0,
                 ];
-                let num_rules = 17usize;
+                let num_rules = 16usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
                     let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => ::rusty_lr::rule::Precedence::None,
-                        1 => {
-                            ::rusty_lr::rule::Precedence::Fixed((prec_val >> 2) as usize)
-                        }
-                        2 => {
-                            ::rusty_lr::rule::Precedence::Dynamic(
-                                (prec_val >> 2) as usize,
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
                             name,
                             len: RULE_LENGTHS[i] as usize,
-                            precedence,
                         });
                 }
-                let num_states = 25usize;
+                let num_states = 27usize;
                 let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;

@@ -9,54 +9,6 @@ use crate::grammar::Grammar;
 use crate::terminal_info::TerminalName;
 use crate::utils;
 
-// helper function to generate match-case stream.
-// convert integer list to `a | b..=c | d` syntax
-fn list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
-    let mut stream = TokenStream::new();
-    let mut prev = None;
-    for val in list {
-        if let Some((prev_start, prev_last)) = prev {
-            if prev_last + 1 == val {
-                // extend the range
-                prev = Some((prev_start, val));
-            } else {
-                // push the previous range
-                if !stream.is_empty() {
-                    stream.extend(quote! { | });
-                }
-                if prev_start == prev_last {
-                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-                    stream.extend(quote! { #prev_start });
-                } else {
-                    let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-                    let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
-                    stream.extend(quote! { #prev_start..=#prev_last });
-                }
-
-                prev = Some((val, val));
-            }
-        } else {
-            prev = Some((val, val));
-        }
-    }
-    // push the previous range
-    if let Some((prev_start, prev_last)) = prev {
-        if !stream.is_empty() {
-            stream.extend(quote! { | });
-        }
-        if prev_start == prev_last {
-            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-            stream.extend(quote! { #prev_start });
-        } else {
-            let prev_start = proc_macro2::Literal::usize_unsuffixed(prev_start);
-            let prev_last = proc_macro2::Literal::usize_unsuffixed(prev_last);
-            stream.extend(quote! { #prev_start..=#prev_last });
-        }
-    }
-
-    stream
-}
-
 /// emit Rust code for the parser
 impl Grammar {
     /// write type alias Context, Rule, Tables, Error...
@@ -205,48 +157,6 @@ impl Grammar {
             });
             class_variants.push(variant_name);
         }
-        // generate `Parser::class_precedence()` terminal class -> precedence level match body
-        let mut precedence_match_stream = TokenStream::new();
-        {
-            let mut level_classes = Vec::new();
-            level_classes.resize(
-                self.builder.precedence_types.len(),
-                std::collections::BTreeSet::new(),
-            );
-            for (&class, &level) in self.builder.precedence_levels.iter() {
-                level_classes[level].insert(class.into_term().unwrap());
-            }
-
-            for (level, classes) in level_classes.into_iter().enumerate() {
-                if classes.is_empty() {
-                    continue;
-                } else {
-                    debug_assert!(level < u8::MAX as usize);
-                    let iter = classes.iter().map(|&c| {
-                        let var = &class_variants[c];
-                        quote! { #termclass_typename::#var }
-                    });
-                    let level = proc_macro2::Literal::usize_unsuffixed(level);
-                    let case_stream = quote! { #(#iter)|* };
-                    precedence_match_stream.extend(quote! {
-                        #case_stream => #module_prefix::parser::Precedence::new(#level),
-                    });
-                }
-            }
-            if let Some(error_prec) = self.error_precedence {
-                debug_assert!(error_prec < u8::MAX as usize);
-                let error_prec = proc_macro2::Literal::usize_unsuffixed(error_prec);
-                precedence_match_stream.extend(quote! {
-                #termclass_typename::#error_name => #module_prefix::parser::Precedence::new(#error_prec),
-            });
-            }
-            precedence_match_stream.extend(quote! {
-                #termclass_typename::#eof_name => {
-                    unreachable!("eof token cannot be used in precedence levels")
-                },
-                _ => #module_prefix::parser::Precedence::none(),
-            });
-        }
 
         let other_class_id = self.other_terminal_class_id;
 
@@ -391,11 +301,7 @@ impl Grammar {
                 fn to_usize(&self) -> usize {
                     *self as usize
                 }
-                fn precedence(&self) -> #module_prefix::parser::Precedence {
-                    match self {
-                        #precedence_match_stream
-                    }
-                }
+
                 fn from_term(terminal: &Self::Term) -> Self {
                     #[allow(unreachable_patterns, unused_variables)]
                     match terminal {
@@ -553,63 +459,7 @@ impl Grammar {
         // ======================
         // building grammar
         // ======================
-        use rusty_lr_core::rule::ReduceType;
         use rusty_lr_core::TerminalSymbol;
-
-        // generate precedence level -> reduce type match stream
-        // match level {
-        //     0 => Left,
-        //     1 => Right,
-        //     ...
-        // }
-        let precedence_types_match_body_stream = {
-            let lefts = list_to_case_stream(
-                self.builder
-                    .precedence_types
-                    .iter()
-                    .copied()
-                    .enumerate()
-                    .filter_map(|(level, reduce_type)| {
-                        debug_assert!(level < u8::MAX as usize);
-                        if reduce_type == Some(ReduceType::Left) {
-                            Some(level)
-                        } else {
-                            None
-                        }
-                    }),
-            );
-            let rights = list_to_case_stream(
-                self.builder
-                    .precedence_types
-                    .iter()
-                    .copied()
-                    .enumerate()
-                    .filter_map(|(level, reduce_type)| {
-                        debug_assert!(level < u8::MAX as usize);
-                        if reduce_type == Some(ReduceType::Right) {
-                            Some(level)
-                        } else {
-                            None
-                        }
-                    }),
-            );
-
-            let mut stream = TokenStream::new();
-            if !lefts.is_empty() {
-                stream.extend(quote! {
-                    #lefts => Some(#module_prefix::rule::ReduceType::Left),
-                });
-            }
-            if !rights.is_empty() {
-                stream.extend(quote! {
-                    #rights => Some(#module_prefix::rule::ReduceType::Right),
-                });
-            }
-            stream.extend(quote! {
-                _ => None,
-            });
-            stream
-        };
 
         // do not build at runtime
         // write all parser tables and production rules directly here
@@ -649,7 +499,6 @@ impl Grammar {
         // Rules Serialization
         // ------------------
         let mut rule_names = Vec::new();
-        let mut rule_precedences = Vec::new();
         let mut rule_lengths = Vec::new();
 
         for rule in &self.builder.rules {
@@ -659,27 +508,6 @@ impl Grammar {
                 rule.rule.name
             );
             rule_names.push(rule.rule.name as u32);
-
-            let prec_val = match rule.rule.precedence {
-                rusty_lr_core::rule::Precedence::None => 0,
-                rusty_lr_core::rule::Precedence::Fixed(level) => {
-                    assert!(
-                        level < (1 << 30),
-                        "Precedence level {} exceeds 30-bit limit",
-                        level
-                    );
-                    ((level as u32) << 2) | 1
-                }
-                rusty_lr_core::rule::Precedence::Dynamic(idx) => {
-                    assert!(
-                        idx < (1 << 30),
-                        "Precedence dynamic token index {} exceeds 30-bit limit",
-                        idx
-                    );
-                    ((idx as u32) << 2) | 2
-                }
-            };
-            rule_precedences.push(prec_val);
             rule_lengths.push(rule.rule.rule.len() as u32);
         }
 
@@ -785,9 +613,7 @@ impl Grammar {
         let rule_names = rule_names
             .into_iter()
             .map(proc_macro2::Literal::u32_unsuffixed);
-        let rule_precedences = rule_precedences
-            .into_iter()
-            .map(proc_macro2::Literal::u32_unsuffixed);
+
         let rule_lengths = rule_lengths
             .into_iter()
             .map(proc_macro2::Literal::u32_unsuffixed);
@@ -837,12 +663,7 @@ impl Grammar {
 
                 const ERROR_USED:bool = #error_used;
 
-                fn precedence_types(level: u8) -> Option<#module_prefix::rule::ReduceType> {
-                    #[allow(unreachable_patterns)]
-                    match level {
-                        #precedence_types_match_body_stream
-                    }
-                }
+
                 // get_tables returns the decoded flat runtime parser tables.
                 // Serialized integer arrays keep the generated source compact while Context keeps the
                 // decoded table reference out of the parsing hot path.
@@ -851,10 +672,8 @@ impl Grammar {
                     TABLES.get_or_init(|| {
                         // Serialized rule properties:
                         // - RULE_NAMES: NonTerm enum value of the rule LHS name
-                        // - RULE_PRECEDENCES: Packed operator precedence level/index and type (prec_val & 3: 0 = None, 1 = Fixed, 2 = Dynamic)
                         // - RULE_LENGTHS: RHS length of each production rule
                         static RULE_NAMES: &[u32] = &[ #(#rule_names),* ];
-                        static RULE_PRECEDENCES: &[u32] = &[ #(#rule_precedences),* ];
                         static RULE_LENGTHS: &[u32] = &[ #(#rule_lengths),* ];
 
                         // Serialized table row properties:
@@ -876,18 +695,9 @@ impl Grammar {
                         for i in 0..num_rules {
                             let name = #nonterminals_enum_name::from_usize(RULE_NAMES[i] as usize);
 
-                            let prec_val = RULE_PRECEDENCES[i];
-                            let precedence = match prec_val & 3 {
-                                0 => #module_prefix::rule::Precedence::None,
-                                1 => #module_prefix::rule::Precedence::Fixed((prec_val >> 2) as usize),
-                                2 => #module_prefix::rule::Precedence::Dynamic((prec_val >> 2) as usize),
-                                _ => unreachable!(),
-                            };
-
                             rules.push(#module_prefix::parser::table::RuleInfo {
                                 name,
                                 len: RULE_LENGTHS[i] as usize,
-                                precedence,
                             });
                         }
 

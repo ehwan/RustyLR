@@ -9,7 +9,7 @@ use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
-use crate::parser::Precedence;
+
 use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
@@ -22,7 +22,6 @@ pub struct Context<
     pub state_stack: Vec<StateIndex>,
     pub(crate) data_stack: Data,
     pub(crate) location_stack: Vec<Data::Location>,
-    pub(crate) precedence_stack: Vec<Precedence>,
     pub(crate) userdata: Data::UserData,
     /// Decoded parser tables initialized when the context is created.
     ///
@@ -49,7 +48,6 @@ impl<
 
             data_stack: Default::default(),
             location_stack: Vec::new(),
-            precedence_stack: Vec::new(),
             userdata,
             tables: P::get_tables(),
 
@@ -77,7 +75,6 @@ impl<
 
             data_stack: Data::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
-            precedence_stack: Vec::with_capacity(capacity),
             userdata,
             tables: P::get_tables(),
 
@@ -144,17 +141,13 @@ impl<
         Ok(std::iter::once(self.accept()?))
     }
 
-    /// Check if current context can be terminated and get the value of the start symbol.
     pub fn can_accept(&self) -> bool {
         let mut extra_state_stack = Vec::new();
-        let mut extra_precedence_stack = Vec::new();
 
         self.can_feed_impl(
-            self.precedence_stack.len(),
+            self.state_stack.len() - 1,
             &mut extra_state_stack,
-            &mut extra_precedence_stack,
             P::TermClass::EOF,
-            Precedence::none(),
         ) == Some(true)
     }
 
@@ -196,7 +189,7 @@ impl<
         let mut extra_state_stack = Vec::new();
         self.expected_token_impl(
             &mut extra_state_stack,
-            self.precedence_stack.len(),
+            self.state_stack.len() - 1,
             &mut terms,
             &mut nonterms,
         );
@@ -292,9 +285,8 @@ impl<
     {
         use crate::Location;
         let class = P::TermClass::from_term(&term);
-        let shift_prec = class.precedence();
 
-        match self.feed_location_impl(TerminalSymbol::Term(term), class, shift_prec, location) {
+        match self.feed_location_impl(TerminalSymbol::Term(term), class, location) {
             Ok(()) => Ok(()),
             Err(ParseError::NoAction(err)) => {
                 // nothing shifted; enters panic mode
@@ -304,10 +296,7 @@ impl<
                     return Err(ParseError::NoAction(err));
                 }
 
-                let error_prec = P::TermClass::ERROR.precedence();
-
                 let mut extra_state_stack = Vec::new();
-                let mut extra_precedence_stack = Vec::new();
 
                 use crate::TriState;
                 let mut pop_count = 0;
@@ -316,15 +305,12 @@ impl<
                     match self.tables.can_accept_error(s.into_usize()) {
                         TriState::False => {}
                         TriState::Maybe => {
-                            extra_precedence_stack.clear();
                             extra_state_stack.clear();
 
                             if self.can_feed_impl(
-                                self.precedence_stack.len() - pop_count,
+                                self.state_stack.len() - pop_count - 1,
                                 &mut extra_state_stack,
-                                &mut extra_precedence_stack,
                                 P::TermClass::ERROR,
-                                error_prec,
                             ) == Some(true)
                             {
                                 found = true;
@@ -348,12 +334,10 @@ impl<
                     Data::Location::new(self.location_stack.iter().rev(), pop_count);
                 self.location_stack
                     .truncate(self.location_stack.len() - pop_count);
+                self.data_stack
+                    .truncate(self.state_stack.len() - pop_count - 1);
                 self.state_stack
                     .truncate(self.state_stack.len() - pop_count);
-                self.data_stack
-                    .truncate(self.precedence_stack.len() - pop_count);
-                self.precedence_stack
-                    .truncate(self.precedence_stack.len() - pop_count);
 
                 #[cfg(feature = "tree")]
                 {
@@ -364,7 +348,6 @@ impl<
                 match self.feed_location_impl(
                     TerminalSymbol::Error,
                     P::TermClass::ERROR,
-                    error_prec,
                     error_location,
                 ) {
                     Ok(()) => {
@@ -387,7 +370,6 @@ impl<
                             }
 
                             self.location_stack.push(err.location.clone());
-                            self.precedence_stack.push(shift_prec);
                             self.state_stack.push(next_state.state);
                         } else {
                             // merge term with previous error
@@ -416,7 +398,6 @@ impl<
         &mut self,
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
-        shift_prec: Precedence,
         location: Data::Location,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -438,67 +419,9 @@ impl<
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let tokens_len = rule.len;
 
-                let reduce_prec = match rule.precedence {
-                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
-                    crate::rule::Precedence::Dynamic(token_idx) => {
-                        // get token_idx'th precedence from back of precedence stack
-                        let idx = self.precedence_stack.len() - tokens_len + token_idx;
-                        self.precedence_stack[idx]
-                    }
-                    crate::rule::Precedence::None => Precedence::none(),
-                };
-
-                // resolve shift/reduce conflict by precedence
-                if shift.is_some() {
-                    let shift_prec = shift_prec.unwrap();
-                    let reduce_prec = reduce_prec.unwrap();
-                    use std::cmp::Ordering;
-                    match reduce_prec.cmp(&shift_prec) {
-                        Ordering::Less => {
-                            // no reduce
-                            break shift;
-                        }
-                        Ordering::Equal => {
-                            // check for reduce type
-                            use crate::rule::ReduceType;
-                            match P::precedence_types(reduce_prec) {
-                                Some(ReduceType::Left) => {
-                                    // no shift
-                                    // shift = None;
-                                }
-                                Some(ReduceType::Right) => {
-                                    // no reduce
-                                    break shift;
-                                }
-                                None => {
-                                    // error
-                                    return Err(ParseError::NoPrecedence(
-                                        super::error::NoPrecedenceError {
-                                            term,
-                                            location,
-                                            state: self.state_stack.last().unwrap().into_usize(),
-                                            rule: reduce_rule.into_usize(),
-                                        },
-                                    ));
-                                }
-                            }
-                        }
-                        Ordering::Greater => {
-                            // no shift
-                            // shift = None;
-                        }
-                    }
-                }
-
-                // if the code reaches here, it proceed to reduce, without shifting
-
                 // pop state stack
                 self.state_stack
                     .truncate(self.state_stack.len() - tokens_len);
-                // pop precedence stack
-                self.precedence_stack
-                    .truncate(self.precedence_stack.len() - tokens_len);
-                self.precedence_stack.push(reduce_prec);
 
                 let mut shift = false;
 
@@ -584,7 +507,6 @@ impl<
             }
 
             self.location_stack.push(location);
-            self.precedence_stack.push(shift_prec);
 
             Ok(())
         } else {
@@ -602,17 +524,9 @@ impl<
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &Data::Term) -> bool {
         let mut extra_state_stack = Vec::new();
-        let mut extra_precedence_stack = Vec::new();
         let class = P::TermClass::from_term(term);
-        let shift_prec = class.precedence();
 
-        self.can_feed_impl(
-            self.precedence_stack.len(),
-            &mut extra_state_stack,
-            &mut extra_precedence_stack,
-            class,
-            shift_prec,
-        ) == Some(true)
+        self.can_feed_impl(self.state_stack.len() - 1, &mut extra_state_stack, class) == Some(true)
     }
 
     /// Check if current context can enter panic mode
@@ -623,19 +537,11 @@ impl<
         }
 
         let mut extra_state_stack = Vec::new();
-        let mut extra_precedence_stack = Vec::new();
         let error = P::TermClass::ERROR;
-        let error_prec = error.precedence();
-        let mut stack_len = self.precedence_stack.len();
+        let mut stack_len = self.state_stack.len() - 1;
 
         loop {
-            match self.can_feed_impl(
-                stack_len,
-                &mut extra_state_stack,
-                &mut extra_precedence_stack,
-                error,
-                error_prec,
-            ) {
+            match self.can_feed_impl(stack_len, &mut extra_state_stack, error) {
                 Some(true) => break true, // successfully shifted `error`
                 Some(false) => {
                     if stack_len == 0 {
@@ -647,7 +553,6 @@ impl<
                 None => break false,
             }
             extra_state_stack.clear();
-            extra_precedence_stack.clear();
         }
     }
 
@@ -655,9 +560,7 @@ impl<
         &self,
         mut stack_len: usize,
         extra_state_stack: &mut Vec<StateIndex>,
-        extra_precedence_stack: &mut Vec<Precedence>,
         class: P::TermClass,
-        shift_prec: Precedence,
     ) -> Option<bool> {
         let shift_to = loop {
             let state = extra_state_stack
@@ -676,69 +579,14 @@ impl<
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let tokens_len = rule.len;
 
-                let reduce_prec = match rule.precedence {
-                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
-                    crate::rule::Precedence::Dynamic(token_idx) => {
-                        // get token_idx'th precedence from back of precedence stack
-                        let idx = stack_len + extra_precedence_stack.len() - tokens_len + token_idx;
-                        if idx < stack_len {
-                            self.precedence_stack[idx]
-                        } else {
-                            let idx = idx - stack_len;
-                            extra_precedence_stack[idx]
-                        }
-                    }
-                    crate::rule::Precedence::None => Precedence::none(),
-                };
-
-                // resolve shift/reduce conflict by precedence
-                if shift.is_some() {
-                    let shift_prec = shift_prec.unwrap();
-                    let reduce_prec = reduce_prec.unwrap();
-                    use std::cmp::Ordering;
-                    match reduce_prec.cmp(&shift_prec) {
-                        Ordering::Less => {
-                            // no reduce
-                            break shift;
-                        }
-                        Ordering::Equal => {
-                            // check for reduce type
-                            use crate::rule::ReduceType;
-                            match P::precedence_types(reduce_prec) {
-                                Some(ReduceType::Left) => {
-                                    // no shift
-                                    // shift = None;
-                                }
-                                Some(ReduceType::Right) => {
-                                    // no reduce
-                                    break shift;
-                                }
-                                None => {
-                                    // error
-                                    return None;
-                                }
-                            }
-                        }
-                        Ordering::Greater => {
-                            // no shift
-                            // shift = None;
-                        }
-                    }
-                }
-
                 // pop state stack
-                // pop precedence stack
-                if tokens_len <= extra_precedence_stack.len() {
-                    extra_precedence_stack.truncate(extra_precedence_stack.len() - tokens_len);
+                if tokens_len <= extra_state_stack.len() {
                     extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
                 } else {
-                    let left = tokens_len - extra_precedence_stack.len();
-                    extra_precedence_stack.clear();
+                    let left = tokens_len - extra_state_stack.len();
                     extra_state_stack.clear();
                     stack_len -= left;
                 }
-
-                extra_precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
                 let last_state = extra_state_stack
@@ -776,12 +624,7 @@ impl<
         P::NonTerm: std::fmt::Debug,
     {
         let eof_location = Data::Location::new(self.location_stack.iter().rev(), 0);
-        self.feed_location_impl(
-            TerminalSymbol::Eof,
-            P::TermClass::EOF,
-            Precedence::none(),
-            eof_location,
-        )
+        self.feed_location_impl(TerminalSymbol::Eof, P::TermClass::EOF, eof_location)
     }
 }
 
@@ -814,7 +657,6 @@ where
             state_stack: self.state_stack.clone(),
             data_stack: self.data_stack.clone(),
             location_stack: self.location_stack.clone(),
-            precedence_stack: self.precedence_stack.clone(),
             userdata: self.userdata.clone(),
             tables: self.tables,
 

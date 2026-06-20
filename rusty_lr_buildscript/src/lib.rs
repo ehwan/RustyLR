@@ -742,19 +742,7 @@ impl Builder {
                                 "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#operator-precedence".to_string()
                             ])
                     }
-                    ParseError::NonTerminalPrecedenceNotDefined(loc) => {
-                        let range = span_manager.get_byterange(&loc.location()).unwrap_or(0..0);
-                        Diagnostic::error()
-                            .with_message("Precedence is not defined for this non-terminal")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message(format!("non-terminal used here"))])
-                            .with_notes(vec![
-                                "Every production rule of this non-terminal must have a precedence defined"
-                                    .to_string(),
-                                "use %left, %right, or %precedence to define precedence"
-                                    .to_string(),
-                            ])
-                    }
+
                     ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule } => {
                         // `name` must not be generated rule,
                         // since it is programmically generated, it must have a proper reduce action
