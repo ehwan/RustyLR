@@ -38,9 +38,9 @@ pub type EContext = ::rusty_lr::parser::deterministic::Context<EParser, EDataSta
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
 pub type ERule = ::rusty_lr::rule::ProductionRule<ETerminalClasses, ENonTerminals>;
-/// type alias for DFA state
+/// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
-pub type EState = ::rusty_lr::parser::state::DenseState<
+pub type ETables = ::rusty_lr::parser::table::DenseFlatTables<
     ETerminalClasses,
     ENonTerminals,
     u8,
@@ -845,7 +845,9 @@ impl ::rusty_lr::parser::Parser for EParser {
     type Term = char;
     type TermClass = ETerminalClasses;
     type NonTerm = ENonTerminals;
-    type State = EState;
+    type StateIndex = u8;
+    type ReduceRules = u8;
+    type Tables = ETables;
     const ERROR_USED: bool = false;
     fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
         #[allow(unreachable_patterns)]
@@ -854,9 +856,9 @@ impl ::rusty_lr::parser::Parser for EParser {
             _ => None,
         }
     }
-    fn get_rules() -> &'static [ERule] {
-        static RULES: std::sync::OnceLock<Vec<ERule>> = std::sync::OnceLock::new();
-        RULES
+    fn get_tables() -> &'static ETables {
+        static TABLES: std::sync::OnceLock<ETables> = std::sync::OnceLock::new();
+        TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
                     0, 0, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
@@ -864,68 +866,9 @@ impl ::rusty_lr::parser::Parser for EParser {
                 static RULE_PRECEDENCES: &[u32] = &[
                     0, 0, 0, 0, 0, 6, 9, 0, 1, 5, 0, 0, 0, 0, 0, 0, 0,
                 ];
-                static RULE_TOKENS_DATA: &[u32] = &[
-                    10, 12, 13, 15, 13, 3, 13, 4, 7, 6, 13, 7, 9, 7, 13, 8, 7, 5, 16, 14,
-                    0, 11, 0, 11, 1, 15, 1, 7, 20,
+                static RULE_LENGTHS: &[u32] = &[
+                    1, 1, 3, 1, 5, 3, 3, 1, 1, 1, 1, 2, 1, 0, 1, 2, 2,
                 ];
-                static RULE_TOKENS_OFFSETS: &[u32] = &[
-                    0, 1, 2, 5, 6, 11, 14, 17, 18, 19, 20, 21, 23, 24, 24, 25, 27, 29,
-                ];
-                let num_rules = 17usize;
-                let mut rules = Vec::with_capacity(num_rules);
-                for i in 0..num_rules {
-                    let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => None,
-                        1 => {
-                            Some(
-                                ::rusty_lr::rule::Precedence::Fixed(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        2 => {
-                            Some(
-                                ::rusty_lr::rule::Precedence::Dynamic(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
-                    let token_start = RULE_TOKENS_OFFSETS[i] as usize;
-                    let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
-                    let mut rule = Vec::with_capacity(token_end - token_start);
-                    for idx in token_start..token_end {
-                        let val = RULE_TOKENS_DATA[idx];
-                        let is_nonterm = (val & 1) != 0;
-                        let sym_idx = (val >> 1) as usize;
-                        let token = if is_nonterm {
-                            ::rusty_lr::Token::NonTerm(
-                                ENonTerminals::from_usize(sym_idx),
-                            )
-                        } else {
-                            ::rusty_lr::Token::Term(
-                                ETerminalClasses::from_usize(sym_idx),
-                            )
-                        };
-                        rule.push(token);
-                    }
-                    rules
-                        .push(::rusty_lr::rule::ProductionRule {
-                            name,
-                            rule,
-                            precedence,
-                        });
-                }
-                rules
-            })
-    }
-    fn get_states() -> &'static [EState] {
-        static STATES: std::sync::OnceLock<Vec<EState>> = std::sync::OnceLock::new();
-        STATES
-            .get_or_init(|| {
                 static SHIFT_TERM_DATA: &[u32] = &[
                     196608, 2147614727, 2147614728, 2147581962, 196608, 2147614727,
                     2147614728, 229376, 294914, 753668, 589829, 2148106246, 196608,
@@ -976,8 +919,38 @@ impl ::rusty_lr::parser::Parser for EParser {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0,
                 ];
+                let num_rules = 17usize;
+                let mut rules = Vec::with_capacity(num_rules);
+                for i in 0..num_rules {
+                    let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let prec_val = RULE_PRECEDENCES[i];
+                    let precedence = match prec_val & 3 {
+                        0 => None,
+                        1 => {
+                            Some(
+                                ::rusty_lr::rule::Precedence::Fixed(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        2 => {
+                            Some(
+                                ::rusty_lr::rule::Precedence::Dynamic(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        _ => unreachable!(),
+                    };
+                    rules
+                        .push(::rusty_lr::parser::table::RuleInfo {
+                            name,
+                            len: RULE_LENGTHS[i] as usize,
+                            precedence,
+                        });
+                }
                 let num_states = 25usize;
-                let mut states = Vec::with_capacity(num_states);
+                let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;
                     let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
@@ -1041,9 +1014,13 @@ impl ::rusty_lr::parser::Parser for EParser {
                         ruleset: Vec::new(),
                         can_accept_error,
                     };
-                    states.push(intermediate.into());
+                    state_rows.push(intermediate);
                 }
-                states
+                ::rusty_lr::parser::table::IntermediateTables {
+                    state_rows,
+                    rules,
+                }
+                    .into()
             })
     }
 }

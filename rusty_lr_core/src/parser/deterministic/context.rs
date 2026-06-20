@@ -6,15 +6,15 @@ use crate::Location;
 use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
+use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
 use crate::parser::Precedence;
-use crate::parser::State;
 use crate::TerminalSymbol;
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<
-    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
     Data: DataStack,
     StateIndex,
 > {
@@ -24,6 +24,11 @@ pub struct Context<
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) precedence_stack: Vec<Precedence>,
     pub(crate) userdata: Data::UserData,
+    /// Decoded parser tables initialized when the context is created.
+    ///
+    /// Keeping this reference in the context avoids repeated `Parser::get_tables()` calls in the
+    /// token-feeding hot path.
+    pub(crate) tables: &'static P::Tables,
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
@@ -31,7 +36,7 @@ pub struct Context<
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > Context<P, Data, StateIndex>
@@ -46,6 +51,7 @@ impl<
             location_stack: Vec::new(),
             precedence_stack: Vec::new(),
             userdata,
+            tables: P::get_tables(),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -73,6 +79,7 @@ impl<
             location_stack: Vec::with_capacity(capacity),
             precedence_stack: Vec::with_capacity(capacity),
             userdata,
+            tables: P::get_tables(),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -116,7 +123,6 @@ impl<
     where
         Data::Term: Clone,
         Data::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_eof()?;
 
@@ -134,16 +140,12 @@ impl<
     where
         Data::Term: Clone,
         Data::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         Ok(std::iter::once(self.accept()?))
     }
 
     /// Check if current context can be terminated and get the value of the start symbol.
-    pub fn can_accept(&self) -> bool
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    pub fn can_accept(&self) -> bool {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
 
@@ -188,7 +190,6 @@ impl<
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
-        P::State: State<StateIndex = StateIndex>,
     {
         let mut terms = BTreeSet::new();
         let mut nonterms = BTreeSet::new();
@@ -212,7 +213,6 @@ impl<
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
-        P::State: State<StateIndex = StateIndex>,
     {
         let (terms, nonterms) = self.expected_token();
         (
@@ -230,21 +230,20 @@ impl<
     ) where
         P::TermClass: Ord,
         P::NonTerm: Ord,
-        P::State: State<StateIndex = StateIndex>,
     {
-        let state = &P::get_states()[extra_state_stack
+        let state = extra_state_stack
             .last()
             .copied()
             .unwrap_or_else(|| self.state_stack[stack_len])
-            .into_usize()];
+            .into_usize();
 
-        terms.extend(state.expected_shift_term());
-        nonterms.extend(state.expected_shift_nonterm());
+        terms.extend(self.tables.expected_shift_term(state));
+        nonterms.extend(self.tables.expected_shift_nonterm(state));
 
         let mut reduce_nonterms = BTreeSet::new();
-        for reduce_rule in state.expected_reduce_rule() {
-            let prod_rule = &P::get_rules()[reduce_rule.into_usize()];
-            reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
+        for reduce_rule in self.tables.expected_reduce_rule(state) {
+            let prod_rule = self.tables.rule(reduce_rule.into_usize());
+            reduce_nonterms.insert((prod_rule.len, prod_rule.name));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
             let mut stack_len = stack_len;
@@ -255,12 +254,12 @@ impl<
             } else {
                 extra_state_stack[..extra_state_stack.len() - tokens_len].to_vec()
             };
-            let state = &P::get_states()[extra_state_stack
+            let state = extra_state_stack
                 .last()
                 .copied()
                 .unwrap_or_else(|| self.state_stack[stack_len])
-                .into_usize()];
-            if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
+                .into_usize();
+            if let Some(next_state) = self.tables.shift_goto_nonterm(state, nonterm) {
                 extra_state_stack.push(next_state.state);
                 self.expected_token_impl(&mut extra_state_stack, stack_len, terms, nonterms);
             }
@@ -276,7 +275,6 @@ impl<
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
         Data::Location: Default,
     {
         self.feed_location(term, Default::default())
@@ -291,7 +289,6 @@ impl<
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
         let class = P::TermClass::from_term(&term);
@@ -316,7 +313,7 @@ impl<
                 let mut pop_count = 0;
                 let mut found = false;
                 for &s in self.state_stack.iter().rev() {
-                    match P::get_states()[s.into_usize()].can_accept_error() {
+                    match self.tables.can_accept_error(s.into_usize()) {
                         TriState::False => {}
                         TriState::Maybe => {
                             extra_precedence_stack.clear();
@@ -374,9 +371,9 @@ impl<
                         // try shift given term again
                         // to check if the given terminal should be merged with `error` token
                         // or it can be shift right after the error token
-                        if let Some(next_state) = P::get_states()
-                            [self.state_stack.last().unwrap().into_usize()]
-                        .shift_goto_class(class)
+                        if let Some(next_state) = self
+                            .tables
+                            .shift_goto_class(self.state_stack.last().unwrap().into_usize(), class)
                         {
                             #[cfg(feature = "tree")]
                             self.tree_stack
@@ -425,19 +422,21 @@ impl<
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
-        use super::super::state::ReduceRules;
+        use super::super::table::ReduceRules;
         use crate::Location;
 
         let shift_to = loop {
-            let state = &P::get_states()[self.state_stack.last().unwrap().into_usize()];
+            let state = self.state_stack.last().unwrap().into_usize();
 
-            let shift = state.shift_goto_class(class);
-            if let Some(reduce_rule) = state.reduce(class) {
+            let (shift, reduce) = match self.tables.term_action(state, class) {
+                Some(action) => (action.shift(), action.reduce()),
+                None => (None, None),
+            };
+            if let Some(reduce_rule) = reduce {
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
-                let rule = &P::get_rules()[reduce_rule.into_usize()];
-                let tokens_len = rule.rule.len();
+                let rule = *self.tables.rule(reduce_rule.into_usize());
+                let tokens_len = rule.len;
 
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
@@ -506,9 +505,10 @@ impl<
                 let mut new_location =
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
-                let Some(next_nonterm_shift) = P::get_states()
-                    [self.state_stack.last().unwrap().into_usize()]
-                .shift_goto_nonterm(rule.name) else {
+                let Some(next_nonterm_shift) = self
+                    .tables
+                    .shift_goto_nonterm(self.state_stack.last().unwrap().into_usize(), rule.name)
+                else {
                     unreachable!(
                         "Failed to shift nonterminal: {:?} in state {}",
                         rule.name,
@@ -542,8 +542,8 @@ impl<
                 // construct tree
                 #[cfg(feature = "tree")]
                 {
-                    let mut children = Vec::with_capacity(rule.rule.len());
-                    for _ in 0..rule.rule.len() {
+                    let mut children = Vec::with_capacity(rule.len);
+                    for _ in 0..rule.len {
                         let tree = self.tree_stack.pop().unwrap();
                         children.push(tree);
                     }
@@ -600,10 +600,7 @@ impl<
     /// This does not simulate for reduce action error, or panic mode.
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
-    pub fn can_feed(&self, term: &Data::Term) -> bool
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    pub fn can_feed(&self, term: &Data::Term) -> bool {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         let class = P::TermClass::from_term(term);
@@ -619,10 +616,7 @@ impl<
     }
 
     /// Check if current context can enter panic mode
-    pub fn can_panic(&self) -> bool
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    pub fn can_panic(&self) -> bool {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -664,23 +658,23 @@ impl<
         extra_precedence_stack: &mut Vec<Precedence>,
         class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool>
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    ) -> Option<bool> {
         let shift_to = loop {
-            let state = &P::get_states()[extra_state_stack
+            let state = extra_state_stack
                 .last()
                 .copied()
                 .unwrap_or_else(|| self.state_stack[stack_len])
-                .into_usize()];
+                .into_usize();
 
-            let shift = state.shift_goto_class(class);
-            if let Some(reduce_rule) = state.reduce(class) {
-                use super::super::state::ReduceRules;
+            let (shift, reduce) = match self.tables.term_action(state, class) {
+                Some(action) => (action.shift(), action.reduce()),
+                None => (None, None),
+            };
+            if let Some(reduce_rule) = reduce {
+                use super::super::table::ReduceRules;
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
-                let rule = &P::get_rules()[reduce_rule.into_usize()];
-                let tokens_len = rule.rule.len();
+                let rule = *self.tables.rule(reduce_rule.into_usize());
+                let tokens_len = rule.len;
 
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
@@ -747,13 +741,12 @@ impl<
                 extra_precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) = P::get_states()[extra_state_stack
+                let last_state = extra_state_stack
                     .last()
                     .copied()
                     .unwrap_or_else(|| self.state_stack[stack_len])
-                    .into_usize()]
-                .shift_goto_nonterm(rule.name)
-                {
+                    .into_usize();
+                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.name) {
                     extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(
@@ -781,7 +774,6 @@ impl<
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         let eof_location = Data::Location::new(self.location_stack.iter().rev(), 0);
         self.feed_location_impl(
@@ -794,7 +786,7 @@ impl<
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > Default for Context<P, Data, StateIndex>
@@ -807,7 +799,7 @@ where
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > Clone for Context<P, Data, StateIndex>
@@ -824,6 +816,7 @@ where
             location_stack: self.location_stack.clone(),
             precedence_stack: self.precedence_stack.clone(),
             userdata: self.userdata.clone(),
+            tables: self.tables,
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),
@@ -834,7 +827,7 @@ where
 
 #[cfg(feature = "tree")]
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > std::fmt::Display for Context<P, Data, StateIndex>
@@ -848,7 +841,7 @@ where
 }
 #[cfg(feature = "tree")]
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > std::fmt::Debug for Context<P, Data, StateIndex>
@@ -863,7 +856,7 @@ where
 
 #[cfg(feature = "tree")]
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > std::ops::Deref for Context<P, Data, StateIndex>
@@ -876,7 +869,7 @@ impl<
 
 #[cfg(feature = "tree")]
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
     > std::ops::DerefMut for Context<P, Data, StateIndex>

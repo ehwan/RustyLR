@@ -59,14 +59,15 @@ fn list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
 
 /// emit Rust code for the parser
 impl Grammar {
-    /// write type alias Context, Rule, State, Error...
+    /// write type alias Context, Rule, Tables, Error...
     fn emit_type_alises(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
         let start_rule_span = self
             .span_manager
             .get_span_in_location(&self.start_rule_name.location());
         let rule_typename = Ident::new(&format!("{}Rule", self.start_rule_name), start_rule_span);
-        let state_typename = Ident::new(&format!("{}State", self.start_rule_name), start_rule_span);
+        let tables_typename =
+            Ident::new(&format!("{}Tables", self.start_rule_name), start_rule_span);
         let nonterm_typename = Ident::new(
             &format!("{}NonTerminals", self.start_rule_name),
             start_rule_span,
@@ -90,10 +91,10 @@ impl Grammar {
         let location_typename = &self.location_typename;
         let reduce_error_typename = &self.error_typename;
 
-        let state_structname = if self.emit_dense {
-            format_ident!("DenseState")
+        let table_structname = if self.emit_dense {
+            format_ident!("DenseFlatTables")
         } else {
-            format_ident!("SparseState")
+            format_ident!("SparseFlatTables")
         };
         let token_typename = &self.token_typename;
 
@@ -116,21 +117,19 @@ impl Grammar {
             quote! { usize }
         };
 
+        let max_reduce_rules = self
+            .states
+            .iter()
+            .flat_map(|s| s.reduce_map.iter().map(|(_, rules)| rules.len()))
+            .max()
+            .unwrap_or(1);
+        let rule_container_type = if self.glr && max_reduce_rules > 1 {
+            quote! { #module_prefix::parser::table::ArrayVec<#rule_index_type, #max_reduce_rules> }
+        } else {
+            rule_index_type.clone()
+        };
+
         if self.glr {
-            // count the max number of multiple reduce rules in a single state
-            let max_reduce_rules = self
-                .states
-                .iter()
-                .flat_map(|s| s.reduce_map.iter().map(|(_, rules)| rules.len()))
-                .max()
-                .unwrap_or(1);
-
-            let rule_container_type = if max_reduce_rules == 1 {
-                rule_index_type.clone()
-            } else {
-                quote! { #module_prefix::parser::state::ArrayVec<#rule_index_type, #max_reduce_rules> }
-            };
-
             stream.extend(
             quote! {
                     /// type alias for `Context`
@@ -139,9 +138,9 @@ impl Grammar {
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
-                    /// type alias for DFA state
+                    /// type alias for runtime parser tables
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                    pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
@@ -156,9 +155,9 @@ impl Grammar {
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
-                /// type alias for DFA state
+                /// type alias for runtime parser tables
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_index_type, #state_index_typename>;
+                pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
@@ -528,8 +527,7 @@ impl Grammar {
                 .get_span_in_location(&self.start_rule_name.location()),
         );
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
-        let rule_typename = format_ident!("{}Rule", start_rule_ident);
-        let state_typename = format_ident!("{}State", start_rule_ident);
+        let tables_typename = format_ident!("{}Tables", start_rule_ident);
         let parser_struct_name = format_ident!("{}Parser", start_rule_ident);
         let token_typename = &self.token_typename;
         let termclass_typename = format_ident!("{}TerminalClasses", &start_rule_ident);
@@ -557,7 +555,6 @@ impl Grammar {
         // ======================
         use rusty_lr_core::rule::ReduceType;
         use rusty_lr_core::TerminalSymbol;
-        use rusty_lr_core::Token;
 
         // generate precedence level -> reduce type match stream
         // match level {
@@ -636,16 +633,24 @@ impl Grammar {
         } else {
             quote! { usize }
         };
+        let max_reduce_rules = self
+            .states
+            .iter()
+            .flat_map(|s| s.reduce_map.iter().map(|(_, rules)| rules.len()))
+            .max()
+            .unwrap_or(1);
+        let rule_container_type = if self.glr && max_reduce_rules > 1 {
+            quote! { #module_prefix::parser::table::ArrayVec<#rule_index_typename, #max_reduce_rules> }
+        } else {
+            rule_index_typename.clone()
+        };
 
         // ------------------
         // Rules Serialization
         // ------------------
         let mut rule_names = Vec::new();
         let mut rule_precedences = Vec::new();
-        let mut rule_tokens_data = Vec::new();
-        let mut rule_tokens_offsets = Vec::new();
-
-        rule_tokens_offsets.push(0);
+        let mut rule_lengths = Vec::new();
 
         for rule in &self.builder.rules {
             assert!(
@@ -678,39 +683,11 @@ impl Grammar {
                 0
             };
             rule_precedences.push(prec_val);
-
-            for &token in &rule.rule.rule {
-                let (sym_idx, is_nonterm) = match token {
-                    Token::Term(term) => {
-                        let idx = match term {
-                            TerminalSymbol::Term(t) => t,
-                            TerminalSymbol::Error => self.terminal_classes.len(),
-                            TerminalSymbol::Eof => self.terminal_classes.len() + 1,
-                        };
-                        assert!(
-                            idx < 32768,
-                            "Terminal class index {} exceeds 15-bit limit (32768)",
-                            idx
-                        );
-                        (idx, false)
-                    }
-                    Token::NonTerm(nonterm) => {
-                        assert!(
-                            nonterm < 32768,
-                            "Non-terminal index {} exceeds 15-bit limit (32768)",
-                            nonterm
-                        );
-                        (nonterm, true)
-                    }
-                };
-                let val = ((sym_idx as u32) << 1) | (is_nonterm as u32);
-                rule_tokens_data.push(val);
-            }
-            rule_tokens_offsets.push(rule_tokens_data.len() as u32);
+            rule_lengths.push(rule.rule.rule.len() as u32);
         }
 
         // ------------------
-        // States Serialization
+        // Table Row Serialization
         // ------------------
         let mut shift_term_data = Vec::new();
         let mut shift_term_offsets = Vec::new();
@@ -814,10 +791,7 @@ impl Grammar {
         let rule_precedences = rule_precedences
             .into_iter()
             .map(proc_macro2::Literal::u32_unsuffixed);
-        let rule_tokens_data = rule_tokens_data
-            .into_iter()
-            .map(proc_macro2::Literal::u32_unsuffixed);
-        let rule_tokens_offsets = rule_tokens_offsets
+        let rule_lengths = rule_lengths
             .into_iter()
             .map(proc_macro2::Literal::u32_unsuffixed);
 
@@ -860,7 +834,9 @@ impl Grammar {
                 type Term = #token_typename;
                 type TermClass = #termclass_typename;
                 type NonTerm = #nonterminals_enum_name;
-                type State = #state_typename;
+                type StateIndex = #state_index_typename;
+                type ReduceRules = #rule_container_type;
+                type Tables = #tables_typename;
 
                 const ERROR_USED:bool = #error_used;
 
@@ -870,21 +846,33 @@ impl Grammar {
                         #precedence_types_match_body_stream
                     }
                 }
-                // get_rules returns the list of CFG production rules.
-                // To keep the compiled binary size minimal, the rules data is serialized into flat static integer slices 
-                // and decoded lazily at runtime inside OnceLock.
-                fn get_rules() -> &'static [#rule_typename] {
-                    static RULES: std::sync::OnceLock<Vec<#rule_typename>> = std::sync::OnceLock::new();
-                    RULES.get_or_init(|| {
+                // get_tables returns the decoded flat runtime parser tables.
+                // Serialized integer arrays keep the generated source compact while Context keeps the
+                // decoded table reference out of the parsing hot path.
+                fn get_tables() -> &'static #tables_typename {
+                    static TABLES: std::sync::OnceLock<#tables_typename> = std::sync::OnceLock::new();
+                    TABLES.get_or_init(|| {
                         // Serialized rule properties:
                         // - RULE_NAMES: NonTerm enum value of the rule LHS name
                         // - RULE_PRECEDENCES: Packed operator precedence level/index and type (prec_val & 3: 0 = None, 1 = Fixed, 2 = Dynamic)
-                        // - RULE_TOKENS_DATA: Packed token sequence (sym_idx << 1) | (is_nonterm)
-                        // - RULE_TOKENS_OFFSETS: Index boundaries separating tokens for each rule
+                        // - RULE_LENGTHS: RHS length of each production rule
                         static RULE_NAMES: &[u32] = &[ #(#rule_names),* ];
                         static RULE_PRECEDENCES: &[u32] = &[ #(#rule_precedences),* ];
-                        static RULE_TOKENS_DATA: &[u32] = &[ #(#rule_tokens_data),* ];
-                        static RULE_TOKENS_OFFSETS: &[u32] = &[ #(#rule_tokens_offsets),* ];
+                        static RULE_LENGTHS: &[u32] = &[ #(#rule_lengths),* ];
+
+                        // Serialized table row properties:
+                        // - SHIFT_TERM_DATA & SHIFT_NONTERM_DATA: Packed transitions (push << 31) | (state_idx << 15) | (symbol_idx)
+                        // - SHIFT_TERM_OFFSETS & SHIFT_NONTERM_OFFSETS: Boundaries separating transitions for each state
+                        // - REDUCE_DATA: Variable-length reduce map encoding (term_class, len, rules...)
+                        // - REDUCE_OFFSETS: Boundaries separating reduce maps for each state
+                        // - CAN_ACCEPT_ERROR: TriState (0 = False, 1 = True, 2 = Maybe)
+                        static SHIFT_TERM_DATA: &[u32] = &[ #(#shift_term_data),* ];
+                        static SHIFT_TERM_OFFSETS: &[u32] = &[ #(#shift_term_offsets),* ];
+                        static SHIFT_NONTERM_DATA: &[u32] = &[ #(#shift_nonterm_data),* ];
+                        static SHIFT_NONTERM_OFFSETS: &[u32] = &[ #(#shift_nonterm_offsets),* ];
+                        static REDUCE_DATA: &[u32] = &[ #(#reduce_data),* ];
+                        static REDUCE_OFFSETS: &[u32] = &[ #(#reduce_offsets),* ];
+                        static CAN_ACCEPT_ERROR: &[u8] = &[ #(#can_accept_error),* ];
 
                         let num_rules = #num_rules;
                         let mut rules = Vec::with_capacity(num_rules);
@@ -899,52 +887,15 @@ impl Grammar {
                                 _ => unreachable!(),
                             };
 
-                            let token_start = RULE_TOKENS_OFFSETS[i] as usize;
-                            let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
-                            let mut rule = Vec::with_capacity(token_end - token_start);
-                            for idx in token_start..token_end {
-                                let val = RULE_TOKENS_DATA[idx];
-                                let is_nonterm = (val & 1) != 0;
-                                let sym_idx = (val >> 1) as usize;
-                                let token = if is_nonterm {
-                                    #module_prefix::Token::NonTerm(#nonterminals_enum_name::from_usize(sym_idx))
-                                } else {
-                                    #module_prefix::Token::Term(#termclass_typename::from_usize(sym_idx))
-                                };
-                                rule.push(token);
-                            }
-
-                            rules.push(#module_prefix::rule::ProductionRule {
+                            rules.push(#module_prefix::parser::table::RuleInfo {
                                 name,
-                                rule,
+                                len: RULE_LENGTHS[i] as usize,
                                 precedence,
                             });
                         }
-                        rules
-                    })
-                }
-                // get_states returns the DFA states table.
-                // The transitions, lookaheads, rulesets, and reduction maps are serialized into flat integer arrays
-                // and lazily decoded into SparseState/DenseState objects at runtime.
-                fn get_states() -> &'static [#state_typename] {
-                    static STATES: std::sync::OnceLock<Vec<#state_typename>> = std::sync::OnceLock::new();
-                    STATES.get_or_init(|| {
-                        // Serialized state properties:
-                        // - SHIFT_TERM_DATA & SHIFT_NONTERM_DATA: Packed transitions (push << 31) | (state_idx << 15) | (symbol_idx)
-                        // - SHIFT_TERM_OFFSETS & SHIFT_NONTERM_OFFSETS: Boundaries separating transitions for each state
-                        // - REDUCE_DATA: Variable-length reduce map encoding (term_class, len, rules...)
-                        // - REDUCE_OFFSETS: Boundaries separating reduce maps for each state
-                        // - CAN_ACCEPT_ERROR: TriState (0 = False, 1 = True, 2 = Maybe)
-                        static SHIFT_TERM_DATA: &[u32] = &[ #(#shift_term_data),* ];
-                        static SHIFT_TERM_OFFSETS: &[u32] = &[ #(#shift_term_offsets),* ];
-                        static SHIFT_NONTERM_DATA: &[u32] = &[ #(#shift_nonterm_data),* ];
-                        static SHIFT_NONTERM_OFFSETS: &[u32] = &[ #(#shift_nonterm_offsets),* ];
-                        static REDUCE_DATA: &[u32] = &[ #(#reduce_data),* ];
-                        static REDUCE_OFFSETS: &[u32] = &[ #(#reduce_offsets),* ];
-                        static CAN_ACCEPT_ERROR: &[u8] = &[ #(#can_accept_error),* ];
 
                         let num_states = #num_states;
-                        let mut states = Vec::with_capacity(num_states);
+                        let mut state_rows = Vec::with_capacity(num_states);
                         for i in 0..num_states {
                             // Decode shift transitions for terminals (terminal class, next state index, push flag)
                             let term_start = SHIFT_TERM_OFFSETS[i] as usize;
@@ -1001,9 +952,13 @@ impl Grammar {
                                 ruleset: Vec::new(),
                                 can_accept_error,
                             };
-                            states.push(intermediate.into());
+                            state_rows.push(intermediate);
                         }
-                        states
+
+                        #module_prefix::parser::table::IntermediateTables {
+                            state_rows,
+                            rules,
+                        }.into()
                     })
                 }
             }

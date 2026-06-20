@@ -127,9 +127,9 @@ pub type JsonRule = ::rusty_lr::rule::ProductionRule<
     JsonTerminalClasses,
     JsonNonTerminals,
 >;
-/// type alias for DFA state
+/// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonState = ::rusty_lr::parser::state::DenseState<
+pub type JsonTables = ::rusty_lr::parser::table::DenseFlatTables<
     JsonTerminalClasses,
     JsonNonTerminals,
     u8,
@@ -1923,7 +1923,9 @@ impl ::rusty_lr::parser::Parser for JsonParser {
     type Term = char;
     type TermClass = JsonTerminalClasses;
     type NonTerm = JsonNonTerminals;
-    type State = JsonState;
+    type StateIndex = u8;
+    type ReduceRules = u8;
+    type Tables = JsonTables;
     const ERROR_USED: bool = true;
     fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
         #[allow(unreachable_patterns)]
@@ -1931,9 +1933,9 @@ impl ::rusty_lr::parser::Parser for JsonParser {
             _ => None,
         }
     }
-    fn get_rules() -> &'static [JsonRule] {
-        static RULES: std::sync::OnceLock<Vec<JsonRule>> = std::sync::OnceLock::new();
-        RULES
+    fn get_tables() -> &'static JsonTables {
+        static TABLES: std::sync::OnceLock<JsonTables> = std::sync::OnceLock::new();
+        TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
                     0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 8, 8, 9, 9, 9, 9,
@@ -1950,81 +1952,13 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0,
                 ];
-                static RULE_TOKENS_DATA: &[u32] = &[
-                    13, 5, 11, 15, 23, 33, 35, 37, 54, 31, 56, 54, 7, 56, 54, 62, 56, 9,
-                    9, 24, 7, 31, 15, 31, 32, 13, 40, 41, 42, 31, 3, 31, 58, 45, 58, 60,
-                    19, 47, 58, 60, 8, 10, 12, 14, 16, 18, 52, 21, 21, 21, 21, 55, 49,
-                    51, 25, 59, 27, 55, 30, 53, 22, 55, 22, 30, 53, 61, 36, 29, 53, 38,
-                    29, 53, 61, 20, 22, 61, 2, 31, 0, 31, 18, 16, 52, 38, 12, 44, 48, 50,
-                    38, 14, 52, 48, 48, 13, 13, 24, 39, 39, 17, 17, 43, 43, 2, 6, 20, 24,
-                    22, 26, 8, 28, 30, 32, 34, 36, 40, 42, 44, 10, 46, 38, 12, 48, 14,
-                    16, 50, 18, 52, 54, 56, 34, 36, 44, 10, 46, 38, 12, 55, 55, 53, 28,
-                    30, 26, 53, 57, 1, 64,
+                static RULE_LENGTHS: &[u32] = &[
+                    1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 3, 5, 3, 3, 3, 2, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 5, 1, 1, 1, 3, 1, 2, 2, 3, 1, 3, 3, 1, 1, 1, 1, 2, 2, 4,
+                    5, 4, 1, 3, 1, 0, 1, 2, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+                    1, 1, 2, 1, 0, 0, 2,
                 ];
-                static RULE_TOKENS_OFFSETS: &[u32] = &[
-                    0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 14, 17, 18, 21, 26, 29, 32, 35, 37,
-                    38, 39, 40, 41, 42, 43, 44, 45, 46, 51, 52, 53, 54, 57, 58, 60, 62,
-                    65, 66, 69, 72, 73, 74, 75, 76, 78, 80, 84, 89, 93, 94, 97, 98, 98,
-                    99, 101, 102, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
-                    113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126,
-                    127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 139, 140, 141,
-                    143, 144, 144, 144, 146,
-                ];
-                let num_rules = 99usize;
-                let mut rules = Vec::with_capacity(num_rules);
-                for i in 0..num_rules {
-                    let name = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => None,
-                        1 => {
-                            Some(
-                                ::rusty_lr::rule::Precedence::Fixed(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        2 => {
-                            Some(
-                                ::rusty_lr::rule::Precedence::Dynamic(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
-                    let token_start = RULE_TOKENS_OFFSETS[i] as usize;
-                    let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
-                    let mut rule = Vec::with_capacity(token_end - token_start);
-                    for idx in token_start..token_end {
-                        let val = RULE_TOKENS_DATA[idx];
-                        let is_nonterm = (val & 1) != 0;
-                        let sym_idx = (val >> 1) as usize;
-                        let token = if is_nonterm {
-                            ::rusty_lr::Token::NonTerm(
-                                JsonNonTerminals::from_usize(sym_idx),
-                            )
-                        } else {
-                            ::rusty_lr::Token::Term(
-                                JsonTerminalClasses::from_usize(sym_idx),
-                            )
-                        };
-                        rule.push(token);
-                    }
-                    rules
-                        .push(::rusty_lr::rule::ProductionRule {
-                            name,
-                            rule,
-                            precedence,
-                        });
-                }
-                rules
-            })
-    }
-    fn get_states() -> &'static [JsonState] {
-        static STATES: std::sync::OnceLock<Vec<JsonState>> = std::sync::OnceLock::new();
-        STATES
-            .get_or_init(|| {
                 static SHIFT_TERM_DATA: &[u32] = &[
                     32768, 65537, 32768, 65537, 32768, 65537, 2147680288, 262150, 425991,
                     557065, 688139, 3604494, 884751, 950292, 1277979, 1703965, 294934,
@@ -2207,8 +2141,38 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0,
                 ];
+                let num_rules = 99usize;
+                let mut rules = Vec::with_capacity(num_rules);
+                for i in 0..num_rules {
+                    let name = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let prec_val = RULE_PRECEDENCES[i];
+                    let precedence = match prec_val & 3 {
+                        0 => None,
+                        1 => {
+                            Some(
+                                ::rusty_lr::rule::Precedence::Fixed(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        2 => {
+                            Some(
+                                ::rusty_lr::rule::Precedence::Dynamic(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        _ => unreachable!(),
+                    };
+                    rules
+                        .push(::rusty_lr::parser::table::RuleInfo {
+                            name,
+                            len: RULE_LENGTHS[i] as usize,
+                            precedence,
+                        });
+                }
                 let num_states = 119usize;
-                let mut states = Vec::with_capacity(num_states);
+                let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;
                     let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
@@ -2276,9 +2240,13 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                         ruleset: Vec::new(),
                         can_accept_error,
                     };
-                    states.push(intermediate.into());
+                    state_rows.push(intermediate);
                 }
-                states
+                ::rusty_lr::parser::table::IntermediateTables {
+                    state_rows,
+                    rules,
+                }
+                    .into()
             })
     }
 }

@@ -187,10 +187,14 @@ pub type GrammarContext =
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule =
     ::rusty_lr_core::rule::ProductionRule<GrammarTerminalClasses, GrammarNonTerminals>;
-/// type alias for DFA state
+/// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState =
-    ::rusty_lr_core::parser::state::DenseState<GrammarTerminalClasses, GrammarNonTerminals, u8, u8>;
+pub type GrammarTables = ::rusty_lr_core::parser::table::SparseFlatTables<
+    GrammarTerminalClasses,
+    GrammarNonTerminals,
+    u8,
+    u8,
+>;
 /// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
@@ -6333,7 +6337,9 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type Term = Lexed;
     type TermClass = GrammarTerminalClasses;
     type NonTerm = GrammarNonTerminals;
-    type State = GrammarState;
+    type StateIndex = u8;
+    type ReduceRules = u8;
+    type Tables = GrammarTables;
     const ERROR_USED: bool = true;
     fn precedence_types(level: u8) -> Option<::rusty_lr_core::rule::ReduceType> {
         #[allow(unreachable_patterns)]
@@ -6342,9 +6348,9 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             _ => None,
         }
     }
-    fn get_rules() -> &'static [GrammarRule] {
-        static RULES: std::sync::OnceLock<Vec<GrammarRule>> = std::sync::OnceLock::new();
-        RULES
+    fn get_tables() -> &'static GrammarTables {
+        static TABLES: std::sync::OnceLock<GrammarTables> = std::sync::OnceLock::new();
+        TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
                     0, 1, 1, 2, 2, 3, 4, 4, 4, 4, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
@@ -6366,94 +6372,15 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ];
-                static RULE_TOKENS_DATA: &[u32] = &[
-                    0, 3, 4, 5, 72, 30, 5, 6, 7, 7, 31, 35, 19, 8, 62, 21, 8, 62, 84, 8,
-                    68, 20, 8, 68, 84, 8, 84, 17, 0, 10, 17, 0, 0, 82, 0, 0, 82, 84, 26,
-                    26, 82, 26, 26, 82, 84, 22, 22, 82, 22, 22, 82, 84, 38, 37, 41, 40,
-                    14, 0, 17, 74, 17, 76, 17, 78, 17, 80, 15, 34, 47, 36, 34, 84, 36,
-                    22, 24, 26, 28, 17, 82, 17, 16, 0, 34, 17, 18, 17, 49, 36, 16, 0, 34,
-                    17, 18, 17, 18, 74, 36, 16, 0, 34, 17, 18, 17, 18, 76, 36, 16, 0, 34,
-                    17, 18, 17, 84, 36, 16, 0, 34, 17, 18, 17, 18, 84, 36, 32, 0, 22, 26,
-                    8, 46, 0, 53, 72, 8, 46, 0, 72, 8, 46, 84, 72, 8, 48, 0, 72, 8, 48,
-                    84, 72, 8, 50, 53, 72, 8, 50, 72, 8, 52, 53, 72, 8, 52, 72, 8, 42,
-                    55, 72, 8, 42, 84, 72, 8, 44, 55, 72, 8, 44, 84, 72, 8, 64, 55, 72,
-                    8, 64, 84, 72, 8, 54, 53, 72, 8, 54, 72, 8, 56, 53, 72, 8, 56, 72, 8,
-                    60, 72, 8, 60, 84, 72, 8, 58, 72, 8, 58, 84, 72, 8, 66, 72, 8, 66,
-                    84, 72, 8, 70, 53, 72, 8, 70, 72, 8, 84, 72, 1, 23, 57, 11, 29, 11,
-                    29, 9, 33, 9, 33, 12, 13, 39, 13, 39, 17, 43, 17, 43, 45, 47, 6, 45,
-                    18, 0, 4, 6, 8, 10, 74, 76, 78, 12, 82, 80, 14, 16, 18, 20, 22, 24,
-                    26, 28, 2, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56,
-                    58, 60, 62, 64, 66, 68, 70, 51, 53, 51, 21, 55, 21, 25, 25, 57, 27,
-                    86,
+                static RULE_LENGTHS: &[u32] = &[
+                    5, 1, 0, 3, 1, 3, 3, 3, 3, 3, 2, 1, 3, 1, 3, 3, 1, 3, 3, 1, 3, 3, 4,
+                    1, 1, 2, 2, 2, 2, 1, 3, 3, 1, 1, 1, 1, 3, 8, 9, 9, 8, 9, 1, 0, 1, 1,
+                    1, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 4, 4, 4, 4, 4, 4, 3, 4, 3, 3, 4, 3,
+                    4, 3, 4, 4, 3, 3, 1, 1, 1, 1, 2, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0,
+                    1, 2, 1, 0, 1, 3, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 2, 1, 2, 1, 2, 2,
                 ];
-                static RULE_TOKENS_OFFSETS: &[u32] = &[
-                    0, 5, 6, 6, 9, 10, 13, 16, 19, 22, 25, 27, 28, 31, 32, 35, 38, 39,
-                    42, 45, 46, 49, 52, 56, 57, 58, 60, 62, 64, 66, 67, 70, 73, 74, 75,
-                    76, 77, 80, 88, 97, 106, 114, 123, 124, 124, 125, 126, 127, 132, 136,
-                    140, 144, 148, 152, 155, 159, 162, 166, 170, 174, 178, 182, 186, 190,
-                    193, 197, 200, 203, 207, 210, 214, 217, 221, 225, 228, 231, 232, 233,
-                    234, 235, 237, 238, 238, 239, 241, 242, 242, 243, 243, 244, 246, 247,
-                    247, 248, 250, 251, 251, 252, 255, 256, 256, 257, 258, 259, 260, 261,
-                    262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
-                    276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289,
-                    290, 291, 292, 293, 294, 295, 296, 297, 298, 300, 301, 303, 304, 306,
-                    308,
-                ];
-                let num_rules = 148usize;
-                let mut rules = Vec::with_capacity(num_rules);
-                for i in 0..num_rules {
-                    let name = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => None,
-                        1 => {
-                            Some(
-                                ::rusty_lr_core::rule::Precedence::Fixed(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        2 => {
-                            Some(
-                                ::rusty_lr_core::rule::Precedence::Dynamic(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
-                    let token_start = RULE_TOKENS_OFFSETS[i] as usize;
-                    let token_end = RULE_TOKENS_OFFSETS[i + 1] as usize;
-                    let mut rule = Vec::with_capacity(token_end - token_start);
-                    for idx in token_start..token_end {
-                        let val = RULE_TOKENS_DATA[idx];
-                        let is_nonterm = (val & 1) != 0;
-                        let sym_idx = (val >> 1) as usize;
-                        let token = if is_nonterm {
-                            ::rusty_lr_core::Token::NonTerm(
-                                GrammarNonTerminals::from_usize(sym_idx),
-                            )
-                        } else {
-                            ::rusty_lr_core::Token::Term(
-                                GrammarTerminalClasses::from_usize(sym_idx),
-                            )
-                        };
-                        rule.push(token);
-                    }
-                    rules
-                        .push(::rusty_lr_core::rule::ProductionRule {
-                            name,
-                            rule,
-                            precedence,
-                        });
-                }
-                rules
-            })
-    }
-    fn get_states() -> &'static [GrammarState] {
-        static STATES: std::sync::OnceLock<Vec<GrammarState>> = std::sync::OnceLock::new();
-        STATES
-            .get_or_init(|| {
                 static SHIFT_TERM_DATA: &[u32] = &[
                     2147516416, 2150629380, 2147549199, 2147614722, 2147647488,
                     2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
@@ -6805,8 +6732,38 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0,
                 ];
+                let num_rules = 148usize;
+                let mut rules = Vec::with_capacity(num_rules);
+                for i in 0..num_rules {
+                    let name = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let prec_val = RULE_PRECEDENCES[i];
+                    let precedence = match prec_val & 3 {
+                        0 => None,
+                        1 => {
+                            Some(
+                                ::rusty_lr_core::rule::Precedence::Fixed(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        2 => {
+                            Some(
+                                ::rusty_lr_core::rule::Precedence::Dynamic(
+                                    (prec_val >> 2) as usize,
+                                ),
+                            )
+                        }
+                        _ => unreachable!(),
+                    };
+                    rules
+                        .push(::rusty_lr_core::parser::table::RuleInfo {
+                            name,
+                            len: RULE_LENGTHS[i] as usize,
+                            precedence,
+                        });
+                }
                 let num_states = 167usize;
-                let mut states = Vec::with_capacity(num_states);
+                let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;
                     let term_end = SHIFT_TERM_OFFSETS[i + 1] as usize;
@@ -6880,9 +6837,13 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                         ruleset: Vec::new(),
                         can_accept_error,
                     };
-                    states.push(intermediate.into());
+                    state_rows.push(intermediate);
                 }
-                states
+                ::rusty_lr_core::parser::table::IntermediateTables {
+                    state_rows,
+                    rules,
+                }
+                    .into()
             })
     }
 }
