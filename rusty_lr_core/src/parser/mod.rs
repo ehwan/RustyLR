@@ -12,7 +12,6 @@ pub mod nonterminal;
 pub mod terminalclass;
 
 pub mod state;
-pub use state::State;
 pub mod table;
 
 #[derive(Clone, Copy)]

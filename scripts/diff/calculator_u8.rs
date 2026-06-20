@@ -961,7 +961,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                         shift_goto_map_term
                             .push((
                                 term_class,
-                                ::rusty_lr::parser::state::ShiftTarget::new(state, push),
+                                ::rusty_lr::parser::table::ShiftTarget::new(state, push),
                             ));
                     }
                     let nonterm_start = SHIFT_NONTERM_OFFSETS[i] as usize;
@@ -977,7 +977,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                         shift_goto_map_nonterm
                             .push((
                                 nonterm,
-                                ::rusty_lr::parser::state::ShiftTarget::new(state, push),
+                                ::rusty_lr::parser::table::ShiftTarget::new(state, push),
                             ));
                     }
                     let reduce_start = REDUCE_OFFSETS[i] as usize;

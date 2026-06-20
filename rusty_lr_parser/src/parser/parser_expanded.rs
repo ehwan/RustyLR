@@ -6776,7 +6776,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                         shift_goto_map_term
                             .push((
                                 term_class,
-                                ::rusty_lr_core::parser::state::ShiftTarget::new(
+                                ::rusty_lr_core::parser::table::ShiftTarget::new(
                                     state,
                                     push,
                                 ),
@@ -6797,7 +6797,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                         shift_goto_map_nonterm
                             .push((
                                 nonterm,
-                                ::rusty_lr_core::parser::state::ShiftTarget::new(
+                                ::rusty_lr_core::parser::table::ShiftTarget::new(
                                     state,
                                     push,
                                 ),

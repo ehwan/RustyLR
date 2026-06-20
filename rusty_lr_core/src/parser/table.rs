@@ -1,14 +1,26 @@
 //! Runtime parser table layouts and access traits.
 //!
-//! The `state` module keeps state-level primitives and the older per-state representations.
-//! This module is the public home for whole-table layouts used by generated parsers.
+//! This module is the public home for parser table layouts used by generated parsers.
 
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
 use crate::parser::state::IntermediateState;
-use crate::parser::state::ShiftTarget;
 use crate::parser::terminalclass::TerminalClass;
 use crate::TriState;
+
+#[derive(Debug, Clone, Copy)]
+pub struct ShiftTarget<StateIndex> {
+    pub state: StateIndex,
+    /// true if the data should be pushed, false if data should not be pushed (so `Empty` tag will be pushed)
+    pub push: bool,
+}
+
+impl<StateIndex> ShiftTarget<StateIndex> {
+    #[inline]
+    pub fn new(state: StateIndex, push: bool) -> Self {
+        ShiftTarget { state, push }
+    }
+}
 
 /// Hot-path information for a production rule.
 ///

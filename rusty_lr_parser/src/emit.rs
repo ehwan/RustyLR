@@ -903,7 +903,7 @@ impl Grammar {
                                 let term_class = #termclass_typename::from_usize((val & 0x7fff) as usize);
                                 let state = ((val >> 15) & 0xffff) as #state_index_typename;
                                 let push = (val >> 31) != 0;
-                                shift_goto_map_term.push((term_class, #module_prefix::parser::state::ShiftTarget::new(state, push)));
+                                shift_goto_map_term.push((term_class, #module_prefix::parser::table::ShiftTarget::new(state, push)));
                             }
 
                             // Decode shift transitions for non-terminals (non-terminal index, next state index, push flag)
@@ -915,7 +915,7 @@ impl Grammar {
                                 let nonterm = #nonterminals_enum_name::from_usize((val & 0x7fff) as usize);
                                 let state = ((val >> 15) & 0xffff) as #state_index_typename;
                                 let push = (val >> 31) != 0;
-                                shift_goto_map_nonterm.push((nonterm, #module_prefix::parser::state::ShiftTarget::new(state, push)));
+                                shift_goto_map_nonterm.push((nonterm, #module_prefix::parser::table::ShiftTarget::new(state, push)));
                             }
 
                             // Decode the reduce action map (variable-length encoding)
