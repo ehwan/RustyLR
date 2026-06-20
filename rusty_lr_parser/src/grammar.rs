@@ -153,9 +153,8 @@ impl Grammar {
                 return true;
             }
             match warning {
-                Warning::NonTermNotUsed { nonterm_name }
-                | Warning::Cycle { nonterm_name }
-                | Warning::NonTermDataNotUsed { nonterm_name }
+                Warning::NonTermUnreachable { nonterm_name }
+                | Warning::UnusedNonTermData { nonterm_name }
                 | Warning::NonTermUnproductive { nonterm_name } => {
                     if scopes.contains(&Some(nonterm_name.value().clone())) {
                         return true;
@@ -185,12 +184,12 @@ impl Grammar {
                 return true;
             }
             match info {
-                Info::SingleNonTerminalRule { nonterm_name, .. } => {
+                Info::UnitProductionEliminated { nonterm_name, .. } => {
                     if scopes.contains(&Some(nonterm_name.value().clone())) {
                         return true;
                     }
                 }
-                Info::TerminalClassRuleMerge { rule_location } => {
+                Info::RedundantRuleRemoved { rule_location } => {
                     for nonterm in &self.nonterminals {
                         for rule in &nonterm.rules {
                             if rule.location() == *rule_location {
@@ -1007,13 +1006,13 @@ impl Grammar {
 
         let mut allowed_diagnostics: HashMap<String, HashSet<Option<String>>> = HashMap::default();
         let valid_diagnostics: HashSet<&str> = [
-            "nonterm_not_used",
-            "cycle",
-            "nonterm_data_not_used",
+            "nonterm_unreachable",
+            "unused_nonterm_data",
+            "nonterm_unproductive",
             "unused_terminals",
             "terminals_merged",
-            "terminal_class_rule_merge",
-            "single_non_terminal_rule",
+            "redundant_rule_removed",
+            "unit_production_eliminated",
             "reduce_reduce_conflict_resolved",
             "shift_reduce_conflict_resolved",
             "shift_reduce_conflict_glr",
@@ -2100,7 +2099,7 @@ impl Grammar {
                         // so remove this rule
                         // add to diags only if it was not auto-generated
                         if !nonterm.is_auto_generated() {
-                            self.infos.push(Info::TerminalClassRuleMerge {
+                            self.infos.push(Info::RedundantRuleRemoved {
                                 rule_location: rule.location(),
                             });
                         }
@@ -2173,7 +2172,7 @@ impl Grammar {
                 nonterm.rules.clear();
                 something_changed = true;
                 if !nonterm.is_auto_generated() {
-                    self.warnings.push(Warning::NonTermNotUsed {
+                    self.warnings.push(Warning::NonTermUnreachable {
                         nonterm_name: nonterm.name.clone(),
                     });
                 }
@@ -2377,7 +2376,7 @@ impl Grammar {
             let rule = rules.into_iter().next().unwrap();
             // add to diags only if it was not auto-generated
             if !nonterm.is_auto_generated() {
-                self.infos.push(Info::SingleNonTerminalRule {
+                self.infos.push(Info::UnitProductionEliminated {
                     nonterm_name: nonterm.name.clone(),
                     rule_location: rule.location(),
                 });
@@ -2491,7 +2490,7 @@ impl Grammar {
         }
         for i in add_to_diags {
             let nonterm = &self.nonterminals[i];
-            self.warnings.push(Warning::NonTermDataNotUsed {
+            self.warnings.push(Warning::UnusedNonTermData {
                 nonterm_name: nonterm.name.clone(),
             });
         }
@@ -3820,13 +3819,12 @@ mod tests {
                 .collect::<Vec<_>>()
         );
 
-        let has_unused_warning = grammar
-            .warnings
-            .iter()
-            .any(|w| matches!(w, Warning::NonTermNotUsed { .. }));
         assert!(
-            has_unused_warning,
-            "Expected NonTermNotUsed warning, got: {:?}",
+            grammar
+                .warnings
+                .iter()
+                .any(|w| matches!(w, Warning::NonTermUnreachable { .. })),
+            "Expected NonTermUnreachable warning, got: {:?}",
             grammar.warnings
         );
 
@@ -3852,7 +3850,7 @@ mod tests {
         let input = quote! {
             %tokentype char;
             %start Expr;
-            %allow nonterm_not_used;
+            %allow nonterm_unreachable;
 
             Expr : 'a';
             Unused : 'b';
@@ -3862,22 +3860,24 @@ mod tests {
         assert!(grammar_args
             .allowed_diagnostics
             .iter()
-            .any(|d| d.0.value() == "nonterm_not_used"));
+            .any(|d| d.0.value() == "nonterm_unreachable"));
 
         let span_manager = grammar_args.span_manager.clone();
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
-        assert!(grammar.allowed_diagnostics.contains_key("nonterm_not_used"));
+        assert!(grammar
+            .allowed_diagnostics
+            .contains_key("nonterm_unreachable"));
 
         grammar.optimize(25);
-        // Find the NonTermNotUsed warning
-        let unused_warn = grammar
+        // Find the NonTermUnreachable warning
+        let warning = grammar
             .warnings
             .iter()
-            .find(|w| matches!(w, Warning::NonTermNotUsed { .. }))
-            .expect("Expected NonTermNotUsed warning");
+            .find(|w| matches!(w, Warning::NonTermUnreachable { .. }))
+            .expect("Expected NonTermUnreachable warning");
 
-        let ts = unused_warn.to_compile_warning(&grammar, &span_manager);
+        let ts = warning.to_compile_warning(&grammar, &span_manager);
         assert!(ts.is_empty(), "Warning should be suppressed");
     }
 
@@ -3886,7 +3886,7 @@ mod tests {
         let input = quote! {
             %tokentype char;
             %start Expr;
-            %allow nonterm_not_used(Unused1);
+            %allow nonterm_unreachable(Unused1);
 
             Expr : 'a';
             Unused1 : 'b';
@@ -3897,47 +3897,52 @@ mod tests {
         assert!(grammar_args
             .allowed_diagnostics
             .iter()
-            .any(|d| d.0.value() == "nonterm_not_used"
+            .any(|d| d.0.value() == "nonterm_unreachable"
                 && d.1.as_ref().unwrap().to_string_repr() == "Unused1"));
 
         let span_manager = grammar_args.span_manager.clone();
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
-        assert!(grammar.allowed_diagnostics.contains_key("nonterm_not_used"));
-        let scopes = grammar.allowed_diagnostics.get("nonterm_not_used").unwrap();
+        assert!(grammar
+            .allowed_diagnostics
+            .contains_key("nonterm_unreachable"));
+        let scopes = grammar
+            .allowed_diagnostics
+            .get("nonterm_unreachable")
+            .unwrap();
         assert!(scopes.contains(&Some("Unused1".to_string())));
 
         grammar.optimize(25);
 
-        // Find the NonTermNotUsed warning for Unused1
-        let warn_unused1 = grammar
+        // Find the NonTermUnreachable warning for Unused1
+        let warning = grammar
             .warnings
             .iter()
             .find(|w| match w {
-                Warning::NonTermNotUsed { nonterm_name } => nonterm_name.value() == "Unused1",
+                Warning::NonTermUnreachable { nonterm_name } => nonterm_name.value() == "Unused1",
                 _ => false,
             })
-            .expect("Expected NonTermNotUsed warning for Unused1");
+            .expect("Expected NonTermUnreachable warning for Unused1");
 
-        // Find the NonTermNotUsed warning for Unused2
-        let warn_unused2 = grammar
+        // Find the NonTermUnreachable warning for Unused2
+        let warning2 = grammar
             .warnings
             .iter()
             .find(|w| match w {
-                Warning::NonTermNotUsed { nonterm_name } => nonterm_name.value() == "Unused2",
+                Warning::NonTermUnreachable { nonterm_name } => nonterm_name.value() == "Unused2",
                 _ => false,
             })
-            .expect("Expected NonTermNotUsed warning for Unused2");
+            .expect("Expected NonTermUnreachable warning for Unused2");
 
         // Warning for Unused1 should be suppressed
-        assert!(grammar.is_warning_allowed(warn_unused1));
-        assert!(warn_unused1
+        assert!(grammar.is_warning_allowed(warning));
+        assert!(warning
             .to_compile_warning(&grammar, &span_manager)
             .is_empty());
 
         // Warning for Unused2 should NOT be suppressed
-        assert!(!grammar.is_warning_allowed(warn_unused2));
-        assert!(!warn_unused2
+        assert!(!grammar.is_warning_allowed(warning2));
+        assert!(!warning2
             .to_compile_warning(&grammar, &span_manager)
             .is_empty());
     }

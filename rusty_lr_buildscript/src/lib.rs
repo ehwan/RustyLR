@@ -840,7 +840,7 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("unknown diagnostic name")])
                             .with_notes(vec![
-                                "valid diagnostic names: nonterm_not_used, cycle, nonterm_data_not_used, unused_terminals, terminals_merged, terminal_class_rule_merge, single_non_terminal_rule, reduce_reduce_conflict_resolved, shift_reduce_conflict_resolved, shift_reduce_conflict_glr, reduce_reduce_conflict_glr".to_string(),
+                                "valid diagnostic names: nonterm_unreachable, unused_nonterm_data, nonterm_unproductive, unused_terminals, terminals_merged, redundant_rule_removed, unit_production_eliminated, reduce_reduce_conflict_resolved, shift_reduce_conflict_resolved, shift_reduce_conflict_glr, reduce_reduce_conflict_glr".to_string(),
                             ])
                     }
 
@@ -1013,7 +1013,7 @@ impl Builder {
         let mut warnings = Vec::new();
         for warning in &grammar.warnings {
             let diag = match warning {
-                rusty_lr_parser::error::Warning::NonTermNotUsed { nonterm_name } => {
+                rusty_lr_parser::error::Warning::NonTermUnreachable { nonterm_name } => {
                     let range = span_manager
                         .get_byterange(&nonterm_name.location())
                         .unwrap_or(0..0);
@@ -1037,19 +1037,8 @@ impl Builder {
                             "This non-terminal is unproductive (cannot derive any terminal strings)".to_string(),
                         ])
                 }
-                rusty_lr_parser::error::Warning::Cycle { nonterm_name } => {
-                    let range = span_manager
-                        .get_byterange(&nonterm_name.location())
-                        .unwrap_or(0..0);
-                    Diagnostic::warning()
-                        .with_message("Cycle detected")
-                        .with_labels(vec![Label::primary(file_id, range)
-                            .with_message("non-terminal defined here")])
-                        .with_notes(vec![
-                            "This non-terminal is involved in bad cycle".to_string()
-                        ])
-                }
-                rusty_lr_parser::error::Warning::NonTermDataNotUsed { nonterm_name } => {
+                // Cycle warning removed
+                rusty_lr_parser::error::Warning::UnusedNonTermData { nonterm_name } => {
                     let range = span_manager
                         .get_byterange(&nonterm_name.location())
                         .unwrap_or(0..0);
@@ -1097,7 +1086,7 @@ impl Builder {
                         .with_message("These terminals are merged into terminal class")
                         .with_notes(notes)
                 }
-                rusty_lr_parser::error::Info::TerminalClassRuleMerge { rule_location } => {
+                rusty_lr_parser::error::Info::RedundantRuleRemoved { rule_location } => {
                     let range = span_manager.get_byterange(rule_location).unwrap_or(0..0);
                     Diagnostic::note()
                         .with_message("Production Rule deleted")
@@ -1108,7 +1097,7 @@ impl Builder {
                             "Will be merged into rule using terminal class".to_string()
                         ])
                 }
-                rusty_lr_parser::error::Info::SingleNonTerminalRule {
+                rusty_lr_parser::error::Info::UnitProductionEliminated {
                     nonterm_name,
                     rule_location,
                 } => {
@@ -1432,8 +1421,8 @@ impl Builder {
                 }
                 let should_print = match info_variant {
                     rusty_lr_parser::error::Info::TerminalsMerged { .. }
-                    | rusty_lr_parser::error::Info::TerminalClassRuleMerge { .. }
-                    | rusty_lr_parser::error::Info::SingleNonTerminalRule { .. } => true,
+                    | rusty_lr_parser::error::Info::RedundantRuleRemoved { .. }
+                    | rusty_lr_parser::error::Info::UnitProductionEliminated { .. } => true,
                     _ => false,
                 };
                 if should_print {

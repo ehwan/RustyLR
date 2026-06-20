@@ -405,9 +405,8 @@ impl ConflictError {
 /// and parser generation (e.g., unused symbols, cycles, etc.).
 #[derive(Debug, Clone)]
 pub enum Warning {
-    NonTermNotUsed { nonterm_name: Located<String> },
-    Cycle { nonterm_name: Located<String> },
-    NonTermDataNotUsed { nonterm_name: Located<String> },
+    NonTermUnreachable { nonterm_name: Located<String> },
+    UnusedNonTermData { nonterm_name: Located<String> },
     NonTermUnproductive { nonterm_name: Located<String> },
     UnusedTerminals { class_idx: TerminalClass },
 }
@@ -415,9 +414,8 @@ pub enum Warning {
 impl Warning {
     pub fn name(&self) -> &'static str {
         match self {
-            Warning::NonTermNotUsed { .. } => "nonterm_not_used",
-            Warning::Cycle { .. } => "cycle",
-            Warning::NonTermDataNotUsed { .. } => "nonterm_data_not_used",
+            Warning::NonTermUnreachable { .. } => "nonterm_unreachable",
+            Warning::UnusedNonTermData { .. } => "unused_nonterm_data",
             Warning::NonTermUnproductive { .. } => "nonterm_unproductive",
             Warning::UnusedTerminals { .. } => "unused_terminals",
         }
@@ -425,9 +423,8 @@ impl Warning {
 
     pub fn suggestion(&self, grammar: &crate::grammar::Grammar) -> String {
         match self {
-            Warning::NonTermNotUsed { nonterm_name }
-            | Warning::Cycle { nonterm_name }
-            | Warning::NonTermDataNotUsed { nonterm_name }
+            Warning::NonTermUnreachable { nonterm_name }
+            | Warning::UnusedNonTermData { nonterm_name }
             | Warning::NonTermUnproductive { nonterm_name } => {
                 let name = nonterm_name.value();
                 format!("%allow {}({});", self.name(), name)
@@ -488,9 +485,8 @@ impl Warning {
     /// Retrieves all source code locations associated with this warning.
     pub fn locations(&self) -> Vec<Location> {
         match self {
-            Warning::NonTermNotUsed { nonterm_name } => vec![nonterm_name.location()],
-            Warning::Cycle { nonterm_name } => vec![nonterm_name.location()],
-            Warning::NonTermDataNotUsed { nonterm_name } => vec![nonterm_name.location()],
+            Warning::NonTermUnreachable { nonterm_name } => vec![nonterm_name.location()],
+            Warning::UnusedNonTermData { nonterm_name } => vec![nonterm_name.location()],
             Warning::NonTermUnproductive { nonterm_name } => vec![nonterm_name.location()],
             Warning::UnusedTerminals { .. } => Vec::new(),
         }
@@ -499,15 +495,11 @@ impl Warning {
     /// Formats a short diagnostic message describing the warning.
     pub fn short_message(&self, grammar: &crate::grammar::Grammar) -> String {
         match self {
-            Warning::NonTermNotUsed { nonterm_name } => {
+            Warning::NonTermUnreachable { nonterm_name } => {
                 let name = nonterm_name.value();
-                format!("Non-terminal `{name}` is not used in the grammar")
+                format!("Non-terminal `{name}` is not reachable from the start symbol")
             }
-            Warning::Cycle { nonterm_name } => {
-                let name = nonterm_name.value();
-                format!("Cycle detected: non-terminal `{name}` is involved in a bad cycle")
-            }
-            Warning::NonTermDataNotUsed { nonterm_name } => {
+            Warning::UnusedNonTermData { nonterm_name } => {
                 let name = nonterm_name.value();
                 format!("Non-terminal `{name}`'s data type is not used in any reduce action")
             }
@@ -538,10 +530,10 @@ pub enum Info {
     TerminalsMerged {
         class_idx: TerminalClass,
     },
-    TerminalClassRuleMerge {
+    RedundantRuleRemoved {
         rule_location: Location,
     },
-    SingleNonTerminalRule {
+    UnitProductionEliminated {
         nonterm_name: Located<String>,
         rule_location: Location,
     },
@@ -578,8 +570,8 @@ impl Info {
     pub fn name(&self) -> &'static str {
         match self {
             Info::TerminalsMerged { .. } => "terminals_merged",
-            Info::TerminalClassRuleMerge { .. } => "terminal_class_rule_merge",
-            Info::SingleNonTerminalRule { .. } => "single_non_terminal_rule",
+            Info::RedundantRuleRemoved { .. } => "redundant_rule_removed",
+            Info::UnitProductionEliminated { .. } => "unit_production_eliminated",
             Info::ReduceReduceConflictResolved { .. } => "reduce_reduce_conflict_resolved",
             Info::ShiftReduceConflictResolvedShift { .. } => "shift_reduce_conflict_resolved",
             Info::ShiftReduceConflictResolvedReduce { .. } => "shift_reduce_conflict_resolved",
@@ -590,11 +582,11 @@ impl Info {
 
     pub fn suggestion(&self, grammar: &crate::grammar::Grammar) -> String {
         match self {
-            Info::SingleNonTerminalRule { nonterm_name, .. } => {
+            Info::UnitProductionEliminated { nonterm_name, .. } => {
                 let name = nonterm_name.value();
                 format!("%allow {}({});", self.name(), name)
             }
-            Info::TerminalClassRuleMerge { rule_location } => {
+            Info::RedundantRuleRemoved { rule_location } => {
                 let mut name = String::new();
                 for nonterm in &grammar.nonterminals {
                     for rule in &nonterm.rules {

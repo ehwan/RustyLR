@@ -671,14 +671,14 @@ When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>(<tar
 #### Valid Diagnostic Names
 
 - **Warnings:**
-  - `nonterm_not_used`: A non-terminal is defined but cannot be reached or is not used.
-  - `cycle`: Cycles detected in the non-terminal rules.
-  - `nonterm_data_not_used`: A non-terminal has a data type defined, but that data is never utilized in any reduce actions.
+  - `nonterm_unreachable`: A non-terminal is defined but cannot be reached from the start symbol.
+  - `unused_nonterm_data`: A non-terminal has a data type defined, but that data is never utilized in any reduce actions.
+  - `nonterm_unproductive`: A non-terminal is defined but cannot derive any sequence of terminal symbols.
   - `unused_terminals`: Terminals that are defined but never used in any grammar rule.
 - **Infos:**
   - `terminals_merged`: Info about terminals being merged into a terminal class.
-  - `terminal_class_rule_merge`: Info about a production rule being optimized out due to terminal class rules merging.
-  - `single_non_terminal_rule`: Info about a single non-terminal rule being replaced directly by its child rule.
+  - `redundant_rule_removed`: Info about a production rule being optimized out due to terminal class rules merging.
+  - `unit_production_eliminated`: Info about a single non-terminal rule being replaced directly by its child rule.
   - `reduce_reduce_conflict_resolved`: Info about a reduce/reduce conflict resolved via precedence.
   - `shift_reduce_conflict_resolved`: Info about a shift/reduce conflict resolved via precedence.
   - `shift_reduce_conflict_glr`: Info about a shift/reduce conflict that splits branches in GLR mode.
@@ -687,8 +687,8 @@ When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>(<tar
 #### Example
 
 ```
-%allow nonterm_not_used(UnusedRule);       // Suppress unused warning specifically for UnusedRule
+%allow nonterm_unreachable(UnusedRule);    // Suppress unused warning specifically for UnusedRule
 %allow unused_terminals('+');              // Suppress unused warning specifically for terminal '+'
 %allow shift_reduce_conflict_resolved('+'); // Suppress resolution info specifically for terminal '+'
-%allow cycle;                              // Suppress all cycle warnings globally
+%allow nonterm_unproductive;               // Suppress all unproductive warnings globally
 ```
