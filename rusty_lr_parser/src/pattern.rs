@@ -5,6 +5,7 @@ use rusty_lr_core::Token;
 
 use super::error::ParseError;
 use super::grammar::Grammar;
+use super::grammar::Terminal;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
 use super::token::TokenMapped;
 use crate::parser::location::Located;
@@ -25,7 +26,7 @@ pub enum PatternInternal {
     Star(Box<Pattern>),
     Question(Box<Pattern>),
     Exclamation(Box<Pattern>),
-    TerminalSet(bool, BTreeSet<usize>),
+    TerminalSet(bool, BTreeSet<Terminal>),
     Group(Vec<Vec<Pattern>>),
     Byte(Located<u8>),
     ByteString(Located<Vec<u8>>),
@@ -61,7 +62,7 @@ pub struct PatternToToken {
     /// only for internal usage; generating name like A_star, A_plus, A_question
     pub name: Located<String>,
     /// actual token for the pattern
-    pub token: Token<TerminalSymbol<usize>, usize>,
+    pub token: Token<TerminalSymbol<Terminal>, usize>,
     /// ruletype for this pattern
     pub ruletype: Option<TokenStream>,
     /// implicit mapto derived from its parent pattern (e.g. 'A' from A+, 'A' from A*!)

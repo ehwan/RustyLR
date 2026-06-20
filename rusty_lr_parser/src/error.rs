@@ -3,6 +3,7 @@ use proc_macro2::TokenStream;
 
 use quote::quote_spanned;
 
+use crate::grammar::{Terminal, TerminalClass};
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
@@ -67,8 +68,8 @@ pub enum ParseError {
 
     InvalidTerminalRange {
         location: Location,
-        start: (Located<String>, usize),
-        end: (Located<String>, usize),
+        start: (Located<String>, Terminal),
+        end: (Located<String>, Terminal),
     },
 
     /// name given to %start not defined
@@ -407,7 +408,7 @@ pub enum Warning {
     NonTermNotUsed { nonterm_name: Located<String> },
     Cycle { nonterm_name: Located<String> },
     NonTermDataNotUsed { nonterm_name: Located<String> },
-    UnusedTerminals { class_idx: usize },
+    UnusedTerminals { class_idx: TerminalClass },
 }
 
 impl Warning {
@@ -527,7 +528,7 @@ impl Warning {
 #[derive(Debug, Clone)]
 pub enum Info {
     TerminalsMerged {
-        class_idx: usize,
+        class_idx: TerminalClass,
     },
     TerminalClassRuleMerge {
         rule_location: Location,
@@ -542,25 +543,25 @@ pub enum Info {
         deleted_rules: Vec<usize>,
     },
     ShiftReduceConflictResolvedShift {
-        term: TerminalSymbol<usize>,
+        term: TerminalSymbol<TerminalClass>,
         shift_prec: usize,
         shift_rules: Vec<usize>,
         reduce_rules: Vec<(usize, usize)>,
     },
     ShiftReduceConflictResolvedReduce {
-        term: TerminalSymbol<usize>,
+        term: TerminalSymbol<TerminalClass>,
         shift_prec: usize,
         shift_rules: Vec<usize>,
         reduce_rules: Vec<(usize, usize)>,
     },
     ShiftReduceConflictGLR {
-        term: TerminalSymbol<usize>,
+        term: TerminalSymbol<TerminalClass>,
         shift_rules: Vec<usize>,
         shift_rules_backtrace: Vec<String>,
         reduce_rules: Vec<(usize, Vec<String>)>,
     },
     ReduceReduceConflictGLR {
-        terms: Vec<TerminalSymbol<usize>>,
+        terms: Vec<TerminalSymbol<TerminalClass>>,
         reduce_rules: Vec<(usize, Vec<String>)>,
     },
 }

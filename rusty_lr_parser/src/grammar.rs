@@ -35,7 +35,7 @@ use crate::token::TokenMapped;
 use crate::utils;
 
 pub struct TerminalClassDefinition {
-    pub terminals: Vec<usize>,
+    pub terminals: Vec<Terminal>,
     /// counter for only terminal clasas (have more than 1 terminal)
     /// dummy if it is single-terminal class
     pub multiterm_counter: usize,
@@ -48,8 +48,8 @@ pub struct TerminalClassDefinition {
 }
 
 /// type alias just for readability
-type ClassIndex = usize;
-type TerminalIndex = usize;
+pub type TerminalClass = usize;
+pub type Terminal = usize;
 
 pub struct CustomSingleReduceAction {
     pub body: CustomReduceAction,
@@ -77,7 +77,7 @@ pub struct Grammar {
 
     pub terminals: Vec<TerminalInfo>,
     /// ident -> index map for terminals
-    pub terminals_index: HashMap<TerminalName, TerminalIndex>,
+    pub terminals_index: HashMap<TerminalName, Terminal>,
 
     /// %left, %right, or %precedence for each precedence level
     pub precedence_types: Vec<Located<Option<rusty_lr_core::rule::ReduceType>>>,
@@ -102,15 +102,16 @@ pub struct Grammar {
 
     /// do terminal classificate optimization
     pub optimize: bool,
-    pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize>,
-    pub states: Vec<rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<usize>, usize>>,
+    pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize>,
+    pub states:
+        Vec<rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<TerminalClass>, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,
     /// id of teminal class for each terminal
-    pub terminal_class_id: Vec<TerminalIndex>,
+    pub terminal_class_id: Vec<TerminalClass>,
     /// class id for terminal that does not belong to any class
-    pub other_terminal_class_id: ClassIndex,
+    pub other_terminal_class_id: TerminalClass,
 
     pub other_used: bool,
     pub error_used: bool,
@@ -118,7 +119,7 @@ pub struct Grammar {
     /// terminal index of other_terminals
     /// `other_terminal` can be only used by [^ term ...] pattern,
     /// to indicate *other terminals* not defined in this grammar.
-    pub other_terminal_index: TerminalIndex,
+    pub other_terminal_index: Terminal,
 
     /// character range resolver;
     pub range_resolver: RangeResolver,
@@ -295,7 +296,10 @@ impl Grammar {
         None
     }
 
-    pub(crate) fn negate_terminal_set(&self, terminalset: &BTreeSet<usize>) -> BTreeSet<usize> {
+    pub(crate) fn negate_terminal_set(
+        &self,
+        terminalset: &BTreeSet<Terminal>,
+    ) -> BTreeSet<Terminal> {
         (0..self.terminals.len())
             .filter(|&i| !terminalset.contains(&i))
             .collect()
@@ -495,7 +499,7 @@ impl Grammar {
         &self,
         start: char,
         last: char,
-    ) -> impl Iterator<Item = usize> + '_ {
+    ) -> impl Iterator<Item = Terminal> + '_ {
         self.terminals
             .iter()
             .enumerate()
@@ -511,7 +515,7 @@ impl Grammar {
                 }
             })
     }
-    pub(crate) fn get_terminal_index_from_char(&self, ch: char) -> usize {
+    pub(crate) fn get_terminal_index_from_char(&self, ch: char) -> Terminal {
         let name: TerminalName = (ch, ch).into();
         *self.terminals_index.get(&name).unwrap()
     }
@@ -2512,7 +2516,7 @@ impl Grammar {
         }
     }
 
-    pub fn term_pretty_name(&self, term_idx: usize) -> String {
+    pub fn term_pretty_name(&self, term_idx: Terminal) -> String {
         if term_idx == self.other_terminal_index {
             "<Others>".to_string()
         } else {
@@ -2523,7 +2527,7 @@ impl Grammar {
     }
 
     /// returns either 'term' or 'TerminalClassX'
-    pub fn class_pretty_name_abbr(&self, class_idx: usize) -> String {
+    pub fn class_pretty_name_abbr(&self, class_idx: TerminalClass) -> String {
         let class = &self.terminal_classes[class_idx];
         let len: usize = class
             .terminals
@@ -2537,7 +2541,11 @@ impl Grammar {
         }
     }
     /// returns either 'term' or '[term1, term2, ...]'
-    pub fn class_pretty_name_list(&self, class: TerminalSymbol<usize>, max_len: usize) -> String {
+    pub fn class_pretty_name_list(
+        &self,
+        class: TerminalSymbol<TerminalClass>,
+        max_len: usize,
+    ) -> String {
         match class {
             TerminalSymbol::Error => return "error".to_string(),
             TerminalSymbol::Eof => return "eof".to_string(),
@@ -2579,8 +2587,8 @@ impl Grammar {
     /// create the rusty_lr_core::Grammar from the parsed CFGs
     pub fn create_builder(
         &mut self,
-    ) -> rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize> {
-        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize> =
+    ) -> rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize> {
+        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize> =
             rusty_lr_core::builder::Grammar::new();
 
         let mut rules = Vec::new();
@@ -2626,7 +2634,7 @@ impl Grammar {
 
     pub fn build_grammar(
         &mut self,
-    ) -> rusty_lr_core::builder::DiagnosticCollector<TerminalSymbol<usize>> {
+    ) -> rusty_lr_core::builder::DiagnosticCollector<TerminalSymbol<TerminalClass>> {
         let augmented_idx = *self.nonterminals_index.get(utils::AUGMENTED_NAME).unwrap();
         let mut collector = rusty_lr_core::builder::DiagnosticCollector::new(true);
         let states = if self.lalr {
@@ -2641,7 +2649,7 @@ impl Grammar {
             }
         };
         let mut states: Vec<
-            rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<usize>, usize>,
+            rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<TerminalClass>, usize>,
         > = states.into_iter().map(Into::into).collect();
 
         // Identify states that only perform a single reduction of a single-token rule.
@@ -2849,7 +2857,7 @@ impl Grammar {
                 let mut sparse_goto_entries = 0usize;
                 let mut shift_key_entries = 0usize;
 
-                let term_to_usize = |term: TerminalSymbol<usize>| -> usize {
+                let term_to_usize = |term: TerminalSymbol<TerminalClass>| -> usize {
                     match term {
                         TerminalSymbol::Term(t) => t,
                         TerminalSymbol::Error => self.terminal_classes.len(),

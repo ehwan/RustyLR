@@ -1,3 +1,4 @@
+use crate::grammar::TerminalClass;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
 
@@ -5,7 +6,7 @@ use crate::parser::location::Location;
 #[derive(Debug, Clone)]
 pub struct TokenMapped {
     /// terminal or non-terminal name
-    pub token: rusty_lr_core::Token<rusty_lr_core::TerminalSymbol<usize>, usize>,
+    pub token: rusty_lr_core::Token<rusty_lr_core::TerminalSymbol<TerminalClass>, usize>,
 
     /// variable name that the token's data will be mapped to
     pub mapto: Option<Located<String>>,
