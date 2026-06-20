@@ -4,6 +4,7 @@ use std::collections::BTreeSet;
 
 use crate::error::ParseError;
 use crate::grammar::Grammar;
+use crate::grammar::Terminal;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
 use crate::terminal_info::TerminalName;
@@ -46,7 +47,7 @@ impl TerminalSetItem {
             TerminalSetItem::CharRange(first, last) => first.location().merge(&last.location()),
         }
     }
-    pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<usize>, ParseError> {
+    pub fn to_terminal_set(&self, grammar: &mut Grammar) -> Result<BTreeSet<Terminal>, ParseError> {
         match self {
             TerminalSetItem::Terminal(terminal) => {
                 if let Some(idx) = grammar
@@ -96,7 +97,7 @@ impl TerminalSetItem {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
 
-                let set: BTreeSet<usize> = grammar
+                let set: BTreeSet<Terminal> = grammar
                     .get_terminal_indices_from_char_range(first_val as char, last_val as char)
                     .collect();
                 Ok(set)
@@ -113,7 +114,7 @@ impl TerminalSetItem {
                 if first_val > last_val {
                     return Err(ParseError::InvalidLiteralRange(self.location()));
                 }
-                let set: BTreeSet<usize> = grammar
+                let set: BTreeSet<Terminal> = grammar
                     .get_terminal_indices_from_char_range(first_val, last_val)
                     .collect();
                 Ok(set)
@@ -170,7 +171,7 @@ impl TerminalSet {
     pub fn to_terminal_set(
         &self,
         grammar: &mut Grammar,
-    ) -> Result<(bool, BTreeSet<usize>), ParseError> {
+    ) -> Result<(bool, BTreeSet<Terminal>), ParseError> {
         let mut terminal_set = BTreeSet::new();
         for item in &self.items {
             let mut item_set = item.to_terminal_set(grammar)?;
