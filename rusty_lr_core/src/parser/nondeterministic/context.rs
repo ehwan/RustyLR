@@ -6,17 +6,17 @@ use super::ParseError;
 use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
+use crate::parser::state::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
 use crate::parser::Precedence;
-use crate::parser::State;
 use crate::TerminalSymbol;
 
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
 pub struct NodeRefIterator<
     'a,
-    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
     Data: DataStack,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
@@ -26,7 +26,7 @@ pub struct NodeRefIterator<
 }
 impl<
         'a,
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex,
         const MAX_REDUCE_RULES: usize,
@@ -41,7 +41,7 @@ impl<
 }
 impl<
         'a,
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index + Copy,
         const MAX_REDUCE_RULES: usize,
@@ -59,7 +59,7 @@ impl<
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
 pub struct Context<
-    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
     Data: DataStack,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
@@ -86,11 +86,12 @@ pub struct Context<
     /// For temporary use.
     /// store rule indices where shift/reduce conflicts occured with no precedence defined.
     pub(crate) no_precedences: Vec<usize>,
+    pub(crate) tables: &'static P::Tables,
     pub(crate) _phantom: std::marker::PhantomData<P>,
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
@@ -110,6 +111,7 @@ impl<
             fallback_nodes: Default::default(),
             fallback_userdatas: Default::default(),
             no_precedences: Default::default(),
+            tables: P::get_tables(),
             _phantom: std::marker::PhantomData,
         };
         let root_node = context.new_node();
@@ -516,28 +518,25 @@ impl<
         Data: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
-        let rule = &P::get_rules()[reduce_rule];
-        let count = rule.rule.len();
+        let rule = *self.tables.rule(reduce_rule);
+        let count = rule.len;
         let mut new_location = Data::Location::new(self.location_iter(node), count);
 
         let node_to_shift = self.prepare_reduce_node(node, count, count);
 
-        use crate::parser::State;
-
         let state = self.state(node_to_shift);
-        let node = self.node_mut(node_to_shift);
-        #[cfg(feature = "tree")]
-        let trees = node.tree_stack.split_off(node.tree_stack.len() - count);
-
-        let Some(next_nonterm_shift) = P::get_states()[state].shift_goto_nonterm(rule.name) else {
+        let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(state, rule.name) else {
             unreachable!(
                 "Failed to shift non-terminal: {:?} in state {}",
                 rule.name, state
             );
         };
+
+        let node = self.node_mut(node_to_shift);
+        #[cfg(feature = "tree")]
+        let trees = node.tree_stack.split_off(node.tree_stack.len() - count);
 
         match Data::reduce_action(
             &mut node.data_stack,
@@ -589,7 +588,6 @@ impl<
         Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         Ok(self.accept_all()?.next().unwrap())
     }
@@ -606,7 +604,6 @@ impl<
         Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         self.feed_eof()?;
         // since `eof` is feeded, every node graph should be like this:
@@ -652,7 +649,6 @@ impl<
     ) where
         P::TermClass: Ord,
         P::NonTerm: Ord,
-        P::State: State<StateIndex = StateIndex>,
     {
         let state = extra_state_stack
             .last()
@@ -665,15 +661,13 @@ impl<
                     })
                     .unwrap_or(0)
             });
-        let state = &P::get_states()[state];
-
-        terms.extend(state.expected_shift_term());
-        nonterms.extend(state.expected_shift_nonterm());
+        terms.extend(self.tables.expected_shift_term(state));
+        nonterms.extend(self.tables.expected_shift_nonterm(state));
 
         let mut reduce_nonterms = std::collections::BTreeSet::new();
-        for reduce_rule in state.expected_reduce_rule() {
-            let prod_rule = &P::get_rules()[reduce_rule.into_usize()];
-            reduce_nonterms.insert((prod_rule.rule.len(), prod_rule.name));
+        for reduce_rule in self.tables.expected_reduce_rule(state) {
+            let prod_rule = self.tables.rule(reduce_rule.into_usize());
+            reduce_nonterms.insert((prod_rule.len, prod_rule.name));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
             let mut node_and_len = node_and_len;
@@ -712,8 +706,7 @@ impl<
                         })
                         .unwrap_or(0)
                 });
-            let state = &P::get_states()[state];
-            if let Some(next_state) = state.shift_goto_nonterm(nonterm) {
+            if let Some(next_state) = self.tables.shift_goto_nonterm(state, nonterm) {
                 extra_state_stack.push(next_state.state);
                 self.expected_token_impl(&mut extra_state_stack, node_and_len, terms, nonterms);
             }
@@ -730,7 +723,6 @@ impl<
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
-        P::State: State<StateIndex = StateIndex>,
     {
         let mut terms = std::collections::BTreeSet::new();
         let mut nonterms = std::collections::BTreeSet::new();
@@ -768,7 +760,6 @@ impl<
     where
         P::TermClass: Ord,
         P::NonTerm: Ord,
-        P::State: State<StateIndex = StateIndex>,
     {
         let (terms, nonterms) = self.expected_token();
         (
@@ -786,7 +777,6 @@ impl<
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
         Data::UserData: Clone,
         Data::Location: Default,
@@ -831,25 +821,26 @@ impl<
         Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         debug_assert!(self.node(node).is_leaf());
         use crate::parser::state::ReduceRules;
-        use crate::parser::State;
 
         let last_state = self.state(node);
-        let shift_state = P::get_states()[last_state].shift_goto_class(class);
-        if let Some(reduce_rules) = P::get_states()[last_state].reduce(class) {
+        let (shift_state, reduce) = match self.tables.term_action(last_state, class) {
+            Some(action) => (action.shift(), action.reduce()),
+            None => (None, None),
+        };
+        if let Some(reduce_rules) = reduce {
             let mut shift = None;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             for reduce_rule in reduce_rules.to_iter() {
-                let rule = &P::get_rules()[reduce_rule.into_usize()];
+                let rule = *self.tables.rule(reduce_rule.into_usize());
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
-                        let ith = rule.rule.len() - token_index - 1;
+                        let ith = rule.len - token_index - 1;
                         let (node, ith) = self.skip_last_n(node, ith).unwrap();
                         self.node(node).precedence_stack[ith]
                     }
@@ -1051,7 +1042,6 @@ impl<
         Data::UserData: Clone,
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
     {
         use crate::Location;
         use crate::TriState;
@@ -1071,7 +1061,7 @@ impl<
             let mut found = false;
 
             for &s in node_.state_stack.iter().rev() {
-                match P::get_states()[s.into_usize()].can_accept_error() {
+                match self.tables.can_accept_error(s.into_usize()) {
                     TriState::False => {}
                     TriState::Maybe => {
                         extra_precedence_stack.clear();
@@ -1165,11 +1155,9 @@ impl<
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
         Data::UserData: Clone,
     {
-        use crate::parser::State;
         use crate::Location;
 
         self.reduce_errors.clear();
@@ -1249,7 +1237,7 @@ impl<
             if self.next_nodes.is_empty() {
                 // for-loop above doesn't check for root state (0).
                 // check for 0 state here
-                if P::get_states()[0].can_accept_error() == crate::TriState::True {
+                if self.tables.can_accept_error(0) == crate::TriState::True {
                     if let Some(userdata) = root_userdata {
                         // all nodes were deleted, so create new
                         let node = self.new_node();
@@ -1289,7 +1277,7 @@ impl<
                 let mut next_userdatas = std::mem::take(&mut self.next_userdatas);
                 for (error_node, userdata) in next_nodes.drain(..).zip(next_userdatas.drain(..)) {
                     let last_state = self.state(error_node);
-                    if let Some(next_state) = P::get_states()[last_state].shift_goto_class(class) {
+                    if let Some(next_state) = self.tables.shift_goto_class(last_state, class) {
                         // A -> a . error b
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
@@ -1342,12 +1330,7 @@ impl<
         mut node_and_len: Option<(usize, NonZeroUsize)>,
         class: P::TermClass,
         shift_prec: Precedence,
-    ) -> Option<bool>
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
-        use crate::parser::State;
-
+    ) -> Option<bool> {
         let last_state = extra_state_stack
             .last()
             .copied()
@@ -1359,19 +1342,22 @@ impl<
                     })
                     .unwrap_or(0)
             });
-        let shift_state = P::get_states()[last_state].shift_goto_class(class);
-        if let Some(reduce_rules) = P::get_states()[last_state].reduce(class) {
+        let (shift_state, reduce) = match self.tables.term_action(last_state, class) {
+            Some(action) => (action.shift(), action.reduce()),
+            None => (None, None),
+        };
+        if let Some(reduce_rules) = reduce {
             let mut shift = None;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             use crate::parser::state::ReduceRules;
             for reduce_rule in reduce_rules.to_iter() {
-                let rule = &P::get_rules()[reduce_rule.into_usize()];
+                let rule = *self.tables.rule(reduce_rule.into_usize());
                 let reduce_prec = match rule.precedence {
                     Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
                     Some(crate::rule::Precedence::Dynamic(token_index)) => {
                         // fix the value to the offset from current node
-                        let mut ith = rule.rule.len() - token_index - 1;
+                        let mut ith = rule.len - token_index - 1;
                         if ith < extra_precedence_stack.len() {
                             extra_precedence_stack[extra_precedence_stack.len() - 1 - ith]
                         } else {
@@ -1441,8 +1427,8 @@ impl<
 
             if reduces.len() == 1 {
                 let (rule, reduce_prec) = reduces[0];
-                let reduce_rule = &P::get_rules()[rule.into_usize()];
-                let tokens_len = reduce_rule.rule.len();
+                let reduce_rule = *self.tables.rule(rule.into_usize());
+                let tokens_len = reduce_rule.len;
 
                 // pop state stack
                 // pop precedence stack
@@ -1475,7 +1461,7 @@ impl<
                 extra_precedence_stack.push(reduce_prec);
 
                 // shift with reduced nonterminal
-                if let Some(next_state_id) = P::get_states()[extra_state_stack
+                let last_state = extra_state_stack
                     .last()
                     .copied()
                     .map(Index::into_usize)
@@ -1485,8 +1471,9 @@ impl<
                                 self.node(node).state_stack[stack_len.get() - 1].into_usize()
                             })
                             .unwrap_or(0)
-                    })]
-                .shift_goto_nonterm(reduce_rule.name)
+                    });
+                if let Some(next_state_id) =
+                    self.tables.shift_goto_nonterm(last_state, reduce_rule.name)
                 {
                     extra_state_stack.push(next_state_id.state);
                 } else {
@@ -1508,8 +1495,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             } else {
                 let mut ret = None;
                 for (reduce_rule, reduce_prec) in reduces.into_iter() {
-                    let reduce_rule = &P::get_rules()[reduce_rule.into_usize()];
-                    let tokens_len = reduce_rule.rule.len();
+                    let reduce_rule = *self.tables.rule(reduce_rule.into_usize());
+                    let tokens_len = reduce_rule.len;
 
                     let mut extra_state_stack = extra_state_stack.clone();
                     let mut extra_precedence_stack = extra_precedence_stack.clone();
@@ -1558,7 +1545,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         });
 
                     if let Some(next_state_id) =
-                        P::get_states()[last_state].shift_goto_nonterm(reduce_rule.name)
+                        self.tables.shift_goto_nonterm(last_state, reduce_rule.name)
                     {
                         extra_state_stack.push(next_state_id.state);
                     } else {
@@ -1595,10 +1582,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     /// This does not simulate for reduce action error, or panic mode.
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
-    pub fn can_feed(&self, term: &P::Term) -> bool
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    pub fn can_feed(&self, term: &P::Term) -> bool {
         let class = P::TermClass::from_term(term);
         let shift_prec = class.precedence();
         let mut extra_state_stack = Vec::new();
@@ -1627,10 +1611,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     }
 
     /// Check if current context can enter panic mode.
-    pub fn can_panic(&self) -> bool
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    pub fn can_panic(&self) -> bool {
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -1692,7 +1673,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
-        P::State: State<StateIndex = StateIndex>,
         Data: Clone,
         Data::UserData: Clone,
     {
@@ -1751,10 +1731,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         }
     }
     /// Check if current context can be terminated and get the start value.
-    pub fn can_accept(&self) -> bool
-    where
-        P::State: State<StateIndex = StateIndex>,
-    {
+    pub fn can_accept(&self) -> bool {
         let mut extra_state_stack = Vec::new();
         let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
@@ -1782,7 +1759,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
@@ -1791,28 +1768,12 @@ where
     Data::UserData: Default,
 {
     fn default() -> Self {
-        let mut context = Context {
-            nodes_pool: Default::default(),
-            empty_node_indices: Default::default(),
-            current_nodes: Default::default(),
-            current_userdatas: Default::default(),
-            next_nodes: Default::default(),
-            next_userdatas: Default::default(),
-            reduce_errors: Default::default(),
-            fallback_nodes: Default::default(),
-            fallback_userdatas: Default::default(),
-            no_precedences: Default::default(),
-            _phantom: std::marker::PhantomData,
-        };
-        let root_node = context.new_node();
-        context.current_nodes.push(root_node);
-        context.current_userdatas.push(Default::default());
-        context
+        Self::new(Default::default())
     }
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
@@ -1840,7 +1801,7 @@ where
 
 #[cfg(feature = "tree")]
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
@@ -1859,7 +1820,7 @@ where
 }
 #[cfg(feature = "tree")]
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm>,
+        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: DataStack,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,

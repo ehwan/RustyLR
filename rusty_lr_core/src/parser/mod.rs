@@ -50,13 +50,20 @@ pub trait Parser {
     type TermClass: terminalclass::TerminalClass<Term = Self::Term> + 'static;
     /// The type of non-terminal symbols.
     type NonTerm: nonterminal::NonTerminal + 'static;
-    /// The type of the parser state.
-    type State: State<TermClass = Self::TermClass, NonTerm = Self::NonTerm> + 'static;
+    /// The compact integer type used for state indices.
+    type StateIndex: state::Index + 'static;
+    /// The reduce-rule container for a terminal action.
+    type ReduceRules: state::ReduceRules + 'static;
+    /// The type of the parser table.
+    type Tables: state::ParserTables<
+            TermClass = Self::TermClass,
+            NonTerm = Self::NonTerm,
+            StateIndex = Self::StateIndex,
+            ReduceRules = Self::ReduceRules,
+        > + 'static;
 
-    /// Get list of production rules. Returns a static slice since rules are generated at compile time.
-    fn get_rules() -> &'static [crate::rule::ProductionRule<Self::TermClass, Self::NonTerm>];
-    /// Get list of states. Returns a static slice since states are generated at compile time.
-    fn get_states() -> &'static [Self::State];
+    /// Get the decoded runtime parser tables.
+    fn get_tables() -> &'static Self::Tables;
     /// Get the type of precedence for i'th level.
     /// `None` if i'th level was defined as %precedence (no reduce type).
     /// Determined entirely at compile time and is static.
