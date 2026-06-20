@@ -2731,22 +2731,25 @@ impl Grammar {
 
         self.states = new_states;
 
-        // Resolve table layout choice (DenseState vs SparseState) dynamically.
+        // Resolve table layout choice (DenseFlatTables vs SparseFlatTables) dynamically.
         // Performance considerations:
-        // - DenseState: Uses O(1) direct array indexing lookup. It is extremely fast but requires a contiguous array
-        //   allocation spanning from min_symbol to max_symbol. This can lead to memory bloat for large, sparse tables.
-        // - SparseState: Uses O(log K) binary search on a sorted static slice. It has zero memory bloat but takes
-        //   slightly more CPU cycles and has higher branching overhead in the hot parsing loop.
-        // - Default/Auto mode: We calculate the estimated memory footprints for both layout types. If the estimated
-        //   DenseState table size fits within `dense_limit` (defaults to 32KB, which comfortably fits inside CPU L1/L2
-        //   caches), or if the ratio of Dense-to-Sparse size is small (< 2.5x), we favor the O(1) speed of DenseState.
-        //   Otherwise, we default to SparseState to minimize memory and binary footprint.
+        // - DenseFlatTables: Stores each state's merged terminal actions in a row-local dense span
+        //   (`min_terminal..=max_terminal`) and each goto row in a row-local dense nonterminal span. This gives
+        //   O(1) lookup with better locality, but empty slots inside sparse rows can still add memory pressure.
+        // - SparseFlatTables: Stores each state's merged terminal actions as sorted row slices. It has no empty
+        //   action slots and is compact, but lookup needs a short linear scan or binary search.
+        // - Default/Auto mode: We estimate the decoded runtime table footprint, including the row metadata added by
+        //   the flat layouts. If the dense footprint fits within `dense_limit` or the dense/sparse ratio is modest,
+        //   we favor the direct-indexing dense table; otherwise we keep the sparse table.
         self.emit_dense = match self.layout {
             TableLayout::Dense => true,
             TableLayout::Sparse => false,
             TableLayout::Auto => {
-                let mut total_dense_size = 0;
-                let mut total_sparse_size = 0;
+                let mut dense_action_slots = 0usize;
+                let mut dense_goto_slots = 0usize;
+                let mut sparse_action_entries = 0usize;
+                let mut sparse_goto_entries = 0usize;
+                let mut shift_key_entries = 0usize;
 
                 let term_to_usize = |term: TerminalSymbol<usize>| -> usize {
                     match term {
@@ -2757,15 +2760,75 @@ impl Grammar {
                 };
 
                 for state in &self.states {
-                    // Terminal class transitions
-                    let term_span = if !state.shift_goto_map_term.is_empty() {
-                        let min = term_to_usize(state.shift_goto_map_term.first().unwrap().0);
-                        let max = term_to_usize(state.shift_goto_map_term.last().unwrap().0);
-                        max - min + 1
-                    } else {
-                        0
+                    // DenseFlatTables stores one terminal action row built from the union of shift and reduce keys.
+                    // Count that union rather than charging shifts and reduces as independent tables.
+                    let mut shift_terms = state
+                        .shift_goto_map_term
+                        .iter()
+                        .map(|(term, _)| term_to_usize(*term));
+                    let mut reduce_terms = state
+                        .reduce_map
+                        .iter()
+                        .map(|(term, _)| term_to_usize(*term));
+                    let first_shift = shift_terms.next();
+                    let first_reduce = reduce_terms.next();
+                    let term_min = first_shift.into_iter().chain(first_reduce).min();
+                    let term_max = state
+                        .shift_goto_map_term
+                        .last()
+                        .map(|(term, _)| term_to_usize(*term))
+                        .into_iter()
+                        .chain(
+                            state
+                                .reduce_map
+                                .last()
+                                .map(|(term, _)| term_to_usize(*term)),
+                        )
+                        .max();
+                    dense_action_slots += match (term_min, term_max) {
+                        (Some(min), Some(max)) => max - min + 1,
+                        _ => 0,
                     };
-                    let term_count = state.shift_goto_map_term.len();
+
+                    let mut shift_iter = state
+                        .shift_goto_map_term
+                        .iter()
+                        .map(|(term, _)| term_to_usize(*term));
+                    let mut reduce_iter = state
+                        .reduce_map
+                        .iter()
+                        .map(|(term, _)| term_to_usize(*term));
+                    let mut shift_next = shift_iter.next();
+                    let mut reduce_next = reduce_iter.next();
+                    while shift_next.is_some() || reduce_next.is_some() {
+                        match (shift_next, reduce_next) {
+                            (Some(shift), Some(reduce)) if shift == reduce => {
+                                sparse_action_entries += 1;
+                                shift_next = shift_iter.next();
+                                reduce_next = reduce_iter.next();
+                            }
+                            (Some(shift), Some(reduce)) if shift < reduce => {
+                                sparse_action_entries += 1;
+                                shift_next = shift_iter.next();
+                            }
+                            (Some(_), Some(_)) => {
+                                sparse_action_entries += 1;
+                                reduce_next = reduce_iter.next();
+                            }
+                            (Some(_), None) => {
+                                sparse_action_entries += 1;
+                                shift_next = shift_iter.next();
+                            }
+                            (None, Some(_)) => {
+                                sparse_action_entries += 1;
+                                reduce_next = reduce_iter.next();
+                            }
+                            (None, None) => unreachable!(),
+                        }
+                    }
+
+                    // DenseFlatTables keeps shift-capable terminal keys for expected-token reporting.
+                    shift_key_entries += state.shift_goto_map_term.len();
 
                     // Non-terminal transitions
                     let nonterm_span = if !state.shift_goto_map_nonterm.is_empty() {
@@ -2776,27 +2839,36 @@ impl Grammar {
                         0
                     };
                     let nonterm_count = state.shift_goto_map_nonterm.len();
-
-                    // Reduce rule transitions
-                    let reduce_span = if !state.reduce_map.is_empty() {
-                        let min = term_to_usize(state.reduce_map.first().unwrap().0);
-                        let max = term_to_usize(state.reduce_map.last().unwrap().0);
-                        max - min + 1
-                    } else {
-                        0
-                    };
-                    let reduce_count = state.reduce_map.len();
-
-                    // Dense table memory estimation:
-                    // Each slot is an Option<ShiftTarget<StateIndex>>, which takes ~4 bytes (assuming 16-bit state index).
-                    total_dense_size += (term_span + nonterm_span + reduce_span) * 4;
-
-                    // Sparse table memory estimation:
-                    // Each slot stores a tuple (Symbol, ShiftTarget), taking ~8 bytes.
-                    total_sparse_size += (term_count + nonterm_count + reduce_count) * 8;
+                    dense_goto_slots += nonterm_span;
+                    sparse_goto_entries += nonterm_count;
                 }
 
-                // Choose DenseState if it fits in the cache limit, or if the size overhead is reasonable.
+                let state_count = self.states.len();
+                let usize_size = std::mem::size_of::<usize>();
+                let symbol_size = std::mem::size_of::<usize>();
+
+                // These are intentionally approximate: the concrete enum/Option layout depends on the generated
+                // state/rule index widths and niche optimizations. The goal is to choose the right layout class, not
+                // to predict the exact allocator footprint byte-for-byte.
+                let dense_action_slot_size = 8usize;
+                let dense_goto_slot_size = 4usize;
+                let sparse_action_entry_size = 12usize;
+                let sparse_goto_entry_size = 8usize;
+
+                let dense_row_metadata_size =
+                    (state_count + 1) * usize_size * 4 + state_count * usize_size * 2;
+                let sparse_row_metadata_size = (state_count + 1) * usize_size * 2;
+
+                let total_dense_size = dense_row_metadata_size
+                    + dense_action_slots * dense_action_slot_size
+                    + dense_goto_slots * dense_goto_slot_size
+                    + (shift_key_entries + sparse_goto_entries) * symbol_size;
+
+                let total_sparse_size = sparse_row_metadata_size
+                    + sparse_action_entries * sparse_action_entry_size
+                    + sparse_goto_entries * sparse_goto_entry_size;
+
+                // Choose DenseFlatTables if it fits in the cache limit, or if the size overhead is reasonable.
                 total_dense_size <= self.dense_limit
                     || (total_sparse_size > 0
                         && (total_dense_size as f64 / total_sparse_size as f64) < 2.5)
