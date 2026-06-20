@@ -6,6 +6,7 @@ use quote::quote_spanned;
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
+use rusty_lr_core::TerminalSymbol;
 
 /// failed to feed() the token
 #[derive(Debug)]
@@ -396,4 +397,138 @@ impl ConflictError {
             }
         }
     }
+}
+
+/// Represents various compilation warnings encountered during grammar analysis
+/// and parser generation (e.g., unused symbols, cycles, etc.).
+#[derive(Debug, Clone)]
+pub enum Warning {
+    NonTermNotUsed { nonterm_idx: Located<usize> },
+    Cycle { nonterm_idx: Located<usize> },
+    NonTermDataNotUsed { nonterm_idx: Located<usize> },
+    UnusedTerminals { class_idx: usize },
+}
+
+impl Warning {
+    /// Translates the warning into a `TokenStream` containing a compiler warning.
+    /// Since Rust does not have a stable `compile_warning!` macro, this leverages
+    /// a dummy deprecated struct definition mapped to the source code span
+    /// where the warning originated, allowing stable Rust compilers to emit a diagnostic warning.
+    pub fn to_compile_warning(
+        &self,
+        grammar: &crate::grammar::Grammar,
+        span_manager: &crate::parser::location::SpanManager,
+    ) -> TokenStream {
+        let mut output = TokenStream::new();
+        let message = self.short_message(grammar);
+        let locs = self.locations();
+        if locs.is_empty() {
+            let span = Span::call_site();
+            output.extend(quote_spanned! {
+                span=>
+                const _: () = {
+                    #[deprecated(since = "0.0.0", note = #message)]
+                    struct Warning;
+                    let _ = Warning;
+                };
+            });
+        } else {
+            for loc in locs {
+                for span in span_manager.get_spans_in_location(&loc) {
+                    output.extend(quote_spanned! {
+                        span=>
+                        const _: () = {
+                            #[deprecated(since = "0.0.0", note = #message)]
+                            struct Warning;
+                            let _ = Warning;
+                        };
+                    });
+                }
+            }
+        }
+        output
+    }
+
+    /// Retrieves all source code locations associated with this warning.
+    pub fn locations(&self) -> Vec<Location> {
+        match self {
+            Warning::NonTermNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::Cycle { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::NonTermDataNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::UnusedTerminals { .. } => Vec::new(),
+        }
+    }
+
+    /// Formats a short diagnostic message describing the warning.
+    pub fn short_message(&self, grammar: &crate::grammar::Grammar) -> String {
+        match self {
+            Warning::NonTermNotUsed { nonterm_idx } => {
+                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+                format!("Non-terminal `{name}` is not used in the grammar")
+            }
+            Warning::Cycle { nonterm_idx } => {
+                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+                format!("Cycle detected: non-terminal `{name}` is involved in a bad cycle")
+            }
+            Warning::NonTermDataNotUsed { nonterm_idx } => {
+                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+                format!("Non-terminal `{name}`'s data type is not used in any reduce action")
+            }
+            Warning::UnusedTerminals { class_idx } => {
+                let class_name = grammar.class_pretty_name_abbr(*class_idx);
+                let terminals = grammar.terminal_classes[*class_idx]
+                    .terminals
+                    .iter()
+                    .map(|&term| grammar.term_pretty_name(term))
+                    .collect::<Vec<_>>();
+                format!(
+                    "These terminals are not used: {class_name}: {}",
+                    terminals.join(", ")
+                )
+            }
+        }
+    }
+}
+
+/// Represents informational diagnostics and details collected during parser construction
+/// and conflict resolution (e.g. terminals merged, conflicts resolved, backtraces for GLR).
+#[derive(Debug, Clone)]
+pub enum Info {
+    TerminalsMerged {
+        class_idx: usize,
+    },
+    TerminalClassRuleMerge {
+        rule_location: Location,
+    },
+    SingleNonTerminalRule {
+        nonterm_idx: Located<usize>,
+        rule_location: Location,
+    },
+    ReduceReduceConflictResolved {
+        max_priority: usize,
+        reduce_rules: Vec<usize>,
+        deleted_rules: Vec<usize>,
+    },
+    ShiftReduceConflictResolvedShift {
+        term: TerminalSymbol<usize>,
+        shift_prec: usize,
+        shift_rules: Vec<usize>,
+        reduce_rules: Vec<(usize, usize)>,
+    },
+    ShiftReduceConflictResolvedReduce {
+        term: TerminalSymbol<usize>,
+        shift_prec: usize,
+        shift_rules: Vec<usize>,
+        reduce_rules: Vec<(usize, usize)>,
+    },
+    ShiftReduceConflictGLR {
+        term: TerminalSymbol<usize>,
+        shift_rules: Vec<usize>,
+        shift_rules_backtrace: Vec<String>,
+        reduce_rules: Vec<(usize, Vec<String>)>,
+    },
+    ReduceReduceConflictGLR {
+        terms: Vec<TerminalSymbol<usize>>,
+        reduce_rules: Vec<(usize, Vec<String>)>,
+    },
 }

@@ -30,7 +30,6 @@ use codespan_reporting::term::termcolor::StandardStream;
 use proc_macro2::TokenStream;
 
 use quote::quote;
-use rusty_lr_core::TerminalSymbol;
 use rusty_lr_parser::error::ArgError;
 use rusty_lr_parser::error::ParseArgError;
 use rusty_lr_parser::error::ParseError;
@@ -873,538 +872,576 @@ impl Builder {
             }
         };
 
-        let mut optimize_diags = Vec::new();
-
         // diagnostics for optimization
         if grammar.optimize {
-            use rusty_lr_parser::grammar::OptimizeRemove;
-            let mut optimized = grammar.optimize(25);
-
-            optimized.removed.sort_by_key(|a| match a {
-                OptimizeRemove::TerminalClassRuleMerge(_) => 0,
-                OptimizeRemove::SingleNonTerminalRule(_, _) => 1,
-                OptimizeRemove::NonTermNotUsed(_) => 2,
-                OptimizeRemove::Cycle(_) => 3,
-                OptimizeRemove::NonTermDataNotUsed(_) => 4,
-            });
-
-            if self.note_optimization {
-                // terminals merged into terminal class
-                let mut class_message = Vec::new();
-                for (class_idx, class_def) in grammar.terminal_classes.iter().enumerate() {
-                    let len: usize = class_def
-                        .terminals
-                        .iter()
-                        .map(|term| grammar.terminals[*term].name.count())
-                        .sum();
-                    if len == 1 {
-                        continue;
-                    }
-                    let msg = format!(
-                        "TerminalClass{}: {}",
-                        class_def.multiterm_counter,
-                        grammar.class_pretty_name_list(TerminalSymbol::Term(class_idx), 10)
-                    );
-                    class_message.push(msg);
-                }
-                if !class_message.is_empty() {
-                    let diag = Diagnostic::note()
-                        .with_message("These terminals are merged into terminal class".to_string())
-                        .with_notes(class_message);
-
-                    optimize_diags.push(diag);
-                }
-
-                for o in optimized.removed {
-                    match o {
-                        OptimizeRemove::TerminalClassRuleMerge(rule) => {
-                            let message = "Production Rule deleted";
-                            let rule_location = rule.location();
-                            let range = span_manager.get_byterange(&rule_location).unwrap_or(0..0);
-                            let labels =
-                                vec![Label::primary(file_id, range).with_message("defined here")];
-                            let notes =
-                                vec!["Will be merged into rule using terminal class".to_string()];
-                            let diag = Diagnostic::note()
-                                .with_message(message)
-                                .with_labels(labels)
-                                .with_notes(notes);
-
-                            optimize_diags.push(diag);
-                        }
-                        OptimizeRemove::SingleNonTerminalRule(rule, nonterm_span) => {
-                            let message = "NonTerminal deleted";
-                            let mut labels = Vec::new();
-                            let notes = vec![
-                                "This non-terminal will be replaced by it's unique child rule"
-                                    .to_string(),
-                            ];
-
-                            labels.push(
-                                Label::primary(
-                                    file_id,
-                                    span_manager.get_byterange(&nonterm_span).unwrap_or(0..0),
-                                )
-                                .with_message("non-terminal defined here"),
-                            );
-
-                            let rule_location = rule.location();
-                            let rule_range =
-                                span_manager.get_byterange(&rule_location).unwrap_or(0..0);
-                            labels.push(
-                                Label::secondary(file_id, rule_range)
-                                    .with_message("this rule has only one child rule"),
-                            );
-                            let diag = Diagnostic::note()
-                                .with_message(message)
-                                .with_labels(labels)
-                                .with_notes(notes);
-
-                            optimize_diags.push(diag);
-                        }
-                        OptimizeRemove::NonTermNotUsed(span) => {
-                            let message = "NonTerminal deleted";
-                            let mut labels = Vec::new();
-                            let notes =
-                                vec!["This non-terminal cannot be reached from initial state"
-                                    .to_string()];
-
-                            labels.push(
-                                Label::primary(
-                                    file_id,
-                                    span_manager.get_byterange(&span).unwrap_or(0..0),
-                                )
-                                .with_message("non-terminal defined here"),
-                            );
-
-                            let diag = Diagnostic::warning()
-                                .with_message(message)
-                                .with_labels(labels)
-                                .with_notes(notes);
-
-                            optimize_diags.push(diag);
-                        }
-                        OptimizeRemove::Cycle(span) => {
-                            let message = "Cycle detected";
-                            let mut labels = Vec::new();
-                            let notes =
-                                vec!["This non-terminal is involved in bad cycle".to_string()];
-
-                            labels.push(
-                                Label::primary(
-                                    file_id,
-                                    span_manager.get_byterange(&span).unwrap_or(0..0),
-                                )
-                                .with_message("non-terminal defined here"),
-                            );
-
-                            let diag = Diagnostic::warning()
-                                .with_message(message)
-                                .with_labels(labels)
-                                .with_notes(notes);
-
-                            optimize_diags.push(diag);
-                        }
-                        OptimizeRemove::NonTermDataNotUsed(nonterm_idx) => {
-                            let nonterm = &grammar.nonterminals[nonterm_idx];
-                            let message = "NonTerminal data type not used";
-                            let mut labels = Vec::new();
-                            let notes = vec![
-                                "This non-terminal's data type is not used in any reduce action"
-                                    .to_string(),
-                                "Consider removing data type to optimize memory usage".to_string(),
-                            ];
-
-                            labels.push(
-                                Label::primary(
-                                    file_id,
-                                    span_manager
-                                        .get_byterange(&nonterm.name.location())
-                                        .unwrap_or(0..0),
-                                )
-                                .with_message("non-terminal defined here"),
-                            );
-
-                            let diag = Diagnostic::warning()
-                                .with_message(message)
-                                .with_labels(labels)
-                                .with_notes(notes);
-
-                            optimize_diags.push(diag);
-                        }
-                    }
-                }
-
-                // if other terminals were not used, print warning about removing them
-                let other_terminal_class =
-                    &grammar.terminal_classes[grammar.other_terminal_class_id];
-                if !grammar.other_used && other_terminal_class.terminals.len() > 1 {
-                    let class_name =
-                        grammar.class_pretty_name_abbr(grammar.other_terminal_class_id);
-                    let terms = grammar.class_pretty_name_list(
-                        TerminalSymbol::Term(grammar.other_terminal_class_id),
-                        10,
-                    );
-                    let mut notes = Vec::new();
-                    notes.push(format!("{class_name}: {terms}"));
-
-                    let diag = Diagnostic::warning()
-                        .with_message("These terminals are not used in the grammar")
-                        .with_notes(notes);
-
-                    optimize_diags.push(diag);
-                }
-            }
+            grammar.optimize(25);
         }
 
         grammar.builder = grammar.create_builder();
         let diags_collector = grammar.build_grammar();
 
-        let mut conflict_diags = Vec::new();
-        let mut conflict_diags_resolved = Vec::new();
+        let mut conflict_errors = Vec::new();
         let nonterm_mapper = |nonterm| grammar.nonterm_pretty_name(nonterm);
         let class_mapper = |class| grammar.class_pretty_name_list(class, 5);
 
-        // calculate conflicts
-        for (max_priority, reduce_rules, deleted_rules) in diags_collector.reduce_reduce_resolved {
-            let mut labels = Vec::new();
-            for rule in reduce_rules {
-                let priority = grammar.builder.rules[rule].priority;
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    rule,
-                    &grammar,
-                    "(Reduce) ",
-                    format!("(Reduce) rule with the highest priority: {priority}").as_str(),
-                );
-            }
-            for del in deleted_rules {
-                let priority = grammar.builder.rules[del].priority;
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    del,
-                    &grammar,
-                    "[Removed] (Reduce) ",
-                    format!("[Removed] (Reduce) rule with lower priority: {priority}").as_str(),
-                );
-            }
-
-            let message = "Reduce/Reduce conflict resolved";
-            let notes = vec![
-                format!("Max priority: {max_priority}"),
-                "Set priority for the rule with %dprec".to_string(),
-            ];
-            conflict_diags_resolved.push(
-                Diagnostic::note()
-                    .with_message(message)
-                    .with_labels(labels)
-                    .with_notes(notes),
-            );
-        }
-        for ((term, shift_rules), (shift_prec, reduce_rules)) in
-            diags_collector.shift_reduce_resolved_shift
-        {
-            let mut labels = Vec::new();
-            // shift_prec >= reduce_prec
-
-            for (reduce_rule, reduce_prec) in reduce_rules {
-                let (nonterm_info, local_id) = grammar.get_rule_by_id(reduce_rule).unwrap();
-                let rule_info = &nonterm_info.rules[local_id];
-                if shift_prec > reduce_prec {
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        reduce_rule,
-                        &grammar,
-                        "[Removed] (Reduce) ",
-                        format!("[Removed] (Reduce) lower precedence than shift: {reduce_prec}")
-                            .as_str(),
-                    );
-                } else {
-                    let reduce_type = "%right";
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        reduce_rule,
-                        &grammar,
-                        "[Removed] (Reduce) ",
-                        format!("[Removed] (Reduce) has {reduce_type} associativity").as_str(),
-                    );
-                }
-                if !nonterm_info.is_auto_generated() {
-                    let op_range = span_manager
-                        .get_byterange(&rule_info.prec.unwrap().location())
-                        .unwrap_or(0..0);
-                    labels.push(
-                        Label::secondary(file_id, op_range)
-                            .with_message("[Removed] (Reduce) operator for reduce rule"),
-                    );
-                }
-            }
-            for shift_rule in shift_rules {
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    shift_rule.rule,
-                    &grammar,
-                    "(Shift) ",
-                    format!("(Shift) precedence: {shift_prec}").as_str(),
-                );
-            }
-
-            let message = format!(
-                "Shift/Reduce conflict resolved with terminal(class): {}",
-                grammar.class_pretty_name_list(term, 5)
-            );
-            let notes = vec![
-                        "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
-                        "Set operator for rule explicitly with %prec".to_string(),
-                        "Set precedence for operator with %left, %right, or %precedence"
-                            .to_string(),
-                    ];
-            conflict_diags_resolved.push(
-                Diagnostic::note()
-                    .with_message(message)
-                    .with_labels(labels)
-                    .with_notes(notes),
-            );
-        }
-        for ((term, shift_rules), (shift_prec, reduce_rules)) in
-            diags_collector.shift_reduce_resolved_reduce
-        {
-            let mut labels = Vec::new();
-
-            for (reduce_rule, reduce_prec) in reduce_rules {
-                let (nonterm_info, local_id) = grammar.get_rule_by_id(reduce_rule).unwrap();
-                let rule_info = &nonterm_info.rules[local_id];
-                if reduce_prec > shift_prec {
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        reduce_rule,
-                        &grammar,
-                        "(Reduce) ",
-                        format!("(Reduce) higher precedence than shift: {reduce_prec}").as_str(),
-                    );
-                } else {
-                    let reduce_type = "%left";
-                    Self::extend_rule_source_label(
-                        &mut labels,
-                        file_id,
-                        reduce_rule,
-                        &grammar,
-                        "(Reduce) ",
-                        format!("(Reduce) has {reduce_type} associativity").as_str(),
-                    );
-                }
-
-                if !nonterm_info.is_auto_generated() {
-                    let op_range = span_manager
-                        .get_byterange(&rule_info.prec.unwrap().location())
-                        .unwrap_or(0..0);
-                    labels.push(
-                        Label::secondary(file_id, op_range)
-                            .with_message("(Reduce) operator for reduce rule"),
-                    );
-                }
-            }
-
-            for shift_rule in shift_rules {
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    shift_rule.rule,
-                    &grammar,
-                    "[Removed] (Shift) ",
-                    format!("[Removed] (Shift) lower precedence than reduce: {shift_prec}")
-                        .as_str(),
-                );
-            }
-
-            let message = format!(
-                "Shift/Reduce conflict resolved with terminal(class): {}",
-                grammar.class_pretty_name_list(term, 5)
-            );
-            let notes = vec![
-                        "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
-                        "Set operator for rule explicitly with %prec".to_string(),
-                        "Set precedence for operator with %left, %right, or %precedence"
-                            .to_string(),
-                    ];
-            conflict_diags_resolved.push(
-                Diagnostic::note()
-                    .with_message(message)
-                    .with_labels(labels)
-                    .with_notes(notes),
-            );
-        }
-
-        for ((term, shift_rules, shift_rules_backtrace), reduce_rules) in
-            diags_collector.shift_reduce_conflicts
-        {
-            let mut labels = Vec::new();
-            let mut notes = vec![
-                        "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
-                        "Set operator for rule explicitly with %prec".to_string(),
-                        "Set precedence for operator with %left, %right, or %precedence"
-                            .to_string(),
-                    ];
-
-            if self.note_backtrace {
-                if self.is_executable {
-                    notes.push("--no-backtrace to disable backtracing".to_string());
-                }
-                notes.push("Backtrace for the shift rule:".to_string());
-                for shift_rule in shift_rules_backtrace {
-                    let rule_str = grammar.builder.rules[shift_rule.rule]
-                        .rule
-                        .clone()
-                        .map(class_mapper, nonterm_mapper)
-                        .into_shifted(shift_rule.shifted);
-                    notes.push(format!("\t>>> {rule_str}"));
-                }
-            }
-            for shift_rule in shift_rules {
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    shift_rule.rule,
-                    &grammar,
-                    "(Shift) ",
-                    "(Shift) ",
-                );
-            }
-            for (reduce_rule, reduce_rule_backtrace) in reduce_rules {
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    reduce_rule,
-                    &grammar,
-                    "(Reduce) ",
-                    "(Reduce) ",
-                );
-
-                if self.note_backtrace {
-                    let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
-
-                    notes.push(format!("Backtrace for the reduce rule ({name}):"));
-                    notes.extend(reduce_rule_backtrace.into_iter().map(|shifted_rule| {
-                        let rule_str = grammar.builder.rules[shifted_rule.rule]
-                            .rule
-                            .clone()
-                            .map(class_mapper, nonterm_mapper)
-                            .into_shifted(shifted_rule.shifted);
-
-                        format!("\t>>> {rule_str}")
-                    }));
-                }
-            }
-
-            let message = format!(
-                "Shift/Reduce conflict detected with terminal(class): {}",
-                grammar.class_pretty_name_list(term, 5)
-            );
-
-            conflict_diags.push(
-                Diagnostic::error()
-                    .with_message(message)
-                    .with_labels(labels)
-                    .with_notes(notes),
-            );
-        }
-        for (reduce_rules, reduce_terms) in diags_collector.reduce_reduce_conflicts {
-            let mut labels = Vec::new();
-
-            let mut notes = vec!["Set priority for the rule with %dprec".to_string()];
-            for (reduce_rule, reduce_rule_from) in reduce_rules {
-                Self::extend_rule_source_label(
-                    &mut labels,
-                    file_id,
-                    reduce_rule,
-                    &grammar,
-                    "(Reduce) ",
-                    "(Reduce) ",
-                );
+        // construct conflict errors for non-GLR mode
+        if !grammar.glr {
+            for ((term, shift_rules, shift_rules_backtrace), reduce_rules) in
+                diags_collector.shift_reduce_conflicts
+            {
+                let mut labels = Vec::new();
+                let mut notes = vec![
+                    "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
+                    "Set operator for rule explicitly with %prec".to_string(),
+                    "Set precedence for operator with %left, %right, or %precedence"
+                        .to_string(),
+                ];
 
                 if self.note_backtrace {
                     if self.is_executable {
                         notes.push("--no-backtrace to disable backtracing".to_string());
                     }
-                    let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
-
-                    notes.push(format!("Backtrace for the reduce rule ({name}):"));
-                    notes.extend(reduce_rule_from.into_iter().map(|shifted_rule| {
-                        let rule_str = grammar.builder.rules[shifted_rule.rule]
+                    notes.push("Backtrace for the shift rule:".to_string());
+                    for shift_rule in shift_rules_backtrace {
+                        let rule_str = grammar.builder.rules[shift_rule.rule]
                             .rule
                             .clone()
                             .map(class_mapper, nonterm_mapper)
-                            .into_shifted(shifted_rule.shifted);
+                            .into_shifted(shift_rule.shifted);
+                        notes.push(format!("\t>>> {rule_str}"));
+                    }
+                }
+                for shift_rule in shift_rules {
+                    Self::extend_rule_source_label(
+                        &mut labels,
+                        file_id,
+                        shift_rule.rule,
+                        &grammar,
+                        "(Shift) ",
+                        "(Shift) ",
+                    );
+                }
+                for (reduce_rule, reduce_rule_backtrace) in reduce_rules {
+                    Self::extend_rule_source_label(
+                        &mut labels,
+                        file_id,
+                        reduce_rule,
+                        &grammar,
+                        "(Reduce) ",
+                        "(Reduce) ",
+                    );
 
-                        format!("\t>>> {rule_str}")
-                    }));
+                    if self.note_backtrace {
+                        let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
+
+                        notes.push(format!("Backtrace for the reduce rule ({name}):"));
+                        notes.extend(reduce_rule_backtrace.into_iter().map(|shifted_rule| {
+                            let rule_str = grammar.builder.rules[shifted_rule.rule]
+                                .rule
+                                .clone()
+                                .map(class_mapper, nonterm_mapper)
+                                .into_shifted(shifted_rule.shifted);
+
+                            format!("\t>>> {rule_str}")
+                        }));
+                    }
+                }
+
+                let message = format!(
+                    "Shift/Reduce conflict detected with terminal(class): {}",
+                    grammar.class_pretty_name_list(term, 5)
+                );
+
+                conflict_errors.push(
+                    Diagnostic::error()
+                        .with_message(message)
+                        .with_labels(labels)
+                        .with_notes(notes),
+                );
+            }
+            for (reduce_rules, reduce_terms) in diags_collector.reduce_reduce_conflicts {
+                let mut labels = Vec::new();
+
+                let mut notes = vec!["Set priority for the rule with %dprec".to_string()];
+                for (reduce_rule, reduce_rule_from) in reduce_rules {
+                    Self::extend_rule_source_label(
+                        &mut labels,
+                        file_id,
+                        reduce_rule,
+                        &grammar,
+                        "(Reduce) ",
+                        "(Reduce) ",
+                    );
+
+                    if self.note_backtrace {
+                        if self.is_executable {
+                            notes.push("--no-backtrace to disable backtracing".to_string());
+                        }
+                        let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
+
+                        notes.push(format!("Backtrace for the reduce rule ({name}):"));
+                        notes.extend(reduce_rule_from.into_iter().map(|shifted_rule| {
+                            let rule_str = grammar.builder.rules[shifted_rule.rule]
+                                .rule
+                                .clone()
+                                .map(class_mapper, nonterm_mapper)
+                                .into_shifted(shifted_rule.shifted);
+
+                            format!("\t>>> {rule_str}")
+                        }));
+                    }
+                }
+
+                let message = format!(
+                    "Reduce/Reduce conflict detected with terminals: {}",
+                    reduce_terms
+                        .into_iter()
+                        .map(class_mapper)
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                );
+
+                conflict_errors.push(
+                    Diagnostic::error()
+                        .with_message(message)
+                        .with_labels(labels)
+                        .with_notes(notes),
+                );
+            }
+        }
+
+        // Convert warning and info diagnostics from the grammar level
+        let mut warnings = Vec::new();
+        for warning in &grammar.warnings {
+            let diag = match warning {
+                rusty_lr_parser::error::Warning::NonTermNotUsed { nonterm_idx } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
+                    Diagnostic::warning()
+                        .with_message("NonTerminal deleted")
+                        .with_labels(vec![Label::primary(file_id, range)
+                            .with_message("non-terminal defined here")])
+                        .with_notes(vec![
+                            "This non-terminal cannot be reached from initial state".to_string(),
+                        ])
+                }
+                rusty_lr_parser::error::Warning::Cycle { nonterm_idx } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
+                    Diagnostic::warning()
+                        .with_message("Cycle detected")
+                        .with_labels(vec![Label::primary(file_id, range)
+                            .with_message("non-terminal defined here")])
+                        .with_notes(vec![
+                            "This non-terminal is involved in bad cycle".to_string()
+                        ])
+                }
+                rusty_lr_parser::error::Warning::NonTermDataNotUsed { nonterm_idx } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
+                    Diagnostic::warning()
+                        .with_message("NonTerminal data type not used")
+                        .with_labels(vec![Label::primary(file_id, range)
+                            .with_message("non-terminal defined here")])
+                        .with_notes(vec![
+                            "This non-terminal's data type is not used in any reduce action"
+                                .to_string(),
+                            "Consider removing data type to optimize memory usage".to_string(),
+                        ])
+                }
+                rusty_lr_parser::error::Warning::UnusedTerminals { class_idx } => {
+                    let class_name = grammar.class_pretty_name_abbr(*class_idx);
+                    let terminals = grammar.terminal_classes[*class_idx]
+                        .terminals
+                        .iter()
+                        .map(|&term| grammar.term_pretty_name(term))
+                        .collect::<Vec<_>>();
+                    let notes = vec![format!("{}: {}", class_name, terminals.join(", "))];
+                    Diagnostic::warning()
+                        .with_message("These terminals are not used in the grammar")
+                        .with_notes(notes)
+                }
+            };
+            warnings.push(diag);
+        }
+
+        let mut infos = Vec::new();
+        for info in &grammar.infos {
+            let diag = match info {
+                rusty_lr_parser::error::Info::TerminalsMerged { class_idx } => {
+                    let class_name = format!(
+                        "TerminalClass{}",
+                        grammar.terminal_classes[*class_idx].multiterm_counter
+                    );
+                    let terminals = grammar.terminal_classes[*class_idx]
+                        .terminals
+                        .iter()
+                        .map(|&term| grammar.term_pretty_name(term))
+                        .collect::<Vec<_>>();
+                    let notes = vec![format!("{}: {}", class_name, terminals.join(", "))];
+                    Diagnostic::note()
+                        .with_message("These terminals are merged into terminal class")
+                        .with_notes(notes)
+                }
+                rusty_lr_parser::error::Info::TerminalClassRuleMerge { rule_location } => {
+                    let range = span_manager.get_byterange(rule_location).unwrap_or(0..0);
+                    Diagnostic::note()
+                        .with_message("Production Rule deleted")
+                        .with_labels(vec![
+                            Label::primary(file_id, range).with_message("defined here")
+                        ])
+                        .with_notes(vec![
+                            "Will be merged into rule using terminal class".to_string()
+                        ])
+                }
+                rusty_lr_parser::error::Info::SingleNonTerminalRule {
+                    nonterm_idx,
+                    rule_location,
+                } => {
+                    let nonterm_range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
+                    let rule_range = span_manager.get_byterange(rule_location).unwrap_or(0..0);
+                    Diagnostic::note()
+                        .with_message("NonTerminal deleted")
+                        .with_labels(vec![
+                            Label::primary(file_id, nonterm_range)
+                                .with_message("non-terminal defined here"),
+                            Label::secondary(file_id, rule_range)
+                                .with_message("this rule has only one child rule"),
+                        ])
+                        .with_notes(vec![
+                            "This non-terminal will be replaced by it's unique child rule"
+                                .to_string(),
+                        ])
+                }
+                rusty_lr_parser::error::Info::ReduceReduceConflictResolved {
+                    max_priority,
+                    reduce_rules,
+                    deleted_rules,
+                } => {
+                    let mut labels = Vec::new();
+                    for &rule in reduce_rules {
+                        let priority = grammar.builder.rules[rule].priority;
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            rule,
+                            &grammar,
+                            "(Reduce) ",
+                            format!("(Reduce) rule with the highest priority: {priority}").as_str(),
+                        );
+                    }
+                    for &del in deleted_rules {
+                        let priority = grammar.builder.rules[del].priority;
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            del,
+                            &grammar,
+                            "[Removed] (Reduce) ",
+                            format!("[Removed] (Reduce) rule with lower priority: {priority}")
+                                .as_str(),
+                        );
+                    }
+                    Diagnostic::note()
+                        .with_message("Reduce/Reduce conflict resolved")
+                        .with_labels(labels)
+                        .with_notes(vec![
+                            format!("Max priority: {max_priority}"),
+                            "Set priority for the rule with %dprec".to_string(),
+                        ])
+                }
+                rusty_lr_parser::error::Info::ShiftReduceConflictResolvedShift {
+                    term,
+                    shift_prec,
+                    shift_rules,
+                    reduce_rules,
+                } => {
+                    let term_str = grammar.class_pretty_name_list(*term, 5);
+                    let mut labels = Vec::new();
+                    for &reduce_rule_pair in reduce_rules {
+                        let (reduce_rule, reduce_prec) = reduce_rule_pair;
+                        let (nonterm_info, local_id) = grammar.get_rule_by_id(reduce_rule).unwrap();
+                        let rule_info = &nonterm_info.rules[local_id];
+                        if shift_prec > &reduce_prec {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce_rule,
+                                &grammar,
+                                "[Removed] (Reduce) ",
+                                format!(
+                                    "[Removed] (Reduce) lower precedence than shift: {reduce_prec}"
+                                )
+                                .as_str(),
+                            );
+                        } else {
+                            let reduce_type = "%right";
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce_rule,
+                                &grammar,
+                                "[Removed] (Reduce) ",
+                                format!("[Removed] (Reduce) has {reduce_type} associativity")
+                                    .as_str(),
+                            );
+                        }
+                        if !nonterm_info.is_auto_generated() {
+                            let op_range = span_manager
+                                .get_byterange(&rule_info.prec.unwrap().location())
+                                .unwrap_or(0..0);
+                            labels.push(
+                                Label::secondary(file_id, op_range)
+                                    .with_message("[Removed] (Reduce) operator for reduce rule"),
+                            );
+                        }
+                    }
+                    for &shift_rule in shift_rules {
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            shift_rule,
+                            &grammar,
+                            "(Shift) ",
+                            format!("(Shift) precedence: {shift_prec}").as_str(),
+                        );
+                    }
+                    Diagnostic::note()
+                        .with_message(format!("Shift/Reduce conflict resolved with terminal(class): {term_str}"))
+                        .with_labels(labels)
+                        .with_notes(vec![
+                            "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
+                            "Set operator for rule explicitly with %prec".to_string(),
+                            "Set precedence for operator with %left, %right, or %precedence".to_string(),
+                        ])
+                }
+                rusty_lr_parser::error::Info::ShiftReduceConflictResolvedReduce {
+                    term,
+                    shift_prec,
+                    shift_rules,
+                    reduce_rules,
+                } => {
+                    let term_str = grammar.class_pretty_name_list(*term, 5);
+                    let mut labels = Vec::new();
+                    for &reduce_rule_pair in reduce_rules {
+                        let (reduce_rule, reduce_prec) = reduce_rule_pair;
+                        let (nonterm_info, local_id) = grammar.get_rule_by_id(reduce_rule).unwrap();
+                        let rule_info = &nonterm_info.rules[local_id];
+                        if &reduce_prec > shift_prec {
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce_rule,
+                                &grammar,
+                                "(Reduce) ",
+                                format!("(Reduce) higher precedence than shift: {reduce_prec}")
+                                    .as_str(),
+                            );
+                        } else {
+                            let reduce_type = "%left";
+                            Self::extend_rule_source_label(
+                                &mut labels,
+                                file_id,
+                                reduce_rule,
+                                &grammar,
+                                "(Reduce) ",
+                                format!("(Reduce) has {reduce_type} associativity").as_str(),
+                            );
+                        }
+                        if !nonterm_info.is_auto_generated() {
+                            let op_range = span_manager
+                                .get_byterange(&rule_info.prec.unwrap().location())
+                                .unwrap_or(0..0);
+                            labels.push(
+                                Label::secondary(file_id, op_range)
+                                    .with_message("(Reduce) operator for reduce rule"),
+                            );
+                        }
+                    }
+                    for &shift_rule in shift_rules {
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            shift_rule,
+                            &grammar,
+                            "[Removed] (Shift) ",
+                            format!("[Removed] (Shift) lower precedence than reduce: {shift_prec}")
+                                .as_str(),
+                        );
+                    }
+                    Diagnostic::note()
+                        .with_message(format!("Shift/Reduce conflict resolved with terminal(class): {term_str}"))
+                        .with_labels(labels)
+                        .with_notes(vec![
+                            "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
+                            "Set operator for rule explicitly with %prec".to_string(),
+                            "Set precedence for operator with %left, %right, or %precedence".to_string(),
+                        ])
+                }
+                rusty_lr_parser::error::Info::ShiftReduceConflictGLR {
+                    term,
+                    shift_rules,
+                    shift_rules_backtrace,
+                    reduce_rules,
+                } => {
+                    let term_str = grammar.class_pretty_name_list(*term, 5);
+                    let mut labels = Vec::new();
+                    let mut notes = vec![
+                        "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
+                        "Set operator for rule explicitly with %prec".to_string(),
+                        "Set precedence for operator with %left, %right, or %precedence".to_string(),
+                    ];
+
+                    if self.note_backtrace {
+                        if self.is_executable {
+                            notes.push("--no-backtrace to disable backtracing".to_string());
+                        }
+                        notes.push("Backtrace for the shift rule:".to_string());
+                        for s_bt in shift_rules_backtrace {
+                            notes.push(s_bt.clone());
+                        }
+                    }
+                    for &shift_rule in shift_rules {
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            shift_rule,
+                            &grammar,
+                            "(Shift) ",
+                            "(Shift) ",
+                        );
+                    }
+                    for &(reduce_rule, ref r_bt) in reduce_rules {
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            reduce_rule,
+                            &grammar,
+                            "(Reduce) ",
+                            "(Reduce) ",
+                        );
+                        if self.note_backtrace {
+                            for line in r_bt {
+                                notes.push(line.clone());
+                            }
+                        }
+                    }
+                    Diagnostic::help()
+                        .with_message(format!(
+                            "Shift/Reduce conflict detected with terminal(class): {term_str}"
+                        ))
+                        .with_labels(labels)
+                        .with_notes(notes)
+                }
+                rusty_lr_parser::error::Info::ReduceReduceConflictGLR {
+                    terms,
+                    reduce_rules,
+                } => {
+                    let mut labels = Vec::new();
+                    let mut notes = vec!["Set priority for the rule with %dprec".to_string()];
+
+                    for &(reduce_rule, ref r_bt) in reduce_rules {
+                        Self::extend_rule_source_label(
+                            &mut labels,
+                            file_id,
+                            reduce_rule,
+                            &grammar,
+                            "(Reduce) ",
+                            "(Reduce) ",
+                        );
+                        if self.note_backtrace {
+                            if self.is_executable {
+                                notes.push("--no-backtrace to disable backtracing".to_string());
+                            }
+                            for line in r_bt {
+                                notes.push(line.clone());
+                            }
+                        }
+                    }
+                    let term_strings = terms
+                        .iter()
+                        .map(|&t| grammar.class_pretty_name_list(t, 5))
+                        .collect::<Vec<_>>();
+                    Diagnostic::help()
+                        .with_message(format!(
+                            "Reduce/Reduce conflict detected with terminals: {}",
+                            term_strings.join(", ")
+                        ))
+                        .with_labels(labels)
+                        .with_notes(notes)
+                }
+            };
+            infos.push(diag);
+        }
+
+        // Print resolved conflict notes and unresolved GLR conflict help notes based on user flags.
+        // We match on the new generalized `Info` enum variants to decide whether to print them.
+        if self.note_conflicts_resolving || self.note_conflicts {
+            for (diag, info_variant) in infos.iter().zip(&grammar.infos) {
+                let should_print = match info_variant {
+                    rusty_lr_parser::error::Info::ShiftReduceConflictGLR { .. }
+                    | rusty_lr_parser::error::Info::ReduceReduceConflictGLR { .. } => {
+                        self.note_conflicts
+                    }
+
+                    rusty_lr_parser::error::Info::ReduceReduceConflictResolved { .. }
+                    | rusty_lr_parser::error::Info::ShiftReduceConflictResolvedShift { .. }
+                    | rusty_lr_parser::error::Info::ShiftReduceConflictResolvedReduce { .. } => {
+                        self.note_conflicts_resolving
+                    }
+
+                    _ => true, // Optimization notes are printed unconditionally
+                };
+                if should_print {
+                    let writer = self.stream();
+                    let config = codespan_reporting::term::Config::default();
+                    term::emit_to_write_style(&mut writer.lock(), &config, &files, diag)
+                        .expect("Failed to write verbose/verbose stream");
                 }
             }
-
-            let message = format!(
-                "Reduce/Reduce conflict detected with terminals: {}",
-                reduce_terms
-                    .into_iter()
-                    .map(class_mapper)
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            );
-
-            conflict_diags.push(
-                Diagnostic::error()
-                    .with_message(message)
-                    .with_labels(labels)
-                    .with_notes(notes),
-            );
-        }
-
-        // print note about shift/reduce conflict resolved with `%left` or `%right`
-        if self.note_conflicts_resolving {
-            for diag in conflict_diags_resolved.into_iter() {
-                let writer = self.stream();
-                let config = codespan_reporting::term::Config::default();
-                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
-                    .expect("Failed to write to verbose stream");
+        } else {
+            // Print only optimization notes unconditionally if conflict flags are disabled.
+            for (diag, info_variant) in infos.iter().zip(&grammar.infos) {
+                let should_print = match info_variant {
+                    rusty_lr_parser::error::Info::TerminalsMerged { .. }
+                    | rusty_lr_parser::error::Info::TerminalClassRuleMerge { .. }
+                    | rusty_lr_parser::error::Info::SingleNonTerminalRule { .. } => true,
+                    _ => false,
+                };
+                if should_print {
+                    let writer = self.stream();
+                    let config = codespan_reporting::term::Config::default();
+                    term::emit_to_write_style(&mut writer.lock(), &config, &files, diag)
+                        .expect("Failed to write verbose/verbose stream");
+                }
             }
         }
 
-        if !grammar.glr {
-            let has_diags = !conflict_diags.is_empty();
-            for diag in conflict_diags.into_iter() {
-                let writer = self.stream();
-                let config = codespan_reporting::term::Config::default();
-                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
-                    .expect("Failed to write to stderr");
-            }
-            if has_diags {
-                return Err("Grammar building failed".to_string());
-            }
-        }
-        // print note about reduce/reduce conflict and shift/reduce conflict not resolved
-        else if self.note_conflicts {
-            for diag in conflict_diags.into_iter() {
-                let diag = Diagnostic::help()
-                    .with_message(diag.message)
-                    .with_labels(diag.labels)
-                    .with_notes(diag.notes);
-                let writer = self.stream();
-                let config = codespan_reporting::term::Config::default();
-                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
-                    .expect("Failed to write to stderr");
-            }
-        }
-
-        for diag in optimize_diags.into_iter() {
+        // print warnings
+        for diag in &warnings {
             let writer = self.stream();
             let config = codespan_reporting::term::Config::default();
-            term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
+            term::emit_to_write_style(&mut writer.lock(), &config, &files, diag)
                 .expect("Failed to write to verbose stream");
+        }
+
+        // print conflict errors if not GLR
+        if !grammar.glr {
+            let has_errors = !conflict_errors.is_empty();
+            for diag in conflict_errors {
+                let writer = self.stream();
+                let config = codespan_reporting::term::Config::default();
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
+                    .expect("Failed to write to stderr");
+            }
+            if has_errors {
+                return Err("Grammar building failed".to_string());
+            }
         }
 
         // expand macro

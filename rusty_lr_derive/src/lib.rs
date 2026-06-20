@@ -118,5 +118,12 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         }
     }
 
-    grammar.emit_compiletime().into()
+    // Emit the generated parser code at compile-time.
+    let mut output = grammar.emit_compiletime();
+    // Append any grammar warnings to the output TokenStream, mapping them
+    // to their respective locations in the source code.
+    for warning in &grammar.warnings {
+        output.extend(warning.to_compile_warning(&grammar, &span_manager));
+    }
+    output.into()
 }
