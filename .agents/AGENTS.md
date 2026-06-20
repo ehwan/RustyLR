@@ -23,9 +23,9 @@ After completing any implementation work or documentation refactoring:
 - After the bootstrap test passes, print the message summary of the changes made, including any new features, bug fixes, or documentation updates.
 
 ## 4. Adding comments and tests
-When adding new features or modifying existing ones:
-- You must include comprehensive comments in the code to explain the purpose and functionality of new code sections.
-- You must also add unit tests or integration tests to cover the new functionality, ensuring that it works as intended and does not introduce regressions.
+When modifying the codebase:
+- You must include clear, comprehensive comments in the code to explain the purpose, design rationale, and intention behind all changes.
+- You must also add unit tests or integration tests to cover any new functionality, ensuring that it works as intended and does not introduce regressions.
 
 ## 5. Checking for external link validity
 - When adding or modifying md files, you must ensure that all of external links in the parser.rs and rusty_lr_buildscript/src/lib.rs files are valid and reachable.

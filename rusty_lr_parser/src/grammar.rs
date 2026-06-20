@@ -2535,8 +2535,11 @@ impl Grammar {
             .map(|term| self.terminals[*term].name.count())
             .sum();
         if len == 1 {
+            // Exactly one single-character/token terminal is matched. Print it directly.
             self.term_pretty_name(class.terminals[0])
         } else {
+            // Matches multiple characters (e.g. range 'a'-'z') or multiple terminals.
+            // Use abbreviated class name to keep diagnostics concise.
             format!("TerminalClass{}", class.multiterm_counter)
         }
     }
@@ -2546,6 +2549,7 @@ impl Grammar {
         class: TerminalSymbol<TerminalClass>,
         max_len: usize,
     ) -> String {
+        let max_len = max_len.max(3);
         match class {
             TerminalSymbol::Error => return "error".to_string(),
             TerminalSymbol::Eof => return "eof".to_string(),
@@ -2557,8 +2561,11 @@ impl Grammar {
                     .map(|term| self.terminals[*term].name.count())
                     .sum();
                 if len == 1 {
+                    // Exactly one single-character/token terminal is matched. Print it directly.
                     self.term_pretty_name(class.terminals[0])
                 } else if class.terminals.len() < max_len {
+                    // Matches a range or multiple terminals (less than max_len).
+                    // Wrap in brackets `[...]` to clearly signify a character class/set in diagnostics.
                     let f = self.terminal_classes[class_idx]
                         .terminals
                         .iter()
@@ -2567,6 +2574,7 @@ impl Grammar {
                         .join(", ");
                     format!("[{f}]")
                 } else {
+                    // Matches a large range or set of terminals. Wrap the truncated list in brackets.
                     let class = &self.terminal_classes[class_idx];
                     let first = class.terminals[0];
                     let second = class.terminals[1];
