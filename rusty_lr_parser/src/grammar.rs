@@ -2880,8 +2880,9 @@ impl Grammar {
             }
         };
 
-        // Collect conflict diagnostics
-        // 1. reduce_reduce_resolved
+        // Collect conflict diagnostics and populate the `self.infos` diagnostics list.
+
+        // 1. Collect resolved reduce-reduce conflicts (resolved via precedence/dprec declarations).
         for (max_priority, reduce_rules, deleted_rules) in &collector.reduce_reduce_resolved {
             self.infos.push(Info::ReduceReduceConflictResolved {
                 max_priority: *max_priority,
@@ -2890,7 +2891,7 @@ impl Grammar {
             });
         }
 
-        // 2. shift_reduce_resolved_shift
+        // 2. Collect resolved shift-reduce conflicts where shift was chosen (resolved via precedence/associativity).
         for ((term, shift_rules), (shift_prec, reduce_rules)) in
             &collector.shift_reduce_resolved_shift
         {
@@ -2907,7 +2908,7 @@ impl Grammar {
             });
         }
 
-        // 3. shift_reduce_resolved_reduce
+        // 3. Collect resolved shift-reduce conflicts where reduce was chosen (resolved via precedence/associativity).
         for ((term, shift_rules), (shift_prec, reduce_rules)) in
             &collector.shift_reduce_resolved_reduce
         {
@@ -2924,9 +2925,10 @@ impl Grammar {
             });
         }
 
-        // 4. unresolved conflicts (for GLR help notes)
+        // 4. Collect unresolved conflicts for GLR warning/help notes.
+        // In GLR parsers, unresolved conflicts are resolved at runtime, but we still report them for debugging purposes.
         if self.glr {
-            // shift_reduce_conflicts
+            // Collect unresolved shift-reduce conflicts with backtraces.
             for ((term, shift_rules, shift_rules_backtrace), reduce_rules) in
                 &collector.shift_reduce_conflicts
             {
@@ -2972,7 +2974,7 @@ impl Grammar {
                 });
             }
 
-            // reduce_reduce_conflicts
+            // Collect unresolved reduce-reduce conflicts with backtraces.
             for (reduce_rules, reduce_terms) in &collector.reduce_reduce_conflicts {
                 let mut r_rules = Vec::new();
                 for &(reduce_rule, ref reduce_rule_from) in reduce_rules {

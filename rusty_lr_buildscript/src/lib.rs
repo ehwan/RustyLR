@@ -1379,7 +1379,8 @@ impl Builder {
             infos.push(diag);
         }
 
-        // print resolved conflict notes and unresolved GLR conflict help notes
+        // Print resolved conflict notes and unresolved GLR conflict help notes based on user flags.
+        // We match on the new generalized `Info` enum variants to decide whether to print them.
         if self.note_conflicts_resolving || self.note_conflicts {
             for (diag, info_variant) in infos.iter().zip(&grammar.infos) {
                 let should_print = match info_variant {
@@ -1394,7 +1395,7 @@ impl Builder {
                         self.note_conflicts_resolving
                     }
 
-                    _ => true, // optimization notes are printed unconditionally
+                    _ => true, // Optimization notes are printed unconditionally
                 };
                 if should_print {
                     let writer = self.stream();
@@ -1404,7 +1405,7 @@ impl Builder {
                 }
             }
         } else {
-            // print only optimization notes
+            // Print only optimization notes unconditionally if conflict flags are disabled.
             for (diag, info_variant) in infos.iter().zip(&grammar.infos) {
                 let should_print = match info_variant {
                     rusty_lr_parser::error::Info::TerminalsMerged { .. }

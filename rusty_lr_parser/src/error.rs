@@ -399,6 +399,8 @@ impl ConflictError {
     }
 }
 
+/// Represents various compilation warnings encountered during grammar analysis
+/// and parser generation (e.g., unused symbols, cycles, etc.).
 #[derive(Debug, Clone)]
 pub enum Warning {
     NonTermNotUsed { nonterm_idx: Located<usize> },
@@ -408,6 +410,10 @@ pub enum Warning {
 }
 
 impl Warning {
+    /// Translates the warning into a `TokenStream` containing a compiler warning.
+    /// Since Rust does not have a stable `compile_warning!` macro, this leverages
+    /// a dummy deprecated struct definition mapped to the source code span
+    /// where the warning originated, allowing stable Rust compilers to emit a diagnostic warning.
     pub fn to_compile_warning(
         &self,
         grammar: &crate::grammar::Grammar,
@@ -443,6 +449,7 @@ impl Warning {
         output
     }
 
+    /// Retrieves all source code locations associated with this warning.
     pub fn locations(&self) -> Vec<Location> {
         match self {
             Warning::NonTermNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
@@ -452,6 +459,7 @@ impl Warning {
         }
     }
 
+    /// Formats a short diagnostic message describing the warning.
     pub fn short_message(&self, grammar: &crate::grammar::Grammar) -> String {
         match self {
             Warning::NonTermNotUsed { nonterm_idx } => {
@@ -482,6 +490,8 @@ impl Warning {
     }
 }
 
+/// Represents informational diagnostics and details collected during parser construction
+/// and conflict resolution (e.g. terminals merged, conflicts resolved, backtraces for GLR).
 #[derive(Debug, Clone)]
 pub enum Info {
     TerminalsMerged {
