@@ -1150,6 +1150,13 @@ impl Grammar {
         // but we can't assign every single character to a self.terminals.
         // Rather, we assign a range of characters to a single self.terminals
         if grammar.is_char || grammar.is_u8 {
+            // resolve allowed diagnostics ranges first
+            for (_, opt_target) in &grammar_args.allowed_diagnostics {
+                if let Some(target) = opt_target {
+                    target.range_resolve(&mut grammar)?;
+                }
+            }
+
             // add terminals from %prec definition in each rule
             for rules_arg in grammar_args.rules.iter() {
                 for rule in rules_arg.rule_lines.iter() {
@@ -4164,5 +4171,30 @@ mod tests {
             .find(|i| matches!(i, Info::TerminalsMerged { .. }))
             .expect("Expected TerminalsMerged info");
         assert!(grammar.is_info_allowed(info));
+    }
+
+    #[test]
+    fn test_diagnostic_suppression_allow_range_resolver_success() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %allow unused_terminals('b'-'d');
+
+            Expr : 'a';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        let grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
+
+        // Check that character range 'b' to 'd' is present in terminals
+        let has_range = grammar
+            .terminals
+            .iter()
+            .any(|t| matches!(t.name, TerminalName::CharRange('b', 'd')));
+        assert!(
+            has_range,
+            "Expected range 'b'-'d' to be registered and split in terminals"
+        );
     }
 }

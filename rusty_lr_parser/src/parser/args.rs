@@ -144,6 +144,44 @@ impl AllowTarget {
             }
         }
     }
+
+    pub fn range_resolve(&self, grammar: &mut Grammar) -> Result<(), ParseError> {
+        match self {
+            AllowTarget::Ident(_) => Ok(()),
+            AllowTarget::Byte(b) => {
+                let val = *b.value() as u32;
+                grammar.range_resolver.insert(val, val);
+                Ok(())
+            }
+            AllowTarget::Char(c) => {
+                let val = *c.value() as u32;
+                grammar.range_resolver.insert(val, val);
+                Ok(())
+            }
+            AllowTarget::ByteRange(start, end) => {
+                let first_val = *start.value() as u32;
+                let last_val = *end.value() as u32;
+                if first_val > last_val {
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
+                }
+                grammar.range_resolver.insert(first_val, last_val);
+                Ok(())
+            }
+            AllowTarget::CharRange(start, end) => {
+                let first_val = *start.value() as u32;
+                let last_val = *end.value() as u32;
+                if first_val > last_val {
+                    return Err(ParseError::InvalidLiteralRange(self.location()));
+                }
+                grammar.range_resolver.insert(first_val, last_val);
+                Ok(())
+            }
+            AllowTarget::TerminalSet(ts) => {
+                ts.range_resolve(grammar)?;
+                Ok(())
+            }
+        }
+    }
 }
 
 impl From<IdentOrLiteral> for AllowTarget {
