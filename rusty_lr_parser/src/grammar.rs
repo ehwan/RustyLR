@@ -11,8 +11,10 @@ use rusty_lr_core::TerminalSymbol;
 use rusty_lr_core::Token;
 
 use crate::error::ArgError;
+use crate::error::Info;
 use crate::error::ParseArgError;
 use crate::error::ParseError;
+use crate::error::Warning;
 use crate::nonterminal_info::CustomReduceAction;
 use crate::nonterminal_info::NonTerminalInfo;
 use crate::nonterminal_info::ReduceAction;
@@ -43,18 +45,6 @@ pub struct TerminalClassDefinition {
 
     /// Whether this class's data was used in any reduce action
     pub data_used: bool,
-}
-
-pub enum OptimizeRemove {
-    TerminalClassRuleMerge(Rule),
-    SingleNonTerminalRule(Rule, Location),
-    NonTermNotUsed(Location),
-    Cycle(Location),
-    NonTermDataNotUsed(usize),
-}
-pub struct OptimizeDiag {
-    /// deleted rules
-    pub removed: Vec<OptimizeRemove>,
 }
 
 /// type alias just for readability
@@ -149,6 +139,9 @@ pub struct Grammar {
     pub custom_reduce_actions: Vec<CustomSingleReduceAction>,
 
     pub span_manager: crate::parser::location::SpanManager,
+
+    pub warnings: Vec<Warning>,
+    pub infos: Vec<Info>,
 }
 
 impl Grammar {
@@ -914,6 +907,9 @@ impl Grammar {
             custom_reduce_actions: Vec::new(),
 
             span_manager: grammar_args.span_manager,
+
+            warnings: Vec::new(),
+            infos: Vec::new(),
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -1837,7 +1833,7 @@ impl Grammar {
     }
 
     /// optimize grammar
-    fn optimize_iterate(&mut self) -> Option<OptimizeDiag> {
+    fn optimize_iterate(&mut self) -> bool {
         // for early stopping optimization loop
         let mut something_changed = false;
 
@@ -1920,7 +1916,7 @@ impl Grammar {
                         {
                             // if it is false, it is reduce/reduce conflict (duplicated rule)
                             // so stop optimization
-                            return None;
+                            return false;
                         }
                     }
                 }
@@ -1931,9 +1927,6 @@ impl Grammar {
         let term_partition = crate::partition::minimal_partition(
             term_sets.into_iter().map(|terms| terms.into_iter()),
         );
-
-        // check if two or more terminals can be merged into one class
-        let mut removed_rules_diag = Vec::new();
 
         if term_partition.len() != self.terminal_classes.len() {
             something_changed = true;
@@ -1986,36 +1979,6 @@ impl Grammar {
             self.other_terminal_class_id = self.terminal_class_id[self.other_terminal_index];
             // terminal class optimization ends
 
-            // check for unused non-terminals
-            let mut nonterm_used = vec![false; self.nonterminals.len()];
-            for nonterm in &self.nonterminals {
-                for rule in &nonterm.rules {
-                    for token in &rule.tokens {
-                        if let Token::NonTerm(nonterm_idx) = token.token {
-                            nonterm_used[nonterm_idx] = true;
-                        }
-                    }
-                }
-            }
-            for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
-                // do not delete protected non-terminals
-                if nonterm.is_protected() {
-                    continue;
-                }
-                if nonterm.rules.is_empty() {
-                    continue;
-                }
-
-                if !nonterm_used[nonterm_idx] {
-                    // this rule was not used
-                    nonterm.rules.clear();
-                    if !nonterm.is_auto_generated() {
-                        let loc = nonterm.name.location();
-                        removed_rules_diag.push(OptimizeRemove::NonTermNotUsed(loc));
-                    }
-                }
-            }
-
             let mut other_was_used = false;
             for nonterm in &mut self.nonterminals {
                 let rules = std::mem::take(&mut nonterm.rules);
@@ -2037,8 +2000,9 @@ impl Grammar {
                         // so remove this rule
                         // add to diags only if it was not auto-generated
                         if !nonterm.is_auto_generated() {
-                            let diag = OptimizeRemove::TerminalClassRuleMerge(rule);
-                            removed_rules_diag.push(diag);
+                            self.infos.push(Info::TerminalClassRuleMerge {
+                                rule_location: rule.location(),
+                            });
                         }
                         continue;
                     }
@@ -2061,6 +2025,39 @@ impl Grammar {
             }
 
             self.other_used = other_was_used;
+        }
+
+        // check for unused non-terminals
+        let mut nonterm_used = vec![false; self.nonterminals.len()];
+        for nonterm in &self.nonterminals {
+            for rule in &nonterm.rules {
+                for token in &rule.tokens {
+                    if let Token::NonTerm(nonterm_idx) = token.token {
+                        nonterm_used[nonterm_idx] = true;
+                    }
+                }
+            }
+        }
+        for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+            // do not delete protected non-terminals
+            if nonterm.is_protected() {
+                continue;
+            }
+            if nonterm.rules.is_empty() {
+                continue;
+            }
+
+            if !nonterm_used[nonterm_idx] {
+                // this rule was not used
+                nonterm.rules.clear();
+                something_changed = true;
+                if !nonterm.is_auto_generated() {
+                    let loc = nonterm.name.location();
+                    self.warnings.push(Warning::NonTermNotUsed {
+                        nonterm_location: loc,
+                    });
+                }
+            }
         }
 
         // remove rules that have single production rule and single token
@@ -2191,25 +2188,17 @@ impl Grammar {
             // add to diags only if it was not auto-generated
             if !nonterm.is_auto_generated() {
                 let loc = nonterm.name.location();
-                let diag = OptimizeRemove::SingleNonTerminalRule(rule, loc);
-                removed_rules_diag.push(diag);
+                self.infos.push(Info::SingleNonTerminalRule {
+                    nonterm_location: loc,
+                    rule_location: rule.location(),
+                });
             }
         }
 
-        if something_changed {
-            Some(OptimizeDiag {
-                removed: removed_rules_diag,
-            })
-        } else {
-            None
-        }
+        something_changed
     }
 
-    pub fn optimize(&mut self, max_iter: usize) -> OptimizeDiag {
-        let mut diag = OptimizeDiag {
-            removed: Vec::new(),
-        };
-
+    pub fn optimize(&mut self, max_iter: usize) {
         // check if RuleType and ReduceAction can be removed from certain non-terminals
         let mut add_to_diags = BTreeSet::new();
         loop {
@@ -2312,7 +2301,10 @@ impl Grammar {
             }
         }
         for i in add_to_diags {
-            diag.removed.push(OptimizeRemove::NonTermDataNotUsed(i));
+            let nonterm = &self.nonterminals[i];
+            self.warnings.push(Warning::NonTermDataNotUsed {
+                nonterm_location: nonterm.name.location(),
+            });
         }
 
         // check for any data of terminal symbol was used in any reduce action
@@ -2334,14 +2326,8 @@ impl Grammar {
         }
 
         for _ in 0..max_iter {
-            let ret = self.optimize_iterate();
-            match ret {
-                Some(new_diag) => {
-                    diag.removed.extend(new_diag.removed.into_iter());
-                }
-                None => {
-                    break;
-                }
+            if !self.optimize_iterate() {
+                break;
             }
         }
 
@@ -2411,7 +2397,39 @@ impl Grammar {
             }
         }
 
-        diag
+        // Collect optimization warnings and notes/infos
+        for class_def in self.terminal_classes.iter() {
+            let len: usize = class_def
+                .terminals
+                .iter()
+                .map(|term| self.terminals[*term].name.count())
+                .sum();
+            if len == 1 {
+                continue;
+            }
+            let class_name = format!("TerminalClass{}", class_def.multiterm_counter);
+            let terminals = class_def
+                .terminals
+                .iter()
+                .map(|&term| self.term_pretty_name(term))
+                .collect::<Vec<_>>();
+            self.infos.push(Info::TerminalsMerged {
+                class_name,
+                terminals,
+            });
+        }
+
+        // if other terminals were not used, print warning about removing them
+        let other_terminal_class = &self.terminal_classes[self.other_terminal_class_id];
+        if !self.other_used && other_terminal_class.terminals.len() > 1 {
+            let class_name = self.class_pretty_name_abbr(self.other_terminal_class_id);
+            let terms =
+                self.class_pretty_name_list(TerminalSymbol::Term(self.other_terminal_class_id), 10);
+            self.warnings.push(Warning::UnusedTerminals {
+                class_name,
+                terminals: vec![terms],
+            });
+        }
     }
 
     fn term_pretty_name(&self, term_idx: usize) -> String {
@@ -2874,6 +2892,134 @@ impl Grammar {
                         && (total_dense_size as f64 / total_sparse_size as f64) < 2.5)
             }
         };
+
+        // Collect conflict diagnostics
+        // 1. reduce_reduce_resolved
+        for (max_priority, reduce_rules, deleted_rules) in &collector.reduce_reduce_resolved {
+            self.infos.push(Info::ReduceReduceConflictResolved {
+                max_priority: *max_priority,
+                reduce_rules: reduce_rules.iter().cloned().collect(),
+                deleted_rules: deleted_rules.iter().cloned().collect(),
+            });
+        }
+
+        // 2. shift_reduce_resolved_shift
+        for ((term, shift_rules), (shift_prec, reduce_rules)) in
+            &collector.shift_reduce_resolved_shift
+        {
+            let term_str = self.class_pretty_name_list(*term, 5);
+            let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
+            let reduce_rule_pairs = reduce_rules
+                .iter()
+                .map(|(&r, &p)| (r, p))
+                .collect::<Vec<_>>();
+            self.infos.push(Info::ShiftReduceConflictResolvedShift {
+                term: term_str,
+                shift_prec: *shift_prec,
+                shift_rules: shift_rule_indices,
+                reduce_rules: reduce_rule_pairs,
+            });
+        }
+
+        // 3. shift_reduce_resolved_reduce
+        for ((term, shift_rules), (shift_prec, reduce_rules)) in
+            &collector.shift_reduce_resolved_reduce
+        {
+            let term_str = self.class_pretty_name_list(*term, 5);
+            let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
+            let reduce_rule_pairs = reduce_rules
+                .iter()
+                .map(|(&r, &p)| (r, p))
+                .collect::<Vec<_>>();
+            self.infos.push(Info::ShiftReduceConflictResolvedReduce {
+                term: term_str,
+                shift_prec: *shift_prec,
+                shift_rules: shift_rule_indices,
+                reduce_rules: reduce_rule_pairs,
+            });
+        }
+
+        // 4. unresolved conflicts (for GLR help notes)
+        if self.glr {
+            // shift_reduce_conflicts
+            for ((term, shift_rules, shift_rules_backtrace), reduce_rules) in
+                &collector.shift_reduce_conflicts
+            {
+                let term_str = self.class_pretty_name_list(*term, 5);
+                let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
+
+                let mut s_backtrace = Vec::new();
+                for shift_rule in shift_rules_backtrace {
+                    let rule_str = self.builder.rules[shift_rule.rule]
+                        .rule
+                        .clone()
+                        .map(
+                            |c| self.class_pretty_name_list(c, 5),
+                            |nt| self.nonterm_pretty_name(nt),
+                        )
+                        .into_shifted(shift_rule.shifted);
+                    s_backtrace.push(format!("\t>>> {rule_str}"));
+                }
+
+                let mut r_rules = Vec::new();
+                for (&reduce_rule, reduce_rule_backtrace) in reduce_rules {
+                    let mut r_backtrace = Vec::new();
+                    let name = self.nonterm_pretty_name(self.builder.rules[reduce_rule].rule.name);
+                    r_backtrace.push(format!("Backtrace for the reduce rule ({name}):"));
+                    for shifted_rule in reduce_rule_backtrace {
+                        let rule_str = self.builder.rules[shifted_rule.rule]
+                            .rule
+                            .clone()
+                            .map(
+                                |c| self.class_pretty_name_list(c, 5),
+                                |nt| self.nonterm_pretty_name(nt),
+                            )
+                            .into_shifted(shifted_rule.shifted);
+                        r_backtrace.push(format!("\t>>> {rule_str}"));
+                    }
+                    r_rules.push((reduce_rule, r_backtrace));
+                }
+
+                self.infos.push(Info::ShiftReduceConflictGLR {
+                    term: term_str,
+                    shift_rules: shift_rule_indices,
+                    shift_rules_backtrace: s_backtrace,
+                    reduce_rules: r_rules,
+                });
+            }
+
+            // reduce_reduce_conflicts
+            for (reduce_rules, reduce_terms) in &collector.reduce_reduce_conflicts {
+                let term_strings = reduce_terms
+                    .iter()
+                    .map(|&t| self.class_pretty_name_list(t, 5))
+                    .collect::<Vec<_>>();
+
+                let mut r_rules = Vec::new();
+                for &(reduce_rule, ref reduce_rule_from) in reduce_rules {
+                    let mut r_backtrace = Vec::new();
+                    let name = self.nonterm_pretty_name(self.builder.rules[reduce_rule].rule.name);
+                    r_backtrace.push(format!("Backtrace for the reduce rule ({name}):"));
+                    for shifted_rule in reduce_rule_from {
+                        let rule_str = self.builder.rules[shifted_rule.rule]
+                            .rule
+                            .clone()
+                            .map(
+                                |c| self.class_pretty_name_list(c, 5),
+                                |nt| self.nonterm_pretty_name(nt),
+                            )
+                            .into_shifted(shifted_rule.shifted);
+                        r_backtrace.push(format!("\t>>> {rule_str}"));
+                    }
+                    r_rules.push((reduce_rule, r_backtrace));
+                }
+
+                self.infos.push(Info::ReduceReduceConflictGLR {
+                    terms: term_strings,
+                    reduce_rules: r_rules,
+                });
+            }
+        }
 
         collector
     }
@@ -3454,6 +3600,68 @@ mod tests {
         assert!(
             code_str.contains("* val") || code_str.contains("*val"),
             "Dereference should be generated to extract boxed value"
+        );
+    }
+
+    #[test]
+    fn test_warnings_and_infos_collection() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %left '+';
+
+            Expr : Expr '+' Expr | 'a';
+            UnusedNonTerm : 'b' 'c';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
+
+        println!(
+            "Non-terminals before optimize: {:?}",
+            grammar
+                .nonterminals
+                .iter()
+                .map(|n| n.name.value().clone())
+                .collect::<Vec<_>>()
+        );
+        grammar.optimize(25);
+
+        println!("Warnings: {:?}", grammar.warnings);
+        println!(
+            "Non-terminals: {:?}",
+            grammar
+                .nonterminals
+                .iter()
+                .map(|n| n.name.value().clone())
+                .collect::<Vec<_>>()
+        );
+
+        let has_unused_warning = grammar
+            .warnings
+            .iter()
+            .any(|w| matches!(w, Warning::NonTermNotUsed { .. }));
+        assert!(
+            has_unused_warning,
+            "Expected NonTermNotUsed warning, got: {:?}",
+            grammar.warnings
+        );
+
+        grammar.builder = grammar.create_builder();
+        let _ = grammar.build_grammar();
+
+        let has_resolved_info = grammar.infos.iter().any(|info| {
+            matches!(
+                info,
+                Info::ShiftReduceConflictResolvedReduce { .. }
+                    | Info::ShiftReduceConflictResolvedShift { .. }
+            )
+        });
+        assert!(
+            has_resolved_info,
+            "Expected shift/reduce conflict resolution note, got: {:?}",
+            grammar.infos
         );
     }
 }

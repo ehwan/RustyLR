@@ -397,3 +397,62 @@ impl ConflictError {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub enum Warning {
+    NonTermNotUsed {
+        nonterm_location: Location,
+    },
+    Cycle {
+        nonterm_location: Location,
+    },
+    NonTermDataNotUsed {
+        nonterm_location: Location,
+    },
+    UnusedTerminals {
+        class_name: String,
+        terminals: Vec<String>,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub enum Info {
+    TerminalsMerged {
+        class_name: String,
+        terminals: Vec<String>,
+    },
+    TerminalClassRuleMerge {
+        rule_location: Location,
+    },
+    SingleNonTerminalRule {
+        nonterm_location: Location,
+        rule_location: Location,
+    },
+    ReduceReduceConflictResolved {
+        max_priority: usize,
+        reduce_rules: Vec<usize>,
+        deleted_rules: Vec<usize>,
+    },
+    ShiftReduceConflictResolvedShift {
+        term: String,
+        shift_prec: usize,
+        shift_rules: Vec<usize>,
+        reduce_rules: Vec<(usize, usize)>, // (rule_id, reduce_prec)
+    },
+    ShiftReduceConflictResolvedReduce {
+        term: String,
+        shift_prec: usize,
+        shift_rules: Vec<usize>,
+        reduce_rules: Vec<(usize, usize)>, // (rule_id, reduce_prec)
+    },
+    ShiftReduceConflictGLR {
+        term: String,
+        shift_rules: Vec<usize>,
+        shift_rules_backtrace: Vec<String>,
+        reduce_rules: Vec<(usize, Vec<String>)>, // (rule_id, backtrace)
+    },
+    ReduceReduceConflictGLR {
+        terms: Vec<String>,
+        reduce_rules: Vec<(usize, Vec<String>)>, // (rule_id, backtrace)
+    },
+}
