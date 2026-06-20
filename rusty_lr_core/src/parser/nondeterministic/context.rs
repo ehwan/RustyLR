@@ -840,14 +840,14 @@ impl<
             for reduce_rule in reduce_rules.to_iter() {
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let reduce_prec = match rule.precedence {
-                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
-                    Some(crate::rule::Precedence::Dynamic(token_index)) => {
+                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
+                    crate::rule::Precedence::Dynamic(token_index) => {
                         // fix the value to the offset from current node
                         let ith = rule.len - token_index - 1;
                         let (node, ith) = self.skip_last_n(node, ith).unwrap();
                         self.node(node).precedence_stack[ith]
                     }
-                    None => Precedence::none(),
+                    crate::rule::Precedence::None => Precedence::none(),
                 };
 
                 // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
@@ -1357,8 +1357,8 @@ impl<
             for reduce_rule in reduce_rules.to_iter() {
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let reduce_prec = match rule.precedence {
-                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
-                    Some(crate::rule::Precedence::Dynamic(token_index)) => {
+                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
+                    crate::rule::Precedence::Dynamic(token_index) => {
                         // fix the value to the offset from current node
                         let mut ith = rule.len - token_index - 1;
                         if ith < extra_precedence_stack.len() {
@@ -1377,7 +1377,7 @@ impl<
                             // safe unwrap since ith >= extra_precedence_stack.len()
                         }
                     }
-                    None => Precedence::none(),
+                    crate::rule::Precedence::None => Precedence::none(),
                 };
 
                 // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence

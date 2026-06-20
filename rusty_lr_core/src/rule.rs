@@ -24,13 +24,26 @@ impl std::fmt::Display for ReduceType {
 }
 
 /// Operator precedence for production rules
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Precedence {
+    /// no operator precedence
+    #[default]
+    None,
+
     /// fixed precedence level
     Fixed(usize), // precedence level
 
     /// get precedence from i'th child token; for runtime conflict resolution
     Dynamic(usize), // token index
+}
+impl Precedence {
+    pub fn is_some(self) -> bool {
+        !matches!(self, Precedence::None)
+    }
+
+    pub fn is_none(self) -> bool {
+        matches!(self, Precedence::None)
+    }
 }
 
 // Production rule.
@@ -40,7 +53,7 @@ pub enum Precedence {
 pub struct ProductionRule<Term, NonTerm> {
     pub name: NonTerm,
     pub rule: Vec<Token<Term, NonTerm>>,
-    pub precedence: Option<Precedence>,
+    pub precedence: Precedence,
 }
 impl<Term: Display, NonTerm: Display> Display for ProductionRule<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -64,8 +77,8 @@ impl<Term: Debug, NonTerm: Debug> Debug for ProductionRule<Term, NonTerm> {
             }
         }
 
-        if let Some(prec) = self.precedence {
-            write!(f, " [prec: {:?}]", prec)?;
+        if self.precedence.is_some() {
+            write!(f, " [prec: {:?}]", self.precedence)?;
         }
         Ok(())
     }
@@ -141,8 +154,8 @@ impl<Term: Display, NonTerm: Display> Display for ShiftedRule<Term, NonTerm> {
             write!(f, " •")?;
         }
 
-        if let Some(prec) = self.rule.precedence {
-            write!(f, " [prec: {:?}]", prec)?;
+        if self.rule.precedence.is_some() {
+            write!(f, " [prec: {:?}]", self.rule.precedence)?;
         }
         Ok(())
     }
