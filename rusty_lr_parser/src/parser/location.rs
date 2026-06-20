@@ -64,7 +64,7 @@ impl SpanManager {
 
 /// type for %location for each token
 /// stores index range `[start, end)` in the `SpanManager::spans` vector, where `start` is the index of the first token in the span and `end` is the index of the last token + 1.
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Location {
     /// index range `[start, end)` of the token span.
     /// zero-length spans are represented with equal values `(pos, pos)`.

@@ -658,11 +658,15 @@ Use `%lalr` when you specifically need LALR behavior or want to compare generate
 
 ```
 %allow <diagnostic_name>;
+%allow <diagnostic_name>(<target>);
 ```
 
-Suppresses specific compile-time warning or informational diagnostics. If an unknown diagnostic name is provided, RustyLR will trigger a compile-time error to catch typos.
+Suppresses specific compile-time warnings or informational diagnostics. If an unknown diagnostic name is provided, RustyLR will trigger a compile-time error to catch typos.
 
-When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>;` syntax to suppress it.
+- **Global Suppression**: Using `%allow <diagnostic_name>;` suppresses all occurrences of that diagnostic globally.
+- **Targeted Suppression**: Using `%allow <diagnostic_name>(<target>);` suppresses the diagnostic only for a specific target. The target can be a non-terminal identifier (e.g. `MyRule`) or a terminal literal (e.g. `'+'` or `b'c'`).
+
+When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>(<target>);` or `%allow <name>;` syntax to suppress it.
 
 #### Valid Diagnostic Names
 
@@ -683,6 +687,8 @@ When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>;` sy
 #### Example
 
 ```
-%allow nonterm_not_used;
-%allow unused_terminals;
+%allow nonterm_not_used(UnusedRule);       // Suppress unused warning specifically for UnusedRule
+%allow unused_terminals('+');              // Suppress unused warning specifically for terminal '+'
+%allow shift_reduce_conflict_resolved('+'); // Suppress resolution info specifically for terminal '+'
+%allow cycle;                              // Suppress all cycle warnings globally
 ```

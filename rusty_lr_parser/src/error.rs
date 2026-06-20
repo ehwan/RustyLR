@@ -404,9 +404,9 @@ impl ConflictError {
 /// and parser generation (e.g., unused symbols, cycles, etc.).
 #[derive(Debug, Clone)]
 pub enum Warning {
-    NonTermNotUsed { nonterm_idx: Located<usize> },
-    Cycle { nonterm_idx: Located<usize> },
-    NonTermDataNotUsed { nonterm_idx: Located<usize> },
+    NonTermNotUsed { nonterm_name: Located<String> },
+    Cycle { nonterm_name: Located<String> },
+    NonTermDataNotUsed { nonterm_name: Located<String> },
     UnusedTerminals { class_idx: usize },
 }
 
@@ -420,6 +420,21 @@ impl Warning {
         }
     }
 
+    pub fn suggestion(&self, grammar: &crate::grammar::Grammar) -> String {
+        match self {
+            Warning::NonTermNotUsed { nonterm_name }
+            | Warning::Cycle { nonterm_name }
+            | Warning::NonTermDataNotUsed { nonterm_name } => {
+                let name = nonterm_name.value();
+                format!("%allow {}({});", self.name(), name)
+            }
+            Warning::UnusedTerminals { class_idx } => {
+                let class_name = grammar.class_pretty_name_abbr(*class_idx);
+                format!("%allow {}({});", self.name(), class_name)
+            }
+        }
+    }
+
     /// Translates the warning into a `TokenStream` containing a compiler warning.
     /// Since Rust does not have a stable `compile_warning!` macro, this leverages
     /// a dummy deprecated struct definition mapped to the source code span
@@ -429,14 +444,14 @@ impl Warning {
         grammar: &crate::grammar::Grammar,
         span_manager: &crate::parser::location::SpanManager,
     ) -> TokenStream {
-        if grammar.allowed_diagnostics.contains(self.name()) {
+        if grammar.is_warning_allowed(self) {
             return TokenStream::new();
         }
         let mut output = TokenStream::new();
         let message = format!(
-            "{} (to ignore, add `%allow {};` to the grammar)",
+            "{} (to ignore, add `{}` to the grammar)",
             self.short_message(grammar),
-            self.name()
+            self.suggestion(grammar)
         );
         let locs = self.locations();
         if locs.is_empty() {
@@ -469,9 +484,9 @@ impl Warning {
     /// Retrieves all source code locations associated with this warning.
     pub fn locations(&self) -> Vec<Location> {
         match self {
-            Warning::NonTermNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
-            Warning::Cycle { nonterm_idx } => vec![nonterm_idx.location()],
-            Warning::NonTermDataNotUsed { nonterm_idx } => vec![nonterm_idx.location()],
+            Warning::NonTermNotUsed { nonterm_name } => vec![nonterm_name.location()],
+            Warning::Cycle { nonterm_name } => vec![nonterm_name.location()],
+            Warning::NonTermDataNotUsed { nonterm_name } => vec![nonterm_name.location()],
             Warning::UnusedTerminals { .. } => Vec::new(),
         }
     }
@@ -479,16 +494,16 @@ impl Warning {
     /// Formats a short diagnostic message describing the warning.
     pub fn short_message(&self, grammar: &crate::grammar::Grammar) -> String {
         match self {
-            Warning::NonTermNotUsed { nonterm_idx } => {
-                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+            Warning::NonTermNotUsed { nonterm_name } => {
+                let name = nonterm_name.value();
                 format!("Non-terminal `{name}` is not used in the grammar")
             }
-            Warning::Cycle { nonterm_idx } => {
-                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+            Warning::Cycle { nonterm_name } => {
+                let name = nonterm_name.value();
                 format!("Cycle detected: non-terminal `{name}` is involved in a bad cycle")
             }
-            Warning::NonTermDataNotUsed { nonterm_idx } => {
-                let name = grammar.nonterminals[*nonterm_idx.value()].name.value();
+            Warning::NonTermDataNotUsed { nonterm_name } => {
+                let name = nonterm_name.value();
                 format!("Non-terminal `{name}`'s data type is not used in any reduce action")
             }
             Warning::UnusedTerminals { class_idx } => {
@@ -518,7 +533,7 @@ pub enum Info {
         rule_location: Location,
     },
     SingleNonTerminalRule {
-        nonterm_idx: Located<usize>,
+        nonterm_name: Located<String>,
         rule_location: Location,
     },
     ReduceReduceConflictResolved {
@@ -561,6 +576,67 @@ impl Info {
             Info::ShiftReduceConflictResolvedReduce { .. } => "shift_reduce_conflict_resolved",
             Info::ShiftReduceConflictGLR { .. } => "shift_reduce_conflict_glr",
             Info::ReduceReduceConflictGLR { .. } => "reduce_reduce_conflict_glr",
+        }
+    }
+
+    pub fn suggestion(&self, grammar: &crate::grammar::Grammar) -> String {
+        match self {
+            Info::SingleNonTerminalRule { nonterm_name, .. } => {
+                let name = nonterm_name.value();
+                format!("%allow {}({});", self.name(), name)
+            }
+            Info::TerminalClassRuleMerge { rule_location } => {
+                let mut name = String::new();
+                for nonterm in &grammar.nonterminals {
+                    for rule in &nonterm.rules {
+                        if rule.location() == *rule_location {
+                            name = nonterm.name.value().clone();
+                            break;
+                        }
+                    }
+                }
+                if name.is_empty() {
+                    format!("%allow {};", self.name())
+                } else {
+                    format!("%allow {}({});", self.name(), name)
+                }
+            }
+            Info::TerminalsMerged { class_idx } => {
+                let class_name = format!(
+                    "TerminalClass{}",
+                    grammar.terminal_classes[*class_idx].multiterm_counter
+                );
+                format!("%allow {}({});", self.name(), class_name)
+            }
+            Info::ReduceReduceConflictResolved { reduce_rules, .. } => {
+                if let Some(&r) = reduce_rules.first() {
+                    if let Some((nonterm, _)) = grammar.get_rule_by_id(r) {
+                        return format!("%allow {}({});", self.name(), nonterm.name.value());
+                    }
+                }
+                format!("%allow {};", self.name())
+            }
+            Info::ShiftReduceConflictResolvedShift { term, .. }
+            | Info::ShiftReduceConflictResolvedReduce { term, .. }
+            | Info::ShiftReduceConflictGLR { term, .. } => {
+                let term_name = match term {
+                    TerminalSymbol::Term(t) => grammar.class_pretty_name_abbr(*t),
+                    TerminalSymbol::Error => "error".to_string(),
+                    TerminalSymbol::Eof => "$".to_string(),
+                };
+                format!("%allow {}({});", self.name(), term_name)
+            }
+            Info::ReduceReduceConflictGLR { terms, .. } => {
+                if let Some(term) = terms.first() {
+                    let term_name = match term {
+                        TerminalSymbol::Term(t) => grammar.class_pretty_name_abbr(*t),
+                        TerminalSymbol::Error => "error".to_string(),
+                        TerminalSymbol::Eof => "$".to_string(),
+                    };
+                    return format!("%allow {}({});", self.name(), term_name);
+                }
+                format!("%allow {};", self.name())
+            }
         }
     }
 }

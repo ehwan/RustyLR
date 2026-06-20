@@ -633,7 +633,13 @@ Directive
         let $ident = ident else {
             unreachable!( "AllowDef-Ident" );
         };
-        data.allowed_diagnostics.push(Located::new(ident.to_string(), @ident));
+        data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), None));
+    }
+    | percent allow ident lparen IdentOrLiteral rparen semicolon {
+        let $ident = ident else {
+            unreachable!( "AllowDef-Ident" );
+        };
+        data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), Some(IdentOrLiteral)));
     }
     | percent allow error semicolon {
         data.error_recovered.push( RecoveredError {

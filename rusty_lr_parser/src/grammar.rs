@@ -143,10 +143,148 @@ pub struct Grammar {
 
     pub warnings: Vec<Warning>,
     pub infos: Vec<Info>,
-    pub allowed_diagnostics: HashSet<String>,
+    pub allowed_diagnostics: HashMap<String, HashSet<Option<String>>>,
 }
 
 impl Grammar {
+    pub fn is_warning_allowed(&self, warning: &Warning) -> bool {
+        if let Some(scopes) = self.allowed_diagnostics.get(warning.name()) {
+            if scopes.contains(&None) {
+                return true;
+            }
+            match warning {
+                Warning::NonTermNotUsed { nonterm_name }
+                | Warning::Cycle { nonterm_name }
+                | Warning::NonTermDataNotUsed { nonterm_name } => {
+                    if scopes.contains(&Some(nonterm_name.value().clone())) {
+                        return true;
+                    }
+                }
+                Warning::UnusedTerminals { class_idx } => {
+                    let class_name = self.class_pretty_name_abbr(*class_idx);
+                    if scopes.contains(&Some(class_name)) {
+                        return true;
+                    }
+                    let terminals = &self.terminal_classes[*class_idx].terminals;
+                    for &t in terminals {
+                        let t_name = self.term_pretty_name(t);
+                        if scopes.contains(&Some(t_name)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    pub fn is_info_allowed(&self, info: &Info) -> bool {
+        if let Some(scopes) = self.allowed_diagnostics.get(info.name()) {
+            if scopes.contains(&None) {
+                return true;
+            }
+            match info {
+                Info::SingleNonTerminalRule { nonterm_name, .. } => {
+                    if scopes.contains(&Some(nonterm_name.value().clone())) {
+                        return true;
+                    }
+                }
+                Info::TerminalClassRuleMerge { rule_location } => {
+                    for nonterm in &self.nonterminals {
+                        for rule in &nonterm.rules {
+                            if rule.location() == *rule_location {
+                                if scopes.contains(&Some(nonterm.name.value().clone())) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                Info::TerminalsMerged { class_idx } => {
+                    let class_name = format!(
+                        "TerminalClass{}",
+                        self.terminal_classes[*class_idx].multiterm_counter
+                    );
+                    if scopes.contains(&Some(class_name)) {
+                        return true;
+                    }
+                    let terminals = &self.terminal_classes[*class_idx].terminals;
+                    for &t in terminals {
+                        let t_name = self.term_pretty_name(t);
+                        if scopes.contains(&Some(t_name)) {
+                            return true;
+                        }
+                    }
+                }
+                Info::ReduceReduceConflictResolved { reduce_rules, .. } => {
+                    for &r in reduce_rules {
+                        if let Some((nonterm, _)) = self.get_rule_by_id(r) {
+                            if scopes.contains(&Some(nonterm.name.value().clone())) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                Info::ShiftReduceConflictResolvedShift { term, .. }
+                | Info::ShiftReduceConflictResolvedReduce { term, .. }
+                | Info::ShiftReduceConflictGLR { term, .. } => match term {
+                    TerminalSymbol::Error => {
+                        if scopes.contains(&Some("error".to_string())) {
+                            return true;
+                        }
+                    }
+                    TerminalSymbol::Eof => {
+                        if scopes.contains(&Some("$".to_string())) {
+                            return true;
+                        }
+                    }
+                    TerminalSymbol::Term(class_idx) => {
+                        let class_name = self.class_pretty_name_abbr(*class_idx);
+                        if scopes.contains(&Some(class_name)) {
+                            return true;
+                        }
+                        let terminals = &self.terminal_classes[*class_idx].terminals;
+                        for &t in terminals {
+                            let t_name = self.term_pretty_name(t);
+                            if scopes.contains(&Some(t_name)) {
+                                return true;
+                            }
+                        }
+                    }
+                },
+                Info::ReduceReduceConflictGLR { terms, .. } => {
+                    for term in terms {
+                        match term {
+                            TerminalSymbol::Error => {
+                                if scopes.contains(&Some("error".to_string())) {
+                                    return true;
+                                }
+                            }
+                            TerminalSymbol::Eof => {
+                                if scopes.contains(&Some("$".to_string())) {
+                                    return true;
+                                }
+                            }
+                            TerminalSymbol::Term(class_idx) => {
+                                let class_name = self.class_pretty_name_abbr(*class_idx);
+                                if scopes.contains(&Some(class_name)) {
+                                    return true;
+                                }
+                                let terminals = &self.terminal_classes[*class_idx].terminals;
+                                for &t in terminals {
+                                    let t_name = self.term_pretty_name(t);
+                                    if scopes.contains(&Some(t_name)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        false
+    }
     /// get rule by ruleid
     pub fn get_rule_by_id(&self, mut rule_idx: usize) -> Option<(&NonTerminalInfo, usize)> {
         for nonterm in self.nonterminals.iter() {
@@ -864,7 +1002,7 @@ impl Grammar {
             (boxed, stripped)
         };
 
-        let mut allowed_diagnostics = HashSet::new();
+        let mut allowed_diagnostics: HashMap<String, HashSet<Option<String>>> = HashMap::default();
         let valid_diagnostics: HashSet<&str> = [
             "nonterm_not_used",
             "cycle",
@@ -882,15 +1020,19 @@ impl Grammar {
         .copied()
         .collect();
 
-        for allowed in grammar_args.allowed_diagnostics {
-            let name = allowed.value();
+        for (allowed_loc, target) in grammar_args.allowed_diagnostics {
+            let name = allowed_loc.value();
             if !valid_diagnostics.contains(name.as_str()) {
                 return Err(ParseError::InvalidAllowDiagnostic {
-                    location: allowed.location(),
+                    location: allowed_loc.location(),
                     name: name.clone(),
                 });
             }
-            allowed_diagnostics.insert(name.clone());
+            let target_str = target.map(|t| t.to_string_repr());
+            allowed_diagnostics
+                .entry(name.clone())
+                .or_default()
+                .insert(target_str);
         }
 
         let mut grammar = Grammar {
@@ -2009,9 +2151,8 @@ impl Grammar {
                 nonterm.rules.clear();
                 something_changed = true;
                 if !nonterm.is_auto_generated() {
-                    let loc = nonterm.name.location();
                     self.warnings.push(Warning::NonTermNotUsed {
-                        nonterm_idx: Located::new(nonterm_idx, loc),
+                        nonterm_name: nonterm.name.clone(),
                     });
                 }
             }
@@ -2144,9 +2285,8 @@ impl Grammar {
             let rule = rules.into_iter().next().unwrap();
             // add to diags only if it was not auto-generated
             if !nonterm.is_auto_generated() {
-                let loc = nonterm.name.location();
                 self.infos.push(Info::SingleNonTerminalRule {
-                    nonterm_idx: Located::new(nonterm_id, loc),
+                    nonterm_name: nonterm.name.clone(),
                     rule_location: rule.location(),
                 });
             }
@@ -2260,7 +2400,7 @@ impl Grammar {
         for i in add_to_diags {
             let nonterm = &self.nonterminals[i];
             self.warnings.push(Warning::NonTermDataNotUsed {
-                nonterm_idx: Located::new(i, nonterm.name.location()),
+                nonterm_name: nonterm.name.clone(),
             });
         }
 
@@ -3618,11 +3758,12 @@ mod tests {
         assert!(grammar_args
             .allowed_diagnostics
             .iter()
-            .any(|d| d.value() == "nonterm_not_used"));
+            .any(|d| d.0.value() == "nonterm_not_used"));
 
+        let span_manager = grammar_args.span_manager.clone();
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
-        assert!(grammar.allowed_diagnostics.contains("nonterm_not_used"));
+        assert!(grammar.allowed_diagnostics.contains_key("nonterm_not_used"));
 
         grammar.optimize(25);
         // Find the NonTermNotUsed warning
@@ -3632,9 +3773,69 @@ mod tests {
             .find(|w| matches!(w, Warning::NonTermNotUsed { .. }))
             .expect("Expected NonTermNotUsed warning");
 
-        let span_manager = crate::parser::location::SpanManager::default();
         let ts = unused_warn.to_compile_warning(&grammar, &span_manager);
         assert!(ts.is_empty(), "Warning should be suppressed");
+    }
+
+    #[test]
+    fn test_diagnostic_suppression_targeted_success() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %allow nonterm_not_used(Unused1);
+
+            Expr : 'a';
+            Unused1 : 'b';
+            Unused2 : 'c';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        assert!(grammar_args
+            .allowed_diagnostics
+            .iter()
+            .any(|d| d.0.value() == "nonterm_not_used"
+                && d.1.as_ref().unwrap().to_string_repr() == "Unused1"));
+
+        let span_manager = grammar_args.span_manager.clone();
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
+        assert!(grammar.allowed_diagnostics.contains_key("nonterm_not_used"));
+        let scopes = grammar.allowed_diagnostics.get("nonterm_not_used").unwrap();
+        assert!(scopes.contains(&Some("Unused1".to_string())));
+
+        grammar.optimize(25);
+
+        // Find the NonTermNotUsed warning for Unused1
+        let warn_unused1 = grammar
+            .warnings
+            .iter()
+            .find(|w| match w {
+                Warning::NonTermNotUsed { nonterm_name } => nonterm_name.value() == "Unused1",
+                _ => false,
+            })
+            .expect("Expected NonTermNotUsed warning for Unused1");
+
+        // Find the NonTermNotUsed warning for Unused2
+        let warn_unused2 = grammar
+            .warnings
+            .iter()
+            .find(|w| match w {
+                Warning::NonTermNotUsed { nonterm_name } => nonterm_name.value() == "Unused2",
+                _ => false,
+            })
+            .expect("Expected NonTermNotUsed warning for Unused2");
+
+        // Warning for Unused1 should be suppressed
+        assert!(grammar.is_warning_allowed(warn_unused1));
+        assert!(warn_unused1
+            .to_compile_warning(&grammar, &span_manager)
+            .is_empty());
+
+        // Warning for Unused2 should NOT be suppressed
+        assert!(!grammar.is_warning_allowed(warn_unused2));
+        assert!(!warn_unused2
+            .to_compile_warning(&grammar, &span_manager)
+            .is_empty());
     }
 
     #[test]
