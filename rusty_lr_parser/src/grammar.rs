@@ -1175,10 +1175,7 @@ impl Grammar {
                                 }
                             }
                         } else {
-                            Some(Located::new(
-                                Precedence::Dynamic(from_token),
-                                from_token_location,
-                            ))
+                            return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                         }
                     } else if let Some(&level) = grammar.precedence_levels.get(&prec) {
                         Some(level.map(Precedence::Fixed))
@@ -1652,78 +1649,6 @@ impl Grammar {
                     Some(ts) => substitute_placeholders(ts.clone(), &resolved),
                     None => None,
                 };
-            }
-        }
-
-        // check for nonterminals in %prec,
-        // all production rules in that nonterminal must have precedence defined.
-        let mut nonterm_prec_candidates: Vec<BTreeSet<Option<usize>>> =
-            vec![BTreeSet::new(); grammar.nonterminals.len()];
-        loop {
-            let mut changed = false;
-            for (nonterm_idx, nonterm) in grammar.nonterminals.iter().enumerate() {
-                for rule in &nonterm.rules {
-                    match rule.prec {
-                        Some(prec) => match *prec.value() {
-                            Precedence::Dynamic(token_idx) => {
-                                if let Token::NonTerm(token_nonterm_idx) =
-                                    rule.tokens[token_idx].token
-                                {
-                                    let mut target_candidates =
-                                        nonterm_prec_candidates[token_nonterm_idx].clone();
-                                    let len0 = nonterm_prec_candidates[nonterm_idx].len();
-                                    nonterm_prec_candidates[nonterm_idx]
-                                        .append(&mut target_candidates);
-                                    if nonterm_prec_candidates[nonterm_idx].len() != len0 {
-                                        changed = true;
-                                    }
-                                }
-                            }
-                            Precedence::Fixed(level) => {
-                                if nonterm_prec_candidates[nonterm_idx].insert(Some(level)) {
-                                    changed = true;
-                                }
-                            }
-                            Precedence::None => {
-                                if nonterm_prec_candidates[nonterm_idx].insert(None) {
-                                    changed = true;
-                                }
-                            }
-                        },
-                        _ => {
-                            if nonterm_prec_candidates[nonterm_idx].insert(None) {
-                                changed = true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if !changed {
-                break;
-            }
-        }
-        for nonterm in &mut grammar.nonterminals {
-            for rule in &mut nonterm.rules {
-                if let Some(prec) = &mut rule.prec {
-                    if let Precedence::Dynamic(token_idx) = *prec.value() {
-                        if let Token::NonTerm(token_nonterm_idx) = rule.tokens[token_idx].token {
-                            let target_candidates = &nonterm_prec_candidates[token_nonterm_idx];
-                            if target_candidates.contains(&None) {
-                                // TODO
-                                // no need to be an error on GLR parser?
-                                return Err(ParseError::NonTerminalPrecedenceNotDefined(
-                                    Located::new(token_nonterm_idx, prec.location()),
-                                ));
-                            }
-
-                            if target_candidates.len() == 1 {
-                                let fixed = target_candidates.iter().next().unwrap().unwrap();
-                                *prec = Located::new(Precedence::Fixed(fixed), prec.location());
-                            }
-                        }
-                    }
-                }
             }
         }
 

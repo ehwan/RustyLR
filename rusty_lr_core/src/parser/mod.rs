@@ -14,30 +14,6 @@ pub mod terminalclass;
 pub mod state;
 pub mod table;
 
-#[derive(Clone, Copy)]
-pub struct Precedence(u8);
-
-impl Precedence {
-    #[inline]
-    pub fn none() -> Self {
-        Precedence(u8::MAX)
-    }
-    #[inline]
-    pub fn new(level: u8) -> Self {
-        debug_assert!(level < u8::MAX);
-        Precedence(level)
-    }
-    #[inline]
-    pub fn is_some(&self) -> bool {
-        self.0 < u8::MAX
-    }
-
-    pub fn unwrap(self) -> u8 {
-        debug_assert!(self.0 < u8::MAX);
-        self.0
-    }
-}
-
 /// A trait for Parser that holds the entire parser table.
 /// This trait will be automatically implemented by rusty_lr
 pub trait Parser {
@@ -64,8 +40,4 @@ pub trait Parser {
 
     /// Get the decoded runtime parser tables.
     fn get_tables() -> &'static Self::Tables;
-    /// Get the type of precedence for i'th level.
-    /// `None` if i'th level was defined as %precedence (no reduce type).
-    /// Determined entirely at compile time and is static.
-    fn precedence_types(level: u8) -> Option<crate::rule::ReduceType>;
 }

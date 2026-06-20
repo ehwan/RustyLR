@@ -243,14 +243,6 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
     fn to_usize(&self) -> usize {
         *self as usize
     }
-    fn precedence(&self) -> ::rusty_lr::parser::Precedence {
-        match self {
-            JsonTerminalClasses::eof => {
-                unreachable!("eof token cannot be used in precedence levels")
-            }
-            _ => ::rusty_lr::parser::Precedence::none(),
-        }
-    }
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
@@ -1927,12 +1919,6 @@ impl ::rusty_lr::parser::Parser for JsonParser {
     type ReduceRules = u8;
     type Tables = JsonTables;
     const ERROR_USED: bool = true;
-    fn precedence_types(level: u8) -> Option<::rusty_lr::rule::ReduceType> {
-        #[allow(unreachable_patterns)]
-        match level {
-            _ => None,
-        }
-    }
     fn get_tables() -> &'static JsonTables {
         static TABLES: std::sync::OnceLock<JsonTables> = std::sync::OnceLock::new();
         TABLES
@@ -1944,13 +1930,6 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
                     23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 25, 25, 25, 25, 25, 26, 26,
                     27, 27, 28, 29, 29, 30, 31,
-                ];
-                static RULE_PRECEDENCES: &[u32] = &[
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0,
                 ];
                 static RULE_LENGTHS: &[u32] = &[
                     1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 3, 5, 3, 3, 3, 2, 1, 1, 1, 1, 1,
@@ -2145,24 +2124,10 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
                     let name = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => ::rusty_lr::rule::Precedence::None,
-                        1 => {
-                            ::rusty_lr::rule::Precedence::Fixed((prec_val >> 2) as usize)
-                        }
-                        2 => {
-                            ::rusty_lr::rule::Precedence::Dynamic(
-                                (prec_val >> 2) as usize,
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
                             name,
                             len: RULE_LENGTHS[i] as usize,
-                            precedence,
                         });
                 }
                 let num_states = 119usize;

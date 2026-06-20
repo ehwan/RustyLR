@@ -9,7 +9,6 @@ use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
-use crate::parser::Precedence;
 use crate::TerminalSymbol;
 
 /// Iterator for traverse node to root.
@@ -353,7 +352,6 @@ impl<
 
                 // truncate stacks to cut off reduce_token_count elements from back
                 node.state_stack.truncate(i);
-                node.precedence_stack.truncate(i);
 
                 node_idx
             } else {
@@ -402,14 +400,12 @@ impl<
                     let mut parent_data_stack = node.data_stack.split_off(i);
                     let mut parent_state_stack = node.state_stack.split_off(i);
                     let mut parent_location_stack = node.location_stack.split_off(i);
-                    let mut parent_precedence_stack = node.precedence_stack.split_off(i);
                     #[cfg(feature = "tree")]
                     let mut parent_tree_stack = node.tree_stack.split_off(i);
 
                     std::mem::swap(&mut parent_data_stack, &mut node.data_stack);
                     std::mem::swap(&mut parent_state_stack, &mut node.state_stack);
                     std::mem::swap(&mut parent_location_stack, &mut node.location_stack);
-                    std::mem::swap(&mut parent_precedence_stack, &mut node.precedence_stack);
                     #[cfg(feature = "tree")]
                     std::mem::swap(&mut parent_tree_stack, &mut node.tree_stack);
 
@@ -422,7 +418,6 @@ impl<
                     parent_node.data_stack = parent_data_stack;
                     parent_node.state_stack = parent_state_stack;
                     parent_node.location_stack = parent_location_stack;
-                    parent_node.precedence_stack = parent_precedence_stack;
                     #[cfg(feature = "tree")]
                     {
                         parent_node.tree_stack = parent_tree_stack;
@@ -511,7 +506,6 @@ impl<
     fn reduce(
         &mut self,
         reduce_rule: usize,
-        precedence: Precedence,
         node: usize,
         term: &crate::TerminalSymbol<P::Term>,
         shift: &mut bool,
@@ -554,7 +548,6 @@ impl<
             Ok(_) => {
                 node.state_stack.push(next_nonterm_shift.state);
                 node.location_stack.push(new_location);
-                node.precedence_stack.push(precedence);
                 #[cfg(feature = "tree")]
                 {
                     node.tree_stack
@@ -807,7 +800,6 @@ impl<
         node: usize,
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
-        shift_prec: Precedence,
         location: Data::Location,
         userdata: Data::UserData,
     ) -> Result<
@@ -834,62 +826,11 @@ impl<
             None => (None, None),
         };
         if let Some(reduce_rules) = reduce {
-            let mut shift = None;
+            let mut shift = shift_state;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             for reduce_rule in reduce_rules.to_iter() {
-                let rule = *self.tables.rule(reduce_rule.into_usize());
-                let reduce_prec = match rule.precedence {
-                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
-                    crate::rule::Precedence::Dynamic(token_index) => {
-                        // fix the value to the offset from current node
-                        let ith = rule.len - token_index - 1;
-                        let (node, ith) = self.skip_last_n(node, ith).unwrap();
-                        self.node(node).precedence_stack[ith]
-                    }
-                    crate::rule::Precedence::None => Precedence::none(),
-                };
-
-                // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
-                match (shift_state.is_some(), shift_prec, reduce_prec) {
-                    (true, Precedence(shift_prec_), Precedence(reduce_prec_))
-                        if shift_prec.is_some() && reduce_prec.is_some() =>
-                    {
-                        match reduce_prec_.cmp(&shift_prec_) {
-                            std::cmp::Ordering::Less => {
-                                // no reduce
-                                shift = shift_state;
-                            }
-                            std::cmp::Ordering::Equal => {
-                                // check for reduce_type
-                                use crate::rule::ReduceType;
-                                match P::precedence_types(reduce_prec_) {
-                                    Some(ReduceType::Left) => {
-                                        // no shift
-                                        reduces.push((reduce_rule, reduce_prec));
-                                    }
-                                    Some(ReduceType::Right) => {
-                                        // no reduce
-                                        shift = shift_state;
-                                    }
-                                    None => {
-                                        // cannot determine precedence, error
-                                        self.no_precedences.push(reduce_rule.into_usize());
-                                    }
-                                }
-                            }
-                            std::cmp::Ordering::Greater => {
-                                // no shift
-                                reduces.push((reduce_rule, reduce_prec));
-                            }
-                        }
-                    }
-                    _ => {
-                        // nothing; go for both reduce and shift
-                        shift = shift_state;
-                        reduces.push((reduce_rule, reduce_prec));
-                    }
-                }
+                reduces.push(reduce_rule);
             }
 
             let mut shifted = false;
@@ -899,7 +840,7 @@ impl<
                 // Each GLR branch receives its own user data copy before running reduce actions.
                 let mut shift_ = false;
                 let l = reduces.len();
-                for (idx, (reduce_rule, precedence)) in reduces.into_iter().enumerate() {
+                for (idx, reduce_rule) in reduces.into_iter().enumerate() {
                     let mut pass = shift.is_some();
                     let mut branch_userdata = userdata.clone();
 
@@ -913,7 +854,6 @@ impl<
                     }
                     match self.reduce(
                         reduce_rule.into_usize(),
-                        precedence,
                         node,
                         &term,
                         &mut pass,
@@ -927,7 +867,6 @@ impl<
                                 next_node,
                                 term.clone(),
                                 class,
-                                shift_prec,
                                 location.clone(),
                                 branch_userdata,
                             ) {
@@ -965,7 +904,6 @@ impl<
             if let Some(shift) = shift {
                 let node_ = self.node_mut(node);
                 node_.state_stack.push(shift.state);
-                node_.precedence_stack.push(shift_prec);
                 node_.location_stack.push(location.clone());
                 #[cfg(feature = "tree")]
                 node_
@@ -1000,7 +938,6 @@ impl<
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
             node_.state_stack.push(shift.state);
-            node_.precedence_stack.push(shift_prec);
             node_.location_stack.push(location);
             #[cfg(feature = "tree")]
             node_
@@ -1035,10 +972,8 @@ impl<
     fn panic_mode(
         &mut self,
         mut node: usize,
-        error_prec: Precedence,
         userdata: Data::UserData,
         extra_state_stack: &mut Vec<StateIndex>,
-        extra_precedence_stack: &mut Vec<Precedence>,
     ) -> Data::Location
     where
         Data: Clone,
@@ -1067,15 +1002,12 @@ impl<
                 match self.tables.can_accept_error(s.into_usize()) {
                     TriState::False => {}
                     TriState::Maybe => {
-                        extra_precedence_stack.clear();
                         extra_state_stack.clear();
 
                         if self.can_feed_impl(
                             extra_state_stack,
-                            extra_precedence_stack,
                             Some((node, NonZeroUsize::new(node_.len() - pop_count).unwrap())),
                             P::TermClass::ERROR,
-                            error_prec,
                         ) == Some(true)
                         {
                             found = true;
@@ -1127,7 +1059,6 @@ impl<
         let l = node_.len() - pop_count;
         node_.location_stack.truncate(l);
         node_.state_stack.truncate(l);
-        node_.precedence_stack.truncate(l);
         node_.data_stack.truncate(l);
         #[cfg(feature = "tree")]
         {
@@ -1138,7 +1069,6 @@ impl<
             node,
             TerminalSymbol::Error,
             P::TermClass::ERROR,
-            error_prec,
             error_location.clone(),
             userdata,
         ) {
@@ -1171,7 +1101,6 @@ impl<
         self.next_userdatas.clear();
 
         let class = P::TermClass::from_term(&term);
-        let shift_prec = class.precedence();
 
         let mut current_nodes = std::mem::take(&mut self.current_nodes);
         let mut current_userdatas = std::mem::take(&mut self.current_userdatas);
@@ -1180,7 +1109,6 @@ impl<
                 node,
                 TerminalSymbol::Term(term.clone()),
                 class,
-                shift_prec,
                 location.clone(),
                 userdata,
             ) {
@@ -1211,13 +1139,10 @@ impl<
                 });
             }
 
-            let error_prec = P::TermClass::ERROR.precedence();
-
             let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
             let mut fallback_userdatas = std::mem::take(&mut self.fallback_userdatas);
             let root_userdata = fallback_userdatas.first().cloned();
             let mut extra_state_stack = Vec::new();
-            let mut extra_precedence_stack = Vec::new();
             let mut error_location = if let Some(&first_node) = fallback_nodes.first() {
                 Data::Location::new(self.location_iter(first_node), 0)
             } else {
@@ -1225,13 +1150,7 @@ impl<
             };
             // try enter panic mode and store error nodes to next_nodes
             for (node, userdata) in fallback_nodes.drain(..).zip(fallback_userdatas.drain(..)) {
-                error_location = self.panic_mode(
-                    node,
-                    error_prec,
-                    userdata,
-                    &mut extra_state_stack,
-                    &mut extra_precedence_stack,
-                );
+                error_location = self.panic_mode(node, userdata, &mut extra_state_stack);
             }
             // put back for reuse allocated memory
             self.fallback_nodes = fallback_nodes;
@@ -1248,7 +1167,6 @@ impl<
                             node,
                             TerminalSymbol::Error,
                             P::TermClass::ERROR,
-                            error_prec,
                             error_location,
                             userdata,
                         ) {
@@ -1285,7 +1203,6 @@ impl<
                         // and b is fed, shift error and b
                         let node = self.node_mut(error_node);
                         node.state_stack.push(next_state.state);
-                        node.precedence_stack.push(shift_prec);
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
                         node.tree_stack.push(crate::tree::Tree::new_terminal(
@@ -1329,10 +1246,8 @@ impl<
     fn can_feed_impl(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
-        extra_precedence_stack: &mut Vec<Precedence>,
         mut node_and_len: Option<(usize, NonZeroUsize)>,
         class: P::TermClass,
-        shift_prec: Precedence,
     ) -> Option<bool> {
         let last_state = extra_state_stack
             .last()
@@ -1350,75 +1265,12 @@ impl<
             None => (None, None),
         };
         if let Some(reduce_rules) = reduce {
-            let mut shift = None;
+            let shift = shift_state;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             use crate::parser::table::ReduceRules;
             for reduce_rule in reduce_rules.to_iter() {
-                let rule = *self.tables.rule(reduce_rule.into_usize());
-                let reduce_prec = match rule.precedence {
-                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
-                    crate::rule::Precedence::Dynamic(token_index) => {
-                        // fix the value to the offset from current node
-                        let mut ith = rule.len - token_index - 1;
-                        if ith < extra_precedence_stack.len() {
-                            extra_precedence_stack[extra_precedence_stack.len() - 1 - ith]
-                        } else {
-                            ith -= extra_precedence_stack.len();
-                            let (node, len) = node_and_len.unwrap();
-                            if ith < len.get() {
-                                self.node(node).precedence_stack[len.get() - 1 - ith]
-                            } else {
-                                ith -= len.get();
-                                let parent = self.node(node).parent.unwrap();
-                                let (node, ith) = self.skip_last_n(parent, ith).unwrap();
-                                self.node(node).precedence_stack[ith]
-                            }
-                            // safe unwrap since ith >= extra_precedence_stack.len()
-                        }
-                    }
-                    crate::rule::Precedence::None => Precedence::none(),
-                };
-
-                // if there is shift/reduce conflict, check for reduce rule's precedence and shift terminal's precedence
-                match (shift_state.is_some(), shift_prec, reduce_prec) {
-                    (true, Precedence(shift_prec_), Precedence(reduce_prec_))
-                        if shift_prec.is_some() && reduce_prec.is_some() =>
-                    {
-                        match reduce_prec_.cmp(&shift_prec_) {
-                            std::cmp::Ordering::Less => {
-                                // no reduce
-                                shift = shift_state;
-                            }
-                            std::cmp::Ordering::Equal => {
-                                // check for reduce_type
-                                use crate::rule::ReduceType;
-                                match P::precedence_types(reduce_prec_) {
-                                    Some(ReduceType::Left) => {
-                                        // no shift
-                                        reduces.push((reduce_rule, reduce_prec));
-                                    }
-                                    Some(ReduceType::Right) => {
-                                        // no reduce
-                                        shift = shift_state;
-                                    }
-                                    None => {
-                                        // cannot determine precedence
-                                    }
-                                }
-                            }
-                            std::cmp::Ordering::Greater => {
-                                // no shift
-                                reduces.push((reduce_rule, reduce_prec));
-                            }
-                        }
-                    }
-                    _ => {
-                        // nothing; go for both reduce and shift
-                        shift = shift_state;
-                        reduces.push((reduce_rule, reduce_prec));
-                    }
-                }
+                reduces.push(reduce_rule);
             }
 
             if shift.is_some() {
@@ -1429,18 +1281,14 @@ impl<
             }
 
             if reduces.len() == 1 {
-                let (rule, reduce_prec) = reduces[0];
-                let reduce_rule = *self.tables.rule(rule.into_usize());
-                let tokens_len = reduce_rule.len;
+                let rule = *self.tables.rule(reduces[0].into_usize());
+                let tokens_len = rule.len;
 
                 // pop state stack
-                // pop precedence stack
-                if tokens_len <= extra_precedence_stack.len() {
-                    extra_precedence_stack.truncate(extra_precedence_stack.len() - tokens_len);
+                if tokens_len <= extra_state_stack.len() {
                     extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
                 } else {
-                    let left = tokens_len - extra_precedence_stack.len();
-                    extra_precedence_stack.clear();
+                    let left = tokens_len - extra_state_stack.len();
                     extra_state_stack.clear();
 
                     let (node, len) = node_and_len.unwrap();
@@ -1461,8 +1309,6 @@ impl<
                     }
                 }
 
-                extra_precedence_stack.push(reduce_prec);
-
                 // shift with reduced nonterminal
                 let last_state = extra_state_stack
                     .last()
@@ -1475,44 +1321,32 @@ impl<
                             })
                             .unwrap_or(0)
                     });
-                if let Some(next_state_id) =
-                    self.tables.shift_goto_nonterm(last_state, reduce_rule.name)
-                {
+                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.name) {
                     extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(
                         "unreachable: nonterminal shift should always succeed after reduce operation. \
 Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
-                        reduce_rule.name.as_str(),
-                        rule.into_usize()
+                        rule.name.as_str(),
+                        reduces[0].into_usize()
                     );
                 }
 
-                self.can_feed_impl(
-                    extra_state_stack,
-                    extra_precedence_stack,
-                    node_and_len,
-                    class,
-                    shift_prec,
-                )
+                self.can_feed_impl(extra_state_stack, node_and_len, class)
             } else {
                 let mut ret = None;
-                for (reduce_rule, reduce_prec) in reduces.into_iter() {
+                for reduce_rule in reduces.into_iter() {
                     let reduce_rule = *self.tables.rule(reduce_rule.into_usize());
                     let tokens_len = reduce_rule.len;
 
                     let mut extra_state_stack = extra_state_stack.clone();
-                    let mut extra_precedence_stack = extra_precedence_stack.clone();
 
                     // pop state stack
-                    // pop precedence stack
-                    let new_node_and_len = if tokens_len <= extra_precedence_stack.len() {
-                        extra_precedence_stack.truncate(extra_precedence_stack.len() - tokens_len);
+                    let new_node_and_len = if tokens_len <= extra_state_stack.len() {
                         extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
                         node_and_len
                     } else {
-                        let left = tokens_len - extra_precedence_stack.len();
-                        extra_precedence_stack.clear();
+                        let left = tokens_len - extra_state_stack.len();
                         extra_state_stack.clear();
 
                         let (node, len) = node_and_len.unwrap();
@@ -1531,8 +1365,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                             }
                         }
                     };
-
-                    extra_precedence_stack.push(reduce_prec);
 
                     // shift with reduced nonterminal
                     let last_state = extra_state_stack
@@ -1559,13 +1391,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         );
                     }
 
-                    match self.can_feed_impl(
-                        &mut extra_state_stack,
-                        &mut extra_precedence_stack,
-                        new_node_and_len,
-                        class,
-                        shift_prec,
-                    ) {
+                    match self.can_feed_impl(&mut extra_state_stack, new_node_and_len, class) {
                         Some(true) => return Some(true),
                         Some(false) => {
                             ret = Some(false);
@@ -1575,7 +1401,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 }
                 ret
             }
-            // check reduce actions
         } else {
             Some(shift_state.is_some())
         }
@@ -1587,11 +1412,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &P::Term) -> bool {
         let class = P::TermClass::from_term(term);
-        let shift_prec = class.precedence();
         let mut extra_state_stack = Vec::new();
-        let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
-            extra_precedence_stack.clear();
             extra_state_stack.clear();
 
             let node_and_len = {
@@ -1603,13 +1425,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                     Some((node, NonZeroUsize::new(node_.len()).unwrap()))
                 }
             };
-            self.can_feed_impl(
-                &mut extra_state_stack,
-                &mut extra_precedence_stack,
-                node_and_len,
-                class,
-                shift_prec,
-            ) == Some(true)
+            self.can_feed_impl(&mut extra_state_stack, node_and_len, class) == Some(true)
         })
     }
 
@@ -1621,8 +1437,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         }
 
         let mut extra_state_stack = Vec::new();
-        let mut extra_precedence_stack = Vec::new();
-        let error_prec = P::TermClass::ERROR.precedence();
 
         self.current_nodes.iter().any(move |&node| {
             let mut node = node;
@@ -1630,15 +1444,12 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
             if len > 0 {
                 loop {
-                    extra_precedence_stack.clear();
                     extra_state_stack.clear();
 
                     if self.can_feed_impl(
                         &mut extra_state_stack,
-                        &mut extra_precedence_stack,
                         Some((node, NonZeroUsize::new(len).unwrap())),
                         P::TermClass::ERROR,
-                        error_prec,
                     ) == Some(true)
                     {
                         return true;
@@ -1657,15 +1468,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             }
 
             // check root node
-            extra_precedence_stack.clear();
             extra_state_stack.clear();
-            self.can_feed_impl(
-                &mut extra_state_stack,
-                &mut extra_precedence_stack,
-                None,
-                P::TermClass::ERROR,
-                error_prec,
-            ) == Some(true)
+            self.can_feed_impl(&mut extra_state_stack, None, P::TermClass::ERROR) == Some(true)
         })
     }
 
@@ -1702,7 +1506,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 node,
                 TerminalSymbol::Eof,
                 P::TermClass::EOF,
-                Precedence::none(),
                 node_eof_location,
                 userdata,
             ) {
@@ -1736,9 +1539,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     /// Check if current context can be terminated and get the start value.
     pub fn can_accept(&self) -> bool {
         let mut extra_state_stack = Vec::new();
-        let mut extra_precedence_stack = Vec::new();
         self.current_nodes.iter().any(move |&node| {
-            extra_precedence_stack.clear();
             extra_state_stack.clear();
 
             let node_and_len = {
@@ -1750,13 +1551,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                     Some((node, NonZeroUsize::new(node_.len()).unwrap()))
                 }
             };
-            self.can_feed_impl(
-                &mut extra_state_stack,
-                &mut extra_precedence_stack,
-                node_and_len,
-                P::TermClass::EOF,
-                Precedence::none(),
-            ) == Some(true)
+            self.can_feed_impl(&mut extra_state_stack, node_and_len, P::TermClass::EOF)
+                == Some(true)
         })
     }
 }

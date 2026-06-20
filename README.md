@@ -17,7 +17,7 @@ Highly inspired by classic tools like *Bison* and *Yacc*, RustyLR uses a familia
 - **Automatic Parser Optimization:** Shrinks parsing tables and boosts runtime performance by grouping terminal symbols that exhibit identical behavior across parser states.
 - **Multiple Parsing Strategies:** Supports minimal-LR(1) (IELR-style), LALR(1) tables, and Generalized LR (GLR) parsing.
 - **Detailed Diagnostics:** Reports grammar conflicts, provides verbose traces of conflict resolution stages, and logs optimization passes.
-- **Static & Runtime Conflict Resolution:** Resolve grammar conflicts at compile time (precedence/associativity) or dynamically at runtime.
+- **Static Conflict Resolution & GLR Branching:** Resolve grammar conflicts at compile time (precedence/associativity) or dynamically using GLR parsing.
 - **Location Tracking:** Automatically tracks positions of tokens and non-terminals, simplifying error reporting in compiler diagnostics.
 - **State Machine Debugging:** The `rustylr` CLI provides a `--state` flag to inspect and visualize the generated state machine, making conflict debugging straightforward.
 

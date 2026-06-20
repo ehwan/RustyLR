@@ -92,9 +92,6 @@ pub enum ParseError {
     /// Precedence not defined for the given token
     PrecedenceNotDefined(IdentOrLiteral),
 
-    /// All production rules in this non-terminal must have %prec defined
-    NonTerminalPrecedenceNotDefined(Located<usize>),
-
     /// ReduceAction must be defined but not defined
     RuleTypeDefinedButActionNotDefined { nonterm: Location, rule: Location },
 
@@ -258,7 +255,6 @@ impl ParseError {
 
             ParseError::MultiplePrecedenceOrderDefinition(locations) => locations.clone(),
             ParseError::PrecedenceNotDefined(name) => vec![name.location()],
-            ParseError::NonTerminalPrecedenceNotDefined(loc) => vec![loc.location()],
 
             ParseError::RuleTypeDefinedButActionNotDefined { nonterm, rule } => {
                 vec![*nonterm, *rule]
@@ -315,9 +311,7 @@ impl ParseError {
             ParseError::PrecedenceNotDefined(_) => {
                 "Precedence not defined for the given token".to_string()
             }
-            ParseError::NonTerminalPrecedenceNotDefined(_) => {
-                "All production rules in this non-terminal must have %prec defined".into()
-            }
+
 
             ParseError::RuleTypeDefinedButActionNotDefined { .. } => {
                 "ReduceAction must be defined for this rule".into()

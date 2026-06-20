@@ -11,6 +11,4 @@ pub trait TerminalClass: Copy {
     fn to_usize(&self) -> usize;
 
     fn from_term(term: &Self::Term) -> Self;
-
-    fn precedence(&self) -> crate::parser::Precedence;
 }

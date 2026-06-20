@@ -327,19 +327,6 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
     fn to_usize(&self) -> usize {
         *self as usize
     }
-    fn precedence(&self) -> ::rusty_lr_core::parser::Precedence {
-        match self {
-            GrammarTerminalClasses::minus => ::rusty_lr_core::parser::Precedence::new(0),
-            GrammarTerminalClasses::plus
-            | GrammarTerminalClasses::star
-            | GrammarTerminalClasses::question
-            | GrammarTerminalClasses::exclamation => ::rusty_lr_core::parser::Precedence::new(1),
-            GrammarTerminalClasses::eof => {
-                unreachable!("eof token cannot be used in precedence levels")
-            }
-            _ => ::rusty_lr_core::parser::Precedence::none(),
-        }
-    }
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
@@ -6341,13 +6328,6 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type ReduceRules = u8;
     type Tables = GrammarTables;
     const ERROR_USED: bool = true;
-    fn precedence_types(level: u8) -> Option<::rusty_lr_core::rule::ReduceType> {
-        #[allow(unreachable_patterns)]
-        match level {
-            0..=1 => Some(::rusty_lr_core::rule::ReduceType::Left),
-            _ => None,
-        }
-    }
     fn get_tables() -> &'static GrammarTables {
         static TABLES: std::sync::OnceLock<GrammarTables> = std::sync::OnceLock::new();
         TABLES
@@ -6362,15 +6342,6 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
                     25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 27, 27, 28, 28,
                     29,
-                ];
-                static RULE_PRECEDENCES: &[u32] = &[
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0,
-                    0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 5, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ];
                 static RULE_LENGTHS: &[u32] = &[
                     5, 1, 0, 3, 1, 3, 3, 3, 3, 3, 2, 1, 3, 1, 3, 3, 1, 3, 3, 1, 3, 3, 4,
@@ -6736,26 +6707,10 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
                     let name = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
-                    let prec_val = RULE_PRECEDENCES[i];
-                    let precedence = match prec_val & 3 {
-                        0 => ::rusty_lr_core::rule::Precedence::None,
-                        1 => {
-                            ::rusty_lr_core::rule::Precedence::Fixed(
-                                (prec_val >> 2) as usize,
-                            )
-                        }
-                        2 => {
-                            ::rusty_lr_core::rule::Precedence::Dynamic(
-                                (prec_val >> 2) as usize,
-                            )
-                        }
-                        _ => unreachable!(),
-                    };
                     rules
                         .push(::rusty_lr_core::parser::table::RuleInfo {
                             name,
                             len: RULE_LENGTHS[i] as usize,
-                            precedence,
                         });
                 }
                 let num_states = 167usize;

@@ -1,5 +1,4 @@
 use crate::parser::data_stack::DataStack;
-use crate::parser::Precedence;
 
 /// To handle multiple paths in the non-deterministic GLR parsing,
 /// this node represents a subrange in stack of the parser.
@@ -15,7 +14,6 @@ pub struct Node<Data: DataStack, StateIndex> {
     pub state_stack: Vec<StateIndex>,
     pub data_stack: Data,
     pub location_stack: Vec<Data::Location>,
-    pub precedence_stack: Vec<Precedence>,
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
@@ -28,7 +26,6 @@ impl<Data: DataStack, StateIndex> Default for Node<Data, StateIndex> {
             state_stack: Vec::new(),
             data_stack: Data::default(),
             location_stack: Vec::new(),
-            precedence_stack: Vec::new(),
             #[cfg(feature = "tree")]
             tree_stack: Vec::new(),
         }
@@ -43,7 +40,6 @@ impl<Data: DataStack, StateIndex> Node<Data, StateIndex> {
         self.state_stack.clear();
         self.data_stack.clear();
         self.location_stack.clear();
-        self.precedence_stack.clear();
         #[cfg(feature = "tree")]
         self.tree_stack.clear();
     }
@@ -61,7 +57,6 @@ impl<Data: DataStack, StateIndex> Node<Data, StateIndex> {
             state_stack: Vec::with_capacity(capacity),
             data_stack: Data::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
-            precedence_stack: Vec::with_capacity(capacity),
             #[cfg(feature = "tree")]
             tree_stack: Vec::with_capacity(capacity),
         }
@@ -70,7 +65,6 @@ impl<Data: DataStack, StateIndex> Node<Data, StateIndex> {
         self.state_stack.reserve(additional);
         self.data_stack.reserve(additional);
         self.location_stack.reserve(additional);
-        self.precedence_stack.reserve(additional);
         #[cfg(feature = "tree")]
         self.tree_stack.reserve(additional);
     }

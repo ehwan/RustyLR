@@ -92,12 +92,11 @@ impl ShiftTarget<usize> {
 /// Hot-path information for a production rule.
 ///
 /// The full production token list is useful for diagnostics and debug output, but parsing only
-/// needs the left-hand side, right-hand-side length, and precedence.
+/// needs the left-hand side and right-hand-side length.
 #[derive(Debug, Clone, Copy)]
 pub struct RuleInfo<NonTerm> {
     pub name: NonTerm,
     pub len: usize,
-    pub precedence: crate::rule::Precedence,
 }
 
 /// Intermediate flat parser table data used by generated code before converting to a concrete
