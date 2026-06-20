@@ -509,15 +509,7 @@ impl Warning {
             }
             Warning::UnusedTerminals { class_idx } => {
                 let class_name = grammar.class_pretty_name_abbr(*class_idx);
-                let terminals = grammar.terminal_classes[*class_idx]
-                    .terminals
-                    .iter()
-                    .map(|&term| grammar.term_pretty_name(term))
-                    .collect::<Vec<_>>();
-                format!(
-                    "These terminals are not used: {class_name}: {}",
-                    terminals.join(", ")
-                )
+                format!("Terminals merged in class `{class_name}` are defined but not used in any production rule")
             }
         }
     }

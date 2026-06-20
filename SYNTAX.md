@@ -664,7 +664,7 @@ Use `%lalr` when you specifically need LALR behavior or want to compare generate
 Suppresses specific compile-time warnings or informational diagnostics. If an unknown diagnostic name is provided, RustyLR will trigger a compile-time error to catch typos.
 
 - **Global Suppression**: Using `%allow <diagnostic_name>;` suppresses all occurrences of that diagnostic globally.
-- **Targeted Suppression**: Using `%allow <diagnostic_name>(<target>);` suppresses the diagnostic only for a specific target. The target can be a non-terminal identifier (e.g. `MyRule`) or a terminal literal (e.g. `'+'` or `b'c'`).
+- **Targeted Suppression**: Using `%allow <diagnostic_name>(<target>);` suppresses the diagnostic only for a specific target. The target can be a non-terminal identifier (e.g. `MyRule`), a terminal literal (e.g. `'+'` or `b'c'`), a character/byte range literal (e.g. `'a'-'z'` or `b'a'-b'z'`), or a terminal set (e.g. `[ 'a'-'z' '+' ]`).
 
 When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>(<target>);` or `%allow <name>;` syntax to suppress it.
 
@@ -687,8 +687,10 @@ When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>(<tar
 #### Example
 
 ```
-%allow nonterm_unreachable(UnusedRule);    // Suppress unused warning specifically for UnusedRule
-%allow unused_terminals('+');              // Suppress unused warning specifically for terminal '+'
-%allow shift_reduce_conflict_resolved('+'); // Suppress resolution info specifically for terminal '+'
-%allow nonterm_unproductive;               // Suppress all unproductive warnings globally
+%allow nonterm_unreachable(UnusedRule);      // Suppress unused warning specifically for UnusedRule
+%allow unused_terminals('+');                // Suppress unused warning specifically for terminal '+'
+%allow unused_terminals([ 'a'-'z' '+' ]);    // Suppress unused warning specifically for set [ 'a'-'z' '+' ]
+%allow terminals_merged('a'-'z');            // Suppress merged info specifically for character range 'a'-'z'
+%allow shift_reduce_conflict_resolved('+');   // Suppress resolution info specifically for terminal '+'
+%allow nonterm_unproductive;                 // Suppress all unproductive warnings globally
 ```
