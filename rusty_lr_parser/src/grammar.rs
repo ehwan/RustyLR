@@ -2144,7 +2144,7 @@ impl Grammar {
             }
         }
 
-        // BFS reachability
+        // DFS reachability
         while let Some(nt_idx) = queue.pop() {
             for rule in &self.nonterminals[nt_idx].rules {
                 for token in &rule.tokens {
