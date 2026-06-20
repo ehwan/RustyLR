@@ -28,6 +28,7 @@ impl Index for u8 {
         self as usize
     }
     fn from_usize_unchecked(value: usize) -> Self {
+        debug_assert!(value <= u8::MAX as usize, "value {} out of bounds for u8", value);
         value as u8
     }
 }
@@ -37,6 +38,7 @@ impl Index for u16 {
         self as usize
     }
     fn from_usize_unchecked(value: usize) -> Self {
+        debug_assert!(value <= u16::MAX as usize, "value {} out of bounds for u16", value);
         value as u16
     }
 }
@@ -46,6 +48,7 @@ impl Index for u32 {
         self as usize
     }
     fn from_usize_unchecked(value: usize) -> Self {
+        debug_assert!(value <= u32::MAX as usize, "value {} out of bounds for u32", value);
         value as u32
     }
 }
