@@ -18,6 +18,25 @@ pub enum IdentOrLiteral {
     Byte(Located<u8>),
     Char(Located<char>),
 }
+impl IdentOrLiteral {
+    pub fn to_string_repr(&self) -> String {
+        match self {
+            IdentOrLiteral::Ident(ident) => ident.value().clone(),
+            IdentOrLiteral::Byte(b) => {
+                let byte = *b.value();
+                let b_tok =
+                    syn::LitByte::new(byte, proc_macro2::Span::call_site()).to_token_stream();
+                format!("{b_tok}")
+            }
+            IdentOrLiteral::Char(c) => {
+                let character = *c.value();
+                let c_tok =
+                    syn::LitChar::new(character, proc_macro2::Span::call_site()).to_token_stream();
+                format!("{c_tok}")
+            }
+        }
+    }
+}
 impl PartialEq for IdentOrLiteral {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
@@ -633,6 +652,7 @@ pub struct GrammarArgs {
     pub layout: TableLayout,
     pub dense_limit: usize,
     pub location_typename: Vec<(Location, TokenStream)>,
+    pub allowed_diagnostics: Vec<(Located<String>, Option<IdentOrLiteral>)>,
 
     pub error_recovered: Vec<RecoveredError>,
     pub span_manager: crate::parser::location::SpanManager,
@@ -655,6 +675,7 @@ impl Default for GrammarArgs {
             layout: TableLayout::Auto,
             dense_limit: 32768, // default 32KB
             location_typename: Vec::new(),
+            allowed_diagnostics: Vec::new(),
             error_recovered: Vec::new(),
             span_manager: crate::parser::location::SpanManager::default(),
         }

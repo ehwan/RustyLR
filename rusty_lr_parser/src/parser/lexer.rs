@@ -65,6 +65,7 @@ pub enum Lexed {
     NoOptim(Ident),      // %nooptim
     DPrec(Ident),        // %dprec
     Location(Ident),     // %location
+    Allow(Ident),        // %allow
 }
 impl Lexed {
     pub fn append_to_stream(self, stream: &mut TokenStream) {
@@ -150,6 +151,9 @@ impl Lexed {
             Lexed::Location(ident) => {
                 stream.append(ident);
             }
+            Lexed::Allow(ident) => {
+                stream.append(ident);
+            }
         }
     }
 }
@@ -205,6 +209,7 @@ impl std::fmt::Display for Lexed {
             Lexed::NoOptim(_) => write!(f, "nooptim"),
             Lexed::DPrec(_) => write!(f, "dprec"),
             Lexed::Location(_) => write!(f, "location"),
+            Lexed::Allow(_) => write!(f, "allow"),
         }
     }
 }
@@ -226,6 +231,7 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
         "nooptim" => Some(Lexed::NoOptim(ident)),
         "dprec" => Some(Lexed::DPrec(ident)),
         "location" => Some(Lexed::Location(ident)),
+        "allow" => Some(Lexed::Allow(ident)),
         _ => None,
     }
 }

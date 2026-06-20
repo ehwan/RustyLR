@@ -79,6 +79,7 @@ use rusty_lr_core::rule::ReduceType;
 %token nooptim Lexed::NoOptim(_);
 %token dprec Lexed::DPrec(_);
 %token location Lexed::Location(_);
+%token allow Lexed::Allow(_);
 
 %start Grammar;
 
@@ -626,6 +627,25 @@ Directive
             message: "Expected location type definition".to_string(),
             link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#location-tracking".to_string(),
             location: @location,
+        });
+    }
+    | percent allow ident semicolon {
+        let $ident = ident else {
+            unreachable!( "AllowDef-Ident" );
+        };
+        data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), None));
+    }
+    | percent allow ident lparen IdentOrLiteral rparen semicolon {
+        let $ident = ident else {
+            unreachable!( "AllowDef-Ident" );
+        };
+        data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), Some(IdentOrLiteral)));
+    }
+    | percent allow error semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected diagnostic name".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#diagnostic-suppression".to_string(),
+            location: @error,
         });
     }
     | percent error semicolon {

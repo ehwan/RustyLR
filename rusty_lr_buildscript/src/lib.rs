@@ -833,6 +833,17 @@ impl Builder {
                             ])
                     }
 
+                    ParseError::InvalidAllowDiagnostic { location, name } => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message(format!("unknown diagnostic name: `{}`", name))
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("unknown diagnostic name")])
+                            .with_notes(vec![
+                                "valid diagnostic names: nonterm_not_used, cycle, nonterm_data_not_used, unused_terminals, terminals_merged, terminal_class_rule_merge, single_non_terminal_rule, reduce_reduce_conflict_resolved, shift_reduce_conflict_resolved, shift_reduce_conflict_glr, reduce_reduce_conflict_glr".to_string(),
+                            ])
+                    }
+
                     ParseError::MaxSubstitutionDepthExceeded {
                         location,
                         max_depth,
@@ -1002,9 +1013,9 @@ impl Builder {
         let mut warnings = Vec::new();
         for warning in &grammar.warnings {
             let diag = match warning {
-                rusty_lr_parser::error::Warning::NonTermNotUsed { nonterm_idx } => {
+                rusty_lr_parser::error::Warning::NonTermNotUsed { nonterm_name } => {
                     let range = span_manager
-                        .get_byterange(&nonterm_idx.location())
+                        .get_byterange(&nonterm_name.location())
                         .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("NonTerminal deleted")
@@ -1014,9 +1025,9 @@ impl Builder {
                             "This non-terminal cannot be reached from initial state".to_string(),
                         ])
                 }
-                rusty_lr_parser::error::Warning::Cycle { nonterm_idx } => {
+                rusty_lr_parser::error::Warning::Cycle { nonterm_name } => {
                     let range = span_manager
-                        .get_byterange(&nonterm_idx.location())
+                        .get_byterange(&nonterm_name.location())
                         .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("Cycle detected")
@@ -1026,9 +1037,9 @@ impl Builder {
                             "This non-terminal is involved in bad cycle".to_string()
                         ])
                 }
-                rusty_lr_parser::error::Warning::NonTermDataNotUsed { nonterm_idx } => {
+                rusty_lr_parser::error::Warning::NonTermDataNotUsed { nonterm_name } => {
                     let range = span_manager
-                        .get_byterange(&nonterm_idx.location())
+                        .get_byterange(&nonterm_name.location())
                         .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("NonTerminal data type not used")
@@ -1053,7 +1064,7 @@ impl Builder {
                         .with_notes(notes)
                 }
             };
-            warnings.push(diag);
+            warnings.push((diag, warning));
         }
 
         let mut infos = Vec::new();
@@ -1086,11 +1097,11 @@ impl Builder {
                         ])
                 }
                 rusty_lr_parser::error::Info::SingleNonTerminalRule {
-                    nonterm_idx,
+                    nonterm_name,
                     rule_location,
                 } => {
                     let nonterm_range = span_manager
-                        .get_byterange(&nonterm_idx.location())
+                        .get_byterange(&nonterm_name.location())
                         .unwrap_or(0..0);
                     let rule_range = span_manager.get_byterange(rule_location).unwrap_or(0..0);
                     Diagnostic::note()
@@ -1364,13 +1375,16 @@ impl Builder {
                         .with_notes(notes)
                 }
             };
-            infos.push(diag);
+            infos.push((diag, info));
         }
 
         // Print resolved conflict notes and unresolved GLR conflict help notes based on user flags.
         // We match on the new generalized `Info` enum variants to decide whether to print them.
         if self.note_conflicts_resolving || self.note_conflicts {
-            for (diag, info_variant) in infos.iter().zip(&grammar.infos) {
+            for (diag, info_variant) in &infos {
+                if grammar.is_info_allowed(info_variant) {
+                    continue;
+                }
                 let should_print = match info_variant {
                     rusty_lr_parser::error::Info::ShiftReduceConflictGLR { .. }
                     | rusty_lr_parser::error::Info::ReduceReduceConflictGLR { .. } => {
@@ -1386,15 +1400,24 @@ impl Builder {
                     _ => true, // Optimization notes are printed unconditionally
                 };
                 if should_print {
+                    let mut notes = diag.notes.clone();
+                    notes.push(format!(
+                        "to ignore this info, add `{}` to the grammar",
+                        info_variant.suggestion(&grammar)
+                    ));
+                    let diag = diag.clone().with_notes(notes);
                     let writer = self.stream();
                     let config = codespan_reporting::term::Config::default();
-                    term::emit_to_write_style(&mut writer.lock(), &config, &files, diag)
+                    term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                         .expect("Failed to write verbose/verbose stream");
                 }
             }
         } else {
             // Print only optimization notes unconditionally if conflict flags are disabled.
-            for (diag, info_variant) in infos.iter().zip(&grammar.infos) {
+            for (diag, info_variant) in &infos {
+                if grammar.is_info_allowed(info_variant) {
+                    continue;
+                }
                 let should_print = match info_variant {
                     rusty_lr_parser::error::Info::TerminalsMerged { .. }
                     | rusty_lr_parser::error::Info::TerminalClassRuleMerge { .. }
@@ -1402,19 +1425,34 @@ impl Builder {
                     _ => false,
                 };
                 if should_print {
+                    let mut notes = diag.notes.clone();
+                    notes.push(format!(
+                        "to ignore this info, add `{}` to the grammar",
+                        info_variant.suggestion(&grammar)
+                    ));
+                    let diag = diag.clone().with_notes(notes);
                     let writer = self.stream();
                     let config = codespan_reporting::term::Config::default();
-                    term::emit_to_write_style(&mut writer.lock(), &config, &files, diag)
+                    term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                         .expect("Failed to write verbose/verbose stream");
                 }
             }
         }
 
         // print warnings
-        for diag in &warnings {
+        for (diag, warning) in &warnings {
+            if grammar.is_warning_allowed(warning) {
+                continue;
+            }
+            let mut notes = diag.notes.clone();
+            notes.push(format!(
+                "to ignore this warning, add `{}` to the grammar",
+                warning.suggestion(&grammar)
+            ));
+            let diag = diag.clone().with_notes(notes);
             let writer = self.stream();
             let config = codespan_reporting::term::Config::default();
-            term::emit_to_write_style(&mut writer.lock(), &config, &files, diag)
+            term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
                 .expect("Failed to write to verbose stream");
         }
 
