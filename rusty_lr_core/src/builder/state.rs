@@ -43,12 +43,12 @@ impl<Term, NonTerm> Default for State<Term, NonTerm> {
 }
 
 impl<Term, NonTerm> From<State<Term, NonTerm>>
-    for crate::parser::state::IntermediateState<Term, NonTerm, usize, usize>
+    for crate::parser::state::IntermediateState<Term, NonTerm>
 where
     Term: Ord,
 {
     fn from(state: crate::builder::State<Term, NonTerm>) -> Self {
-        use crate::parser::state::ShiftTarget;
+        use crate::parser::table::ShiftTarget;
 
         crate::parser::state::IntermediateState {
             shift_goto_map_term: state

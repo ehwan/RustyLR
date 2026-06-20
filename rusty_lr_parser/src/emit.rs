@@ -743,7 +743,7 @@ impl Grammar {
             }
             shift_nonterm_offsets.push(shift_nonterm_data.len() as u32);
 
-            // 3. reduce_map: Vec<(TermClass, Vec<RuleIndex>)>
+            // 3. reduce_map: Vec<(TermClass, Vec<usize>)>
             for (term, rules) in &state.reduce_map {
                 let term_idx = match term {
                     TerminalSymbol::Term(t) => *t,
@@ -901,9 +901,9 @@ impl Grammar {
                             for idx in term_start..term_end {
                                 let val = SHIFT_TERM_DATA[idx];
                                 let term_class = #termclass_typename::from_usize((val & 0x7fff) as usize);
-                                let state = ((val >> 15) & 0xffff) as #state_index_typename;
+                                let state = ((val >> 15) & 0xffff) as usize;
                                 let push = (val >> 31) != 0;
-                                shift_goto_map_term.push((term_class, #module_prefix::parser::state::ShiftTarget::new(state, push)));
+                                shift_goto_map_term.push((term_class, #module_prefix::parser::table::ShiftTarget::new(state, push)));
                             }
 
                             // Decode shift transitions for non-terminals (non-terminal index, next state index, push flag)
@@ -913,9 +913,9 @@ impl Grammar {
                             for idx in nonterm_start..nonterm_end {
                                 let val = SHIFT_NONTERM_DATA[idx];
                                 let nonterm = #nonterminals_enum_name::from_usize((val & 0x7fff) as usize);
-                                let state = ((val >> 15) & 0xffff) as #state_index_typename;
+                                let state = ((val >> 15) & 0xffff) as usize;
                                 let push = (val >> 31) != 0;
-                                shift_goto_map_nonterm.push((nonterm, #module_prefix::parser::state::ShiftTarget::new(state, push)));
+                                shift_goto_map_nonterm.push((nonterm, #module_prefix::parser::table::ShiftTarget::new(state, push)));
                             }
 
                             // Decode the reduce action map (variable-length encoding)
@@ -929,7 +929,7 @@ impl Grammar {
                                 let len = REDUCE_DATA[idx + 1] as usize;
                                 let mut rules = Vec::with_capacity(len);
                                 for r_idx in 0..len {
-                                    rules.push(REDUCE_DATA[idx + 2 + r_idx] as #rule_index_typename);
+                                    rules.push(REDUCE_DATA[idx + 2 + r_idx] as usize);
                                 }
                                 reduce_map.push((term_class, rules));
                                 idx += 2 + len;

@@ -113,9 +113,7 @@ pub struct Grammar {
     /// do terminal classificate optimization
     pub optimize: bool,
     pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<usize>, usize>,
-    pub states: Vec<
-        rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<usize>, usize, usize, usize>,
-    >,
+    pub states: Vec<rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<usize>, usize>>,
 
     /// set of terminals for each terminal class
     pub terminal_classes: Vec<TerminalClassDefinition>,
@@ -2545,12 +2543,7 @@ impl Grammar {
             }
         };
         let mut states: Vec<
-            rusty_lr_core::parser::state::IntermediateState<
-                TerminalSymbol<usize>,
-                usize,
-                usize,
-                usize,
-            >,
+            rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<usize>, usize>,
         > = states.into_iter().map(Into::into).collect();
 
         // Identify states that only perform a single reduction of a single-token rule.

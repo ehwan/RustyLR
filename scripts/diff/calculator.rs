@@ -713,12 +713,12 @@ impl ::rusty_lr::parser::Parser for EParser {
                         let term_class = ETerminalClasses::from_usize(
                             (val & 0x7fff) as usize,
                         );
-                        let state = ((val >> 15) & 0xffff) as u8;
+                        let state = ((val >> 15) & 0xffff) as usize;
                         let push = (val >> 31) != 0;
                         shift_goto_map_term
                             .push((
                                 term_class,
-                                ::rusty_lr::parser::state::ShiftTarget::new(state, push),
+                                ::rusty_lr::parser::table::ShiftTarget::new(state, push),
                             ));
                     }
                     let nonterm_start = SHIFT_NONTERM_OFFSETS[i] as usize;
@@ -729,12 +729,12 @@ impl ::rusty_lr::parser::Parser for EParser {
                     for idx in nonterm_start..nonterm_end {
                         let val = SHIFT_NONTERM_DATA[idx];
                         let nonterm = ENonTerminals::from_usize((val & 0x7fff) as usize);
-                        let state = ((val >> 15) & 0xffff) as u8;
+                        let state = ((val >> 15) & 0xffff) as usize;
                         let push = (val >> 31) != 0;
                         shift_goto_map_nonterm
                             .push((
                                 nonterm,
-                                ::rusty_lr::parser::state::ShiftTarget::new(state, push),
+                                ::rusty_lr::parser::table::ShiftTarget::new(state, push),
                             ));
                     }
                     let reduce_start = REDUCE_OFFSETS[i] as usize;
@@ -747,7 +747,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                         let len = REDUCE_DATA[idx + 1] as usize;
                         let mut rules = Vec::with_capacity(len);
                         for r_idx in 0..len {
-                            rules.push(REDUCE_DATA[idx + 2 + r_idx] as u8);
+                            rules.push(REDUCE_DATA[idx + 2 + r_idx] as usize);
                         }
                         reduce_map.push((term_class, rules));
                         idx += 2 + len;
