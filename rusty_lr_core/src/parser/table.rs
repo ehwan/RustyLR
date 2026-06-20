@@ -18,7 +18,7 @@ use crate::TriState;
 pub struct RuleInfo<NonTerm> {
     pub name: NonTerm,
     pub len: usize,
-    pub precedence: Option<crate::rule::Precedence>,
+    pub precedence: crate::rule::Precedence,
 }
 
 /// Intermediate flat parser table data used by generated code before converting to a concrete

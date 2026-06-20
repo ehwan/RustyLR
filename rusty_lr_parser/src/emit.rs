@@ -660,27 +660,24 @@ impl Grammar {
             );
             rule_names.push(rule.rule.name as u32);
 
-            let prec_val = if let Some(precedence) = rule.rule.precedence {
-                match precedence {
-                    rusty_lr_core::rule::Precedence::Fixed(level) => {
-                        assert!(
-                            level < (1 << 30),
-                            "Precedence level {} exceeds 30-bit limit",
-                            level
-                        );
-                        ((level as u32) << 2) | 1
-                    }
-                    rusty_lr_core::rule::Precedence::Dynamic(idx) => {
-                        assert!(
-                            idx < (1 << 30),
-                            "Precedence dynamic token index {} exceeds 30-bit limit",
-                            idx
-                        );
-                        ((idx as u32) << 2) | 2
-                    }
+            let prec_val = match rule.rule.precedence {
+                rusty_lr_core::rule::Precedence::None => 0,
+                rusty_lr_core::rule::Precedence::Fixed(level) => {
+                    assert!(
+                        level < (1 << 30),
+                        "Precedence level {} exceeds 30-bit limit",
+                        level
+                    );
+                    ((level as u32) << 2) | 1
                 }
-            } else {
-                0
+                rusty_lr_core::rule::Precedence::Dynamic(idx) => {
+                    assert!(
+                        idx < (1 << 30),
+                        "Precedence dynamic token index {} exceeds 30-bit limit",
+                        idx
+                    );
+                    ((idx as u32) << 2) | 2
+                }
             };
             rule_precedences.push(prec_val);
             rule_lengths.push(rule.rule.rule.len() as u32);
@@ -881,9 +878,9 @@ impl Grammar {
 
                             let prec_val = RULE_PRECEDENCES[i];
                             let precedence = match prec_val & 3 {
-                                0 => None,
-                                1 => Some(#module_prefix::rule::Precedence::Fixed((prec_val >> 2) as usize)),
-                                2 => Some(#module_prefix::rule::Precedence::Dynamic((prec_val >> 2) as usize)),
+                                0 => #module_prefix::rule::Precedence::None,
+                                1 => #module_prefix::rule::Precedence::Fixed((prec_val >> 2) as usize),
+                                2 => #module_prefix::rule::Precedence::Dynamic((prec_val >> 2) as usize),
                                 _ => unreachable!(),
                             };
 

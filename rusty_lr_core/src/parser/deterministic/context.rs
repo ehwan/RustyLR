@@ -439,13 +439,13 @@ impl<
                 let tokens_len = rule.len;
 
                 let reduce_prec = match rule.precedence {
-                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
-                    Some(crate::rule::Precedence::Dynamic(token_idx)) => {
+                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
+                    crate::rule::Precedence::Dynamic(token_idx) => {
                         // get token_idx'th precedence from back of precedence stack
                         let idx = self.precedence_stack.len() - tokens_len + token_idx;
                         self.precedence_stack[idx]
                     }
-                    None => Precedence::none(),
+                    crate::rule::Precedence::None => Precedence::none(),
                 };
 
                 // resolve shift/reduce conflict by precedence
@@ -677,8 +677,8 @@ impl<
                 let tokens_len = rule.len;
 
                 let reduce_prec = match rule.precedence {
-                    Some(crate::rule::Precedence::Fixed(level)) => Precedence::new(level as u8),
-                    Some(crate::rule::Precedence::Dynamic(token_idx)) => {
+                    crate::rule::Precedence::Fixed(level) => Precedence::new(level as u8),
+                    crate::rule::Precedence::Dynamic(token_idx) => {
                         // get token_idx'th precedence from back of precedence stack
                         let idx = stack_len + extra_precedence_stack.len() - tokens_len + token_idx;
                         if idx < stack_len {
@@ -688,7 +688,7 @@ impl<
                             extra_precedence_stack[idx]
                         }
                     }
-                    None => Precedence::none(),
+                    crate::rule::Precedence::None => Precedence::none(),
                 };
 
                 // resolve shift/reduce conflict by precedence

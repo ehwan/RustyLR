@@ -925,21 +925,9 @@ impl ::rusty_lr::parser::Parser for EParser {
                     let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
                     let prec_val = RULE_PRECEDENCES[i];
                     let precedence = match prec_val & 3 {
-                        0 => None,
-                        1 => {
-                            Some(
-                                ::rusty_lr::rule::Precedence::Fixed(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
-                        2 => {
-                            Some(
-                                ::rusty_lr::rule::Precedence::Dynamic(
-                                    (prec_val >> 2) as usize,
-                                ),
-                            )
-                        }
+                        0 => ::rusty_lr::rule::Precedence::None,
+                        1 => ::rusty_lr::rule::Precedence::Fixed((prec_val >> 2) as usize),
+                        2 => ::rusty_lr::rule::Precedence::Dynamic((prec_val >> 2) as usize),
                         _ => unreachable!(),
                     };
                     rules

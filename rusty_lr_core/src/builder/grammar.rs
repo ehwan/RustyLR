@@ -70,7 +70,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         &mut self,
         name: NonTerm,
         rule: Vec<Token<TerminalSymbol<Term>, NonTerm>>,
-        precedence: Option<Precedence>,
+        precedence: Precedence,
         priority: usize,
     ) -> usize
     where
@@ -838,13 +838,9 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 let mut remove_shift = true;
 
                 for &reduce_rule in reduce_rules.iter() {
-                    let Some(reduce_op) = self.rules[reduce_rule].rule.precedence else {
-                        // no operator for this reduce rule
-                        remove_shift = false;
-                        continue;
-                    };
+                    let reduce_op = self.rules[reduce_rule].rule.precedence;
                     let Precedence::Fixed(reduce_prec) = reduce_op else {
-                        // not fixed operator, so no precedence known at this time
+                        // no fixed operator precedence known at this time
                         remove_shift = false;
                         continue;
                     };
@@ -1038,13 +1034,9 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
             let mut remove_shift = true;
 
             for &reduce_rule in reduce_rules.iter() {
-                let Some(reduce_op) = self.rules[reduce_rule].rule.precedence else {
-                    // no operator for this reduce rule
-                    remove_shift = false;
-                    continue;
-                };
+                let reduce_op = self.rules[reduce_rule].rule.precedence;
                 let Precedence::Fixed(reduce_prec) = reduce_op else {
-                    // not fixed operator, so no precedence known at this time
+                    // no fixed operator precedence known at this time
                     remove_shift = false;
                     continue;
                 };

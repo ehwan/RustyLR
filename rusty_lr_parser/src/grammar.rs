@@ -1690,6 +1690,11 @@ impl Grammar {
                                     changed = true;
                                 }
                             }
+                            Precedence::None => {
+                                if nonterm_prec_candidates[nonterm_idx].insert(None) {
+                                    changed = true;
+                                }
+                            }
                         },
                         _ => {
                             if nonterm_prec_candidates[nonterm_idx].insert(None) {
@@ -2512,7 +2517,9 @@ impl Grammar {
                 grammar.add_rule(
                     nonterm_id,
                     tokens,
-                    rule.prec.map(Located::into_value),
+                    rule.prec
+                        .map(Located::into_value)
+                        .unwrap_or(Precedence::None),
                     rule.dprec.map_or(0, Located::into_value),
                 );
             }
