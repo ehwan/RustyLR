@@ -5,7 +5,7 @@ use crate::Location;
 
 use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
-use crate::parser::state::Index;
+use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;

@@ -51,7 +51,7 @@ pub trait Parser {
     /// The type of non-terminal symbols.
     type NonTerm: nonterminal::NonTerminal + 'static;
     /// The compact integer type used for state indices.
-    type StateIndex: state::Index + 'static;
+    type StateIndex: table::Index + 'static;
     /// The reduce-rule container for a terminal action.
     type ReduceRules: table::ReduceRules + 'static;
     /// The type of the parser table.

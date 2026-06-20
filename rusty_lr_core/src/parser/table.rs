@@ -3,10 +3,52 @@
 //! This module is the public home for parser table layouts used by generated parsers.
 
 use crate::parser::nonterminal::NonTerminal;
-use crate::parser::state::Index;
 use crate::parser::state::IntermediateState;
 use crate::parser::terminalclass::TerminalClass;
 use crate::TriState;
+
+/// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
+/// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.
+pub trait Index: Copy {
+    fn into_usize(self) -> usize;
+    fn from_usize_unchecked(value: usize) -> Self;
+}
+
+impl Index for usize {
+    fn into_usize(self) -> usize {
+        self
+    }
+    fn from_usize_unchecked(value: usize) -> Self {
+        value
+    }
+}
+
+impl Index for u8 {
+    fn into_usize(self) -> usize {
+        self as usize
+    }
+    fn from_usize_unchecked(value: usize) -> Self {
+        value as u8
+    }
+}
+
+impl Index for u16 {
+    fn into_usize(self) -> usize {
+        self as usize
+    }
+    fn from_usize_unchecked(value: usize) -> Self {
+        value as u16
+    }
+}
+
+impl Index for u32 {
+    fn into_usize(self) -> usize {
+        self as usize
+    }
+    fn from_usize_unchecked(value: usize) -> Self {
+        value as u32
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct ShiftTarget<StateIndex> {
@@ -19,6 +61,16 @@ impl<StateIndex> ShiftTarget<StateIndex> {
     #[inline]
     pub fn new(state: StateIndex, push: bool) -> Self {
         ShiftTarget { state, push }
+    }
+}
+
+impl ShiftTarget<usize> {
+    #[inline]
+    fn compact<StateIndex: Index>(self) -> ShiftTarget<StateIndex> {
+        ShiftTarget {
+            state: StateIndex::from_usize_unchecked(self.state),
+            push: self.push,
+        }
     }
 }
 
@@ -35,9 +87,9 @@ pub struct RuleInfo<NonTerm> {
 
 /// Intermediate flat parser table data used by generated code before converting to a concrete
 /// dense or sparse runtime layout.
-pub struct IntermediateTables<TermClass, NonTerm, StateIndex, RuleIndex> {
+pub struct IntermediateTables<TermClass, NonTerm> {
     /// One decoded transition/action row per LR state.
-    pub state_rows: Vec<IntermediateState<TermClass, NonTerm, StateIndex, RuleIndex>>,
+    pub state_rows: Vec<IntermediateState<TermClass, NonTerm>>,
     pub rules: Vec<RuleInfo<NonTerm>>,
 }
 
@@ -225,16 +277,16 @@ pub struct SparseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex> {
     rules: Vec<RuleInfo<NonTerm>>,
 }
 
-impl<TermClass, NonTerm, RuleContainer, StateIndex, RuleIndex>
-    From<IntermediateTables<TermClass, NonTerm, StateIndex, RuleIndex>>
+impl<TermClass, NonTerm, RuleContainer, StateIndex> From<IntermediateTables<TermClass, NonTerm>>
     for SparseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex>
 where
     TermClass: TerminalClass + Ord,
     NonTerm: NonTerminal + Ord,
+    StateIndex: Index,
     RuleContainer: ReduceRules,
-    RuleContainer::RuleIndex: TryFrom<RuleIndex>,
+    RuleContainer::RuleIndex: TryFrom<usize>,
 {
-    fn from(intermediate: IntermediateTables<TermClass, NonTerm, StateIndex, RuleIndex>) -> Self {
+    fn from(intermediate: IntermediateTables<TermClass, NonTerm>) -> Self {
         let mut term_offsets = Vec::with_capacity(intermediate.state_rows.len() + 1);
         let mut term_actions = Vec::new();
         let mut nonterm_offsets = Vec::with_capacity(intermediate.state_rows.len() + 1);
@@ -258,14 +310,17 @@ where
                         match shift_term.cmp(reduce_term) {
                             Ordering::Less => {
                                 let (term, shift) = shifts.next().unwrap();
-                                term_actions.push((term, TermAction::Shift(shift)));
+                                term_actions.push((term, TermAction::Shift(shift.compact())));
                             }
                             Ordering::Equal => {
                                 let (term, shift) = shifts.next().unwrap();
                                 let (_, rules) = reduces.next().unwrap();
                                 term_actions.push((
                                     term,
-                                    TermAction::ShiftReduce(shift, RuleContainer::from_set(rules)),
+                                    TermAction::ShiftReduce(
+                                        shift.compact(),
+                                        RuleContainer::from_set(rules),
+                                    ),
                                 ));
                             }
                             Ordering::Greater => {
@@ -279,7 +334,7 @@ where
                     }
                     (Some(_), None) => {
                         let (term, shift) = shifts.next().unwrap();
-                        term_actions.push((term, TermAction::Shift(shift)));
+                        term_actions.push((term, TermAction::Shift(shift.compact())));
                     }
                     (None, Some(_)) => {
                         let (term, rules) = reduces.next().unwrap();
@@ -291,7 +346,12 @@ where
             }
             term_offsets.push(term_actions.len());
 
-            nonterm_goto.extend(state.shift_goto_map_nonterm);
+            nonterm_goto.extend(
+                state
+                    .shift_goto_map_nonterm
+                    .into_iter()
+                    .map(|(nonterm, target)| (nonterm, target.compact())),
+            );
             nonterm_offsets.push(nonterm_goto.len());
             can_accept_error.push(state.can_accept_error);
         }
@@ -432,17 +492,16 @@ pub struct DenseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex> {
     rules: Vec<RuleInfo<NonTerm>>,
 }
 
-impl<TermClass, NonTerm, RuleContainer, StateIndex, RuleIndex>
-    From<IntermediateTables<TermClass, NonTerm, StateIndex, RuleIndex>>
+impl<TermClass, NonTerm, RuleContainer, StateIndex> From<IntermediateTables<TermClass, NonTerm>>
     for DenseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex>
 where
     TermClass: TerminalClass + Ord,
     NonTerm: NonTerminal + Ord,
-    StateIndex: Copy,
+    StateIndex: Index,
     RuleContainer: Clone + ReduceRules,
-    RuleContainer::RuleIndex: TryFrom<RuleIndex>,
+    RuleContainer::RuleIndex: TryFrom<usize>,
 {
-    fn from(intermediate: IntermediateTables<TermClass, NonTerm, StateIndex, RuleIndex>) -> Self {
+    fn from(intermediate: IntermediateTables<TermClass, NonTerm>) -> Self {
         let mut term_offsets = Vec::with_capacity(intermediate.state_rows.len() + 1);
         let mut term_mins = Vec::with_capacity(intermediate.state_rows.len());
         let mut term_actions = Vec::new();
@@ -495,7 +554,7 @@ where
                             Ordering::Less => {
                                 let (term, shift) = shifts.next().unwrap();
                                 let idx = term_base + term.to_usize() - term_min;
-                                term_actions[idx] = Some(TermAction::Shift(shift));
+                                term_actions[idx] = Some(TermAction::Shift(shift.compact()));
                                 term_keys.push(term);
                             }
                             Ordering::Equal => {
@@ -503,7 +562,7 @@ where
                                 let (_, rules) = reduces.next().unwrap();
                                 let idx = term_base + term.to_usize() - term_min;
                                 term_actions[idx] = Some(TermAction::ShiftReduce(
-                                    shift,
+                                    shift.compact(),
                                     RuleContainer::from_set(rules),
                                 ));
                                 term_keys.push(term);
@@ -519,7 +578,7 @@ where
                     (Some(_), None) => {
                         let (term, shift) = shifts.next().unwrap();
                         let idx = term_base + term.to_usize() - term_min;
-                        term_actions[idx] = Some(TermAction::Shift(shift));
+                        term_actions[idx] = Some(TermAction::Shift(shift.compact()));
                         term_keys.push(term);
                     }
                     (None, Some(_)) => {
@@ -549,7 +608,7 @@ where
             nonterm_goto.resize_with(nonterm_base + nonterm_len, || None);
             for (nonterm, target) in state.shift_goto_map_nonterm {
                 let idx = nonterm_base + nonterm.to_usize() - nonterm_min;
-                nonterm_goto[idx] = Some(target);
+                nonterm_goto[idx] = Some(target.compact());
                 nonterm_keys.push(nonterm);
             }
             nonterm_offsets.push(nonterm_goto.len());

@@ -43,7 +43,7 @@ impl<Term, NonTerm> Default for State<Term, NonTerm> {
 }
 
 impl<Term, NonTerm> From<State<Term, NonTerm>>
-    for crate::parser::state::IntermediateState<Term, NonTerm, usize, usize>
+    for crate::parser::state::IntermediateState<Term, NonTerm>
 where
     Term: Ord,
 {
