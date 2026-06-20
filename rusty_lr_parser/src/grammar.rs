@@ -155,7 +155,8 @@ impl Grammar {
             match warning {
                 Warning::NonTermNotUsed { nonterm_name }
                 | Warning::Cycle { nonterm_name }
-                | Warning::NonTermDataNotUsed { nonterm_name } => {
+                | Warning::NonTermDataNotUsed { nonterm_name }
+                | Warning::NonTermUnproductive { nonterm_name } => {
                     if scopes.contains(&Some(nonterm_name.value().clone())) {
                         return true;
                     }
@@ -2126,17 +2127,38 @@ impl Grammar {
             self.other_used = other_was_used;
         }
 
-        // check for unused non-terminals
+        // Reachability analysis from the start symbol
         let mut nonterm_used = vec![false; self.nonterminals.len()];
-        for nonterm in &self.nonterminals {
-            for rule in &nonterm.rules {
+        let mut queue = Vec::new();
+
+        let start_idx_opt = self.nonterminals_index.get(self.start_rule_name.value());
+        if let Some(&start_idx) = start_idx_opt {
+            nonterm_used[start_idx] = true;
+            queue.push(start_idx);
+        }
+
+        // Also queue protected non-terminals
+        for (i, nonterm) in self.nonterminals.iter().enumerate() {
+            if nonterm.is_protected() && !nonterm_used[i] {
+                nonterm_used[i] = true;
+                queue.push(i);
+            }
+        }
+
+        // BFS reachability
+        while let Some(nt_idx) = queue.pop() {
+            for rule in &self.nonterminals[nt_idx].rules {
                 for token in &rule.tokens {
-                    if let Token::NonTerm(nonterm_idx) = token.token {
-                        nonterm_used[nonterm_idx] = true;
+                    if let Token::NonTerm(next_nt) = token.token {
+                        if !nonterm_used[next_nt] {
+                            nonterm_used[next_nt] = true;
+                            queue.push(next_nt);
+                        }
                     }
                 }
             }
         }
+
         for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
             // do not delete protected non-terminals
             if nonterm.is_protected() {
@@ -2155,6 +2177,76 @@ impl Grammar {
                         nonterm_name: nonterm.name.clone(),
                     });
                 }
+            }
+        }
+
+        // Productivity Analysis
+        // A non-terminal is productive if it has at least one rule that contains only productive symbols (terminals, or productive non-terminals).
+        let mut productive = vec![false; self.nonterminals.len()];
+        let mut prod_changed = true;
+
+        while prod_changed {
+            prod_changed = false;
+            for (i, nonterm) in self.nonterminals.iter().enumerate() {
+                if productive[i] {
+                    continue;
+                }
+
+                let mut is_productive = false;
+                for rule in &nonterm.rules {
+                    let mut rule_productive = true;
+                    for token in &rule.tokens {
+                        if let Token::NonTerm(next_nt) = token.token {
+                            if !productive[next_nt] {
+                                rule_productive = false;
+                                break;
+                            }
+                        }
+                    }
+                    if rule_productive {
+                        is_productive = true;
+                        break;
+                    }
+                }
+
+                if is_productive {
+                    productive[i] = true;
+                    prod_changed = true;
+                }
+            }
+        }
+
+        // Remove rules containing unproductive non-terminals
+        for (nonterm_idx, nonterm) in self.nonterminals.iter_mut().enumerate() {
+            if nonterm.is_protected() && nonterm.rules.is_empty() {
+                continue;
+            }
+
+            let original_rule_count = nonterm.rules.len();
+            if original_rule_count == 0 {
+                continue;
+            }
+
+            nonterm.rules.retain(|rule| {
+                rule.tokens.iter().all(|token| {
+                    if let Token::NonTerm(next_nt) = token.token {
+                        productive[next_nt]
+                    } else {
+                        true
+                    }
+                })
+            });
+
+            if nonterm.rules.len() < original_rule_count {
+                something_changed = true;
+            }
+
+            // If it lost all its rules and is now unproductive
+            if nonterm.rules.is_empty() && !productive[nonterm_idx] && !nonterm.is_auto_generated()
+            {
+                self.warnings.push(Warning::NonTermUnproductive {
+                    nonterm_name: nonterm.name.clone(),
+                });
             }
         }
 

@@ -408,6 +408,7 @@ pub enum Warning {
     NonTermNotUsed { nonterm_name: Located<String> },
     Cycle { nonterm_name: Located<String> },
     NonTermDataNotUsed { nonterm_name: Located<String> },
+    NonTermUnproductive { nonterm_name: Located<String> },
     UnusedTerminals { class_idx: TerminalClass },
 }
 
@@ -417,6 +418,7 @@ impl Warning {
             Warning::NonTermNotUsed { .. } => "nonterm_not_used",
             Warning::Cycle { .. } => "cycle",
             Warning::NonTermDataNotUsed { .. } => "nonterm_data_not_used",
+            Warning::NonTermUnproductive { .. } => "nonterm_unproductive",
             Warning::UnusedTerminals { .. } => "unused_terminals",
         }
     }
@@ -425,7 +427,8 @@ impl Warning {
         match self {
             Warning::NonTermNotUsed { nonterm_name }
             | Warning::Cycle { nonterm_name }
-            | Warning::NonTermDataNotUsed { nonterm_name } => {
+            | Warning::NonTermDataNotUsed { nonterm_name }
+            | Warning::NonTermUnproductive { nonterm_name } => {
                 let name = nonterm_name.value();
                 format!("%allow {}({});", self.name(), name)
             }
@@ -488,6 +491,7 @@ impl Warning {
             Warning::NonTermNotUsed { nonterm_name } => vec![nonterm_name.location()],
             Warning::Cycle { nonterm_name } => vec![nonterm_name.location()],
             Warning::NonTermDataNotUsed { nonterm_name } => vec![nonterm_name.location()],
+            Warning::NonTermUnproductive { nonterm_name } => vec![nonterm_name.location()],
             Warning::UnusedTerminals { .. } => Vec::new(),
         }
     }
@@ -506,6 +510,10 @@ impl Warning {
             Warning::NonTermDataNotUsed { nonterm_name } => {
                 let name = nonterm_name.value();
                 format!("Non-terminal `{name}`'s data type is not used in any reduce action")
+            }
+            Warning::NonTermUnproductive { nonterm_name } => {
+                let name = nonterm_name.value();
+                format!("Non-terminal `{name}` is unproductive and cannot derive any sequence of terminals")
             }
             Warning::UnusedTerminals { class_idx } => {
                 let class_name = grammar.class_pretty_name_abbr(*class_idx);

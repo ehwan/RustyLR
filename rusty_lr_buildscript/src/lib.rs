@@ -1025,6 +1025,18 @@ impl Builder {
                             "This non-terminal cannot be reached from initial state".to_string(),
                         ])
                 }
+                rusty_lr_parser::error::Warning::NonTermUnproductive { nonterm_name } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_name.location())
+                        .unwrap_or(0..0);
+                    Diagnostic::warning()
+                        .with_message("NonTerminal deleted")
+                        .with_labels(vec![Label::primary(file_id, range)
+                            .with_message("non-terminal defined here")])
+                        .with_notes(vec![
+                            "This non-terminal is unproductive (cannot derive any terminal strings)".to_string(),
+                        ])
+                }
                 rusty_lr_parser::error::Warning::Cycle { nonterm_name } => {
                     let range = span_manager
                         .get_byterange(&nonterm_name.location())
