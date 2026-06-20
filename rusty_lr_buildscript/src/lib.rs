@@ -1014,8 +1014,10 @@ impl Builder {
         let mut warnings = Vec::new();
         for warning in &grammar.warnings {
             let diag = match warning {
-                rusty_lr_parser::error::Warning::NonTermNotUsed { nonterm_location } => {
-                    let range = span_manager.get_byterange(nonterm_location).unwrap_or(0..0);
+                rusty_lr_parser::error::Warning::NonTermNotUsed { nonterm_idx } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("NonTerminal deleted")
                         .with_labels(vec![Label::primary(file_id, range)
@@ -1024,8 +1026,10 @@ impl Builder {
                             "This non-terminal cannot be reached from initial state".to_string(),
                         ])
                 }
-                rusty_lr_parser::error::Warning::Cycle { nonterm_location } => {
-                    let range = span_manager.get_byterange(nonterm_location).unwrap_or(0..0);
+                rusty_lr_parser::error::Warning::Cycle { nonterm_idx } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("Cycle detected")
                         .with_labels(vec![Label::primary(file_id, range)
@@ -1034,8 +1038,10 @@ impl Builder {
                             "This non-terminal is involved in bad cycle".to_string()
                         ])
                 }
-                rusty_lr_parser::error::Warning::NonTermDataNotUsed { nonterm_location } => {
-                    let range = span_manager.get_byterange(nonterm_location).unwrap_or(0..0);
+                rusty_lr_parser::error::Warning::NonTermDataNotUsed { nonterm_idx } => {
+                    let range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("NonTerminal data type not used")
                         .with_labels(vec![Label::primary(file_id, range)
@@ -1046,10 +1052,13 @@ impl Builder {
                             "Consider removing data type to optimize memory usage".to_string(),
                         ])
                 }
-                rusty_lr_parser::error::Warning::UnusedTerminals {
-                    class_name,
-                    terminals,
-                } => {
+                rusty_lr_parser::error::Warning::UnusedTerminals { class_idx } => {
+                    let class_name = grammar.class_pretty_name_abbr(*class_idx);
+                    let terminals = grammar.terminal_classes[*class_idx]
+                        .terminals
+                        .iter()
+                        .map(|&term| grammar.term_pretty_name(term))
+                        .collect::<Vec<_>>();
                     let notes = vec![format!("{}: {}", class_name, terminals.join(", "))];
                     Diagnostic::warning()
                         .with_message("These terminals are not used in the grammar")
@@ -1062,10 +1071,16 @@ impl Builder {
         let mut infos = Vec::new();
         for info in &grammar.infos {
             let diag = match info {
-                rusty_lr_parser::error::Info::TerminalsMerged {
-                    class_name,
-                    terminals,
-                } => {
+                rusty_lr_parser::error::Info::TerminalsMerged { class_idx } => {
+                    let class_name = format!(
+                        "TerminalClass{}",
+                        grammar.terminal_classes[*class_idx].multiterm_counter
+                    );
+                    let terminals = grammar.terminal_classes[*class_idx]
+                        .terminals
+                        .iter()
+                        .map(|&term| grammar.term_pretty_name(term))
+                        .collect::<Vec<_>>();
                     let notes = vec![format!("{}: {}", class_name, terminals.join(", "))];
                     Diagnostic::note()
                         .with_message("These terminals are merged into terminal class")
@@ -1083,11 +1098,12 @@ impl Builder {
                         ])
                 }
                 rusty_lr_parser::error::Info::SingleNonTerminalRule {
-                    nonterm_location,
+                    nonterm_idx,
                     rule_location,
                 } => {
-                    let nonterm_range =
-                        span_manager.get_byterange(nonterm_location).unwrap_or(0..0);
+                    let nonterm_range = span_manager
+                        .get_byterange(&nonterm_idx.location())
+                        .unwrap_or(0..0);
                     let rule_range = span_manager.get_byterange(rule_location).unwrap_or(0..0);
                     Diagnostic::note()
                         .with_message("NonTerminal deleted")
@@ -1145,6 +1161,7 @@ impl Builder {
                     shift_rules,
                     reduce_rules,
                 } => {
+                    let term_str = grammar.class_pretty_name_list(*term, 5);
                     let mut labels = Vec::new();
                     for &reduce_rule_pair in reduce_rules {
                         let (reduce_rule, reduce_prec) = reduce_rule_pair;
@@ -1195,7 +1212,7 @@ impl Builder {
                         );
                     }
                     Diagnostic::note()
-                        .with_message(format!("Shift/Reduce conflict resolved with terminal(class): {term}"))
+                        .with_message(format!("Shift/Reduce conflict resolved with terminal(class): {term_str}"))
                         .with_labels(labels)
                         .with_notes(vec![
                             "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
@@ -1209,6 +1226,7 @@ impl Builder {
                     shift_rules,
                     reduce_rules,
                 } => {
+                    let term_str = grammar.class_pretty_name_list(*term, 5);
                     let mut labels = Vec::new();
                     for &reduce_rule_pair in reduce_rules {
                         let (reduce_rule, reduce_prec) = reduce_rule_pair;
@@ -1257,7 +1275,7 @@ impl Builder {
                         );
                     }
                     Diagnostic::note()
-                        .with_message(format!("Shift/Reduce conflict resolved with terminal(class): {term}"))
+                        .with_message(format!("Shift/Reduce conflict resolved with terminal(class): {term_str}"))
                         .with_labels(labels)
                         .with_notes(vec![
                             "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
@@ -1271,6 +1289,7 @@ impl Builder {
                     shift_rules_backtrace,
                     reduce_rules,
                 } => {
+                    let term_str = grammar.class_pretty_name_list(*term, 5);
                     let mut labels = Vec::new();
                     let mut notes = vec![
                         "Operator of production rule is the rightmost terminal symbol with precedence defined".to_string(),
@@ -1314,7 +1333,7 @@ impl Builder {
                     }
                     Diagnostic::help()
                         .with_message(format!(
-                            "Shift/Reduce conflict detected with terminal(class): {term}"
+                            "Shift/Reduce conflict detected with terminal(class): {term_str}"
                         ))
                         .with_labels(labels)
                         .with_notes(notes)
@@ -1344,10 +1363,14 @@ impl Builder {
                             }
                         }
                     }
+                    let term_strings = terms
+                        .iter()
+                        .map(|&t| grammar.class_pretty_name_list(t, 5))
+                        .collect::<Vec<_>>();
                     Diagnostic::help()
                         .with_message(format!(
                             "Reduce/Reduce conflict detected with terminals: {}",
-                            terms.join(", ")
+                            term_strings.join(", ")
                         ))
                         .with_labels(labels)
                         .with_notes(notes)

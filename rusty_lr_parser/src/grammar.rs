@@ -2054,7 +2054,7 @@ impl Grammar {
                 if !nonterm.is_auto_generated() {
                     let loc = nonterm.name.location();
                     self.warnings.push(Warning::NonTermNotUsed {
-                        nonterm_location: loc,
+                        nonterm_idx: Located::new(nonterm_idx, loc),
                     });
                 }
             }
@@ -2189,7 +2189,7 @@ impl Grammar {
             if !nonterm.is_auto_generated() {
                 let loc = nonterm.name.location();
                 self.infos.push(Info::SingleNonTerminalRule {
-                    nonterm_location: loc,
+                    nonterm_idx: Located::new(nonterm_id, loc),
                     rule_location: rule.location(),
                 });
             }
@@ -2303,7 +2303,7 @@ impl Grammar {
         for i in add_to_diags {
             let nonterm = &self.nonterminals[i];
             self.warnings.push(Warning::NonTermDataNotUsed {
-                nonterm_location: nonterm.name.location(),
+                nonterm_idx: Located::new(i, nonterm.name.location()),
             });
         }
 
@@ -2398,7 +2398,7 @@ impl Grammar {
         }
 
         // Collect optimization warnings and notes/infos
-        for class_def in self.terminal_classes.iter() {
+        for (class_idx, class_def) in self.terminal_classes.iter().enumerate() {
             let len: usize = class_def
                 .terminals
                 .iter()
@@ -2407,32 +2407,19 @@ impl Grammar {
             if len == 1 {
                 continue;
             }
-            let class_name = format!("TerminalClass{}", class_def.multiterm_counter);
-            let terminals = class_def
-                .terminals
-                .iter()
-                .map(|&term| self.term_pretty_name(term))
-                .collect::<Vec<_>>();
-            self.infos.push(Info::TerminalsMerged {
-                class_name,
-                terminals,
-            });
+            self.infos.push(Info::TerminalsMerged { class_idx });
         }
 
         // if other terminals were not used, print warning about removing them
         let other_terminal_class = &self.terminal_classes[self.other_terminal_class_id];
         if !self.other_used && other_terminal_class.terminals.len() > 1 {
-            let class_name = self.class_pretty_name_abbr(self.other_terminal_class_id);
-            let terms =
-                self.class_pretty_name_list(TerminalSymbol::Term(self.other_terminal_class_id), 10);
             self.warnings.push(Warning::UnusedTerminals {
-                class_name,
-                terminals: vec![terms],
+                class_idx: self.other_terminal_class_id,
             });
         }
     }
 
-    fn term_pretty_name(&self, term_idx: usize) -> String {
+    pub fn term_pretty_name(&self, term_idx: usize) -> String {
         if term_idx == self.other_terminal_index {
             "<Others>".to_string()
         } else {
@@ -2907,14 +2894,13 @@ impl Grammar {
         for ((term, shift_rules), (shift_prec, reduce_rules)) in
             &collector.shift_reduce_resolved_shift
         {
-            let term_str = self.class_pretty_name_list(*term, 5);
             let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
             let reduce_rule_pairs = reduce_rules
                 .iter()
                 .map(|(&r, &p)| (r, p))
                 .collect::<Vec<_>>();
             self.infos.push(Info::ShiftReduceConflictResolvedShift {
-                term: term_str,
+                term: *term,
                 shift_prec: *shift_prec,
                 shift_rules: shift_rule_indices,
                 reduce_rules: reduce_rule_pairs,
@@ -2925,14 +2911,13 @@ impl Grammar {
         for ((term, shift_rules), (shift_prec, reduce_rules)) in
             &collector.shift_reduce_resolved_reduce
         {
-            let term_str = self.class_pretty_name_list(*term, 5);
             let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
             let reduce_rule_pairs = reduce_rules
                 .iter()
                 .map(|(&r, &p)| (r, p))
                 .collect::<Vec<_>>();
             self.infos.push(Info::ShiftReduceConflictResolvedReduce {
-                term: term_str,
+                term: *term,
                 shift_prec: *shift_prec,
                 shift_rules: shift_rule_indices,
                 reduce_rules: reduce_rule_pairs,
@@ -2945,7 +2930,6 @@ impl Grammar {
             for ((term, shift_rules, shift_rules_backtrace), reduce_rules) in
                 &collector.shift_reduce_conflicts
             {
-                let term_str = self.class_pretty_name_list(*term, 5);
                 let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
 
                 let mut s_backtrace = Vec::new();
@@ -2981,7 +2965,7 @@ impl Grammar {
                 }
 
                 self.infos.push(Info::ShiftReduceConflictGLR {
-                    term: term_str,
+                    term: *term,
                     shift_rules: shift_rule_indices,
                     shift_rules_backtrace: s_backtrace,
                     reduce_rules: r_rules,
@@ -2990,11 +2974,6 @@ impl Grammar {
 
             // reduce_reduce_conflicts
             for (reduce_rules, reduce_terms) in &collector.reduce_reduce_conflicts {
-                let term_strings = reduce_terms
-                    .iter()
-                    .map(|&t| self.class_pretty_name_list(t, 5))
-                    .collect::<Vec<_>>();
-
                 let mut r_rules = Vec::new();
                 for &(reduce_rule, ref reduce_rule_from) in reduce_rules {
                     let mut r_backtrace = Vec::new();
@@ -3015,7 +2994,7 @@ impl Grammar {
                 }
 
                 self.infos.push(Info::ReduceReduceConflictGLR {
-                    terms: term_strings,
+                    terms: reduce_terms.iter().cloned().collect(),
                     reduce_rules: r_rules,
                 });
             }

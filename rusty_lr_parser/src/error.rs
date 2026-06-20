@@ -6,6 +6,7 @@ use quote::quote_spanned;
 use crate::parser::args::IdentOrLiteral;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
+use rusty_lr_core::TerminalSymbol;
 
 /// failed to feed() the token
 #[derive(Debug)]
@@ -400,32 +401,22 @@ impl ConflictError {
 
 #[derive(Debug, Clone)]
 pub enum Warning {
-    NonTermNotUsed {
-        nonterm_location: Location,
-    },
-    Cycle {
-        nonterm_location: Location,
-    },
-    NonTermDataNotUsed {
-        nonterm_location: Location,
-    },
-    UnusedTerminals {
-        class_name: String,
-        terminals: Vec<String>,
-    },
+    NonTermNotUsed { nonterm_idx: Located<usize> },
+    Cycle { nonterm_idx: Located<usize> },
+    NonTermDataNotUsed { nonterm_idx: Located<usize> },
+    UnusedTerminals { class_idx: usize },
 }
 
 #[derive(Debug, Clone)]
 pub enum Info {
     TerminalsMerged {
-        class_name: String,
-        terminals: Vec<String>,
+        class_idx: usize,
     },
     TerminalClassRuleMerge {
         rule_location: Location,
     },
     SingleNonTerminalRule {
-        nonterm_location: Location,
+        nonterm_idx: Located<usize>,
         rule_location: Location,
     },
     ReduceReduceConflictResolved {
@@ -434,25 +425,25 @@ pub enum Info {
         deleted_rules: Vec<usize>,
     },
     ShiftReduceConflictResolvedShift {
-        term: String,
+        term: TerminalSymbol<usize>,
         shift_prec: usize,
         shift_rules: Vec<usize>,
-        reduce_rules: Vec<(usize, usize)>, // (rule_id, reduce_prec)
+        reduce_rules: Vec<(usize, usize)>,
     },
     ShiftReduceConflictResolvedReduce {
-        term: String,
+        term: TerminalSymbol<usize>,
         shift_prec: usize,
         shift_rules: Vec<usize>,
-        reduce_rules: Vec<(usize, usize)>, // (rule_id, reduce_prec)
+        reduce_rules: Vec<(usize, usize)>,
     },
     ShiftReduceConflictGLR {
-        term: String,
+        term: TerminalSymbol<usize>,
         shift_rules: Vec<usize>,
         shift_rules_backtrace: Vec<String>,
-        reduce_rules: Vec<(usize, Vec<String>)>, // (rule_id, backtrace)
+        reduce_rules: Vec<(usize, Vec<String>)>,
     },
     ReduceReduceConflictGLR {
-        terms: Vec<String>,
-        reduce_rules: Vec<(usize, Vec<String>)>, // (rule_id, backtrace)
+        terms: Vec<TerminalSymbol<usize>>,
+        reduce_rules: Vec<(usize, Vec<String>)>,
     },
 }
