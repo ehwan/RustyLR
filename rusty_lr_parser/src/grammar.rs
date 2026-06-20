@@ -1,15 +1,14 @@
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
-use std::collections::HashSet;
-
 use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
 use rusty_lr_core::hash::HashMap;
+use rusty_lr_core::hash::HashSet;
 use rusty_lr_core::rule::Precedence;
 use rusty_lr_core::TerminalSymbol;
 use rusty_lr_core::Token;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 use crate::error::ArgError;
 use crate::error::Info;
@@ -536,7 +535,7 @@ impl Grammar {
 
         fn resolve_provider(
             name: &str,
-            providers: &mut std::collections::HashMap<String, ProviderInfo>,
+            providers: &mut HashMap<String, ProviderInfo>,
             span_manager: &mut crate::parser::location::SpanManager,
             stack: &mut Vec<String>,
             depth: usize,
@@ -608,7 +607,7 @@ impl Grammar {
 
         fn substitute_stream(
             stream: TokenStream,
-            providers: &mut std::collections::HashMap<String, ProviderInfo>,
+            providers: &mut HashMap<String, ProviderInfo>,
             span_manager: &mut crate::parser::location::SpanManager,
             stack: &mut Vec<String>,
             depth: usize,
@@ -757,8 +756,7 @@ impl Grammar {
         }
 
         // Initialize providers
-        let mut providers: std::collections::HashMap<String, ProviderInfo> =
-            std::collections::HashMap::new();
+        let mut providers: HashMap<String, ProviderInfo> = HashMap::default();
 
         let moduleprefix_loc = grammar_args
             .module_prefix
@@ -1728,10 +1726,8 @@ impl Grammar {
 
         // Resolve placeholders ('_') using type inference
         {
-            let mut resolved: std::collections::HashMap<String, Option<TokenStream>> =
-                std::collections::HashMap::new();
-            let mut unresolved_placeholders: std::collections::HashSet<String> =
-                std::collections::HashSet::new();
+            let mut resolved: HashMap<String, Option<TokenStream>> = HashMap::default();
+            let mut unresolved_placeholders: HashSet<String> = HashSet::default();
 
             for nonterm in &grammar.nonterminals {
                 if let Some(name) = get_placeholder_name(&nonterm.ruletype) {
@@ -3153,7 +3149,7 @@ fn get_placeholder_name(ruletype: &Option<TokenStream>) -> Option<String> {
 
 fn substitute_placeholders(
     ts: TokenStream,
-    resolved: &std::collections::HashMap<String, Option<TokenStream>>,
+    resolved: &HashMap<String, Option<TokenStream>>,
 ) -> Option<TokenStream> {
     let mut new_ts = TokenStream::new();
     for token in ts {
