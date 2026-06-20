@@ -6740,10 +6740,14 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     let precedence = match prec_val & 3 {
                         0 => ::rusty_lr_core::rule::Precedence::None,
                         1 => {
-                            ::rusty_lr_core::rule::Precedence::Fixed((prec_val >> 2) as usize)
+                            ::rusty_lr_core::rule::Precedence::Fixed(
+                                (prec_val >> 2) as usize,
+                            )
                         }
                         2 => {
-                            ::rusty_lr_core::rule::Precedence::Dynamic((prec_val >> 2) as usize)
+                            ::rusty_lr_core::rule::Precedence::Dynamic(
+                                (prec_val >> 2) as usize,
+                            )
                         }
                         _ => unreachable!(),
                     };
