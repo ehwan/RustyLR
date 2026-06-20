@@ -24,6 +24,10 @@ pub struct Context<
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) precedence_stack: Vec<Precedence>,
     pub(crate) userdata: Data::UserData,
+    /// Decoded parser tables initialized when the context is created.
+    ///
+    /// Keeping this reference in the context avoids repeated `Parser::get_tables()` calls in the
+    /// token-feeding hot path.
     pub(crate) tables: &'static P::Tables,
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]

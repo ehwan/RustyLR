@@ -59,14 +59,15 @@ fn list_to_case_stream(list: impl Iterator<Item = usize>) -> TokenStream {
 
 /// emit Rust code for the parser
 impl Grammar {
-    /// write type alias Context, Rule, State, Error...
+    /// write type alias Context, Rule, Tables, Error...
     fn emit_type_alises(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
         let start_rule_span = self
             .span_manager
             .get_span_in_location(&self.start_rule_name.location());
         let rule_typename = Ident::new(&format!("{}Rule", self.start_rule_name), start_rule_span);
-        let state_typename = Ident::new(&format!("{}State", self.start_rule_name), start_rule_span);
+        let tables_typename =
+            Ident::new(&format!("{}Tables", self.start_rule_name), start_rule_span);
         let nonterm_typename = Ident::new(
             &format!("{}NonTerminals", self.start_rule_name),
             start_rule_span,
@@ -139,7 +140,7 @@ impl Grammar {
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                     /// type alias for runtime parser tables
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                    pub type #tables_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
@@ -156,7 +157,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                 /// type alias for runtime parser tables
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #state_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                pub type #tables_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
@@ -526,7 +527,7 @@ impl Grammar {
                 .get_span_in_location(&self.start_rule_name.location()),
         );
         let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
-        let state_typename = format_ident!("{}State", start_rule_ident);
+        let tables_typename = format_ident!("{}Tables", start_rule_ident);
         let parser_struct_name = format_ident!("{}Parser", start_rule_ident);
         let token_typename = &self.token_typename;
         let termclass_typename = format_ident!("{}TerminalClasses", &start_rule_ident);
@@ -835,7 +836,7 @@ impl Grammar {
                 type NonTerm = #nonterminals_enum_name;
                 type StateIndex = #state_index_typename;
                 type ReduceRules = #rule_container_type;
-                type Tables = #state_typename;
+                type Tables = #tables_typename;
 
                 const ERROR_USED:bool = #error_used;
 
@@ -848,8 +849,8 @@ impl Grammar {
                 // get_tables returns the decoded flat runtime parser tables.
                 // Serialized integer arrays keep the generated source compact while Context keeps the
                 // decoded table reference out of the parsing hot path.
-                fn get_tables() -> &'static #state_typename {
-                    static TABLES: std::sync::OnceLock<#state_typename> = std::sync::OnceLock::new();
+                fn get_tables() -> &'static #tables_typename {
+                    static TABLES: std::sync::OnceLock<#tables_typename> = std::sync::OnceLock::new();
                     TABLES.get_or_init(|| {
                         // Serialized rule properties:
                         // - RULE_NAMES: NonTerm enum value of the rule LHS name

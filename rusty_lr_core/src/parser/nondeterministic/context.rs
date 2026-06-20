@@ -86,6 +86,9 @@ pub struct Context<
     /// For temporary use.
     /// store rule indices where shift/reduce conflicts occured with no precedence defined.
     pub(crate) no_precedences: Vec<usize>,
+    /// Decoded parser tables shared by every active GLR branch.
+    ///
+    /// Branches clone stack/userdata state, but they all read the same immutable runtime tables.
     pub(crate) tables: &'static P::Tables,
     pub(crate) _phantom: std::marker::PhantomData<P>,
 }

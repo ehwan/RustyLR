@@ -96,13 +96,27 @@ pub trait ReduceRules {
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self;
 }
 
+/// Terminal action stored in the runtime action table.
+///
+/// Shift and reduce entries are merged into one lookup key because the parser hot path always asks
+/// the same `(state, terminal_class)` question before deciding whether to reduce or shift. Keeping
+/// both actions together avoids probing two independent maps for the common LR step.
 #[derive(Debug, Clone)]
 pub enum TermAction<RuleContainer, StateIndex> {
+    /// Shift the lookahead terminal into the target state.
     Shift(ShiftTarget<StateIndex>),
+    /// Reduce by one or more production rules.
     Reduce(RuleContainer),
+    /// A real shift/reduce conflict remains after table construction and is resolved at runtime
+    /// with precedence or, for GLR, by branching.
     ShiftReduce(ShiftTarget<StateIndex>, RuleContainer),
 }
 
+/// Borrowed view of a terminal action.
+///
+/// The action table owns reduce-rule containers, but parsing only needs to inspect them while the
+/// table is borrowed. This lightweight view lets the context obtain both shift and reduce sides
+/// from a single table lookup without cloning the reduce container.
 #[derive(Debug)]
 pub enum TermActionRef<'a, RuleContainer, StateIndex> {
     Shift(ShiftTarget<StateIndex>),
@@ -153,12 +167,20 @@ impl<RuleContainer, StateIndex: Copy> TermAction<RuleContainer, StateIndex> {
 }
 
 /// A trait representing the whole parser table.
+///
+/// Contexts keep a `&'static ParserTables` reference initialized in `Context::new`, so feeding
+/// tokens does not repeatedly pass through `Parser::get_tables()` or `OnceLock`. Implementations are
+/// free to choose dense or sparse storage while presenting the same action/goto/rule accessors.
 pub trait ParserTables {
     type TermClass: TerminalClass;
     type NonTerm: NonTerminal;
     type ReduceRules: ReduceRules;
     type StateIndex: Index;
 
+    /// Returns the merged terminal action for `(state, terminal_class)`.
+    ///
+    /// This is the primary hot-path accessor. Callers that need both shift and reduce information
+    /// should use this once instead of calling `shift_goto_class` and `reduce` separately.
     fn term_action(
         &self,
         state: usize,
@@ -173,6 +195,7 @@ pub trait ParserTables {
         self.term_action(state, class).and_then(TermActionRef::shift)
     }
 
+    /// Returns the goto transition after reducing to `nonterm`.
     fn shift_goto_nonterm(
         &self,
         state: usize,
@@ -194,6 +217,7 @@ pub trait ParserTables {
 
     fn can_accept_error(&self, state: usize) -> TriState;
 
+    /// Returns compact rule metadata used while reducing.
     fn rule(&self, rule: usize) -> &RuleInfo<Self::NonTerm>;
 
     fn state_count(&self) -> usize;
@@ -548,11 +572,20 @@ where
 
 #[derive(Debug, Clone)]
 pub struct SparseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex> {
+    /// Row boundaries into `term_actions`; row `s` is `term_offsets[s]..term_offsets[s + 1]`.
     term_offsets: Vec<usize>,
+    /// Sorted `(terminal_class, action)` pairs for all states concatenated together.
+    ///
+    /// Sparse rows avoid allocating empty slots for terminal classes that never appear in a state.
+    /// Small rows use linear search because LR rows are often tiny; larger rows use binary search.
     term_actions: Vec<(TermClass, TermAction<RuleContainer, StateIndex>)>,
+    /// Row boundaries into `nonterm_goto`.
     nonterm_offsets: Vec<usize>,
+    /// Sorted `(nonterminal, goto)` pairs for all states concatenated together.
     nonterm_goto: Vec<(NonTerm, ShiftTarget<StateIndex>)>,
+    /// Error-recovery capability for each state.
     can_accept_error: Vec<TriState>,
+    /// Compact rule metadata indexed by reduce rule id.
     rules: Vec<RuleInfo<NonTerm>>,
 }
 
@@ -576,6 +609,9 @@ where
         nonterm_offsets.push(0);
 
         for state in intermediate.states {
+            // Merge the separately serialized shift and reduce maps into one sorted action row.
+            // The generated source stays compact, while the runtime table answers the hot-path
+            // terminal lookup with a single probe.
             let mut shifts = state.shift_goto_map_term.into_iter().peekable();
             let mut reduces = state.reduce_map.into_iter().peekable();
 
@@ -736,17 +772,32 @@ where
 
 #[derive(Debug, Clone)]
 pub struct DenseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex> {
+    /// Row boundaries into `term_actions`.
     term_offsets: Vec<usize>,
+    /// Minimum terminal-class index represented by each dense terminal row.
     term_mins: Vec<usize>,
+    /// Dense terminal action slots for all rows concatenated together.
+    ///
+    /// Each row only spans its own `min..=max` terminal range, preserving the existing auto-layout
+    /// memory heuristic while still avoiding one allocation per state.
     term_actions: Vec<Option<TermAction<RuleContainer, StateIndex>>>,
+    /// Row boundaries into `term_keys`, used for diagnostics and expected-token reporting.
     term_keys_offsets: Vec<usize>,
+    /// Terminal classes that have a shift side in each row.
     term_keys: Vec<TermClass>,
+    /// Row boundaries into `nonterm_goto`.
     nonterm_offsets: Vec<usize>,
+    /// Minimum nonterminal index represented by each dense goto row.
     nonterm_mins: Vec<usize>,
+    /// Dense nonterminal goto slots for all rows concatenated together.
     nonterm_goto: Vec<Option<ShiftTarget<StateIndex>>>,
+    /// Row boundaries into `nonterm_keys`.
     nonterm_keys_offsets: Vec<usize>,
+    /// Nonterminal keys present in each goto row.
     nonterm_keys: Vec<NonTerm>,
+    /// Error-recovery capability for each state.
     can_accept_error: Vec<TriState>,
+    /// Compact rule metadata indexed by reduce rule id.
     rules: Vec<RuleInfo<NonTerm>>,
 }
 
@@ -780,6 +831,9 @@ where
         nonterm_keys_offsets.push(0);
 
         for state in intermediate.states {
+            // Build a per-row dense terminal span, then append it to the shared backing vector.
+            // This keeps direct indexing inside a row without paying for a full
+            // `states * terminal_classes` matrix.
             let term_min = state
                 .shift_goto_map_term
                 .first()

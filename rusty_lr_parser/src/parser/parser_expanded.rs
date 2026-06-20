@@ -195,7 +195,7 @@ pub type GrammarRule = ::rusty_lr_core::rule::ProductionRule<
 >;
 /// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarState = ::rusty_lr_core::parser::state::DenseFlatTables<
+pub type GrammarTables = ::rusty_lr_core::parser::state::DenseFlatTables<
     GrammarTerminalClasses,
     GrammarNonTerminals,
     u8,
@@ -6337,7 +6337,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
     type NonTerm = GrammarNonTerminals;
     type StateIndex = u8;
     type ReduceRules = u8;
-    type Tables = GrammarState;
+    type Tables = GrammarTables;
     const ERROR_USED: bool = true;
     fn precedence_types(level: u8) -> Option<::rusty_lr_core::rule::ReduceType> {
         #[allow(unreachable_patterns)]
@@ -6346,8 +6346,8 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
             _ => None,
         }
     }
-    fn get_tables() -> &'static GrammarState {
-        static TABLES: std::sync::OnceLock<GrammarState> = std::sync::OnceLock::new();
+    fn get_tables() -> &'static GrammarTables {
+        static TABLES: std::sync::OnceLock<GrammarTables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
