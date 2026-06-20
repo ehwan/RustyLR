@@ -22,6 +22,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Error Type (`%error`)](#error-type-optional)
 - [Disabling Table Optimization (`%nooptim`)](#no-optimization)
 - [Location Tracking (`%location`)](#location-tracking)
+- [Diagnostic Suppression (`%allow`)](#diagnostic-suppression)
 - [Variable Substitution](#variable-substitution)
 - [Advanced Parser Controls](#advanced-parser-controls)
   - [Memory Optimization with `box`](#memory-optimization-with-box)
@@ -652,3 +653,36 @@ Use `%dprec` for reduce/reduce conflicts in advanced or GLR-oriented grammars. F
 Forces RustyLR to generate LALR(1) parsing tables. By default, RustyLR builds minimal-LR(1) (IELR-style) tables, which provide full LR(1) parsing strength while keeping table sizes close to LALR(1).
 
 Use `%lalr` when you specifically need LALR behavior or want to compare generated tables with a traditional LALR parser generator.
+
+### Diagnostic Suppression
+
+```
+%allow <diagnostic_name>;
+```
+
+Suppresses specific compile-time warning or informational diagnostics. If an unknown diagnostic name is provided, RustyLR will trigger a compile-time error to catch typos.
+
+When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>;` syntax to suppress it.
+
+#### Valid Diagnostic Names
+
+- **Warnings:**
+  - `nonterm_not_used`: A non-terminal is defined but cannot be reached or is not used.
+  - `cycle`: Cycles detected in the non-terminal rules.
+  - `nonterm_data_not_used`: A non-terminal has a data type defined, but that data is never utilized in any reduce actions.
+  - `unused_terminals`: Terminals that are defined but never used in any grammar rule.
+- **Infos:**
+  - `terminals_merged`: Info about terminals being merged into a terminal class.
+  - `terminal_class_rule_merge`: Info about a production rule being optimized out due to terminal class rules merging.
+  - `single_non_terminal_rule`: Info about a single non-terminal rule being replaced directly by its child rule.
+  - `reduce_reduce_conflict_resolved`: Info about a reduce/reduce conflict resolved via precedence.
+  - `shift_reduce_conflict_resolved`: Info about a shift/reduce conflict resolved via precedence.
+  - `shift_reduce_conflict_glr`: Info about a shift/reduce conflict that splits branches in GLR mode.
+  - `reduce_reduce_conflict_glr`: Info about a reduce/reduce conflict that splits branches in GLR mode.
+
+#### Example
+
+```
+%allow nonterm_not_used;
+%allow unused_terminals;
+```

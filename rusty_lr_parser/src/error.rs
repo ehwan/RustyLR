@@ -128,6 +128,9 @@ pub enum ParseError {
         location: Location,
         max_depth: usize,
     },
+
+    /// unknown diagnostic name allowed
+    InvalidAllowDiagnostic { location: Location, name: String },
 }
 impl ArgError {
     pub fn to_compile_error(
@@ -267,6 +270,7 @@ impl ParseError {
             ParseError::TypeInferenceFailed(location) => vec![*location],
             ParseError::CircularDependency { location, .. } => vec![*location],
             ParseError::MaxSubstitutionDepthExceeded { location, .. } => vec![*location],
+            ParseError::InvalidAllowDiagnostic { location, .. } => vec![*location],
         }
     }
 
@@ -340,6 +344,9 @@ impl ParseError {
                     max_depth
                 )
             }
+            ParseError::InvalidAllowDiagnostic { name, .. } => {
+                format!("unknown diagnostic name: `{}`", name)
+            }
         }
     }
 }
@@ -404,6 +411,15 @@ pub enum Warning {
 }
 
 impl Warning {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Warning::NonTermNotUsed { .. } => "nonterm_not_used",
+            Warning::Cycle { .. } => "cycle",
+            Warning::NonTermDataNotUsed { .. } => "nonterm_data_not_used",
+            Warning::UnusedTerminals { .. } => "unused_terminals",
+        }
+    }
+
     /// Translates the warning into a `TokenStream` containing a compiler warning.
     /// Since Rust does not have a stable `compile_warning!` macro, this leverages
     /// a dummy deprecated struct definition mapped to the source code span
@@ -413,8 +429,15 @@ impl Warning {
         grammar: &crate::grammar::Grammar,
         span_manager: &crate::parser::location::SpanManager,
     ) -> TokenStream {
+        if grammar.allowed_diagnostics.contains(self.name()) {
+            return TokenStream::new();
+        }
         let mut output = TokenStream::new();
-        let message = self.short_message(grammar);
+        let message = format!(
+            "{} (to ignore, add `%allow {};` to the grammar)",
+            self.short_message(grammar),
+            self.name()
+        );
         let locs = self.locations();
         if locs.is_empty() {
             let span = Span::call_site();
@@ -525,4 +548,19 @@ pub enum Info {
         terms: Vec<TerminalSymbol<usize>>,
         reduce_rules: Vec<(usize, Vec<String>)>,
     },
+}
+
+impl Info {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Info::TerminalsMerged { .. } => "terminals_merged",
+            Info::TerminalClassRuleMerge { .. } => "terminal_class_rule_merge",
+            Info::SingleNonTerminalRule { .. } => "single_non_terminal_rule",
+            Info::ReduceReduceConflictResolved { .. } => "reduce_reduce_conflict_resolved",
+            Info::ShiftReduceConflictResolvedShift { .. } => "shift_reduce_conflict_resolved",
+            Info::ShiftReduceConflictResolvedReduce { .. } => "shift_reduce_conflict_resolved",
+            Info::ShiftReduceConflictGLR { .. } => "shift_reduce_conflict_glr",
+            Info::ReduceReduceConflictGLR { .. } => "reduce_reduce_conflict_glr",
+        }
+    }
 }

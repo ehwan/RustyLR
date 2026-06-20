@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashSet;
 
 use proc_macro2::Ident;
 use proc_macro2::TokenStream;
@@ -142,6 +143,7 @@ pub struct Grammar {
 
     pub warnings: Vec<Warning>,
     pub infos: Vec<Info>,
+    pub allowed_diagnostics: HashSet<String>,
 }
 
 impl Grammar {
@@ -862,6 +864,35 @@ impl Grammar {
             (boxed, stripped)
         };
 
+        let mut allowed_diagnostics = HashSet::new();
+        let valid_diagnostics: HashSet<&str> = [
+            "nonterm_not_used",
+            "cycle",
+            "nonterm_data_not_used",
+            "unused_terminals",
+            "terminals_merged",
+            "terminal_class_rule_merge",
+            "single_non_terminal_rule",
+            "reduce_reduce_conflict_resolved",
+            "shift_reduce_conflict_resolved",
+            "shift_reduce_conflict_glr",
+            "reduce_reduce_conflict_glr",
+        ]
+        .iter()
+        .copied()
+        .collect();
+
+        for allowed in grammar_args.allowed_diagnostics {
+            let name = allowed.value();
+            if !valid_diagnostics.contains(name.as_str()) {
+                return Err(ParseError::InvalidAllowDiagnostic {
+                    location: allowed.location(),
+                    name: name.clone(),
+                });
+            }
+            allowed_diagnostics.insert(name.clone());
+        }
+
         let mut grammar = Grammar {
             module_prefix,
             token_typename,
@@ -910,6 +941,7 @@ impl Grammar {
 
             warnings: Vec::new(),
             infos: Vec::new(),
+            allowed_diagnostics,
         };
         grammar.is_char = grammar.token_typename.to_string() == "char";
         grammar.is_u8 = grammar.token_typename.to_string() == "u8";
@@ -3569,5 +3601,66 @@ mod tests {
             "Expected shift/reduce conflict resolution note, got: {:?}",
             grammar.infos
         );
+    }
+
+    #[test]
+    fn test_diagnostic_suppression_success() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %allow nonterm_not_used;
+
+            Expr : 'a';
+            Unused : 'b';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        assert!(grammar_args
+            .allowed_diagnostics
+            .iter()
+            .any(|d| d.value() == "nonterm_not_used"));
+
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
+        assert!(grammar.allowed_diagnostics.contains("nonterm_not_used"));
+
+        grammar.optimize(25);
+        // Find the NonTermNotUsed warning
+        let unused_warn = grammar
+            .warnings
+            .iter()
+            .find(|w| matches!(w, Warning::NonTermNotUsed { .. }))
+            .expect("Expected NonTermNotUsed warning");
+
+        let span_manager = crate::parser::location::SpanManager::default();
+        let ts = unused_warn.to_compile_warning(&grammar, &span_manager);
+        assert!(ts.is_empty(), "Warning should be suppressed");
+    }
+
+    #[test]
+    fn test_diagnostic_suppression_invalid_name() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %allow invalid_diagnostic_name;
+
+            Expr : 'a';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        let result = Grammar::from_grammar_args(grammar_args);
+        assert!(
+            result.is_err(),
+            "Expected parsing to fail due to invalid diagnostic name"
+        );
+        if let Err(ParseError::InvalidAllowDiagnostic { name, .. }) = result {
+            assert_eq!(name, "invalid_diagnostic_name");
+        } else {
+            if let Err(e) = result {
+                panic!("Expected ParseError::InvalidAllowDiagnostic, got: {:?}", e);
+            } else {
+                panic!("Expected ParseError::InvalidAllowDiagnostic, got Ok");
+            }
+        }
     }
 }

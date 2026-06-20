@@ -633,6 +633,7 @@ pub struct GrammarArgs {
     pub layout: TableLayout,
     pub dense_limit: usize,
     pub location_typename: Vec<(Location, TokenStream)>,
+    pub allowed_diagnostics: Vec<Located<String>>,
 
     pub error_recovered: Vec<RecoveredError>,
     pub span_manager: crate::parser::location::SpanManager,
@@ -655,6 +656,7 @@ impl Default for GrammarArgs {
             layout: TableLayout::Auto,
             dense_limit: 32768, // default 32KB
             location_typename: Vec::new(),
+            allowed_diagnostics: Vec::new(),
             error_recovered: Vec::new(),
             span_manager: crate::parser::location::SpanManager::default(),
         }
