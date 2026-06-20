@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use parser_expanded as parser;
 use rusty_lr::parser::Parser;
-use rusty_lr::parser::state::ParserTables;
+use rusty_lr::parser::table::ParserTables;
 
 const TEST_JSON: &'static str = r#"
 {
@@ -47,7 +47,10 @@ const TEST_JSON: &'static str = r#"
 
 fn main() {
     println!("#rules: {}", parser::JsonParser::get_tables().rule_count());
-    println!("#states: {}", parser::JsonParser::get_tables().state_count());
+    println!(
+        "#states: {}",
+        parser::JsonParser::get_tables().state_count()
+    );
 
     fn try_once() {
         let mut context = parser::JsonContext::new(Vec::new());

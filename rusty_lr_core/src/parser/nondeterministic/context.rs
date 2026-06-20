@@ -6,7 +6,7 @@ use super::ParseError;
 use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
-use crate::parser::state::ParserTables;
+use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
 use crate::parser::Precedence;
@@ -826,7 +826,7 @@ impl<
         P::NonTerm: std::fmt::Debug,
     {
         debug_assert!(self.node(node).is_leaf());
-        use crate::parser::state::ReduceRules;
+        use crate::parser::table::ReduceRules;
 
         let last_state = self.state(node);
         let (shift_state, reduce) = match self.tables.term_action(last_state, class) {
@@ -1353,7 +1353,7 @@ impl<
             let mut shift = None;
             let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
-            use crate::parser::state::ReduceRules;
+            use crate::parser::table::ReduceRules;
             for reduce_rule in reduce_rules.to_iter() {
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let reduce_prec = match rule.precedence {

@@ -91,7 +91,7 @@ impl Grammar {
         let location_typename = &self.location_typename;
         let reduce_error_typename = &self.error_typename;
 
-        let state_structname = if self.emit_dense {
+        let table_structname = if self.emit_dense {
             format_ident!("DenseFlatTables")
         } else {
             format_ident!("SparseFlatTables")
@@ -124,7 +124,7 @@ impl Grammar {
             .max()
             .unwrap_or(1);
         let rule_container_type = if self.glr && max_reduce_rules > 1 {
-            quote! { #module_prefix::parser::state::ArrayVec<#rule_index_type, #max_reduce_rules> }
+            quote! { #module_prefix::parser::table::ArrayVec<#rule_index_type, #max_reduce_rules> }
         } else {
             rule_index_type.clone()
         };
@@ -140,7 +140,7 @@ impl Grammar {
                     pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                     /// type alias for runtime parser tables
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #tables_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                    pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                     /// type alias for `InvalidTerminalError`
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
@@ -157,7 +157,7 @@ impl Grammar {
                 pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
                 /// type alias for runtime parser tables
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #tables_typename = #module_prefix::parser::state::#state_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                 /// type alias for `ParseError`
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
@@ -640,7 +640,7 @@ impl Grammar {
             .max()
             .unwrap_or(1);
         let rule_container_type = if self.glr && max_reduce_rules > 1 {
-            quote! { #module_prefix::parser::state::ArrayVec<#rule_index_typename, #max_reduce_rules> }
+            quote! { #module_prefix::parser::table::ArrayVec<#rule_index_typename, #max_reduce_rules> }
         } else {
             rule_index_typename.clone()
         };
@@ -687,7 +687,7 @@ impl Grammar {
         }
 
         // ------------------
-        // States Serialization
+        // Table Row Serialization
         // ------------------
         let mut shift_term_data = Vec::new();
         let mut shift_term_offsets = Vec::new();
@@ -860,7 +860,7 @@ impl Grammar {
                         static RULE_PRECEDENCES: &[u32] = &[ #(#rule_precedences),* ];
                         static RULE_LENGTHS: &[u32] = &[ #(#rule_lengths),* ];
 
-                        // Serialized state properties:
+                        // Serialized table row properties:
                         // - SHIFT_TERM_DATA & SHIFT_NONTERM_DATA: Packed transitions (push << 31) | (state_idx << 15) | (symbol_idx)
                         // - SHIFT_TERM_OFFSETS & SHIFT_NONTERM_OFFSETS: Boundaries separating transitions for each state
                         // - REDUCE_DATA: Variable-length reduce map encoding (term_class, len, rules...)
@@ -887,7 +887,7 @@ impl Grammar {
                                 _ => unreachable!(),
                             };
 
-                            rules.push(#module_prefix::parser::state::RuleInfo {
+                            rules.push(#module_prefix::parser::table::RuleInfo {
                                 name,
                                 len: RULE_LENGTHS[i] as usize,
                                 precedence,
@@ -895,7 +895,7 @@ impl Grammar {
                         }
 
                         let num_states = #num_states;
-                        let mut states = Vec::with_capacity(num_states);
+                        let mut state_rows = Vec::with_capacity(num_states);
                         for i in 0..num_states {
                             // Decode shift transitions for terminals (terminal class, next state index, push flag)
                             let term_start = SHIFT_TERM_OFFSETS[i] as usize;
@@ -952,11 +952,11 @@ impl Grammar {
                                 ruleset: Vec::new(),
                                 can_accept_error,
                             };
-                            states.push(intermediate);
+                            state_rows.push(intermediate);
                         }
 
-                        #module_prefix::parser::state::IntermediateTables {
-                            states,
+                        #module_prefix::parser::table::IntermediateTables {
+                            state_rows,
                             rules,
                         }.into()
                     })

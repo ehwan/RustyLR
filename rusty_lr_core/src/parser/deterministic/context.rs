@@ -6,7 +6,7 @@ use crate::Location;
 use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::Index;
-use crate::parser::state::ParserTables;
+use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
 use crate::parser::Precedence;
@@ -371,10 +371,9 @@ impl<
                         // try shift given term again
                         // to check if the given terminal should be merged with `error` token
                         // or it can be shift right after the error token
-                        if let Some(next_state) = self.tables.shift_goto_class(
-                            self.state_stack.last().unwrap().into_usize(),
-                            class,
-                        )
+                        if let Some(next_state) = self
+                            .tables
+                            .shift_goto_class(self.state_stack.last().unwrap().into_usize(), class)
                         {
                             #[cfg(feature = "tree")]
                             self.tree_stack
@@ -424,7 +423,7 @@ impl<
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
     {
-        use super::super::state::ReduceRules;
+        use super::super::table::ReduceRules;
         use crate::Location;
 
         let shift_to = loop {
@@ -506,10 +505,10 @@ impl<
                 let mut new_location =
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
-                let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(
-                    self.state_stack.last().unwrap().into_usize(),
-                    rule.name,
-                ) else {
+                let Some(next_nonterm_shift) = self
+                    .tables
+                    .shift_goto_nonterm(self.state_stack.last().unwrap().into_usize(), rule.name)
+                else {
                     unreachable!(
                         "Failed to shift nonterminal: {:?} in state {}",
                         rule.name,
@@ -672,7 +671,7 @@ impl<
                 None => (None, None),
             };
             if let Some(reduce_rule) = reduce {
-                use super::super::state::ReduceRules;
+                use super::super::table::ReduceRules;
                 let reduce_rule = reduce_rule.to_iter().next().unwrap();
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let tokens_len = rule.len;
@@ -747,8 +746,7 @@ impl<
                     .copied()
                     .unwrap_or_else(|| self.state_stack[stack_len])
                     .into_usize();
-                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.name)
-                {
+                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.name) {
                     extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(

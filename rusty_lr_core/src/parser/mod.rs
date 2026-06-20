@@ -13,6 +13,7 @@ pub mod terminalclass;
 
 pub mod state;
 pub use state::State;
+pub mod table;
 
 #[derive(Clone, Copy)]
 pub struct Precedence(u8);
@@ -53,9 +54,9 @@ pub trait Parser {
     /// The compact integer type used for state indices.
     type StateIndex: state::Index + 'static;
     /// The reduce-rule container for a terminal action.
-    type ReduceRules: state::ReduceRules + 'static;
+    type ReduceRules: table::ReduceRules + 'static;
     /// The type of the parser table.
-    type Tables: state::ParserTables<
+    type Tables: table::ParserTables<
             TermClass = Self::TermClass,
             NonTerm = Self::NonTerm,
             StateIndex = Self::StateIndex,
