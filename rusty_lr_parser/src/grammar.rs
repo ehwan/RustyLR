@@ -2798,7 +2798,8 @@ impl Grammar {
 
                 // Choose DenseState if it fits in the cache limit, or if the size overhead is reasonable.
                 total_dense_size <= self.dense_limit
-                    || (total_sparse_size > 0 && (total_dense_size as f64 / total_sparse_size as f64) < 2.5)
+                    || (total_sparse_size > 0
+                        && (total_dense_size as f64 / total_sparse_size as f64) < 2.5)
             }
         };
 

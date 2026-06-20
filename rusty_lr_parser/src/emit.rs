@@ -807,6 +807,42 @@ impl Grammar {
         let num_states = self.states.len();
         let error_used = self.error_used;
 
+        // to remove suffix from generated data
+        let rule_names = rule_names
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let rule_precedences = rule_precedences
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let rule_tokens_data = rule_tokens_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let rule_tokens_offsets = rule_tokens_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+
+        let shift_term_data = shift_term_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let shift_term_offsets = shift_term_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let shift_nonterm_data = shift_nonterm_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let shift_nonterm_offsets = shift_nonterm_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let reduce_data = reduce_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let reduce_offsets = reduce_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let can_accept_error = can_accept_error
+            .into_iter()
+            .map(proc_macro2::Literal::u8_unsuffixed);
+
         // range-compressed Vec based terminal-class_id map
         stream.extend(quote! {
             /// A lightweight parser struct that references the static parser tables and production rules.
