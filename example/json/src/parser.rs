@@ -5,7 +5,6 @@
 %tokentype char;
 %start Json;
 %userdata Vec<std::ops::Range<usize>>;
-%dense;
 %location std::ops::Range<usize>;
 
 Json: Element;

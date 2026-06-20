@@ -42,11 +42,32 @@ pub struct Args {
     #[arg(long)]
     pub glr: Option<bool>,
 
-    /// Override the written code and set generated parser table to use dense arrays
-    #[arg(long)]
-    pub dense: Option<bool>,
+    /// Set generated parser table layout representation (auto: optimal choice based on table size, dense: O(1) array, sparse: binary search)
+    #[arg(long, value_enum, default_value_t = TableLayoutArg::Auto)]
+    pub layout: TableLayoutArg,
+
+    /// Set dense limit in bytes for auto-layout detection
+    #[arg(long, default_value_t = 32768)]
+    pub dense_limit: usize,
 
     /// Print the details of a specific state
     #[arg(long)]
     pub state: Option<usize>,
+}
+
+#[derive(clap::ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TableLayoutArg {
+    Auto,
+    Dense,
+    Sparse,
+}
+
+impl From<TableLayoutArg> for rusty_lr_buildscript::TableLayout {
+    fn from(arg: TableLayoutArg) -> Self {
+        match arg {
+            TableLayoutArg::Auto => rusty_lr_buildscript::TableLayout::Auto,
+            TableLayoutArg::Dense => rusty_lr_buildscript::TableLayout::Dense,
+            TableLayoutArg::Sparse => rusty_lr_buildscript::TableLayout::Sparse,
+        }
+    }
 }

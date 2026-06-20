@@ -93,16 +93,16 @@ mv "$rustylr_path/scripts/diff/calculator_u8_new.rs" "$rustylr_path/scripts/diff
 mv "$rustylr_path/scripts/diff/json_new.rs" "$rustylr_path/scripts/diff/json.rs"
 
 echo "Setting Dense = false, GLR = false"
-process_and_compare "--dense false --glr false"
+process_and_compare "--layout sparse --glr false"
 
 echo "Setting Dense = false, GLR = true"
-process_and_compare "--dense false --glr true"
+process_and_compare "--layout sparse --glr true"
 
 echo "Setting Dense = true, GLR = false"
-process_and_compare "--dense true --glr false"
+process_and_compare "--layout dense --glr false"
 
 echo "Setting Dense = true, GLR = true"
-process_and_compare "--dense true --glr true"
+process_and_compare "--layout dense --glr true"
 
 echo "Normal configuration"
 process_and_compare ""

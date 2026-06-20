@@ -605,6 +605,13 @@ pub struct RecoveredError {
     pub location: Location,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TableLayout {
+    Auto,
+    Dense,
+    Sparse,
+}
+
 /// parsed arguments for the grammar
 #[derive(Clone)]
 pub struct GrammarArgs {
@@ -623,7 +630,8 @@ pub struct GrammarArgs {
     pub lalr: bool,
     pub glr: bool,
     pub no_optim: bool,
-    pub dense: bool,
+    pub layout: TableLayout,
+    pub dense_limit: usize,
     pub location_typename: Vec<(Location, TokenStream)>,
 
     pub error_recovered: Vec<RecoveredError>,
@@ -644,7 +652,8 @@ impl Default for GrammarArgs {
             lalr: false,
             glr: false,
             no_optim: false,
-            dense: false,
+            layout: TableLayout::Auto,
+            dense_limit: 32768, // default 32KB
             location_typename: Vec::new(),
             error_recovered: Vec::new(),
             span_manager: crate::parser::location::SpanManager::default(),

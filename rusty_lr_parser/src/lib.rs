@@ -16,6 +16,7 @@ pub(crate) mod terminalset;
 pub(crate) mod token;
 pub mod utils;
 
+pub use parser::args::TableLayout;
 /// Re-export Location for use by external crates (e.g. rusty_lr_buildscript)
 pub use parser::location::Location;
 

@@ -21,7 +21,6 @@ This document provides a comprehensive guide to the grammar definition syntax us
   - [Operator Precedence (`%left`, `%right`, `%precedence`, `%prec`)](#operator-precedence)
 - [Error Type (`%error`)](#error-type-optional)
 - [Disabling Table Optimization (`%nooptim`)](#no-optimization)
-- [Dense Parser Tables (`%dense`)](#dense-parser-table)
 - [Location Tracking (`%location`)](#location-tracking)
 - [Variable Substitution](#variable-substitution)
 - [Advanced Parser Controls](#advanced-parser-controls)
@@ -449,17 +448,7 @@ Defines a custom error type returned by reduce actions. If your reduce action re
 
 Disables optimization passes on the generated table (which merge states and group equivalent terminals). Use this for debugging or to speed up the parser generation compilation phase itself.
 
----
 
-## Dense Parser Table
-
-```
-%dense;
-```
-
-Forces the generated parser table to use flat `Vec` indexes instead of `HashMap` lookups. This significantly speeds up token feeding, but can drastically increase the binary size of the generated parser.
-
----
 
 ## Location Tracking
 

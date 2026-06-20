@@ -39,7 +39,7 @@ pub type EContext = ::rusty_lr::parser::deterministic::Context<EParser, EDataSta
 pub type ERule = ::rusty_lr::rule::ProductionRule<ETerminalClasses, ENonTerminals>;
 /// type alias for DFA state
 #[allow(non_camel_case_types, dead_code)]
-pub type EState = ::rusty_lr::parser::state::SparseState<
+pub type EState = ::rusty_lr::parser::state::DenseState<
     ETerminalClasses,
     ENonTerminals,
     u8,
@@ -645,19 +645,12 @@ impl ::rusty_lr::parser::Parser for EParser {
         static RULES: std::sync::OnceLock<Vec<ERule>> = std::sync::OnceLock::new();
         RULES
             .get_or_init(|| {
-                static RULE_NAMES: &[u32] = &[
-                    0u32, 0u32, 1u32, 1u32, 2u32, 2u32, 3u32, 4u32,
-                ];
-                static RULE_PRECEDENCES: &[u32] = &[
-                    1u32, 0u32, 5u32, 0u32, 0u32, 0u32, 0u32, 0u32,
-                ];
+                static RULE_NAMES: &[u32] = &[0, 0, 1, 1, 2, 2, 3, 4];
+                static RULE_PRECEDENCES: &[u32] = &[1, 0, 5, 0, 0, 0, 0, 0];
                 static RULE_TOKENS_DATA: &[u32] = &[
-                    1u32, 2u32, 1u32, 3u32, 3u32, 4u32, 3u32, 5u32, 0u32, 6u32, 7u32,
-                    8u32, 1u32, 7u32, 14u32,
+                    1, 2, 1, 3, 3, 4, 3, 5, 0, 6, 7, 8, 1, 7, 14,
                 ];
-                static RULE_TOKENS_OFFSETS: &[u32] = &[
-                    0u32, 3u32, 4u32, 7u32, 8u32, 9u32, 12u32, 13u32, 15u32,
-                ];
+                static RULE_TOKENS_OFFSETS: &[u32] = &[0, 3, 4, 7, 8, 9, 12, 13, 15];
                 let num_rules = 8usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
@@ -714,49 +707,30 @@ impl ::rusty_lr::parser::Parser for EParser {
         STATES
             .get_or_init(|| {
                 static SHIFT_TERM_DATA: &[u32] = &[
-                    2147516416u32, 65539u32, 2147516416u32, 65539u32, 2147614721u32,
-                    2147516416u32, 65539u32, 229378u32, 2147516416u32, 65539u32,
-                    327684u32, 2147876871u32,
+                    2147516416, 65539, 2147516416, 65539, 2147614721, 2147516416, 65539,
+                    229378, 2147516416, 65539, 327684, 2147876871,
                 ];
                 static SHIFT_TERM_OFFSETS: &[u32] = &[
-                    0u32, 2u32, 2u32, 4u32, 5u32, 7u32, 7u32, 8u32, 10u32, 10u32, 11u32,
-                    11u32, 12u32, 12u32,
+                    0, 2, 2, 4, 5, 7, 7, 8, 10, 10, 11, 11, 12, 12,
                 ];
                 static SHIFT_NONTERM_DATA: &[u32] = &[
-                    2147581952u32, 2147680257u32, 2147680258u32, 2147844099u32,
-                    2147581952u32, 2147680257u32, 2147680258u32, 2147778563u32,
-                    2147647488u32, 2147680257u32, 2147680258u32, 2147745793u32,
-                    2147745794u32,
+                    2147581952, 2147680257, 2147680258, 2147844099, 2147581952,
+                    2147680257, 2147680258, 2147778563, 2147647488, 2147680257,
+                    2147680258, 2147745793, 2147745794,
                 ];
                 static SHIFT_NONTERM_OFFSETS: &[u32] = &[
-                    0u32, 4u32, 4u32, 8u32, 8u32, 11u32, 11u32, 11u32, 13u32, 13u32,
-                    13u32, 13u32, 13u32, 13u32,
+                    0, 4, 4, 8, 8, 11, 11, 11, 13, 13, 13, 13, 13, 13,
                 ];
                 static REDUCE_DATA: &[u32] = &[
-                    1u32, 1u32, 4u32, 2u32, 1u32, 4u32, 4u32, 1u32, 4u32, 7u32, 1u32,
-                    4u32, 4u32, 1u32, 6u32, 7u32, 1u32, 6u32, 1u32, 1u32, 0u32, 4u32,
-                    1u32, 0u32, 7u32, 1u32, 0u32, 1u32, 1u32, 1u32, 4u32, 1u32, 1u32,
-                    7u32, 1u32, 1u32, 1u32, 1u32, 2u32, 2u32, 1u32, 2u32, 4u32, 1u32,
-                    2u32, 7u32, 1u32, 2u32, 1u32, 1u32, 5u32, 2u32, 1u32, 5u32, 4u32,
-                    1u32, 5u32, 7u32, 1u32, 5u32,
+                    1, 1, 4, 2, 1, 4, 4, 1, 4, 7, 1, 4, 4, 1, 6, 7, 1, 6, 1, 1, 0, 4, 1,
+                    0, 7, 1, 0, 1, 1, 1, 4, 1, 1, 7, 1, 1, 1, 1, 2, 2, 1, 2, 4, 1, 2, 7,
+                    1, 2, 1, 1, 5, 2, 1, 5, 4, 1, 5, 7, 1, 5,
                 ];
                 static REDUCE_OFFSETS: &[u32] = &[
-                    0u32, 0u32, 12u32, 12u32, 18u32, 18u32, 27u32, 36u32, 36u32, 48u32,
-                    48u32, 60u32, 60u32, 60u32,
-                ];
-                static RULESET_DATA: &[u32] = &[
-                    0u32, 1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 65540u32, 0u32, 1u32,
-                    2u32, 3u32, 4u32, 5u32, 65541u32, 6u32, 65536u32, 65542u32, 0u32,
-                    131072u32, 1u32, 2u32, 3u32, 4u32, 5u32, 196608u32, 65537u32,
-                    65538u32, 2u32, 131074u32, 3u32, 4u32, 5u32, 196610u32, 131077u32,
-                    196613u32, 65543u32, 131079u32,
-                ];
-                static RULESET_OFFSETS: &[u32] = &[
-                    0u32, 8u32, 9u32, 17u32, 19u32, 26u32, 27u32, 29u32, 34u32, 35u32,
-                    36u32, 37u32, 38u32, 39u32,
+                    0, 0, 12, 12, 18, 18, 27, 36, 36, 48, 48, 60, 60, 60,
                 ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
-                    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ];
                 let num_states = 13usize;
                 let mut states = Vec::with_capacity(num_states);
@@ -810,19 +784,6 @@ impl ::rusty_lr::parser::Parser for EParser {
                         reduce_map.push((term_class, rules));
                         idx += 2 + len;
                     }
-                    let ruleset_start = RULESET_OFFSETS[i] as usize;
-                    let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
-                    let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
-                    for idx in ruleset_start..ruleset_end {
-                        let val = RULESET_DATA[idx];
-                        let rule = (val & 0xffff) as usize;
-                        let shifted = (val >> 16) as usize;
-                        ruleset
-                            .push(::rusty_lr::rule::ShiftedRuleRef {
-                                rule,
-                                shifted,
-                            });
-                    }
                     let can_accept_error = match CAN_ACCEPT_ERROR[i] {
                         0 => ::rusty_lr::TriState::False,
                         1 => ::rusty_lr::TriState::True,
@@ -833,7 +794,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
-                        ruleset,
+                        ruleset: Vec::new(),
                         can_accept_error,
                     };
                     states.push(intermediate.into());

@@ -134,9 +134,6 @@ pub trait State {
     /// Get the set of production rule for reduce in this state
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_;
 
-    /// Get the set of rules that this state is trying to parse
-    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef];
-
     fn can_accept_error(&self) -> TriState;
 }
 
@@ -151,9 +148,6 @@ pub struct SparseState<TermClass, NonTerm, RuleContainer, StateIndex> {
 
     /// terminal symbol -> reduce rule index
     pub(crate) reduce_map: HashMap<TermClass, RuleContainer>,
-
-    /// set of rules that this state is trying to parse
-    pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 
     pub(crate) can_accept_error: TriState,
 }
@@ -193,9 +187,6 @@ impl<
     fn expected_reduce_rule(&self) -> impl Iterator<Item = impl Index> + '_ {
         self.reduce_map.values().flat_map(RuleContainer::to_iter)
     }
-    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
-        &self.ruleset
-    }
     fn can_accept_error(&self) -> TriState {
         self.can_accept_error
     }
@@ -221,9 +212,6 @@ pub struct DenseState<TermClass, NonTerm, RuleContainer, StateIndex> {
     pub(crate) reduce_map: Vec<Option<RuleContainer>>,
     /// reduce_map[i] will contain i+offset 'th class's reduce rule.
     pub(crate) reduce_offset: usize,
-
-    /// set of rules that this state is trying to parse
-    pub(crate) ruleset: Vec<crate::rule::ShiftedRuleRef>,
 
     pub(crate) can_accept_error: TriState,
 }
@@ -274,10 +262,6 @@ impl<
             .flat_map(RuleContainer::to_iter)
     }
 
-    fn get_rules(&self) -> &[crate::rule::ShiftedRuleRef] {
-        &self.ruleset
-    }
-
     fn can_accept_error(&self) -> TriState {
         self.can_accept_error
     }
@@ -326,7 +310,6 @@ where
                     )
                 })
                 .collect(),
-            ruleset: builder_state.ruleset.into_iter().collect(),
             can_accept_error: builder_state.can_accept_error,
         }
     }
@@ -435,7 +418,6 @@ where
             shift_nonterm_offset: nonterm_min,
             reduce_map,
             reduce_offset: reduce_min,
-            ruleset: builder_state.ruleset.into_iter().collect(),
             can_accept_error: builder_state.can_accept_error,
         }
     }

@@ -718,14 +718,11 @@ impl Grammar {
         let mut shift_nonterm_offsets = Vec::new();
         let mut reduce_data = Vec::new();
         let mut reduce_offsets = Vec::new();
-        let mut ruleset_data = Vec::new();
-        let mut ruleset_offsets = Vec::new();
         let mut can_accept_error = Vec::new();
 
         shift_term_offsets.push(0);
         shift_nonterm_offsets.push(0);
         reduce_offsets.push(0);
-        ruleset_offsets.push(0);
 
         for state in &self.states {
             // 1. shift_goto_map_term
@@ -797,25 +794,6 @@ impl Grammar {
             }
             reduce_offsets.push(reduce_data.len() as u32);
 
-            // 4. ruleset: Vec<ShiftedRuleRef>
-            for &rule in &state.ruleset {
-                let rule_val = rule.rule;
-                let shifted_val = rule.shifted;
-                assert!(
-                    rule_val < 65536,
-                    "Rule index {} in ruleset exceeds 16-bit limit (65536)",
-                    rule_val
-                );
-                assert!(
-                    shifted_val < 65536,
-                    "Shifted index {} in ruleset exceeds 16-bit limit (65536)",
-                    shifted_val
-                );
-                let val = (rule_val as u32) | ((shifted_val as u32) << 16);
-                ruleset_data.push(val);
-            }
-            ruleset_offsets.push(ruleset_data.len() as u32);
-
             // 5. can_accept_error: TriState
             let tri_val = match state.can_accept_error {
                 rusty_lr_core::TriState::False => 0u8,
@@ -828,6 +806,42 @@ impl Grammar {
         let num_rules = self.builder.rules.len();
         let num_states = self.states.len();
         let error_used = self.error_used;
+
+        // to remove suffix from generated data
+        let rule_names = rule_names
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let rule_precedences = rule_precedences
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let rule_tokens_data = rule_tokens_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let rule_tokens_offsets = rule_tokens_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+
+        let shift_term_data = shift_term_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let shift_term_offsets = shift_term_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let shift_nonterm_data = shift_nonterm_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let shift_nonterm_offsets = shift_nonterm_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let reduce_data = reduce_data
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let reduce_offsets = reduce_offsets
+            .into_iter()
+            .map(proc_macro2::Literal::u32_unsuffixed);
+        let can_accept_error = can_accept_error
+            .into_iter()
+            .map(proc_macro2::Literal::u8_unsuffixed);
 
         // range-compressed Vec based terminal-class_id map
         stream.extend(quote! {
@@ -920,8 +934,6 @@ impl Grammar {
                         // - SHIFT_TERM_OFFSETS & SHIFT_NONTERM_OFFSETS: Boundaries separating transitions for each state
                         // - REDUCE_DATA: Variable-length reduce map encoding (term_class, len, rules...)
                         // - REDUCE_OFFSETS: Boundaries separating reduce maps for each state
-                        // - RULESET_DATA: Packed shifted rule references (shifted_idx << 16) | (rule_idx)
-                        // - RULESET_OFFSETS: Boundaries separating ruleset references for each state
                         // - CAN_ACCEPT_ERROR: TriState (0 = False, 1 = True, 2 = Maybe)
                         static SHIFT_TERM_DATA: &[u32] = &[ #(#shift_term_data),* ];
                         static SHIFT_TERM_OFFSETS: &[u32] = &[ #(#shift_term_offsets),* ];
@@ -929,8 +941,6 @@ impl Grammar {
                         static SHIFT_NONTERM_OFFSETS: &[u32] = &[ #(#shift_nonterm_offsets),* ];
                         static REDUCE_DATA: &[u32] = &[ #(#reduce_data),* ];
                         static REDUCE_OFFSETS: &[u32] = &[ #(#reduce_offsets),* ];
-                        static RULESET_DATA: &[u32] = &[ #(#ruleset_data),* ];
-                        static RULESET_OFFSETS: &[u32] = &[ #(#ruleset_offsets),* ];
                         static CAN_ACCEPT_ERROR: &[u8] = &[ #(#can_accept_error),* ];
 
                         let num_states = #num_states;
@@ -977,17 +987,6 @@ impl Grammar {
                                 idx += 2 + len;
                             }
 
-                            // Decode the ruleset containing shifted rule references (rule index, shifted dot index)
-                            let ruleset_start = RULESET_OFFSETS[i] as usize;
-                            let ruleset_end = RULESET_OFFSETS[i + 1] as usize;
-                            let mut ruleset = Vec::with_capacity(ruleset_end - ruleset_start);
-                            for idx in ruleset_start..ruleset_end {
-                                let val = RULESET_DATA[idx];
-                                let rule = (val & 0xffff) as usize;
-                                let shifted = (val >> 16) as usize;
-                                ruleset.push(#module_prefix::rule::ShiftedRuleRef { rule, shifted });
-                            }
-
                             let can_accept_error = match CAN_ACCEPT_ERROR[i] {
                                 0 => #module_prefix::TriState::False,
                                 1 => #module_prefix::TriState::True,
@@ -999,7 +998,7 @@ impl Grammar {
                                 shift_goto_map_term,
                                 shift_goto_map_nonterm,
                                 reduce_map,
-                                ruleset,
+                                ruleset: Vec::new(),
                                 can_accept_error,
                             };
                             states.push(intermediate.into());
