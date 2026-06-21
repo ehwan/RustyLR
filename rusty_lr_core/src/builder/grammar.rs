@@ -10,8 +10,8 @@ use super::DiagnosticCollector;
 use super::State;
 use super::States;
 use crate::hash::HashMap;
-use crate::rule::*;
-use crate::token::Token;
+use crate::production::*;
+use crate::symbol::Symbol;
 use crate::TerminalSymbol;
 use crate::TriState;
 
@@ -25,7 +25,7 @@ struct ExpandCache<Term> {
 
 #[derive(Debug, Clone)]
 pub struct Rule<Term, NonTerm> {
-    pub rule: ProductionRule<Term, NonTerm>,
+    pub rule: Production<Term, NonTerm>,
     /// for reduce/reduce conflict resolving
     pub priority: usize,
 }
@@ -49,7 +49,7 @@ pub struct Grammar<Term, NonTerm> {
     pub precedence_levels: HashMap<Term, usize>,
 
     /// precedence type for each precedence level
-    pub precedence_types: Vec<Option<ReduceType>>,
+    pub precedence_types: Vec<Option<Associativity>>,
 }
 
 impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
@@ -69,7 +69,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     pub fn add_rule(
         &mut self,
         name: NonTerm,
-        rule: Vec<Token<TerminalSymbol<Term>, NonTerm>>,
+        rule: Vec<Symbol<TerminalSymbol<Term>, NonTerm>>,
         precedence: Precedence,
         priority: usize,
     ) -> usize
@@ -79,9 +79,9 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         let index = self.rules.len();
         self.rules_map.entry(name).or_default().push(index);
         let rule = Rule {
-            rule: ProductionRule {
-                name,
-                rule,
+            rule: Production {
+                lhs: name,
+                rhs: rule,
                 precedence,
             },
             priority,
@@ -104,7 +104,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     }
 
     /// error if different reduce type is assigned to same terminal symbol
-    pub fn set_precedence_types(&mut self, types: Vec<Option<ReduceType>>) {
+    pub fn set_precedence_types(&mut self, types: Vec<Option<Associativity>>) {
         self.precedence_types = types;
     }
 
@@ -134,7 +134,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 let rule = &rule.rule;
                 let (mut firsts, mut canbe_empty) = self
                     .firsts
-                    .entry(rule.name)
+                    .entry(rule.lhs)
                     .or_insert_with(|| {
                         changed = true;
                         (BTreeSet::new(), false)
@@ -143,9 +143,9 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
 
                 let mut this_nonterm_changed = false;
                 let mut this_rule_canbe_empty = true;
-                for token in rule.rule.iter() {
+                for token in rule.rhs.iter() {
                     match token {
-                        Token::Term(term) => {
+                        Symbol::Terminal(term) => {
                             let insert_result = firsts.insert(*term);
                             if insert_result {
                                 this_nonterm_changed = true;
@@ -153,7 +153,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                             this_rule_canbe_empty = false;
                             break;
                         }
-                        Token::NonTerm(nonterm) => {
+                        Symbol::NonTerminal(nonterm) => {
                             if let Some((child_firsts, child_canbe_empty)) =
                                 self.firsts.get(nonterm)
                             {
@@ -179,7 +179,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 }
                 if this_nonterm_changed {
                     changed = true;
-                    self.firsts.insert(rule.name, (firsts, canbe_empty));
+                    self.firsts.insert(rule.lhs, (firsts, canbe_empty));
                 }
             }
             if !changed {
@@ -215,10 +215,10 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 pong.clear();
                 for (_, cur) in rules.iter() {
                     let rule = &self.rules[cur.rule].rule;
-                    if let Some(Token::NonTerm(nonterm_name)) = rule.rule.first() {
+                    if let Some(Symbol::NonTerminal(nonterm_name)) = rule.rhs.first() {
                         // calculate lookaheads
                         let (lookaheads, canbe_empty) =
-                            self.lookahead(&rule.rule[1..], &cur.lookaheads)?;
+                            self.lookahead(&rule.rhs[1..], &cur.lookaheads)?;
 
                         for searched_rule in self.search_rules(*nonterm_name)?.iter() {
                             pong.push(ExpandCache {
@@ -267,7 +267,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     /// 1st `bool` of returned tuple is true if follow_tokens can be empty.
     fn lookahead(
         &self,
-        follow_tokens: &[Token<TerminalSymbol<Term>, NonTerm>],
+        follow_tokens: &[Symbol<TerminalSymbol<Term>, NonTerm>],
         lookaheads: &BTreeSet<TerminalSymbol<Term>>,
     ) -> Result<(BTreeSet<TerminalSymbol<Term>>, bool), BuildError<TerminalSymbol<Term>, NonTerm>>
     where
@@ -277,11 +277,11 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         let mut ret = BTreeSet::new();
         for token in follow_tokens.iter() {
             match token {
-                Token::Term(term) => {
+                Symbol::Terminal(term) => {
                     ret.insert(*term);
                     return Ok((ret, false));
                 }
-                Token::NonTerm(nonterm) => {
+                Symbol::NonTerminal(nonterm) => {
                     let (firsts, canbe_empty) = if let Some(nonterm) = self.firsts.get(nonterm) {
                         nonterm
                     } else {
@@ -302,19 +302,17 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     /// if the first token of each rule is nonterminal, attach its production rules
     fn expand(
         &self,
-        rules: &mut LookaheadRuleRefSet<TerminalSymbol<Term>>,
+        rules: &mut ItemSet<TerminalSymbol<Term>>,
     ) -> Result<(), BuildError<TerminalSymbol<Term>, NonTerm>>
     where
         Term: Copy + Ord,
         NonTerm: Copy + Hash + Eq,
     {
         let mut new_rules = Vec::new();
-        for (rule_ref, lookaheads) in rules.rules.iter() {
-            let rule = &self.rules[rule_ref.rule].rule;
-            if let Some(Token::NonTerm(nonterm_name)) = rule.rule.get(rule_ref.shifted) {
-                let lookaheads = self
-                    .lookahead(&rule.rule[rule_ref.shifted + 1..], lookaheads)?
-                    .0;
+        for (rule_ref, lookaheads) in rules.items.iter() {
+            let rule = &self.rules[rule_ref.production_idx].rule;
+            if let Some(Symbol::NonTerminal(nonterm_name)) = rule.rhs.get(rule_ref.dot) {
+                let lookaheads = self.lookahead(&rule.rhs[rule_ref.dot + 1..], lookaheads)?.0;
                 for c in self.expand_cache.get(nonterm_name).unwrap().iter() {
                     let lookaheads = if c.include_origin_lookaheads {
                         lookaheads.union(&c.lookaheads).copied().collect()
@@ -322,9 +320,9 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                         c.lookaheads.clone()
                     };
                     new_rules.push((
-                        ShiftedRuleRef {
-                            rule: c.rule,
-                            shifted: 0,
+                        LR0ItemRef {
+                            production_idx: c.rule,
+                            dot: 0,
                         },
                         lookaheads,
                     ));
@@ -340,7 +338,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     /// in certain state (with ruleset),
     /// given a subset of ruleset (which is `rules`),
     /// add other rules in `ruleset` that is related to `rules`
-    fn expand_backward(&self, rules: &mut Vec<ShiftedRuleRef>, ruleset: &BTreeSet<ShiftedRuleRef>)
+    fn expand_backward(&self, rules: &mut Vec<LR0ItemRef>, ruleset: &BTreeSet<LR0ItemRef>)
     where
         Term: PartialEq + Copy,
         NonTerm: Copy + PartialEq + Ord,
@@ -348,8 +346,8 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         let mut zero_shifted: BTreeSet<_> = rules
             .iter()
             .filter_map(|rule| {
-                if rule.shifted == 0 {
-                    Some(self.rules[rule.rule].rule.name)
+                if rule.dot == 0 {
+                    Some(self.rules[rule.production_idx].rule.lhs)
                 } else {
                     None
                 }
@@ -365,14 +363,17 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 // search for the rule that brings this rule to this state
                 // and add that rule to the `rules`
                 for &rule in ruleset.iter().filter(|&rule_ref| {
-                    self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                        == Some(&Token::NonTerm(nonterm))
+                    self.rules[rule_ref.production_idx]
+                        .rule
+                        .rhs
+                        .get(rule_ref.dot)
+                        == Some(&Symbol::NonTerminal(nonterm))
                 }) {
                     if inserted.insert(rule) {
                         changed = true;
                         rules.push(rule);
-                        if rule.shifted == 0 {
-                            next_zeros.insert(self.rules[rule.rule].rule.name);
+                        if rule.dot == 0 {
+                            next_zeros.insert(self.rules[rule.production_idx].rule.lhs);
                         }
                     }
                 }
@@ -426,7 +427,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     let reduce_rules = reduce_rules
                         .iter()
                         .map(|&rule| {
-                            let len = self.rules[rule].rule.rule.len();
+                            let len = self.rules[rule].rule.rhs.len();
                             let mut state = state_id;
                             for _ in 0..len {
                                 if state == usize::MAX {
@@ -435,7 +436,10 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                                 state = from[state];
                             }
                             let shift_rules = if state != usize::MAX {
-                                let mut rules = vec![ShiftedRuleRef { rule, shifted: 0 }];
+                                let mut rules = vec![LR0ItemRef {
+                                    production_idx: rule,
+                                    dot: 0,
+                                }];
                                 self.expand_backward(&mut rules, &states[state].ruleset);
                                 rules
                             } else {
@@ -454,7 +458,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     let reduce_rules = reduce_rules
                         .iter()
                         .map(|&rule| {
-                            let len = self.rules[rule].rule.rule.len();
+                            let len = self.rules[rule].rule.rhs.len();
                             let mut state = state_id;
                             for _ in 0..len {
                                 if state == usize::MAX {
@@ -463,7 +467,10 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                                 state = from[state];
                             }
                             let shift_rules = if state != usize::MAX {
-                                let mut rules = vec![ShiftedRuleRef { rule, shifted: 0 }];
+                                let mut rules = vec![LR0ItemRef {
+                                    production_idx: rule,
+                                    dot: 0,
+                                }];
                                 self.expand_backward(&mut rules, &states[state].ruleset);
                                 rules
                             } else {
@@ -501,12 +508,12 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                 return Err(BuildError::NoAugmented);
             }
 
-            let mut augmented_rules_set = LookaheadRuleRefSet::new();
+            let mut augmented_rules_set = ItemSet::new();
             for rule in augmented_rules.iter() {
-                augmented_rules_set.rules.insert(
-                    ShiftedRuleRef {
-                        rule: *rule,
-                        shifted: 0,
+                augmented_rules_set.items.insert(
+                    LR0ItemRef {
+                        production_idx: *rule,
+                        dot: 0,
                     },
                     BTreeSet::new(),
                 );
@@ -859,11 +866,11 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                         Ordering::Equal => {
                             // reduce == shift => check reduce type
                             match self.precedence_types[reduce_prec] {
-                                Some(ReduceType::Left) => {
+                                Some(Associativity::Left) => {
                                     // reduce first => remove shift
                                     reduces.insert(reduce_rule, reduce_prec);
                                 }
-                                Some(ReduceType::Right) => {
+                                Some(Associativity::Right) => {
                                     // shift first => remove reduce
                                     remove_reduces.insert(reduce_rule, reduce_prec);
                                     remove_shift = false;
@@ -882,8 +889,11 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     .ruleset
                     .iter()
                     .filter_map(|rule_ref| {
-                        if self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                            == Some(&Token::Term(term))
+                        if self.rules[rule_ref.production_idx]
+                            .rule
+                            .rhs
+                            .get(rule_ref.dot)
+                            == Some(&Symbol::Terminal(term))
                         {
                             Some(*rule_ref)
                         } else {
@@ -896,8 +906,11 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     // remove rules that start with `term`
                     state.shift_goto_map_term.remove(&term);
                     state.ruleset.retain(|rule_ref| {
-                        self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                            != Some(&Token::Term(term))
+                        self.rules[rule_ref.production_idx]
+                            .rule
+                            .rhs
+                            .get(rule_ref.dot)
+                            != Some(&Symbol::Terminal(term))
                     });
                 }
 
@@ -934,9 +947,9 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     /// build new state with given production rules
     fn build_recursive(
         &self,
-        mut rules: LookaheadRuleRefSet<TerminalSymbol<Term>>,
+        mut rules: ItemSet<TerminalSymbol<Term>>,
         states: &mut Vec<State<TerminalSymbol<Term>, NonTerm>>,
-        state_map: &mut BTreeMap<LookaheadRuleRefSet<TerminalSymbol<Term>>, usize>,
+        state_map: &mut BTreeMap<ItemSet<TerminalSymbol<Term>>, usize>,
         diags: &mut DiagnosticCollector<TerminalSymbol<Term>>,
     ) -> Result<usize, BuildError<TerminalSymbol<Term>, NonTerm>>
     where
@@ -955,29 +968,29 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         let state_id = states.len();
         state_map.insert(rules.clone(), state_id);
         states.push(State::new());
-        states[state_id].ruleset = rules.rules.keys().copied().collect();
+        states[state_id].ruleset = rules.items.keys().copied().collect();
 
         // calculate next shifted rules and reduce rules
         // we don't care about the conflicts here
         let mut next_rules_term = BTreeMap::new();
         let mut next_rules_nonterm = BTreeMap::new();
         let mut reduce_map: BTreeMap<TerminalSymbol<Term>, BTreeSet<usize>> = BTreeMap::new();
-        for (mut rule_ref, lookaheads) in rules.rules.into_iter() {
-            let rule = &self.rules[rule_ref.rule].rule;
-            match rule.rule.get(rule_ref.shifted) {
-                Some(Token::Term(term)) => {
-                    rule_ref.shifted += 1;
+        for (mut rule_ref, lookaheads) in rules.items.into_iter() {
+            let rule = &self.rules[rule_ref.production_idx].rule;
+            match rule.rhs.get(rule_ref.dot) {
+                Some(Symbol::Terminal(term)) => {
+                    rule_ref.dot += 1;
                     next_rules_term
                         .entry(*term)
-                        .or_insert_with(LookaheadRuleRefSet::new)
+                        .or_insert_with(ItemSet::new)
                         .add(rule_ref, lookaheads);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
-                Some(Token::NonTerm(nonterm)) => {
-                    rule_ref.shifted += 1;
+                Some(Symbol::NonTerminal(nonterm)) => {
+                    rule_ref.dot += 1;
                     next_rules_nonterm
                         .entry(*nonterm)
-                        .or_insert(LookaheadRuleRefSet::new())
+                        .or_insert(ItemSet::new())
                         .add(rule_ref, lookaheads);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
@@ -986,7 +999,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                         reduce_map
                             .entry(lookahead)
                             .or_default()
-                            .insert(rule_ref.rule);
+                            .insert(rule_ref.production_idx);
                     }
                 }
             }
@@ -1055,11 +1068,11 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     Ordering::Equal => {
                         // reduce == shift => check reduce type
                         match self.precedence_types[reduce_prec] {
-                            Some(ReduceType::Left) => {
+                            Some(Associativity::Left) => {
                                 // reduce first => remove shift
                                 reduces.insert(reduce_rule, reduce_prec);
                             }
-                            Some(ReduceType::Right) => {
+                            Some(Associativity::Right) => {
                                 // shift first => remove reduce
                                 remove_reduces.insert(reduce_rule, reduce_prec);
                                 remove_shift = false;
@@ -1077,21 +1090,24 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
             let shift_rules = if remove_shift {
                 // remove rules that start with `term`
                 states[state_id].ruleset.retain(|rule_ref| {
-                    self.rules[rule_ref.rule].rule.rule.get(rule_ref.shifted)
-                        != Some(&Token::Term(term))
+                    self.rules[rule_ref.production_idx]
+                        .rule
+                        .rhs
+                        .get(rule_ref.dot)
+                        != Some(&Symbol::Terminal(term))
                 });
 
                 next_rules_term
                     .remove(&term)
                     .unwrap()
-                    .rules
+                    .items
                     .into_keys()
                     .collect()
             } else {
                 next_rules_term
                     .get(&term)
                     .unwrap()
-                    .rules
+                    .items
                     .keys()
                     .copied()
                     .collect()

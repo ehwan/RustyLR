@@ -524,10 +524,10 @@ impl<
         let node_to_shift = self.prepare_reduce_node(node, count, count);
 
         let state = self.state(node_to_shift);
-        let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(state, rule.name) else {
+        let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(state, rule.lhs) else {
             unreachable!(
                 "Failed to shift non-terminal: {:?} in state {}",
-                rule.name, state
+                rule.lhs, state
             );
         };
 
@@ -551,7 +551,7 @@ impl<
                 #[cfg(feature = "tree")]
                 {
                     node.tree_stack
-                        .push(crate::tree::Tree::new_nonterminal(rule.name.clone(), trees));
+                        .push(crate::tree::Tree::new_nonterminal(rule.lhs.clone(), trees));
                 }
                 Ok(node_to_shift)
             }
@@ -663,7 +663,7 @@ impl<
         let mut reduce_nonterms = std::collections::BTreeSet::new();
         for reduce_rule in self.tables.expected_reduce_rule(state) {
             let prod_rule = self.tables.rule(reduce_rule.into_usize());
-            reduce_nonterms.insert((prod_rule.len, prod_rule.name));
+            reduce_nonterms.insert((prod_rule.len, prod_rule.lhs));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
             let mut node_and_len = node_and_len;
@@ -912,7 +912,7 @@ impl<
 
                 if shift.push {
                     match term {
-                        TerminalSymbol::Term(term) => {
+                        TerminalSymbol::Terminal(term) => {
                             node_.data_stack.push_terminal(term);
                         }
                         TerminalSymbol::Error | TerminalSymbol::Eof => {
@@ -921,7 +921,9 @@ impl<
                     }
                 } else {
                     match term {
-                        TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
+                        TerminalSymbol::Terminal(_)
+                        | TerminalSymbol::Error
+                        | TerminalSymbol::Eof => {
                             node_.data_stack.push_empty();
                         }
                     }
@@ -946,7 +948,7 @@ impl<
 
             if shift.push {
                 match term {
-                    TerminalSymbol::Term(term) => {
+                    TerminalSymbol::Terminal(term) => {
                         node_.data_stack.push_terminal(term);
                     }
                     TerminalSymbol::Error | TerminalSymbol::Eof => {
@@ -955,7 +957,7 @@ impl<
                 }
             } else {
                 match term {
-                    TerminalSymbol::Term(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
+                    TerminalSymbol::Terminal(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
                         node_.data_stack.push_empty();
                     }
                 }
@@ -1107,7 +1109,7 @@ impl<
         for (node, userdata) in current_nodes.drain(..).zip(current_userdatas.drain(..)) {
             if let Err((node, _, _, userdata)) = self.feed_location_impl(
                 node,
-                TerminalSymbol::Term(term.clone()),
+                TerminalSymbol::Terminal(term.clone()),
                 class,
                 location.clone(),
                 userdata,
@@ -1131,7 +1133,7 @@ impl<
                 std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
 
                 return Err(ParseError {
-                    term: TerminalSymbol::Term(term),
+                    term: TerminalSymbol::Terminal(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
@@ -1171,7 +1173,7 @@ impl<
                             userdata,
                         ) {
                             return Err(ParseError {
-                                term: TerminalSymbol::Term(term),
+                                term: TerminalSymbol::Terminal(term),
                                 location,
                                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                                 no_precedences: std::mem::take(&mut self.no_precedences),
@@ -1186,7 +1188,7 @@ impl<
             // restore current_nodes to fallback_nodes
             if self.next_nodes.is_empty() {
                 Err(ParseError {
-                    term: TerminalSymbol::Term(term),
+                    term: TerminalSymbol::Terminal(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
                     no_precedences: std::mem::take(&mut self.no_precedences),
@@ -1206,7 +1208,7 @@ impl<
                         node.location_stack.push(location.clone());
                         #[cfg(feature = "tree")]
                         node.tree_stack.push(crate::tree::Tree::new_terminal(
-                            TerminalSymbol::Term(term.clone()),
+                            TerminalSymbol::Terminal(term.clone()),
                         ));
 
                         if next_state.push {
@@ -1321,13 +1323,13 @@ impl<
                             })
                             .unwrap_or(0)
                     });
-                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.name) {
+                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.lhs) {
                     extra_state_stack.push(next_state_id.state);
                 } else {
                     unreachable!(
                         "unreachable: nonterminal shift should always succeed after reduce operation. \
 Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
-                        rule.name.as_str(),
+                        rule.lhs.as_str(),
                         reduces[0].into_usize()
                     );
                 }
@@ -1380,13 +1382,13 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         });
 
                     if let Some(next_state_id) =
-                        self.tables.shift_goto_nonterm(last_state, reduce_rule.name)
+                        self.tables.shift_goto_nonterm(last_state, reduce_rule.lhs)
                     {
                         extra_state_stack.push(next_state_id.state);
                     } else {
                         unreachable!(
                             "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
-                            reduce_rule.name.as_str(),
+                            reduce_rule.lhs.as_str(),
                             last_state
                         );
                     }

@@ -69,11 +69,11 @@ fn main() {
             println!("State {state_idx}:");
             println!("Production Rules: {{");
             for rule in &state.ruleset {
-                let rule = out.grammar.builder.rules[rule.rule]
+                let rule = out.grammar.builder.rules[rule.production_idx]
                     .rule
                     .clone()
                     .map(&term_class_map, &nonterm_map)
-                    .into_shifted(rule.shifted);
+                    .into_shifted(rule.dot);
                 println!("    {}", rule);
             }
             println!("}}");

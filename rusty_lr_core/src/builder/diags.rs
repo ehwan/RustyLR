@@ -1,4 +1,4 @@
-use crate::rule::ShiftedRuleRef;
+use crate::production::LR0ItemRef;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -7,7 +7,7 @@ pub struct DiagnosticCollector<Term> {
     pub enabled: bool,
     pub reduce_reduce_resolved: BTreeSet<(usize, BTreeSet<usize>, BTreeSet<usize>)>,
     pub shift_reduce_resolved_shift: BTreeMap<
-        (Term, Vec<ShiftedRuleRef>),
+        (Term, Vec<LR0ItemRef>),
         (
             usize, // shift precedence
             BTreeMap<usize, usize>,
@@ -15,18 +15,16 @@ pub struct DiagnosticCollector<Term> {
         ),
     >,
     pub shift_reduce_resolved_reduce: BTreeMap<
-        (Term, Vec<ShiftedRuleRef>),
+        (Term, Vec<LR0ItemRef>),
         (
             usize, // shift precedence
             BTreeMap<usize, usize>,
             // (rule, reduce precedence)
         ),
     >,
-    pub reduce_reduce_conflicts: BTreeMap<Vec<(usize, Vec<ShiftedRuleRef>)>, BTreeSet<Term>>,
-    pub shift_reduce_conflicts: BTreeMap<
-        (Term, Vec<ShiftedRuleRef>, Vec<ShiftedRuleRef>),
-        BTreeMap<usize, Vec<ShiftedRuleRef>>,
-    >,
+    pub reduce_reduce_conflicts: BTreeMap<Vec<(usize, Vec<LR0ItemRef>)>, BTreeSet<Term>>,
+    pub shift_reduce_conflicts:
+        BTreeMap<(Term, Vec<LR0ItemRef>, Vec<LR0ItemRef>), BTreeMap<usize, Vec<LR0ItemRef>>>,
 }
 impl<Term> DiagnosticCollector<Term> {
     pub fn new(collect: bool) -> Self {
@@ -55,7 +53,7 @@ impl<Term> DiagnosticCollector<Term> {
     pub fn add_shift_reduce_resolved_shift(
         &mut self,
         term: Term,
-        shift_rules: Vec<ShiftedRuleRef>,
+        shift_rules: Vec<LR0ItemRef>,
         shift_precedence: usize,
         mut reduce_rules: BTreeMap<usize, usize>,
     ) where
@@ -73,7 +71,7 @@ impl<Term> DiagnosticCollector<Term> {
     pub fn add_shift_reduce_resolved_reduce(
         &mut self,
         term: Term,
-        shift_rules: Vec<ShiftedRuleRef>,
+        shift_rules: Vec<LR0ItemRef>,
         shift_precedence: usize,
         mut reduce_rules: BTreeMap<usize, usize>,
     ) where
@@ -91,9 +89,9 @@ impl<Term> DiagnosticCollector<Term> {
     pub fn add_shift_reduce_conflict(
         &mut self,
         term: Term,
-        shift_rules: Vec<ShiftedRuleRef>,
-        shift_rules_backtrace: Vec<ShiftedRuleRef>,
-        mut reduce_rules: BTreeMap<usize, Vec<ShiftedRuleRef>>,
+        shift_rules: Vec<LR0ItemRef>,
+        shift_rules_backtrace: Vec<LR0ItemRef>,
+        mut reduce_rules: BTreeMap<usize, Vec<LR0ItemRef>>,
     ) where
         Term: Ord,
     {
@@ -106,7 +104,7 @@ impl<Term> DiagnosticCollector<Term> {
     }
     pub fn update_reduce_reduce_conflict(
         &mut self,
-        reduce_rules: Vec<(usize, Vec<ShiftedRuleRef>)>,
+        reduce_rules: Vec<(usize, Vec<LR0ItemRef>)>,
         term: Term,
     ) where
         Term: Ord,

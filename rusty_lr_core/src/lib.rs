@@ -22,11 +22,11 @@ pub mod builder;
 pub mod parser;
 
 /// module for production rules representation
-pub mod rule;
+pub mod production;
 
-pub(crate) mod token;
-pub use token::TerminalSymbol;
-pub use token::Token;
+pub(crate) mod symbol;
+pub use symbol::Symbol;
+pub use symbol::TerminalSymbol;
 
 /// Default error type for reduce action
 #[derive(Debug, Default)]

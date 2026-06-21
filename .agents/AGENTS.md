@@ -38,4 +38,6 @@ When requested by the user to write a Pull Request (PR):
 ## 7. Outputting the Implementation Plan
 Due to environment display issues (such as WSL rendering problems that prevent the `implementation_plan.md` artifact from rendering correctly in the UI):
 - You must print the full contents of the Implementation Plan directly into the chat/output window in addition to saving it to the artifact file.
-
+## 8. Terminology Alignment
+When modifying code or writing comments and documentation, you must use formal terminology strictly based on Programming Language Theory, Theory of Computation, and Type Theory (e.g., using `Symbol` instead of `Token`, and `Production` instead of `Rule` for internal logic).
+However, because the parser is inspired by Bison, you must maintain Bison's familiar terminology for user-facing aspects (e.g. keeping `%token`, `%tokentype` directives). Ensure all future modifications adhere to this balance.

@@ -11,9 +11,9 @@ pub(crate) mod parser;
 pub mod partition;
 pub(crate) mod pattern;
 pub mod rangeresolver;
+pub(crate) mod symbol;
 pub mod terminal_info;
 pub(crate) mod terminalset;
-pub(crate) mod token;
 pub mod utils;
 
 pub use parser::args::TableLayout;

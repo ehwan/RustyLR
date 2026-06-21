@@ -36,7 +36,7 @@
 pub type EContext = ::rusty_lr::parser::deterministic::Context<EParser, EDataStack, u8>;
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
-pub type ERule = ::rusty_lr::rule::ProductionRule<ETerminalClasses, ENonTerminals>;
+pub type ERule = ::rusty_lr::production::Production<ETerminalClasses, ENonTerminals>;
 /// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
 pub type ETables = ::rusty_lr::parser::table::DenseFlatTables<
@@ -951,10 +951,10 @@ impl ::rusty_lr::parser::Parser for EParser {
                 let num_rules = 16usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let name = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
-                            name,
+                            lhs,
                             len: RULE_LENGTHS[i] as usize,
                         });
                 }

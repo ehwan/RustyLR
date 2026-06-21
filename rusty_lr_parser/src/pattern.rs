@@ -1,13 +1,14 @@
 use crate::terminal_info::TerminalName;
 
+use crate::symbol::MappedSymbol;
+use rusty_lr_core::Symbol;
 use rusty_lr_core::TerminalSymbol;
-use rusty_lr_core::Token;
 
 use super::error::ParseError;
 use super::grammar::Grammar;
 use super::grammar::Terminal;
 use super::nonterminal_info::{NonTerminalInfo, Rule};
-use super::token::TokenMapped;
+
 use crate::parser::location::Located;
 use crate::parser::location::Location;
 
@@ -62,7 +63,7 @@ pub struct PatternToToken {
     /// only for internal usage; generating name like A_star, A_plus, A_question
     pub name: Located<String>,
     /// actual token for the pattern
-    pub token: Token<TerminalSymbol<Terminal>, usize>,
+    pub symbol: Symbol<TerminalSymbol<Terminal>, usize>,
     /// ruletype for this pattern
     pub ruletype: Option<TokenStream>,
     /// implicit mapto derived from its parent pattern (e.g. 'A' from A+, 'A' from A*!)
@@ -108,7 +109,7 @@ impl Pattern {
                     // special case for error token
                     return Ok(PatternToToken {
                         name: ident.clone(),
-                        token: Token::Term(TerminalSymbol::Error),
+                        symbol: Symbol::Terminal(TerminalSymbol::Error),
                         ruletype: None,
                         mapto: Some(ident.clone()),
                     });
@@ -122,7 +123,7 @@ impl Pattern {
                     // terminal
                     Ok(PatternToToken {
                         name: ident.clone(),
-                        token: Token::Term(TerminalSymbol::Term(*term_idx)),
+                        symbol: Symbol::Terminal(TerminalSymbol::Terminal(*term_idx)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: Some(ident.clone()),
                     })
@@ -133,7 +134,7 @@ impl Pattern {
                     let nonterminal = &grammar.nonterminals[*nonterm_idx];
                     Ok(PatternToToken {
                         name: ident.clone(),
-                        token: Token::NonTerm(*nonterm_idx),
+                        symbol: Symbol::NonTerminal(*nonterm_idx),
                         ruletype: nonterminal.ruletype.clone(),
                         mapto: Some(ident.clone()),
                     })
@@ -152,8 +153,8 @@ impl Pattern {
                     // A+ -> A+ A { Ap.push(A); Ap }
                     //     | A    { vec![A] }
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: base_rule.symbol,
                             mapto: Some(Located::new("A".to_string(), Location::CallSite)),
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -168,14 +169,14 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![
-                            TokenMapped {
-                                token: Token::NonTerm(newrule_idx),
+                            MappedSymbol {
+                                symbol: Symbol::NonTerminal(newrule_idx),
                                 mapto: Some(Located::new("Ap".to_string(), Location::CallSite)),
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
-                            TokenMapped {
-                                token: base_rule.token,
+                            MappedSymbol {
+                                symbol: base_rule.symbol,
                                 mapto: Some(Located::new("A".to_string(), Location::CallSite)),
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
@@ -207,7 +208,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
                     })
@@ -216,8 +217,8 @@ impl Pattern {
                     // A+ -> A Ap
                     //     | A
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: base_rule.symbol,
                             mapto: None,
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -230,14 +231,14 @@ impl Pattern {
                     };
                     let line2 = Rule {
                         tokens: vec![
-                            TokenMapped {
-                                token: base_rule.token,
+                            MappedSymbol {
+                                symbol: base_rule.symbol,
                                 mapto: None,
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
-                            TokenMapped {
-                                token: Token::NonTerm(newrule_idx),
+                            MappedSymbol {
+                                symbol: Symbol::NonTerminal(newrule_idx),
                                 mapto: None,
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
@@ -267,7 +268,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
                     })
@@ -293,8 +294,8 @@ impl Pattern {
                     // A* -> A+ { Ap }
                     //     |    { vec![] }
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: plus_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: plus_rule.symbol,
                             mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -333,7 +334,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
                     })
@@ -342,8 +343,8 @@ impl Pattern {
                     // A* -> A+
                     //     |
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: plus_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: plus_rule.symbol,
                             mapto: None,
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -379,7 +380,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
                     })
@@ -398,8 +399,8 @@ impl Pattern {
                     // A? -> A { Some(A) }
                     //     |   { None }
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: base_rule.symbol,
                             mapto: Some(Located::new("A".to_string(), Location::CallSite)),
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -438,7 +439,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: Some(quote! {Option<#base_typename>}),
                         mapto: base_rule.mapto.clone(),
                     })
@@ -447,8 +448,8 @@ impl Pattern {
                     // A? -> A { Some(A) }
                     //     |   { None }
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: base_rule.symbol,
                             mapto: None,
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -485,7 +486,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
                     })
@@ -509,7 +510,7 @@ impl Pattern {
                     let name_str = term_info.name.pretty_name(grammar.is_char, grammar.is_u8);
                     return Ok(PatternToToken {
                         name: Located::new(name_str, root_location),
-                        token: Token::Term(TerminalSymbol::Term(terminal)),
+                        symbol: Symbol::Terminal(TerminalSymbol::Terminal(terminal)),
                         ruletype: Some(grammar.token_typename.clone()),
                         mapto: None,
                     });
@@ -520,8 +521,8 @@ impl Pattern {
                 let mut rules = Vec::with_capacity(terminal_set.len());
                 for terminal in terminals {
                     let rule = Rule {
-                        tokens: vec![TokenMapped {
-                            token: Token::Term(TerminalSymbol::Term(terminal)),
+                        tokens: vec![MappedSymbol {
+                            symbol: Symbol::Terminal(TerminalSymbol::Terminal(terminal)),
                             mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -551,7 +552,7 @@ impl Pattern {
 
                 Ok(PatternToToken {
                     name: newrule_name,
-                    token: Token::NonTerm(newrule_idx),
+                    symbol: Symbol::NonTerminal(newrule_idx),
                     ruletype: Some(grammar.token_typename.clone()),
                     mapto: None,
                 })
@@ -577,8 +578,8 @@ impl Pattern {
                     // indices of children that have ruletype
                     let mut ruletype_child_idxs = Vec::with_capacity(line.len());
                     for (child_idx, child) in elements.iter().enumerate() {
-                        tokens.push(TokenMapped {
-                            token: child.token,
+                        tokens.push(MappedSymbol {
+                            symbol: child.symbol,
                             mapto: Some(Located::new(
                                 format!("__token{child_idx}"),
                                 Location::CallSite,
@@ -680,7 +681,7 @@ impl Pattern {
 
                 Ok(PatternToToken {
                     name: newrule_name,
-                    token: Token::NonTerm(newrule_idx),
+                    symbol: Symbol::NonTerminal(newrule_idx),
                     ruletype,
                     mapto: None,
                 })
@@ -692,7 +693,7 @@ impl Pattern {
 
                 Ok(PatternToToken {
                     name: Located::new(name_str, root_location),
-                    token: Token::Term(TerminalSymbol::Term(idx)),
+                    symbol: Symbol::Terminal(TerminalSymbol::Terminal(idx)),
                     ruletype: Some(grammar.token_typename.clone()),
                     mapto: None,
                 })
@@ -709,8 +710,8 @@ impl Pattern {
                         .iter()
                         .map(|ch| {
                             let term_id = grammar.get_terminal_index_from_char(*ch as char);
-                            TokenMapped {
-                                token: Token::Term(TerminalSymbol::Term(term_id)),
+                            MappedSymbol {
+                                symbol: Symbol::Terminal(TerminalSymbol::Terminal(term_id)),
                                 mapto: None,
                                 location: str_loc,
                                 reduce_action_chains: Vec::new(),
@@ -744,7 +745,7 @@ impl Pattern {
 
                 Ok(PatternToToken {
                     name: newrule_name,
-                    token: Token::NonTerm(newrule_idx),
+                    symbol: Symbol::NonTerminal(newrule_idx),
                     ruletype: Some(quote! { &'static [u8] }),
                     mapto: None,
                 })
@@ -755,7 +756,7 @@ impl Pattern {
 
                 Ok(PatternToToken {
                     name: Located::new(name_str, root_location),
-                    token: Token::Term(TerminalSymbol::Term(idx)),
+                    symbol: Symbol::Terminal(TerminalSymbol::Terminal(idx)),
                     ruletype: Some(grammar.token_typename.clone()),
                     mapto: None,
                 })
@@ -771,8 +772,8 @@ impl Pattern {
                         .chars()
                         .map(|ch| {
                             let term_id = grammar.get_terminal_index_from_char(ch);
-                            TokenMapped {
-                                token: Token::Term(TerminalSymbol::Term(term_id)),
+                            MappedSymbol {
+                                symbol: Symbol::Terminal(TerminalSymbol::Terminal(term_id)),
                                 mapto: None,
                                 location: str_loc,
                                 reduce_action_chains: Vec::new(),
@@ -804,7 +805,7 @@ impl Pattern {
 
                 Ok(PatternToToken {
                     name: newrule_name,
-                    token: Token::NonTerm(newrule_idx),
+                    symbol: Symbol::NonTerminal(newrule_idx),
                     ruletype: Some(quote! { &'static str }),
                     mapto: None,
                 })
@@ -821,8 +822,8 @@ impl Pattern {
 
                 if let Some(base_typename) = &base_rule.ruletype {
                     let rule1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: base_rule.symbol,
                             mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -837,8 +838,8 @@ impl Pattern {
                     };
                     let rule2 = Rule {
                         tokens: vec![
-                            TokenMapped {
-                                token: Token::NonTerm(newrule_idx),
+                            MappedSymbol {
+                                symbol: Symbol::NonTerminal(newrule_idx),
                                 mapto: Some(Located::new(
                                     "__token0".to_string(),
                                     Location::CallSite,
@@ -846,14 +847,14 @@ impl Pattern {
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
-                            TokenMapped {
-                                token: del.token,
+                            MappedSymbol {
+                                symbol: del.symbol,
                                 mapto: None,
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
-                            TokenMapped {
-                                token: base_rule.token,
+                            MappedSymbol {
+                                symbol: base_rule.symbol,
                                 mapto: Some(Located::new(
                                     "__token1".to_string(),
                                     Location::CallSite,
@@ -891,14 +892,14 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
                     })
                 } else {
                     let rule1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: base_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: base_rule.symbol,
                             mapto: None,
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -911,20 +912,20 @@ impl Pattern {
                     };
                     let rule2 = Rule {
                         tokens: vec![
-                            TokenMapped {
-                                token: base_rule.token,
+                            MappedSymbol {
+                                symbol: base_rule.symbol,
                                 mapto: None,
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
-                            TokenMapped {
-                                token: del.token,
+                            MappedSymbol {
+                                symbol: del.symbol,
                                 mapto: None,
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
                             },
-                            TokenMapped {
-                                token: Token::NonTerm(newrule_idx),
+                            MappedSymbol {
+                                symbol: Symbol::NonTerminal(newrule_idx),
                                 mapto: None,
                                 location: Location::CallSite,
                                 reduce_action_chains: Vec::new(),
@@ -954,7 +955,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
                     })
@@ -981,8 +982,8 @@ impl Pattern {
                     // A* -> A+ { Ap }
                     //     |    { vec![] }
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: plus_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: plus_rule.symbol,
                             mapto: Some(Located::new("__token0".to_string(), Location::CallSite)),
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -1021,7 +1022,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: Some(quote! { Vec<#base_typename> }),
                         mapto: base_rule.mapto.clone(),
                     })
@@ -1030,8 +1031,8 @@ impl Pattern {
                     // A* -> A+
                     //     |
                     let line1 = Rule {
-                        tokens: vec![TokenMapped {
-                            token: plus_rule.token,
+                        tokens: vec![MappedSymbol {
+                            symbol: plus_rule.symbol,
                             mapto: None,
                             location: Location::CallSite,
                             reduce_action_chains: Vec::new(),
@@ -1067,7 +1068,7 @@ impl Pattern {
 
                     Ok(PatternToToken {
                         name: newrule_name,
-                        token: Token::NonTerm(newrule_idx),
+                        symbol: Symbol::NonTerminal(newrule_idx),
                         ruletype: None,
                         mapto: base_rule.mapto.clone(),
                     })

@@ -123,7 +123,7 @@ pub type JsonContext = ::rusty_lr::parser::deterministic::Context<
 >;
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonRule = ::rusty_lr::rule::ProductionRule<
+pub type JsonRule = ::rusty_lr::production::Production<
     JsonTerminalClasses,
     JsonNonTerminals,
 >;
@@ -2123,10 +2123,10 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                 let num_rules = 99usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let name = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
-                            name,
+                            lhs,
                             len: RULE_LENGTHS[i] as usize,
                         });
                 }
