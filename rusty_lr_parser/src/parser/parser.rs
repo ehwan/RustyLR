@@ -88,8 +88,8 @@ Rule(box RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let $ident = ident else { // "$ident" replaced with "$ident" in the macro expansion
         unreachable!( "Rule-Ident" );
     };
-    if let Some(fisrt) = RuleLines.first_mut() {
-        fisrt.separator_location = @colon;
+    if let Some(first) = RuleLines.first_mut() {
+        first.separator_location = @colon;
     }
     RuleDefArgs {
         name: Located::new(ident.to_string(), @ident),
@@ -106,8 +106,8 @@ Rule(box RuleDefArgs) : ident RuleType colon RuleLines semicolon {
         link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#production-rules".to_string(),
         location: @error,
     });
-    if let Some(fisrt) = RuleLines.first_mut() {
-        fisrt.separator_location = @colon;
+    if let Some(first) = RuleLines.first_mut() {
+        first.separator_location = @colon;
     }
     RuleDefArgs {
         name: Located::new(ident.to_string(), @ident),

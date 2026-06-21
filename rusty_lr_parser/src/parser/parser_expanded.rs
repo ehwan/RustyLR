@@ -700,8 +700,8 @@ impl GrammarDataStack {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Rule-Ident");
             };
-            if let Some(fisrt) = RuleLines.first_mut() {
-                fisrt.separator_location = __rustylr_location_colon;
+            if let Some(first) = RuleLines.first_mut() {
+                first.separator_location = __rustylr_location_colon;
             }
             RuleDefArgs {
                 name: Located::new(ident.to_string(), __rustylr_location_ident),
@@ -787,8 +787,8 @@ impl GrammarDataStack {
                         .to_string(),
                     location: __rustylr_location_error,
                 });
-            if let Some(fisrt) = RuleLines.first_mut() {
-                fisrt.separator_location = __rustylr_location_colon;
+            if let Some(first) = RuleLines.first_mut() {
+                first.separator_location = __rustylr_location_colon;
             }
             RuleDefArgs {
                 name: Located::new(ident.to_string(), __rustylr_location_ident),
