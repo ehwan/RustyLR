@@ -10,7 +10,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Token Definition (`%token`)](#token-definition-must-defined)
 - [Production Rules](#production-rules)
 - [Patterns](#patterns)
-- [RuleType (Non-Terminal Types)](#ruletype-optional)
+- [ProductionType (Non-Terminal Types)](#ruletype-optional)
 - [Reduce Actions](#reduceaction-optional)
 - [Accessing Data in Reduce Actions](#accessing-token-data-in-reduceaction)
 - [Exclamation Mark (`!`) Value Discard](#exclamation-mark-)
@@ -198,7 +198,7 @@ Literal character and byte ranges such as `['0'-'9']` or `[b'0'-b'9']` are resol
 
 ---
 
-## RuleType (Optional)
+## ProductionType (Optional)
 
 You can assign a semantic return type to any non-terminal symbol.
 
@@ -227,9 +227,9 @@ For large semantic values, RustyLR also supports boxing selected stack variants.
 A reduce action is Rust code executed when a rule is matched and reduced.
 
 ### General Rules
-- If the non-terminal has a `RuleType`, the reduce action block must evaluate to that type.
-- If no `RuleType` is defined and only one symbol in the rule has a value, the reduce action can be omitted (it automatically forwards that value).
-- Actions can return a `Result<RuleType, ErrorType>` to propagate runtime parser errors.
+- If the non-terminal has a `ProductionType`, the reduce action block must evaluate to that type.
+- If no `ProductionType` is defined and only one symbol in the rule has a value, the reduce action can be omitted (it automatically forwards that value).
+- Actions can return a `Result<ProductionType, ErrorType>` to propagate runtime parser errors.
 
 ### Named Variables
 Assign names to elements on the right-hand side using the `=` syntax to access their values inside the action block:
@@ -406,8 +406,8 @@ Used to resolve shift/reduce conflicts in expressions. The precedence of termina
 - **`%right`**: Declares right-associative operators (e.g., `a ^ b ^ c` parses as `a ^ (b ^ c)`).
 - **`%precedence`**: Declares precedence without associativity. Banning chained usage of the operator without parentheses.
 
-When a conflict arises between shifting a terminal and reducing a rule:
-1. The parser compares the precedence of the lookahead terminal to the precedence of the rule's *operator*.
+When a conflict arises between shifting a terminal and reducing a production rule:
+1. The parser compares the precedence of the lookahead terminal to the precedence of the production's *operator*.
 2. The rule's operator is the rightmost terminal in the rule that has a precedence assigned.
 3. If the lookahead terminal has higher precedence, the parser **shifts**.
 4. If the rule operator has higher precedence, the parser **reduces**.
@@ -417,7 +417,7 @@ When a conflict arises between shifting a terminal and reducing a rule:
    - For `%precedence`, the parser reports a syntax error.
 
 #### Explicit Precedence (`%prec`)
-You can override a rule's default operator using the `%prec` directive followed by a terminal name:
+You can override a production's default operator using the `%prec` directive followed by a terminal name:
 
 ```rust
 %left '+';
@@ -489,7 +489,7 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `%userdata`
 - `%error`
 - `%token` terminal definitions
-- Non-terminal rule types
+- Non-terminal production return types
 - Reduce actions
 
 ### Supported Variables
@@ -518,7 +518,7 @@ Rule($userdata) : a { $userdata };
 
 ### Extracting Terminal Values (Syntax Sugar)
 
-When defining a terminal token, you typically wrap it inside an enum variant. For example:
+In formal grammar, a **Terminal Symbol** (often called a **token** in parser generators) represents an indivisible unit of input from the lexer. When defining a terminal symbol using `%token`, you typically wrap it inside an enum variant. For example:
 ```rust
 %tokentype Token;
 %token ident Token::Ident(ident);
@@ -556,11 +556,11 @@ The controls in this section are useful for ambiguous grammars, parser-mode tuni
 
 ### Memory Optimization with `box`
 
-Internally, the generated parser stores all semantic values (the `%tokentype` and all non-terminals' `RuleType`s) in a single unified `enum` representing the parser's data stack.
+Internally, the generated parser stores all semantic values (the `%tokentype` and all non-terminals' `ProductionType`s) in a single unified `enum` representing the parser's data stack.
 
-Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `RuleType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
+Because the memory footprint of a Rust `enum` is dictated by its largest variant, if even one `ProductionType` is exceptionally large (e.g., a large AST struct), the size of *every* stack slot will inflate. This can result in significant memory waste and performance degradation.
 
-To avoid this, you can write the `box` keyword in front of `%tokentype` or any non-terminal's `RuleType` (inside the parentheses, e.g. `(box Type)`). The parser generator will automatically box that type in the data enum (generating `Box<Type>`), and will automatically wrap (`Box::new(...)`) or unwrap (`*val`) it in reduce actions so that you do not have to write `Box::new` or dereference it yourself:
+To avoid this, you can write the `box` keyword in front of `%tokentype` or any non-terminal's `ProductionType` (inside the parentheses, e.g. `(box Type)`). The parser generator will automatically box that type in the data enum (generating `Box<Type>`), and will automatically wrap (`Box::new(...)`) or unwrap (`*val`) it in reduce actions so that you do not have to write `Box::new` or dereference it yourself:
 
 ```rust
 %tokentype box MyToken;

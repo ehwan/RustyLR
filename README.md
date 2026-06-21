@@ -43,7 +43,7 @@ cargo install rustylr
 ```
 
 ### 3. Create a Grammar File
-Create a grammar file, e.g., `src/grammar.rs`. Any Rust code placed *above* the `%%` delimiter is copied directly to the generated parser file. The section *below* `%%` defines directives and grammar rules.
+Create a grammar file, e.g., `src/grammar.rs`. Any Rust code placed *above* the `%%` delimiter is copied directly to the generated parser file. The section *below* `%%` defines directives and production rules.
 
 ```rust
 // src/grammar.rs
@@ -61,7 +61,7 @@ pub enum Token {
 
 %%
 
-// Define the token type and the start symbol
+// Define the terminal symbol type (token type) and the start symbol
 %tokentype Token;
 %start Expr;
 
@@ -105,7 +105,7 @@ rustylr src/grammar.rs src/parser.rs
 ```
 
 ### 5. Parse a Token Stream
-Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your tokens to it:
+Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your terminal symbols (tokens) to it:
 
 ```rust
 // src/main.rs
@@ -153,7 +153,7 @@ The generated parser module contains several generated components tailored to yo
 - **`<Start>Parser`**: A lightweight struct containing the static parsing tables. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/trait.Parser.html)
 - **`<Start>Context`**: A mutable state context that keeps track of the stack and parsed symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/deterministic/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nondeterministic/struct.Context.html)
 
-The generated module also includes internal state, rule, and non-terminal types used by the runtime and debugging APIs.
+The generated module also includes internal state, production, and non-terminal types used by the runtime and debugging APIs.
 
 ### Feeding Tokens
 You can feed terminal symbols either with or without location information:
@@ -180,9 +180,9 @@ For more details, see [GLR.md](GLR.md).
 ## Error Handling and Conflict Resolution
 
 RustyLR provides multiple tools to resolve grammar ambiguities and handle parsing failures:
-- **Panic-Mode Error Recovery:** Use the special `error` terminal to catch and recover from syntax errors. Unlike Bison's blocking loop-based recovery, RustyLR incrementally discards and merges subsequent unexpected tokens into the `error` token's location span on each `feed()`, enabling reactive stream parsing and accurate diagnostic spans.
+- **Panic-Mode Error Recovery:** Use the special `error` terminal to catch and recover from syntax errors. Unlike Bison's blocking loop-based recovery, RustyLR incrementally discards and merges subsequent unexpected terminal symbols into the `error` terminal's location span on each `feed()`, enabling reactive stream parsing and accurate diagnostic spans.
 - **Operator Precedence:** Disambiguate expressions with `%left`, `%right`, and `%precedence` directives.
-- **Advanced Reduce Rule Priority:** Resolve reduce/reduce conflicts with `%dprec` when precedence declarations are not enough.
+- **Advanced Reduce Production Priority:** Resolve reduce/reduce conflicts with `%dprec` when precedence declarations are not enough.
 - **Runtime Error Propagation:** Return custom `Err` payloads from reduce actions to signal semantic or parsing errors.
 
 See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for in-depth information.
@@ -191,7 +191,7 @@ See [SYNTAX.md - Resolving Conflicts](SYNTAX.md#resolving-conflicts) for in-dept
 
 ## Location Tracking
 
-Track input spans automatically across tokens and non-terminals to print helpful compiler errors:
+Track input spans automatically across terminal symbols and non-terminals to print helpful compiler errors:
 
 ```rust
 Expr(i32)
@@ -261,7 +261,7 @@ RustyLR's syntax builds upon standard Yacc/Bison design but is optimized for Rus
 See [SYNTAX.md](SYNTAX.md) for the complete reference.
 
 ### Type Inference with `_`
-You can omit explicit rule types using the `_` placeholder. RustyLR will infer the type based on identity rules and reduce actions:
+You can omit explicit production return types using the `_` placeholder. RustyLR will infer the type based on identity productions and reduce actions:
 
 ```rust
 Expr(_): Term;
