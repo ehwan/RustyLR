@@ -613,8 +613,8 @@ impl Builder {
                         for loc in locs {
                             let range = span_manager.get_byterange(&loc.location()).unwrap_or(0..0);
                             let reduce_type = match loc.value() {
-                                rusty_lr_core::rule::ReduceType::Left => "%left",
-                                rusty_lr_core::rule::ReduceType::Right => "%right",
+                                rusty_lr_core::production::Associativity::Left => "%left",
+                                rusty_lr_core::production::Associativity::Right => "%right",
                             };
                             labels.push(
                                 Label::primary(file_id, range)
@@ -902,11 +902,11 @@ impl Builder {
                     }
                     notes.push("Backtrace for the shift rule:".to_string());
                     for shift_rule in shift_rules_backtrace {
-                        let rule_str = grammar.builder.rules[shift_rule.rule]
+                        let rule_str = grammar.builder.rules[shift_rule.production_idx]
                             .rule
                             .clone()
                             .map(class_mapper, nonterm_mapper)
-                            .into_shifted(shift_rule.shifted);
+                            .into_shifted(shift_rule.dot);
                         notes.push(format!("\t>>> {rule_str}"));
                     }
                 }
@@ -914,7 +914,7 @@ impl Builder {
                     Self::extend_rule_source_label(
                         &mut labels,
                         file_id,
-                        shift_rule.rule,
+                        shift_rule.production_idx,
                         &grammar,
                         "(Shift) ",
                         "(Shift) ",
@@ -931,15 +931,15 @@ impl Builder {
                     );
 
                     if self.note_backtrace {
-                        let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
+                        let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.lhs);
 
                         notes.push(format!("Backtrace for the reduce rule ({name}):"));
                         notes.extend(reduce_rule_backtrace.into_iter().map(|shifted_rule| {
-                            let rule_str = grammar.builder.rules[shifted_rule.rule]
+                            let rule_str = grammar.builder.rules[shifted_rule.production_idx]
                                 .rule
                                 .clone()
                                 .map(class_mapper, nonterm_mapper)
-                                .into_shifted(shifted_rule.shifted);
+                                .into_shifted(shifted_rule.dot);
 
                             format!("\t>>> {rule_str}")
                         }));
@@ -976,15 +976,15 @@ impl Builder {
                         if self.is_executable {
                             notes.push("--no-backtrace to disable backtracing".to_string());
                         }
-                        let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.name);
+                        let name = nonterm_mapper(grammar.builder.rules[reduce_rule].rule.lhs);
 
                         notes.push(format!("Backtrace for the reduce rule ({name}):"));
                         notes.extend(reduce_rule_from.into_iter().map(|shifted_rule| {
-                            let rule_str = grammar.builder.rules[shifted_rule.rule]
+                            let rule_str = grammar.builder.rules[shifted_rule.production_idx]
                                 .rule
                                 .clone()
                                 .map(class_mapper, nonterm_mapper)
-                                .into_shifted(shifted_rule.shifted);
+                                .into_shifted(shifted_rule.dot);
 
                             format!("\t>>> {rule_str}")
                         }));

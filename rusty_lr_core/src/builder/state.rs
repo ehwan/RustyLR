@@ -9,7 +9,7 @@ pub struct State<Term, NonTerm> {
     pub shift_goto_map_term: BTreeMap<Term, usize>,
     pub shift_goto_map_nonterm: BTreeMap<NonTerm, usize>,
     pub reduce_map: BTreeMap<Term, BTreeSet<usize>>,
-    pub ruleset: BTreeSet<crate::rule::ShiftedRuleRef>,
+    pub ruleset: BTreeSet<crate::production::LR0ItemRef>,
     pub can_accept_error: TriState,
 }
 impl<Term, NonTerm> State<Term, NonTerm> {
@@ -24,15 +24,12 @@ impl<Term, NonTerm> State<Term, NonTerm> {
     }
 
     /// shift -= 1 for all rules in the ruleset
-    pub fn unshifted_ruleset(&self) -> impl Iterator<Item = crate::rule::ShiftedRuleRef> + '_ {
-        self.ruleset
-            .iter()
-            .filter(|rule| rule.shifted > 0)
-            .map(|rule| {
-                let mut rule = *rule;
-                rule.shifted -= 1;
-                rule
-            })
+    pub fn unshifted_ruleset(&self) -> impl Iterator<Item = crate::production::LR0ItemRef> + '_ {
+        self.ruleset.iter().filter(|rule| rule.dot > 0).map(|rule| {
+            let mut rule = *rule;
+            rule.dot -= 1;
+            rule
+        })
     }
 }
 

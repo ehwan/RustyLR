@@ -95,7 +95,7 @@ impl ShiftTarget<usize> {
 /// needs the left-hand side and right-hand-side length.
 #[derive(Debug, Clone, Copy)]
 pub struct RuleInfo<NonTerm> {
-    pub name: NonTerm,
+    pub lhs: NonTerm,
     pub len: usize,
 }
 

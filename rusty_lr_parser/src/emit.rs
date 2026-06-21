@@ -89,7 +89,7 @@ impl Grammar {
                     pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>;
                     /// type alias for CFG production rule
                     #[allow(non_camel_case_types,dead_code)]
-                    pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
+                    pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
                     /// type alias for runtime parser tables
                     #[allow(non_camel_case_types,dead_code)]
                     pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
@@ -106,7 +106,7 @@ impl Grammar {
                 pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>;
                 /// type alias for CFG production rule
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #rule_typename = #module_prefix::rule::ProductionRule<#termclass_typename, #nonterm_typename>;
+                pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
                 /// type alias for runtime parser tables
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
@@ -136,8 +136,8 @@ impl Grammar {
         for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
             let (variant_name, pretty_name) = if self.is_u8 || self.is_char {
                 let name = format_ident!("TermClass{}", class_id);
-                let pretty_name =
-                    self.class_pretty_name_list(rusty_lr_core::TerminalSymbol::Term(class_id), 4);
+                let pretty_name = self
+                    .class_pretty_name_list(rusty_lr_core::TerminalSymbol::Terminal(class_id), 4);
                 (name, pretty_name)
             } else {
                 if class_def.terminals.len() == 1 {
@@ -147,8 +147,10 @@ impl Grammar {
                     (term.clone(), term.to_string())
                 } else {
                     let name = format_ident!("TermClass{}", class_id);
-                    let pretty_name = self
-                        .class_pretty_name_list(rusty_lr_core::TerminalSymbol::Term(class_id), 4);
+                    let pretty_name = self.class_pretty_name_list(
+                        rusty_lr_core::TerminalSymbol::Terminal(class_id),
+                        4,
+                    );
                     (name, pretty_name)
                 }
             };
@@ -503,12 +505,12 @@ impl Grammar {
 
         for rule in &self.builder.rules {
             assert!(
-                rule.rule.name < 32768,
+                rule.rule.lhs < 32768,
                 "Non-terminal index {} exceeds 15-bit serialization limit (32768)",
-                rule.rule.name
+                rule.rule.lhs
             );
-            rule_names.push(rule.rule.name as u32);
-            rule_lengths.push(rule.rule.rule.len() as u32);
+            rule_names.push(rule.rule.lhs as u32);
+            rule_lengths.push(rule.rule.rhs.len() as u32);
         }
 
         // ------------------
@@ -530,7 +532,7 @@ impl Grammar {
             // 1. shift_goto_map_term
             for &(term, next_state) in &state.shift_goto_map_term {
                 let term_idx = match term {
-                    TerminalSymbol::Term(t) => t,
+                    TerminalSymbol::Terminal(t) => t,
                     TerminalSymbol::Error => self.terminal_classes.len(),
                     TerminalSymbol::Eof => self.terminal_classes.len() + 1,
                 };
@@ -574,7 +576,7 @@ impl Grammar {
             // 3. reduce_map: Vec<(TermClass, Vec<usize>)>
             for (term, rules) in &state.reduce_map {
                 let term_idx = match term {
-                    TerminalSymbol::Term(t) => *t,
+                    TerminalSymbol::Terminal(t) => *t,
                     TerminalSymbol::Error => self.terminal_classes.len(),
                     TerminalSymbol::Eof => self.terminal_classes.len() + 1,
                 };
@@ -693,10 +695,10 @@ impl Grammar {
                         let num_rules = #num_rules;
                         let mut rules = Vec::with_capacity(num_rules);
                         for i in 0..num_rules {
-                            let name = #nonterminals_enum_name::from_usize(RULE_NAMES[i] as usize);
+                            let lhs = #nonterminals_enum_name::from_usize(RULE_NAMES[i] as usize);
 
                             rules.push(#module_prefix::parser::table::RuleInfo {
-                                name,
+                                lhs,
                                 len: RULE_LENGTHS[i] as usize,
                             });
                         }
@@ -773,8 +775,8 @@ impl Grammar {
     }
 
     fn emit_data_stack(&self, stream: &mut TokenStream) {
+        use rusty_lr_core::Symbol;
         use rusty_lr_core::TerminalSymbol;
-        use rusty_lr_core::Token;
 
         let module_prefix = &self.module_prefix;
         let start_rule_ident = Ident::new(
@@ -860,9 +862,9 @@ impl Grammar {
         }
 
         // Maps tokens to their corresponding variant names. If the token holds no data, it maps to `Empty`.
-        let token_to_variant_name = |token: Token<TerminalSymbol<usize>, usize>| match token {
-            Token::Term(term) => match term {
-                TerminalSymbol::Term(term) => {
+        let token_to_variant_name = |token: Symbol<TerminalSymbol<usize>, usize>| match token {
+            Symbol::Terminal(term) => match term {
+                TerminalSymbol::Terminal(term) => {
                     if self.terminal_classes[term].data_used {
                         &terminal_variant_name
                     } else {
@@ -871,7 +873,7 @@ impl Grammar {
                 }
                 TerminalSymbol::Error | TerminalSymbol::Eof => &empty_variant_name,
             },
-            Token::NonTerm(nonterm_idx) => &variant_names_for_nonterm[nonterm_idx],
+            Symbol::NonTerminal(nonterm_idx) => &variant_names_for_nonterm[nonterm_idx],
         };
 
         let mut reduce_action_case_streams = quote! {};
@@ -932,9 +934,9 @@ impl Grammar {
                     rule.tokens
                         .iter()
                         .map(|t| {
-                            match t.token {
-                                Token::Term(term) => self.class_pretty_name_list(term, 5),
-                                Token::NonTerm(nonterm) => self.nonterm_pretty_name(nonterm),
+                            match t.symbol {
+                                Symbol::Terminal(term) => self.class_pretty_name_list(term, 5),
+                                Symbol::NonTerminal(nonterm) => self.nonterm_pretty_name(nonterm),
                             }
                         })
                         .collect::<Vec<_>>()
@@ -949,7 +951,7 @@ impl Grammar {
                     let mut debug_tag_check_stream = TokenStream::new();
                     for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
                         let token_index_from_end = rule.tokens.len() - 1 - token_idx;
-                        let variant_name = token_to_variant_name(token.token);
+                        let variant_name = token_to_variant_name(token.symbol);
 
                         if variant_name == &empty_variant_name {
                             debug_tag_check_stream.extend(quote! {
@@ -984,7 +986,7 @@ impl Grammar {
                     let mut data_maptos = Vec::with_capacity(rule.tokens.len());
 
                     for (token_idx, token) in rule.tokens.iter().enumerate().rev() {
-                        let variant_name = token_to_variant_name(token.token);
+                        let variant_name = token_to_variant_name(token.symbol);
 
                         // Determine location_mapto
                         let location_mapto = if token.reduce_action_chains.is_empty() {
@@ -1066,9 +1068,9 @@ impl Grammar {
                         };
 
                         if variant_name != &empty_variant_name && mapto.is_some() {
-                            let is_boxed = match token.token {
-                                Token::Term(_) => self.is_tokentype_boxed,
-                                Token::NonTerm(nonterm_idx) => {
+                            let is_boxed = match token.symbol {
+                                Symbol::Terminal(_) => self.is_tokentype_boxed,
+                                Symbol::NonTerminal(nonterm_idx) => {
                                     self.nonterminals[nonterm_idx].ruletype_boxed
                                 }
                             };

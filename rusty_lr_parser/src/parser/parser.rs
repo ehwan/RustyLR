@@ -18,7 +18,7 @@ use quote::ToTokens;
 
 use std::boxed::Box;
 
-use rusty_lr_core::rule::ReduceType;
+use rusty_lr_core::production::Associativity;
 
 // bootstrap the parser for the grammar
 // this define the actual parser for proc-macro line parsing
@@ -120,10 +120,10 @@ RuleLines(Vec<RuleLineArgs>): RuleLines pipe RuleLine {
 }
 ;
 
-RuleLine(box RuleLineArgs): TokenMapped* PrecDef* Action
+RuleLine(box RuleLineArgs): MappedSymbol* PrecDef* Action
 {
     RuleLineArgs {
-        tokens: TokenMapped,
+        tokens: MappedSymbol,
         reduce_action: Action.map(|action| action.to_token_stream()),
         separator_location: Location::default(), // will be set later in RuleLines
         precs: PrecDef,
@@ -167,7 +167,7 @@ PrecDef(box PrecDPrecArgs)
     }
     ;
 
-TokenMapped(box (Option<Located<String>>, PatternArgs)): Pattern {
+MappedSymbol(box (Option<Located<String>>, PatternArgs)): Pattern {
     ( None, Pattern )
 }
 | ident equal Pattern {
@@ -579,7 +579,7 @@ Directive
         });
     }
     | percent left IdentOrLiteral+ semicolon {
-        data.precedences.push( (@left, Some(ReduceType::Left), IdentOrLiteral) );
+        data.precedences.push( (@left, Some(Associativity::Left), IdentOrLiteral) );
     }
     | percent left error semicolon {
         data.error_recovered.push( RecoveredError {
@@ -589,7 +589,7 @@ Directive
         });
     }
     | percent right IdentOrLiteral+ semicolon {
-        data.precedences.push( (@right, Some(ReduceType::Right), IdentOrLiteral) );
+        data.precedences.push( (@right, Some(Associativity::Right), IdentOrLiteral) );
     }
     | percent right error semicolon {
         data.error_recovered.push( RecoveredError {

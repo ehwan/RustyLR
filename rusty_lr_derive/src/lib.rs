@@ -65,11 +65,11 @@ pub fn lr1(input: TokenStream) -> TokenStream {
                 .map(|rule| {
                     format!(
                         "\n>>> {}",
-                        grammar.builder.rules[rule.rule]
+                        grammar.builder.rules[rule.production_idx]
                             .rule
                             .clone()
                             .map(class_mapper, nonterm_mapper)
-                            .into_shifted(rule.shifted)
+                            .into_shifted(rule.dot)
                     )
                 })
                 .collect::<Vec<_>>()

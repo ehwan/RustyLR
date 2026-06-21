@@ -816,9 +816,9 @@ pub struct GrammarArgs {
     pub error_typename: Vec<(Location, TokenStream)>,
     pub terminals: Vec<(Located<String>, TokenStream)>,
     pub precedences: Vec<(
-        Location,                                // location of %left, %right, %precedence
-        Option<rusty_lr_core::rule::ReduceType>, // actual definition of precedence type
-        Vec<IdentOrLiteral>,                     // items
+        Location,                                         // location of %left, %right, %precedence
+        Option<rusty_lr_core::production::Associativity>, // actual definition of precedence type
+        Vec<IdentOrLiteral>,                              // items
     )>,
     pub rules: Vec<RuleDefArgs>,
     pub lalr: bool,

@@ -50,21 +50,21 @@ pub enum ConflictError {
     /// error building given CFG
     ShiftReduceConflict {
         term: String,
-        reduce_rule: (usize, rusty_lr_core::rule::ProductionRule<String, String>),
-        shift_rules: Vec<(usize, rusty_lr_core::rule::ShiftedRule<String, String>)>,
+        reduce_rule: (usize, rusty_lr_core::production::Production<String, String>),
+        shift_rules: Vec<(usize, rusty_lr_core::production::LR0Item<String, String>)>,
     },
     /// error building given CFG
     ReduceReduceConflict {
         lookahead: String,
-        rule1: (usize, rusty_lr_core::rule::ProductionRule<String, String>),
-        rule2: (usize, rusty_lr_core::rule::ProductionRule<String, String>),
+        rule1: (usize, rusty_lr_core::production::Production<String, String>),
+        rule2: (usize, rusty_lr_core::production::Production<String, String>),
     },
 }
 
 #[derive(Debug)]
 pub enum ParseError {
     /// different reduce type applied to the same terminal symbol
-    MultipleReduceDefinition(Vec<Located<rusty_lr_core::rule::ReduceType>>),
+    MultipleReduceDefinition(Vec<Located<rusty_lr_core::production::Associativity>>),
 
     InvalidTerminalRange {
         location: Location,
@@ -613,7 +613,7 @@ impl Info {
             | Info::ShiftReduceConflictResolvedReduce { term, .. }
             | Info::ShiftReduceConflictGLR { term, .. } => {
                 let term_name = match term {
-                    TerminalSymbol::Term(t) => grammar.class_pretty_name_abbr(*t),
+                    TerminalSymbol::Terminal(t) => grammar.class_pretty_name_abbr(*t),
                     TerminalSymbol::Error => "error".to_string(),
                     TerminalSymbol::Eof => "$".to_string(),
                 };
@@ -622,7 +622,7 @@ impl Info {
             Info::ReduceReduceConflictGLR { terms, .. } => {
                 if let Some(term) = terms.first() {
                     let term_name = match term {
-                        TerminalSymbol::Term(t) => grammar.class_pretty_name_abbr(*t),
+                        TerminalSymbol::Terminal(t) => grammar.class_pretty_name_abbr(*t),
                         TerminalSymbol::Error => "error".to_string(),
                         TerminalSymbol::Eof => "$".to_string(),
                     };

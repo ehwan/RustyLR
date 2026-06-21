@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::token::TokenMapped;
+use super::symbol::MappedSymbol;
 use crate::parser::location::Located;
 use crate::parser::location::Location;
 use proc_macro2::TokenStream;
@@ -55,13 +55,13 @@ impl ReduceAction {
 }
 
 pub struct Rule {
-    pub tokens: Vec<TokenMapped>,
+    pub tokens: Vec<MappedSymbol>,
     /// reduce action called when this rule is reduced
     pub reduce_action: Option<ReduceAction>,
     /// span of '|' or ':' before this production rule
     pub separator_location: Location,
     /// %prec definition
-    pub prec: Option<Located<rusty_lr_core::rule::Precedence>>,
+    pub prec: Option<Located<rusty_lr_core::production::Precedence>>,
     /// %dprec definition
     pub dprec: Option<Located<usize>>,
 

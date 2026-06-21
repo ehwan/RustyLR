@@ -4,9 +4,9 @@ use quote::format_ident;
 use quote::quote;
 use rusty_lr_core::hash::HashMap;
 use rusty_lr_core::hash::HashSet;
-use rusty_lr_core::rule::Precedence;
+use rusty_lr_core::production::Precedence;
+use rusty_lr_core::Symbol;
 use rusty_lr_core::TerminalSymbol;
-use rusty_lr_core::Token;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
@@ -29,9 +29,9 @@ use crate::parser::parser_expanded::GrammarContext;
 use crate::pattern::Pattern;
 use crate::pattern::PatternToToken;
 use crate::rangeresolver::RangeResolver;
+use crate::symbol::MappedSymbol;
 use crate::terminal_info::TerminalInfo;
 use crate::terminal_info::TerminalName;
-use crate::token::TokenMapped;
 use crate::utils;
 
 pub struct TerminalClassDefinition {
@@ -80,7 +80,7 @@ pub struct Grammar {
     pub terminals_index: HashMap<TerminalName, Terminal>,
 
     /// %left, %right, or %precedence for each precedence level
-    pub precedence_types: Vec<Located<Option<rusty_lr_core::rule::ReduceType>>>,
+    pub precedence_types: Vec<Located<Option<rusty_lr_core::production::Associativity>>>,
 
     /// precedence levels; line number of %left, %right, or %precedence directive
     pub precedence_levels: HashMap<IdentOrLiteral, Located<usize>>,
@@ -135,7 +135,7 @@ pub struct Grammar {
     /// precedence level of error token
     pub error_precedence: Option<usize>,
 
-    /// See `TokenMapped::reduce_action_chains` for more details.
+    /// See `MappedSymbol::reduce_action_chains` for more details.
     /// This is actual body of each reduce action in the chain.
     pub custom_reduce_actions: Vec<CustomSingleReduceAction>,
 
@@ -195,7 +195,7 @@ impl Grammar {
                     }
                 }
             }
-            TerminalSymbol::Term(class_idx) => {
+            TerminalSymbol::Terminal(class_idx) => {
                 let class_name = self.class_pretty_name_abbr(*class_idx);
                 for opt_target in scopes {
                     match opt_target {
@@ -1279,7 +1279,7 @@ impl Grammar {
         // precedence orders
         let mut reduce_definitions: HashMap<
             IdentOrLiteral,
-            Located<rusty_lr_core::rule::ReduceType>,
+            Located<rusty_lr_core::production::Associativity>,
         > = HashMap::default();
 
         for (level, (location, reduce_type, items)) in
@@ -1356,8 +1356,8 @@ impl Grammar {
                     let pattern_rule =
                         pattern.to_token(&mut grammar, &mut pattern_map, location.clone())?;
 
-                    tokens.push(TokenMapped {
-                        token: pattern_rule.token,
+                    tokens.push(MappedSymbol {
+                        symbol: pattern_rule.symbol,
                         mapto: mapto.or_else(|| pattern_rule.mapto.clone()),
                         location,
                         reduce_action_chains: Vec::new(),
@@ -1384,9 +1384,9 @@ impl Grammar {
                     if let Some(from_token) = from_token {
                         let from_token_location = tokens[from_token].location;
                         // check if from_token'th token is terminal symbol
-                        if let Token::Term(term) = tokens[from_token].token {
+                        if let Symbol::Terminal(term) = tokens[from_token].symbol {
                             match term {
-                                TerminalSymbol::Term(term_idx) => {
+                                TerminalSymbol::Terminal(term_idx) => {
                                     if let Some(level) = grammar.terminals[term_idx].precedence {
                                         Some(Located::new(
                                             Precedence::Fixed(level.into_value()),
@@ -1423,9 +1423,9 @@ impl Grammar {
                     // choose the last terminal symbol that has precedence
                     let mut op = None;
                     for token in tokens.iter().rev() {
-                        if let Token::Term(term) = token.token {
+                        if let Symbol::Terminal(term) = token.symbol {
                             match term {
-                                TerminalSymbol::Term(term_idx) => {
+                                TerminalSymbol::Terminal(term_idx) => {
                                     if let Some(level) = grammar.terminals[term_idx].precedence {
                                         op = Some(Located::new(
                                             Precedence::Fixed(level.into_value()),
@@ -1822,14 +1822,14 @@ impl Grammar {
                         for rule in &grammar.nonterminals[i].rules {
                             if let Some(ReduceAction::Identity(idx)) = &rule.reduce_action {
                                 if *idx < rule.tokens.len() {
-                                    let token = rule.tokens[*idx].token;
+                                    let token = rule.tokens[*idx].symbol;
                                     match token {
-                                        Token::Term(_) => {
+                                        Symbol::Terminal(_) => {
                                             let ty = Some(grammar.token_typename.clone());
                                             inferred_type = Some(ty);
                                             break;
                                         }
-                                        Token::NonTerm(to_nonterm_idx) => {
+                                        Symbol::NonTerminal(to_nonterm_idx) => {
                                             let target_type =
                                                 &grammar.nonterminals[to_nonterm_idx].ruletype;
                                             // Substitute any already resolved placeholders
@@ -1906,14 +1906,14 @@ impl Grammar {
                 .unwrap();
             let augmented_rule = Rule {
                 tokens: vec![
-                    TokenMapped {
-                        token: Token::NonTerm(*start_idx),
+                    MappedSymbol {
+                        symbol: Symbol::NonTerminal(*start_idx),
                         mapto: None,
                         location: Location::CallSite,
                         reduce_action_chains: Vec::new(),
                     },
-                    TokenMapped {
-                        token: Token::Term(TerminalSymbol::Eof),
+                    MappedSymbol {
+                        symbol: Symbol::Terminal(TerminalSymbol::Eof),
                         mapto: None,
                         location: Location::CallSite,
                         reduce_action_chains: Vec::new(),
@@ -1976,12 +1976,12 @@ impl Grammar {
         for nonterm in &grammar.nonterminals {
             for rule in &nonterm.rules {
                 for token in &rule.tokens {
-                    if token.token
-                        == Token::Term(TerminalSymbol::Term(grammar.other_terminal_index))
+                    if token.symbol
+                        == Symbol::Terminal(TerminalSymbol::Terminal(grammar.other_terminal_index))
                     {
                         grammar.other_used = true;
                     }
-                    if token.token == Token::Term(TerminalSymbol::Error) {
+                    if token.symbol == Symbol::Terminal(TerminalSymbol::Error) {
                         grammar.error_used = true;
                     }
                 }
@@ -2063,7 +2063,7 @@ impl Grammar {
             let mut same_ruleset = BTreeMap::new();
             for rule in &nonterm_def.rules {
                 for (token_idx, term_mapped) in rule.tokens.iter().enumerate() {
-                    if let Token::Term(TerminalSymbol::Term(term)) = term_mapped.token {
+                    if let Symbol::Terminal(TerminalSymbol::Terminal(term)) = term_mapped.symbol {
                         // if this rule has reduce action, and it is not auto-generated,
                         // this terminal should be completely distinct from others (for user-defined inspection action)
                         // so put this terminal into separate class
@@ -2079,14 +2079,14 @@ impl Grammar {
                             .tokens
                             .iter()
                             .take(token_idx)
-                            .map(|token| (token.token, &token.reduce_action_chains))
+                            .map(|token| (token.symbol, &token.reduce_action_chains))
                             .collect::<Vec<_>>();
                         // tokens after this token
                         let suffix = rule
                             .tokens
                             .iter()
                             .skip(token_idx + 1)
-                            .map(|token| (token.token, &token.reduce_action_chains))
+                            .map(|token| (token.symbol, &token.reduce_action_chains))
                             .collect::<Vec<_>>();
                         let reduce_chains = &term_mapped.reduce_action_chains;
                         let prec = rule.prec.map(Located::into_value);
@@ -2184,7 +2184,8 @@ impl Grammar {
                     // check if this rule contains any terminal that is not the first terminal in the class
                     let mut remove_this_rule = false;
                     for token in &rule.tokens {
-                        if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
+                        if let Symbol::Terminal(TerminalSymbol::Terminal(old_class)) = token.symbol
+                        {
                             if !is_first_oldclass_in_newclass[old_class] {
                                 remove_this_rule = true;
                                 break;
@@ -2208,12 +2209,13 @@ impl Grammar {
 
                     //  - tokens in the rule
                     for token in &mut rule.tokens {
-                        if let Token::Term(TerminalSymbol::Term(old_class)) = token.token {
+                        if let Symbol::Terminal(TerminalSymbol::Terminal(old_class)) = token.symbol
+                        {
                             let new_class = old_class_to_new_class[old_class];
                             if new_class == self.other_terminal_class_id {
                                 other_was_used = true;
                             }
-                            token.token = Token::Term(TerminalSymbol::Term(new_class));
+                            token.symbol = Symbol::Terminal(TerminalSymbol::Terminal(new_class));
                         }
                     }
                     new_rules.push(rule);
@@ -2246,7 +2248,7 @@ impl Grammar {
         while let Some(nt_idx) = queue.pop() {
             for rule in &self.nonterminals[nt_idx].rules {
                 for token in &rule.tokens {
-                    if let Token::NonTerm(next_nt) = token.token {
+                    if let Symbol::NonTerminal(next_nt) = token.symbol {
                         if !nonterm_used[next_nt] {
                             nonterm_used[next_nt] = true;
                             queue.push(next_nt);
@@ -2293,7 +2295,7 @@ impl Grammar {
                 for rule in &nonterm.rules {
                     let mut rule_productive = true;
                     for token in &rule.tokens {
-                        if let Token::NonTerm(next_nt) = token.token {
+                        if let Symbol::NonTerminal(next_nt) = token.symbol {
                             if !productive[next_nt] {
                                 rule_productive = false;
                                 break;
@@ -2326,7 +2328,7 @@ impl Grammar {
 
             nonterm.rules.retain(|rule| {
                 rule.tokens.iter().all(|token| {
-                    if let Token::NonTerm(next_nt) = token.token {
+                    if let Symbol::NonTerminal(next_nt) = token.symbol {
                         productive[next_nt]
                     } else {
                         true
@@ -2377,14 +2379,14 @@ impl Grammar {
             if optimize_related_nonterminals.contains(&nonterm_id) {
                 continue;
             }
-            let totoken = rule.tokens[0].token;
-            if let Token::NonTerm(to_nonterm_id) = totoken {
+            let totoken = rule.tokens[0].symbol;
+            if let Symbol::NonTerminal(to_nonterm_id) = totoken {
                 if optimize_related_nonterminals.contains(&to_nonterm_id) {
                     continue;
                 }
             }
 
-            if totoken == Token::NonTerm(nonterm_id) {
+            if totoken == Symbol::NonTerminal(nonterm_id) {
                 // A -> A cycle, do not optimize
                 continue;
             }
@@ -2411,8 +2413,8 @@ impl Grammar {
 
                 let input_type = if let Some(mapto) = mapto {
                     let ruletype = match totoken {
-                        Token::Term(_) => Some(self.token_typename.clone()),
-                        Token::NonTerm(to_nonterm_id) => {
+                        Symbol::Terminal(_) => Some(self.token_typename.clone()),
+                        Symbol::NonTerminal(to_nonterm_id) => {
                             self.nonterminals[to_nonterm_id].ruletype.clone()
                         }
                     };
@@ -2440,22 +2442,22 @@ impl Grammar {
             }
 
             optimize_related_nonterminals.insert(nonterm_id);
-            if let Token::NonTerm(to_nonterm_id) = totoken {
+            if let Symbol::NonTerminal(to_nonterm_id) = totoken {
                 optimize_related_nonterminals.insert(to_nonterm_id);
             }
 
             nonterm_replace.insert(nonterm_id, (totoken, reduce_action_chain));
         }
 
-        // replace all Token::NonTerm that can be replaced into Token::Term calculated above
+        // replace all Symbol::NonTerminal that can be replaced into Symbol::Terminal calculated above
         for nonterm in self.nonterminals.iter_mut() {
             for rule in &mut nonterm.rules {
                 for token in &mut rule.tokens {
-                    if let Token::NonTerm(nonterm_id) = token.token {
+                    if let Symbol::NonTerminal(nonterm_id) = token.symbol {
                         if let Some((newclass, custom_reduce_action)) =
                             nonterm_replace.get(&nonterm_id)
                         {
-                            token.token = *newclass;
+                            token.symbol = *newclass;
                             let mut new_reduce_chain = custom_reduce_action.clone();
                             new_reduce_chain
                                 .append(&mut std::mem::take(&mut token.reduce_action_chains));
@@ -2519,7 +2521,7 @@ impl Grammar {
                     }
                     for rule in nonterm_j.rules.iter() {
                         for token in rule.tokens.iter() {
-                            if token.token != Token::NonTerm(i) {
+                            if token.symbol != Symbol::NonTerminal(i) {
                                 continue;
                             }
 
@@ -2600,7 +2602,7 @@ impl Grammar {
         for nonterm in &self.nonterminals {
             for rule in &nonterm.rules {
                 for token in &rule.tokens {
-                    if let Token::Term(TerminalSymbol::Term(term)) = token.token {
+                    if let Symbol::Terminal(TerminalSymbol::Terminal(term)) = token.symbol {
                         if let Some(mapto) = &token.mapto {
                             if rule.reduce_action_contains_ident(mapto.value().as_str()) {
                                 self.terminal_classes[term].data_used = true;
@@ -2640,8 +2642,8 @@ impl Grammar {
         for nonterm in &mut self.nonterminals {
             for rule in &mut nonterm.rules {
                 for token in &mut rule.tokens {
-                    if let Token::NonTerm(nonterm_idx) = token.token {
-                        token.token = Token::NonTerm(nonterm_old_to_new[nonterm_idx]);
+                    if let Symbol::NonTerminal(nonterm_idx) = token.symbol {
+                        token.symbol = Symbol::NonTerminal(nonterm_old_to_new[nonterm_idx]);
                     }
                 }
             }
@@ -2737,7 +2739,7 @@ impl Grammar {
         match class {
             TerminalSymbol::Error => return "error".to_string(),
             TerminalSymbol::Eof => return "eof".to_string(),
-            TerminalSymbol::Term(class_idx) => {
+            TerminalSymbol::Terminal(class_idx) => {
                 let class = &self.terminal_classes[class_idx];
                 let len: usize = class
                     .terminals
@@ -2794,7 +2796,7 @@ impl Grammar {
         for (term_idx, term_info) in self.terminals.iter().enumerate() {
             if let Some(level) = &term_info.precedence {
                 let class = self.terminal_class_id[term_idx];
-                if !grammar.add_precedence(TerminalSymbol::Term(class), *level.value()) {
+                if !grammar.add_precedence(TerminalSymbol::Terminal(class), *level.value()) {
                     unreachable!("set_reduce_type error");
                 }
             }
@@ -2807,7 +2809,7 @@ impl Grammar {
                 let tokens = rule
                     .tokens
                     .iter()
-                    .map(|token_mapped| token_mapped.token)
+                    .map(|token_mapped| token_mapped.symbol)
                     .collect();
 
                 grammar.add_rule(
@@ -3021,7 +3023,7 @@ impl Grammar {
 
         for state in &mut new_states {
             for (term, shift_target) in &mut state.shift_goto_map_term {
-                if let TerminalSymbol::Term(term) = *term {
+                if let TerminalSymbol::Terminal(term) = *term {
                     shift_target.push = self.terminal_classes[term].data_used;
                 }
             }
@@ -3051,7 +3053,7 @@ impl Grammar {
 
                 let term_to_usize = |term: TerminalSymbol<TerminalClass>| -> usize {
                     match term {
-                        TerminalSymbol::Term(t) => t,
+                        TerminalSymbol::Terminal(t) => t,
                         TerminalSymbol::Error => self.terminal_classes.len(),
                         TerminalSymbol::Eof => self.terminal_classes.len() + 1,
                     }
@@ -3188,7 +3190,10 @@ impl Grammar {
         for ((term, shift_rules), (shift_prec, reduce_rules)) in
             &collector.shift_reduce_resolved_shift
         {
-            let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
+            let shift_rule_indices = shift_rules
+                .iter()
+                .map(|sr| sr.production_idx)
+                .collect::<Vec<_>>();
             let reduce_rule_pairs = reduce_rules
                 .iter()
                 .map(|(&r, &p)| (r, p))
@@ -3205,7 +3210,10 @@ impl Grammar {
         for ((term, shift_rules), (shift_prec, reduce_rules)) in
             &collector.shift_reduce_resolved_reduce
         {
-            let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
+            let shift_rule_indices = shift_rules
+                .iter()
+                .map(|sr| sr.production_idx)
+                .collect::<Vec<_>>();
             let reduce_rule_pairs = reduce_rules
                 .iter()
                 .map(|(&r, &p)| (r, p))
@@ -3225,35 +3233,38 @@ impl Grammar {
             for ((term, shift_rules, shift_rules_backtrace), reduce_rules) in
                 &collector.shift_reduce_conflicts
             {
-                let shift_rule_indices = shift_rules.iter().map(|sr| sr.rule).collect::<Vec<_>>();
+                let shift_rule_indices = shift_rules
+                    .iter()
+                    .map(|sr| sr.production_idx)
+                    .collect::<Vec<_>>();
 
                 let mut s_backtrace = Vec::new();
                 for shift_rule in shift_rules_backtrace {
-                    let rule_str = self.builder.rules[shift_rule.rule]
+                    let rule_str = self.builder.rules[shift_rule.production_idx]
                         .rule
                         .clone()
                         .map(
                             |c| self.class_pretty_name_list(c, 5),
                             |nt| self.nonterm_pretty_name(nt),
                         )
-                        .into_shifted(shift_rule.shifted);
+                        .into_shifted(shift_rule.dot);
                     s_backtrace.push(format!("\t>>> {rule_str}"));
                 }
 
                 let mut r_rules = Vec::new();
                 for (&reduce_rule, reduce_rule_backtrace) in reduce_rules {
                     let mut r_backtrace = Vec::new();
-                    let name = self.nonterm_pretty_name(self.builder.rules[reduce_rule].rule.name);
+                    let name = self.nonterm_pretty_name(self.builder.rules[reduce_rule].rule.lhs);
                     r_backtrace.push(format!("Backtrace for the reduce rule ({name}):"));
                     for shifted_rule in reduce_rule_backtrace {
-                        let rule_str = self.builder.rules[shifted_rule.rule]
+                        let rule_str = self.builder.rules[shifted_rule.production_idx]
                             .rule
                             .clone()
                             .map(
                                 |c| self.class_pretty_name_list(c, 5),
                                 |nt| self.nonterm_pretty_name(nt),
                             )
-                            .into_shifted(shifted_rule.shifted);
+                            .into_shifted(shifted_rule.dot);
                         r_backtrace.push(format!("\t>>> {rule_str}"));
                     }
                     r_rules.push((reduce_rule, r_backtrace));
@@ -3272,17 +3283,17 @@ impl Grammar {
                 let mut r_rules = Vec::new();
                 for &(reduce_rule, ref reduce_rule_from) in reduce_rules {
                     let mut r_backtrace = Vec::new();
-                    let name = self.nonterm_pretty_name(self.builder.rules[reduce_rule].rule.name);
+                    let name = self.nonterm_pretty_name(self.builder.rules[reduce_rule].rule.lhs);
                     r_backtrace.push(format!("Backtrace for the reduce rule ({name}):"));
                     for shifted_rule in reduce_rule_from {
-                        let rule_str = self.builder.rules[shifted_rule.rule]
+                        let rule_str = self.builder.rules[shifted_rule.production_idx]
                             .rule
                             .clone()
                             .map(
                                 |c| self.class_pretty_name_list(c, 5),
                                 |nt| self.nonterm_pretty_name(nt),
                             )
-                            .into_shifted(shifted_rule.shifted);
+                            .into_shifted(shifted_rule.dot);
                         r_backtrace.push(format!("\t>>> {rule_str}"));
                     }
                     r_rules.push((reduce_rule, r_backtrace));

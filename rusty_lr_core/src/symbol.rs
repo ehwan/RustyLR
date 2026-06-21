@@ -7,32 +7,32 @@ use std::hash::Hash;
 /// and future support for other special tokens.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum TerminalSymbol<Term> {
-    Term(Term), // index in the terminals vector
-    Error,      // error token
-    Eof,        // end of file token
+    Terminal(Term), // index in the terminals vector
+    Error,          // error token
+    Eof,            // end of file token
 }
 impl<Term> TerminalSymbol<Term> {
     pub fn is_error(&self) -> bool {
         matches!(self, TerminalSymbol::Error)
     }
     pub fn is_term(&self) -> bool {
-        matches!(self, TerminalSymbol::Term(_))
+        matches!(self, TerminalSymbol::Terminal(_))
     }
     pub fn is_eof(&self) -> bool {
         matches!(self, TerminalSymbol::Eof)
     }
-    /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
+    /// converts self to a term if it is a `Terminal` variant, otherwise returns `None`.
     pub fn to_term(&self) -> Option<&Term> {
         match self {
-            TerminalSymbol::Term(term) => Some(term),
+            TerminalSymbol::Terminal(term) => Some(term),
             TerminalSymbol::Error => None,
             TerminalSymbol::Eof => None,
         }
     }
-    /// converts self to a term if it is a `Term` variant, otherwise returns `None`.
+    /// converts self to a term if it is a `Terminal` variant, otherwise returns `None`.
     pub fn into_term(self) -> Option<Term> {
         match self {
-            TerminalSymbol::Term(term) => Some(term),
+            TerminalSymbol::Terminal(term) => Some(term),
             TerminalSymbol::Error => None,
             TerminalSymbol::Eof => None,
         }
@@ -42,45 +42,45 @@ impl<Term> TerminalSymbol<Term> {
 impl<Term: Display> std::fmt::Display for TerminalSymbol<Term> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TerminalSymbol::Term(term) => write!(f, "{}", term),
+            TerminalSymbol::Terminal(term) => write!(f, "{}", term),
             TerminalSymbol::Error => write!(f, "error"),
             TerminalSymbol::Eof => write!(f, "eof"),
         }
     }
 }
 
-/// Token represents a terminal or non-terminal symbol in the grammar.
+/// Symbol represents a terminal or non-terminal symbol in the grammar.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Token<Term, NonTerm> {
-    Term(Term),
-    NonTerm(NonTerm),
+pub enum Symbol<Term, NonTerm> {
+    Terminal(Term),
+    NonTerminal(NonTerm),
 }
-impl<Term: Display, NonTerm: Display> Display for Token<Term, NonTerm> {
+impl<Term: Display, NonTerm: Display> Display for Symbol<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Token::Term(term) => write!(f, "{}", term),
-            Token::NonTerm(nonterm) => write!(f, "{}", nonterm),
+            Symbol::Terminal(term) => write!(f, "{}", term),
+            Symbol::NonTerminal(nonterm) => write!(f, "{}", nonterm),
         }
     }
 }
-impl<Term: Debug, NonTerm: Debug> Debug for Token<Term, NonTerm> {
+impl<Term: Debug, NonTerm: Debug> Debug for Symbol<Term, NonTerm> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Token::Term(term) => write!(f, "{:?}", term),
-            Token::NonTerm(nonterm) => write!(f, "{:?}", nonterm),
+            Symbol::Terminal(term) => write!(f, "{:?}", term),
+            Symbol::NonTerminal(nonterm) => write!(f, "{:?}", nonterm),
         }
     }
 }
 
-impl<Term, NonTerm> Token<Term, NonTerm> {
+impl<Term, NonTerm> Symbol<Term, NonTerm> {
     pub fn map<NewTerm, NewNonTerm>(
         self,
         term_map: impl Fn(Term) -> NewTerm,
         nonterm_map: impl Fn(NonTerm) -> NewNonTerm,
-    ) -> Token<NewTerm, NewNonTerm> {
+    ) -> Symbol<NewTerm, NewNonTerm> {
         match self {
-            Token::Term(term) => Token::Term(term_map(term)),
-            Token::NonTerm(nonterm) => Token::NonTerm(nonterm_map(nonterm)),
+            Symbol::Terminal(term) => Symbol::Terminal(term_map(term)),
+            Symbol::NonTerminal(nonterm) => Symbol::NonTerminal(nonterm_map(nonterm)),
         }
     }
 }

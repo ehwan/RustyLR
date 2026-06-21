@@ -19,7 +19,7 @@ use crate::terminalset::TerminalSetItem;
 use proc_macro2::Group;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use rusty_lr_core::rule::ReduceType;
+use rusty_lr_core::production::Associativity;
 use std::boxed::Box;
 
 // =================================User Codes End=================================
@@ -34,14 +34,14 @@ use std::boxed::Box;
 2: RuleType ->
 3: RuleLines -> RuleLines pipe RuleLine
 4: RuleLines -> RuleLine
-5: RuleLine -> TokenMapped* PrecDef* Action
+5: RuleLine -> MappedSymbol* PrecDef* Action
 6: PrecDef -> percent prec IdentOrLiteral
 7: PrecDef -> percent prec error
 8: PrecDef -> percent dprec int_literal
 9: PrecDef -> percent dprec error
 10: PrecDef -> percent error
-11: TokenMapped -> Pattern
-12: TokenMapped -> ident equal Pattern
+11: MappedSymbol -> Pattern
+12: MappedSymbol -> ident equal Pattern
 13: TerminalSetItem -> ident
 14: TerminalSetItem -> ident minus ident
 15: TerminalSetItem -> ident minus error
@@ -116,10 +116,10 @@ use std::boxed::Box;
 84: GrammarLine -> Rule
 85: GrammarLine -> Directive
 86: Grammar -> GrammarLine+
-87: TokenMapped+ -> TokenMapped
-88: TokenMapped+ -> TokenMapped+ TokenMapped
-89: TokenMapped* -> TokenMapped+
-90: TokenMapped* ->
+87: MappedSymbol+ -> MappedSymbol
+88: MappedSymbol+ -> MappedSymbol+ MappedSymbol
+89: MappedSymbol* -> MappedSymbol+
+90: MappedSymbol* ->
 91: PrecDef+ -> PrecDef
 92: PrecDef+ -> PrecDef+ PrecDef
 93: PrecDef* -> PrecDef+
@@ -197,7 +197,7 @@ pub type GrammarContext =
 /// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule =
-    ::rusty_lr_core::rule::ProductionRule<GrammarTerminalClasses, GrammarNonTerminals>;
+    ::rusty_lr_core::production::Production<GrammarTerminalClasses, GrammarNonTerminals>;
 /// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarTables = ::rusty_lr_core::parser::table::SparseFlatTables<
@@ -419,7 +419,7 @@ pub enum GrammarNonTerminals {
     RuleLines,
     RuleLine,
     PrecDef,
-    TokenMapped,
+    MappedSymbol,
     TerminalSetItem,
     TerminalSet,
     Pattern,
@@ -429,8 +429,8 @@ pub enum GrammarNonTerminals {
     Directive,
     GrammarLine,
     Grammar,
-    _TokenMappedPlus16,
-    _TokenMappedStar17,
+    _MappedSymbolPlus16,
+    _MappedSymbolStar17,
     _PrecDefPlus18,
     _PrecDefStar19,
     _caretQuestion20,
@@ -478,7 +478,7 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::RuleLines => "RuleLines",
             GrammarNonTerminals::RuleLine => "RuleLine",
             GrammarNonTerminals::PrecDef => "PrecDef",
-            GrammarNonTerminals::TokenMapped => "TokenMapped",
+            GrammarNonTerminals::MappedSymbol => "MappedSymbol",
             GrammarNonTerminals::TerminalSetItem => "TerminalSetItem",
             GrammarNonTerminals::TerminalSet => "TerminalSet",
             GrammarNonTerminals::Pattern => "Pattern",
@@ -488,8 +488,8 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Directive => "Directive",
             GrammarNonTerminals::GrammarLine => "GrammarLine",
             GrammarNonTerminals::Grammar => "Grammar",
-            GrammarNonTerminals::_TokenMappedPlus16 => "TokenMapped+",
-            GrammarNonTerminals::_TokenMappedStar17 => "TokenMapped*",
+            GrammarNonTerminals::_MappedSymbolPlus16 => "MappedSymbol+",
+            GrammarNonTerminals::_MappedSymbolStar17 => "MappedSymbol*",
             GrammarNonTerminals::_PrecDefPlus18 => "PrecDef+",
             GrammarNonTerminals::_PrecDefStar19 => "PrecDef*",
             GrammarNonTerminals::_caretQuestion20 => "caret?",
@@ -513,7 +513,7 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::RuleLines => None,
             GrammarNonTerminals::RuleLine => None,
             GrammarNonTerminals::PrecDef => None,
-            GrammarNonTerminals::TokenMapped => None,
+            GrammarNonTerminals::MappedSymbol => None,
             GrammarNonTerminals::TerminalSetItem => None,
             GrammarNonTerminals::TerminalSet => None,
             GrammarNonTerminals::Pattern => None,
@@ -523,10 +523,10 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
             GrammarNonTerminals::Directive => None,
             GrammarNonTerminals::GrammarLine => None,
             GrammarNonTerminals::Grammar => None,
-            GrammarNonTerminals::_TokenMappedPlus16 => {
+            GrammarNonTerminals::_MappedSymbolPlus16 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TokenMappedStar17 => {
+            GrammarNonTerminals::_MappedSymbolStar17 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
             GrammarNonTerminals::_PrecDefPlus18 => {
@@ -850,7 +850,7 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///RuleLine -> TokenMapped* PrecDef* Action
+    ///RuleLine -> MappedSymbol* PrecDef* Action
     #[inline]
     fn reduce_RuleLine_0(
         __data_stack: &mut Self,
@@ -885,13 +885,13 @@ impl GrammarDataStack {
             GrammarData::__variant13(val) => val,
             _ => unreachable!(),
         };
-        let mut TokenMapped = match __data_stack.__stack.pop().unwrap() {
+        let mut MappedSymbol = match __data_stack.__stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
         };
         let __res = {
             RuleLineArgs {
-                tokens: TokenMapped,
+                tokens: MappedSymbol,
                 reduce_action: Action.map(|action| action.to_token_stream()),
                 separator_location: Location::default(),
                 precs: PrecDef,
@@ -1136,9 +1136,9 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///TokenMapped -> Pattern
+    ///MappedSymbol -> Pattern
     #[inline]
-    fn reduce_TokenMapped_0(
+    fn reduce_MappedSymbol_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -1169,9 +1169,9 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///TokenMapped -> ident equal Pattern
+    ///MappedSymbol -> ident equal Pattern
     #[inline]
-    fn reduce_TokenMapped_1(
+    fn reduce_MappedSymbol_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -3663,7 +3663,11 @@ impl GrammarDataStack {
         __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
         {
             data.precedences
-                .push((__rustylr_location_left, Some(ReduceType::Left), IdentOrLiteral));
+                .push((
+                    __rustylr_location_left,
+                    Some(Associativity::Left),
+                    IdentOrLiteral,
+                ));
         };
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
@@ -3757,7 +3761,7 @@ impl GrammarDataStack {
             data.precedences
                 .push((
                     __rustylr_location_right,
-                    Some(ReduceType::Right),
+                    Some(Associativity::Right),
                     IdentOrLiteral,
                 ));
         };
@@ -4670,9 +4674,9 @@ impl GrammarDataStack {
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
     }
-    ///TokenMapped+ -> TokenMapped
+    ///MappedSymbol+ -> MappedSymbol
     #[inline]
-    fn reduce__TokenMappedPlus16_0(
+    fn reduce__MappedSymbolPlus16_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4701,9 +4705,9 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///TokenMapped+ -> TokenMapped+ TokenMapped
+    ///MappedSymbol+ -> MappedSymbol+ MappedSymbol
     #[inline]
-    fn reduce__TokenMappedPlus16_1(
+    fn reduce__MappedSymbolPlus16_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4743,9 +4747,9 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///TokenMapped* -> TokenMapped+
+    ///MappedSymbol* -> MappedSymbol+
     #[inline]
-    fn reduce__TokenMappedStar17_0(
+    fn reduce__MappedSymbolStar17_0(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4774,9 +4778,9 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///TokenMapped* ->
+    ///MappedSymbol* ->
     #[inline]
-    fn reduce__TokenMappedStar17_1(
+    fn reduce__MappedSymbolStar17_1(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -5711,7 +5715,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             11usize => {
-                Self::reduce_TokenMapped_0(
+                Self::reduce_MappedSymbol_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5722,7 +5726,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             12usize => {
-                Self::reduce_TokenMapped_1(
+                Self::reduce_MappedSymbol_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6525,7 +6529,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             87usize => {
-                Self::reduce__TokenMappedPlus16_0(
+                Self::reduce__MappedSymbolPlus16_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6536,7 +6540,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             88usize => {
-                Self::reduce__TokenMappedPlus16_1(
+                Self::reduce__MappedSymbolPlus16_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6547,7 +6551,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             89usize => {
-                Self::reduce__TokenMappedStar17_0(
+                Self::reduce__MappedSymbolStar17_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6558,7 +6562,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             90usize => {
-                Self::reduce__TokenMappedStar17_1(
+                Self::reduce__MappedSymbolStar17_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -7252,10 +7256,10 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                 let num_rules = 158usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let name = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr_core::parser::table::RuleInfo {
-                            name,
+                            lhs,
                             len: RULE_LENGTHS[i] as usize,
                         });
                 }
