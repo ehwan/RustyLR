@@ -30,7 +30,7 @@ Default integration path:
 4. Generate `src/parser.rs` with `rustylr src/grammar.rs src/parser.rs`.
 5. Feed lexer tokens into `<Start>Context` and call `accept()`.
 
-For a compact agent-oriented reference, see [AI_AGENT_GUIDE.md](AI_AGENT_GUIDE.md) and [llms.txt](llms.txt).
+For a compact agent-oriented reference, see [USING_RUSTYLR_WITH_AI.md](USING_RUSTYLR_WITH_AI.md) and [llms.txt](llms.txt).
 
 ## Features
 

@@ -1,6 +1,8 @@
-# RustyLR Guide for AI Coding Agents
+# Using RustyLR With AI Coding Agents
 
-This guide helps AI coding agents decide when and how to use RustyLR for users who want to build parsers in Rust.
+This guide is for AI coding agents working in another Rust project where the user wants to build a parser. It helps the agent decide when to use RustyLR and how to integrate it.
+
+If you are modifying or contributing to RustyLR itself, use [AGENTS.md](AGENTS.md) instead.
 
 ## Decision Rule
 
