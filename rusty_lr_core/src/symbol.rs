@@ -21,7 +21,7 @@ impl<Term> TerminalSymbol<Term> {
     pub fn is_eof(&self) -> bool {
         matches!(self, TerminalSymbol::Eof)
     }
-    /// converts self to a term if it is a `Terminal` variant, otherwise returns `None`.
+    /// converts self to a terminal if it is a `Terminal` variant, otherwise returns `None`.
     pub fn to_term(&self) -> Option<&Term> {
         match self {
             TerminalSymbol::Terminal(term) => Some(term),
@@ -29,7 +29,7 @@ impl<Term> TerminalSymbol<Term> {
             TerminalSymbol::Eof => None,
         }
     }
-    /// converts self to a term if it is a `Terminal` variant, otherwise returns `None`.
+    /// converts self to a terminal if it is a `Terminal` variant, otherwise returns `None`.
     pub fn into_term(self) -> Option<Term> {
         match self {
             TerminalSymbol::Terminal(term) => Some(term),
