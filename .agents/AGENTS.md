@@ -5,7 +5,7 @@ This document outlines rules and instructions that AI agents must follow when mo
 ---
 
 ## 1. Keep Documentation Synchronized
-Whenever a change is made to the parser generator's specifications, APIs, or runtime behavior, you must update the corresponding documentation files (`README.md`, `SYNTAX.md`, or `GLR.md`) immediately.
+Whenever a change is made to the parser generator's specifications, APIs, or runtime behavior, you must update the corresponding documentation files (`README.md`, `SYNTAX.md`, `GLR.md`, `AI_AGENT_GUIDE.md`, or `llms.txt`) immediately.
 
 ## 2. Documenting Syntax Modifications
 In particular, when new grammar rules, directives, pattern operators, or reduce action features are introduced:
