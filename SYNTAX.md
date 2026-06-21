@@ -405,6 +405,7 @@ Used to resolve shift/reduce conflicts in expressions. The precedence of termina
 - **`%left`**: Declares left-associative operators (e.g., `a + b + c` parses as `(a + b) + c`).
 - **`%right`**: Declares right-associative operators (e.g., `a ^ b ^ c` parses as `a ^ (b ^ c)`).
 - **`%precedence`**: Declares precedence without associativity. Banning chained usage of the operator without parentheses.
+- The reserved `error` terminal may be listed in precedence declarations to resolve conflicts introduced by panic-mode recovery productions.
 
 When a conflict arises between shifting a terminal and reducing a production rule:
 1. The parser compares the precedence of the lookahead terminal to the precedence of the production's *operator*.

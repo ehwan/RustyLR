@@ -27,166 +27,171 @@ use std::boxed::Box;
 ====================================Grammar=====================================
 
 # of terminal classes: 43
-# of states: 184
+# of states: 193
 
 0: Rule -> ident RuleType colon RuleLines semicolon
-1: RuleType -> parengroup
-2: RuleType ->
-3: RuleLines -> RuleLines pipe RuleLine
-4: RuleLines -> RuleLine
-5: RuleLine -> MappedSymbol* PrecDef* Action
-6: PrecDef -> percent prec IdentOrLiteral
-7: PrecDef -> percent prec error
-8: PrecDef -> percent dprec int_literal
-9: PrecDef -> percent dprec error
-10: PrecDef -> percent error
-11: MappedSymbol -> Pattern
-12: MappedSymbol -> ident equal Pattern
-13: TerminalSetItem -> ident
-14: TerminalSetItem -> ident minus ident
-15: TerminalSetItem -> ident minus error
-16: TerminalSetItem -> char_literal
-17: TerminalSetItem -> char_literal minus char_literal
-18: TerminalSetItem -> char_literal minus error
-19: TerminalSetItem -> byte_literal
-20: TerminalSetItem -> byte_literal minus byte_literal
-21: TerminalSetItem -> byte_literal minus error
-22: TerminalSet -> lbracket caret? TerminalSetItem* rbracket
-23: TerminalSet -> dot
-24: Pattern -> ident
-25: Pattern -> Pattern plus
-26: Pattern -> Pattern star
-27: Pattern -> Pattern question
-28: Pattern -> Pattern exclamation
-29: Pattern -> TerminalSet
-30: Pattern -> lparen $sep(Pattern*, pipe, +) rparen
-31: Pattern -> lparen error rparen
-32: Pattern -> byte_literal
-33: Pattern -> byte_str_literal
-34: Pattern -> char_literal
-35: Pattern -> str_literal
-36: Pattern -> Pattern minus Pattern
-37: Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
-38: Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
-39: Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
-40: Pattern -> dollar ident lparen Pattern comma Pattern error rparen
-41: Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
-42: Action -> bracegroup
-43: Action ->
-44: IdentOrLiteral -> ident
-45: IdentOrLiteral -> byte_literal
-46: IdentOrLiteral -> char_literal
-47: AllowTarget -> ident
-48: AllowTarget -> byte_literal
-49: AllowTarget -> char_literal
-50: AllowTarget -> char_literal minus char_literal
-51: AllowTarget -> byte_literal minus byte_literal
-52: AllowTarget -> TerminalSet
-53: Directive -> percent token ident [^semicolon]+ semicolon
-54: Directive -> percent token ident semicolon
-55: Directive -> percent token error semicolon
-56: Directive -> percent start ident semicolon
-57: Directive -> percent start error semicolon
-58: Directive -> percent tokentype [^semicolon]+ semicolon
-59: Directive -> percent tokentype semicolon
-60: Directive -> percent userdata [^semicolon]+ semicolon
-61: Directive -> percent userdata semicolon
-62: Directive -> percent left IdentOrLiteral+ semicolon
-63: Directive -> percent left error semicolon
-64: Directive -> percent right IdentOrLiteral+ semicolon
-65: Directive -> percent right error semicolon
-66: Directive -> percent precedence IdentOrLiteral+ semicolon
-67: Directive -> percent precedence error semicolon
-68: Directive -> percent errortype [^semicolon]+ semicolon
-69: Directive -> percent errortype semicolon
-70: Directive -> percent moduleprefix [^semicolon]+ semicolon
-71: Directive -> percent moduleprefix semicolon
-72: Directive -> percent glr semicolon
-73: Directive -> percent glr error semicolon
-74: Directive -> percent lalr semicolon
-75: Directive -> percent lalr error semicolon
-76: Directive -> percent nooptim semicolon
-77: Directive -> percent nooptim error semicolon
-78: Directive -> percent location [^semicolon]+ semicolon
-79: Directive -> percent location semicolon
-80: Directive -> percent allow ident semicolon
-81: Directive -> percent allow ident lparen AllowTarget rparen semicolon
-82: Directive -> percent allow error semicolon
-83: Directive -> percent error semicolon
-84: GrammarLine -> Rule
-85: GrammarLine -> Directive
-86: Grammar -> GrammarLine+
-87: MappedSymbol+ -> MappedSymbol
-88: MappedSymbol+ -> MappedSymbol+ MappedSymbol
-89: MappedSymbol* -> MappedSymbol+
-90: MappedSymbol* ->
-91: PrecDef+ -> PrecDef
-92: PrecDef+ -> PrecDef+ PrecDef
-93: PrecDef* -> PrecDef+
-94: PrecDef* ->
-95: caret? -> caret
-96: caret? ->
-97: TerminalSetItem+ -> TerminalSetItem
-98: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
-99: TerminalSetItem* -> TerminalSetItem+
-100: TerminalSetItem* ->
-101: Pattern+ -> Pattern
-102: Pattern+ -> Pattern+ Pattern
-103: Pattern* -> Pattern+
-104: Pattern* ->
-105: $sep(Pattern*, pipe, +) -> Pattern*
-106: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
-107: comma? -> comma
-108: comma? ->
-109: [^semicolon] -> ident
-110: [^semicolon] -> colon
-111: [^semicolon] -> pipe
-112: [^semicolon] -> percent
-113: [^semicolon] -> equal
-114: [^semicolon] -> plus
-115: [^semicolon] -> star
-116: [^semicolon] -> question
-117: [^semicolon] -> caret
-118: [^semicolon] -> minus
-119: [^semicolon] -> exclamation
-120: [^semicolon] -> dot
-121: [^semicolon] -> dollar
-122: [^semicolon] -> comma
-123: [^semicolon] -> int_literal
-124: [^semicolon] -> byte_literal
-125: [^semicolon] -> byte_str_literal
-126: [^semicolon] -> char_literal
-127: [^semicolon] -> str_literal
-128: [^semicolon] -> [other_literal, <Others>]
-129: [^semicolon] -> parengroup
-130: [^semicolon] -> bracegroup
-131: [^semicolon] -> lparen
-132: [^semicolon] -> rparen
-133: [^semicolon] -> lbracket
-134: [^semicolon] -> rbracket
-135: [^semicolon] -> left
-136: [^semicolon] -> right
-137: [^semicolon] -> token
-138: [^semicolon] -> start
-139: [^semicolon] -> tokentype
-140: [^semicolon] -> userdata
-141: [^semicolon] -> errortype
-142: [^semicolon] -> moduleprefix
-143: [^semicolon] -> lalr
-144: [^semicolon] -> glr
-145: [^semicolon] -> prec
-146: [^semicolon] -> precedence
-147: [^semicolon] -> nooptim
-148: [^semicolon] -> dprec
-149: [^semicolon] -> location
-150: [^semicolon] -> allow
-151: [^semicolon]+ -> [^semicolon]
-152: [^semicolon]+ -> [^semicolon]+ [^semicolon]
-153: IdentOrLiteral+ -> IdentOrLiteral
-154: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
-155: GrammarLine+ -> GrammarLine
-156: GrammarLine+ -> GrammarLine GrammarLine+
-157: Augmented -> Grammar eof
+1: Rule -> ident RuleType colon RuleLines error semicolon
+2: RuleType -> parengroup
+3: RuleType ->
+4: RuleLines -> RuleLines pipe RuleLine
+5: RuleLines -> RuleLine
+6: RuleLine -> MappedSymbol* PrecDef* Action
+7: PrecDef -> percent prec IdentOrLiteral
+8: PrecDef -> percent prec error
+9: PrecDef -> percent dprec int_literal
+10: PrecDef -> percent dprec error
+11: PrecDef -> percent error
+12: MappedSymbol -> Pattern
+13: MappedSymbol -> ident equal Pattern
+14: MappedSymbol -> ident equal error
+15: TerminalSetItem -> ident
+16: TerminalSetItem -> ident minus ident
+17: TerminalSetItem -> ident minus error
+18: TerminalSetItem -> char_literal
+19: TerminalSetItem -> char_literal minus char_literal
+20: TerminalSetItem -> char_literal minus error
+21: TerminalSetItem -> byte_literal
+22: TerminalSetItem -> byte_literal minus byte_literal
+23: TerminalSetItem -> byte_literal minus error
+24: TerminalSet -> lbracket caret? TerminalSetItem* rbracket
+25: TerminalSet -> lbracket caret? error rbracket
+26: TerminalSet -> dot
+27: Pattern -> ident
+28: Pattern -> Pattern plus
+29: Pattern -> Pattern star
+30: Pattern -> Pattern question
+31: Pattern -> Pattern exclamation
+32: Pattern -> TerminalSet
+33: Pattern -> lparen $sep(Pattern*, pipe, +) rparen
+34: Pattern -> lparen error rparen
+35: Pattern -> byte_literal
+36: Pattern -> byte_str_literal
+37: Pattern -> char_literal
+38: Pattern -> str_literal
+39: Pattern -> Pattern minus Pattern
+40: Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
+41: Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
+42: Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
+43: Pattern -> dollar ident lparen Pattern comma Pattern error rparen
+44: Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
+45: Action -> bracegroup
+46: Action -> error
+47: Action ->
+48: IdentOrLiteral -> ident
+49: IdentOrLiteral -> byte_literal
+50: IdentOrLiteral -> char_literal
+51: AllowTarget -> ident
+52: AllowTarget -> byte_literal
+53: AllowTarget -> char_literal
+54: AllowTarget -> char_literal minus char_literal
+55: AllowTarget -> byte_literal minus byte_literal
+56: AllowTarget -> TerminalSet
+57: Directive -> percent token ident [^semicolon]+ semicolon
+58: Directive -> percent token ident semicolon
+59: Directive -> percent token error semicolon
+60: Directive -> percent start ident semicolon
+61: Directive -> percent start error semicolon
+62: Directive -> percent tokentype [^semicolon]+ semicolon
+63: Directive -> percent tokentype semicolon
+64: Directive -> percent userdata [^semicolon]+ semicolon
+65: Directive -> percent userdata semicolon
+66: Directive -> percent left IdentOrLiteral+ semicolon
+67: Directive -> percent left error semicolon
+68: Directive -> percent right IdentOrLiteral+ semicolon
+69: Directive -> percent right error semicolon
+70: Directive -> percent precedence IdentOrLiteral+ semicolon
+71: Directive -> percent precedence error semicolon
+72: Directive -> percent errortype [^semicolon]+ semicolon
+73: Directive -> percent errortype semicolon
+74: Directive -> percent moduleprefix [^semicolon]+ semicolon
+75: Directive -> percent moduleprefix semicolon
+76: Directive -> percent glr semicolon
+77: Directive -> percent glr error semicolon
+78: Directive -> percent lalr semicolon
+79: Directive -> percent lalr error semicolon
+80: Directive -> percent nooptim semicolon
+81: Directive -> percent nooptim error semicolon
+82: Directive -> percent location [^semicolon]+ semicolon
+83: Directive -> percent location semicolon
+84: Directive -> percent allow ident semicolon
+85: Directive -> percent allow ident lparen AllowTarget rparen semicolon
+86: Directive -> percent allow ident lparen error rparen semicolon
+87: Directive -> percent allow error semicolon
+88: Directive -> percent error semicolon
+89: GrammarLine -> Rule
+90: GrammarLine -> Directive
+91: Grammar -> GrammarLine+
+92: MappedSymbol+ -> MappedSymbol
+93: MappedSymbol+ -> MappedSymbol+ MappedSymbol
+94: MappedSymbol* -> MappedSymbol+
+95: MappedSymbol* ->
+96: PrecDef+ -> PrecDef
+97: PrecDef+ -> PrecDef+ PrecDef
+98: PrecDef* -> PrecDef+
+99: PrecDef* ->
+100: caret? -> caret
+101: caret? ->
+102: TerminalSetItem+ -> TerminalSetItem
+103: TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
+104: TerminalSetItem* -> TerminalSetItem+
+105: TerminalSetItem* ->
+106: Pattern+ -> Pattern
+107: Pattern+ -> Pattern+ Pattern
+108: Pattern* -> Pattern+
+109: Pattern* ->
+110: $sep(Pattern*, pipe, +) -> Pattern*
+111: $sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
+112: comma? -> comma
+113: comma? ->
+114: [^semicolon] -> ident
+115: [^semicolon] -> colon
+116: [^semicolon] -> pipe
+117: [^semicolon] -> percent
+118: [^semicolon] -> equal
+119: [^semicolon] -> plus
+120: [^semicolon] -> star
+121: [^semicolon] -> question
+122: [^semicolon] -> caret
+123: [^semicolon] -> minus
+124: [^semicolon] -> exclamation
+125: [^semicolon] -> dot
+126: [^semicolon] -> dollar
+127: [^semicolon] -> comma
+128: [^semicolon] -> int_literal
+129: [^semicolon] -> byte_literal
+130: [^semicolon] -> byte_str_literal
+131: [^semicolon] -> char_literal
+132: [^semicolon] -> str_literal
+133: [^semicolon] -> [other_literal, <Others>]
+134: [^semicolon] -> parengroup
+135: [^semicolon] -> bracegroup
+136: [^semicolon] -> lparen
+137: [^semicolon] -> rparen
+138: [^semicolon] -> lbracket
+139: [^semicolon] -> rbracket
+140: [^semicolon] -> left
+141: [^semicolon] -> right
+142: [^semicolon] -> token
+143: [^semicolon] -> start
+144: [^semicolon] -> tokentype
+145: [^semicolon] -> userdata
+146: [^semicolon] -> errortype
+147: [^semicolon] -> moduleprefix
+148: [^semicolon] -> lalr
+149: [^semicolon] -> glr
+150: [^semicolon] -> prec
+151: [^semicolon] -> precedence
+152: [^semicolon] -> nooptim
+153: [^semicolon] -> dprec
+154: [^semicolon] -> location
+155: [^semicolon] -> allow
+156: [^semicolon]+ -> [^semicolon]
+157: [^semicolon]+ -> [^semicolon]+ [^semicolon]
+158: IdentOrLiteral+ -> IdentOrLiteral
+159: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
+160: GrammarLine+ -> GrammarLine
+161: GrammarLine+ -> GrammarLine GrammarLine+
+162: Augmented -> Grammar eof
 
 */
 // =============================Generated Codes Begin==============================
@@ -713,6 +718,93 @@ impl GrammarDataStack {
         }
         Ok(())
     }
+    ///Rule -> ident RuleType colon RuleLines error semicolon
+    #[inline]
+    fn reduce_Rule_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<Location>,
+        __push_data: bool,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut Location,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& GrammarData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& GrammarData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& GrammarData::__variant3(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                4usize), Some(& GrammarData::__variant2(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                5usize), Some(& GrammarData::__terminals(_)))
+            );
+        }
+        __location_stack.pop();
+        let mut __rustylr_location_error = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_colon = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        let mut RuleLines = match __data_stack.__stack.pop().unwrap() {
+            GrammarData::__variant3(val) => val,
+            _ => unreachable!(),
+        };
+        __data_stack.__stack.pop();
+        let mut RuleType = match __data_stack.__stack.pop().unwrap() {
+            GrammarData::__variant2(val) => val,
+            _ => unreachable!(),
+        };
+        let mut ident = match __data_stack.__stack.pop().unwrap() {
+            GrammarData::__terminals(val) => val,
+            _ => unreachable!(),
+        };
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Rule-Ident");
+            };
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected semicolon or rule alternative".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#production-rules"
+                        .to_string(),
+                    location: __rustylr_location_error,
+                });
+            if let Some(fisrt) = RuleLines.first_mut() {
+                fisrt.separator_location = __rustylr_location_colon;
+            }
+            RuleDefArgs {
+                name: Located::new(ident.to_string(), __rustylr_location_ident),
+                typename: RuleType.map(|t| t.stream()),
+                rule_lines: RuleLines,
+            }
+        };
+        if __push_data {
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant1(::std::boxed::Box::new(__res)));
+        } else {
+            __data_stack.__stack.push(GrammarData::Empty);
+        }
+        Ok(())
+    }
     ///RuleType -> parengroup
     #[inline]
     fn reduce_RuleType_0(
@@ -1221,6 +1313,65 @@ impl GrammarDataStack {
         }
         Ok(())
     }
+    ///MappedSymbol -> ident equal error
+    #[inline]
+    fn reduce_MappedSymbol_2(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<Location>,
+        __push_data: bool,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut Location,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& GrammarData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& GrammarData::__terminals(_)))
+            );
+        }
+        let mut __rustylr_location_error = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_ident = __location_stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        let mut ident = match __data_stack.__stack.pop().unwrap() {
+            GrammarData::__terminals(val) => val,
+            _ => unreachable!(),
+        };
+        let __res = {
+            let Lexed::Ident(ident) = ident else {
+                unreachable!("Token-Ident");
+            };
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected pattern after symbol binding".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    location: __rustylr_location_error,
+                });
+            (
+                Some(Located::new(ident.to_string(), __rustylr_location_ident)),
+                PatternArgs::Ident(Default::default()),
+            )
+        };
+        if __push_data {
+            __data_stack
+                .__stack
+                .push(GrammarData::__variant6(::std::boxed::Box::new(__res)));
+        } else {
+            __data_stack.__stack.push(GrammarData::Empty);
+        }
+        Ok(())
+    }
     ///TerminalSetItem -> ident
     #[inline]
     fn reduce_TerminalSetItem_0(
@@ -1702,9 +1853,71 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///TerminalSet -> dot
+    ///TerminalSet -> lbracket caret? error rbracket
     #[inline]
     fn reduce_TerminalSet_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<Location>,
+        __push_data: bool,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut Location,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& GrammarData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& GrammarData::__variant14(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& GrammarData::__terminals(_)))
+            );
+        }
+        let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
+        let mut __rustylr_location_error = __location_stack.pop().unwrap();
+        __location_stack.pop();
+        let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        let mut caret = match __data_stack.__stack.pop().unwrap() {
+            GrammarData::__variant14(val) => val,
+            _ => unreachable!(),
+        };
+        __data_stack.__stack.pop();
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected terminal set item".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns"
+                        .to_string(),
+                    location: __rustylr_location_error,
+                });
+            TerminalSet {
+                negate: caret.is_some(),
+                items: vec![],
+                open_location: __rustylr_location_lbracket,
+                close_location: __rustylr_location_rbracket,
+            }
+        };
+        if __push_data {
+            __data_stack.__stack.push(GrammarData::__variant8(__res));
+        } else {
+            __data_stack.__stack.push(GrammarData::Empty);
+        }
+        Ok(())
+    }
+    ///TerminalSet -> dot
+    #[inline]
+    fn reduce_TerminalSet_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -2796,9 +3009,47 @@ impl GrammarDataStack {
         }
         Ok(())
     }
-    ///Action ->
+    ///Action -> error
     #[inline]
     fn reduce_Action_1(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<Location>,
+        __push_data: bool,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut Location,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& GrammarData::Empty))
+            );
+        }
+        let mut __rustylr_location_error = __location_stack.pop().unwrap();
+        __data_stack.__stack.pop();
+        let __res = {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected reduce action block or rule terminator"
+                        .to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#reduceaction-optional"
+                        .to_string(),
+                    location: __rustylr_location_error,
+                });
+            None
+        };
+        if __push_data {
+            __data_stack.__stack.push(GrammarData::__variant2(__res));
+        } else {
+            __data_stack.__stack.push(GrammarData::Empty);
+        }
+        Ok(())
+    }
+    ///Action ->
+    #[inline]
+    fn reduce_Action_2(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4557,9 +4808,67 @@ impl GrammarDataStack {
         __data_stack.__stack.push(GrammarData::Empty);
         Ok(())
     }
-    ///Directive -> percent allow error semicolon
+    ///Directive -> percent allow ident lparen error rparen semicolon
     #[inline]
     fn reduce_Directive_29(
+        __data_stack: &mut Self,
+        __location_stack: &mut Vec<Location>,
+        __push_data: bool,
+        shift: &mut bool,
+        lookahead: &::rusty_lr_core::TerminalSymbol<Lexed>,
+        data: &mut GrammarArgs,
+        __rustylr_location0: &mut Location,
+    ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
+        #[cfg(debug_assertions)]
+        {
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                0usize), Some(& GrammarData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                1usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                2usize), Some(& GrammarData::Empty))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                3usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                4usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                5usize), Some(& GrammarData::__terminals(_)))
+            );
+            debug_assert!(
+                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
+                6usize), Some(& GrammarData::__terminals(_)))
+            );
+        }
+        __location_stack.truncate(__location_stack.len() - 2);
+        let mut __rustylr_location_error = __location_stack.pop().unwrap();
+        __location_stack.truncate(__location_stack.len() - 4);
+        __data_stack.__stack.truncate(__data_stack.__stack.len() - 7);
+        {
+            data.error_recovered
+                .push(RecoveredError {
+                    message: "Expected diagnostic suppression target".to_string(),
+                    link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#diagnostic-suppression"
+                        .to_string(),
+                    location: __rustylr_location_error,
+                });
+        };
+        __data_stack.__stack.push(GrammarData::Empty);
+        Ok(())
+    }
+    ///Directive -> percent allow error semicolon
+    #[inline]
+    fn reduce_Directive_30(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -4605,7 +4914,7 @@ impl GrammarDataStack {
     }
     ///Directive -> percent error semicolon
     #[inline]
-    fn reduce_Directive_30(
+    fn reduce_Directive_31(
         __data_stack: &mut Self,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
@@ -5605,7 +5914,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             1usize => {
-                Self::reduce_RuleType_0(
+                Self::reduce_Rule_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5616,7 +5925,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             2usize => {
-                Self::reduce_RuleType_1(
+                Self::reduce_RuleType_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5627,7 +5936,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             3usize => {
-                Self::reduce_RuleLines_0(
+                Self::reduce_RuleType_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5638,7 +5947,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             4usize => {
-                Self::reduce_RuleLines_1(
+                Self::reduce_RuleLines_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5649,7 +5958,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             5usize => {
-                Self::reduce_RuleLine_0(
+                Self::reduce_RuleLines_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5660,7 +5969,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             6usize => {
-                Self::reduce_PrecDef_0(
+                Self::reduce_RuleLine_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5671,7 +5980,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             7usize => {
-                Self::reduce_PrecDef_1(
+                Self::reduce_PrecDef_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5682,7 +5991,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             8usize => {
-                Self::reduce_PrecDef_2(
+                Self::reduce_PrecDef_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5693,7 +6002,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             9usize => {
-                Self::reduce_PrecDef_3(
+                Self::reduce_PrecDef_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5704,7 +6013,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             10usize => {
-                Self::reduce_PrecDef_4(
+                Self::reduce_PrecDef_3(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5715,7 +6024,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             11usize => {
-                Self::reduce_MappedSymbol_0(
+                Self::reduce_PrecDef_4(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5726,7 +6035,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             12usize => {
-                Self::reduce_MappedSymbol_1(
+                Self::reduce_MappedSymbol_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5737,7 +6046,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             13usize => {
-                Self::reduce_TerminalSetItem_0(
+                Self::reduce_MappedSymbol_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5748,7 +6057,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             14usize => {
-                Self::reduce_TerminalSetItem_1(
+                Self::reduce_MappedSymbol_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5759,7 +6068,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             15usize => {
-                Self::reduce_TerminalSetItem_2(
+                Self::reduce_TerminalSetItem_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5770,7 +6079,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             16usize => {
-                Self::reduce_TerminalSetItem_3(
+                Self::reduce_TerminalSetItem_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5781,7 +6090,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             17usize => {
-                Self::reduce_TerminalSetItem_4(
+                Self::reduce_TerminalSetItem_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5792,7 +6101,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             18usize => {
-                Self::reduce_TerminalSetItem_5(
+                Self::reduce_TerminalSetItem_3(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5803,7 +6112,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             19usize => {
-                Self::reduce_TerminalSetItem_6(
+                Self::reduce_TerminalSetItem_4(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5814,7 +6123,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             20usize => {
-                Self::reduce_TerminalSetItem_7(
+                Self::reduce_TerminalSetItem_5(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5825,7 +6134,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             21usize => {
-                Self::reduce_TerminalSetItem_8(
+                Self::reduce_TerminalSetItem_6(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5836,7 +6145,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             22usize => {
-                Self::reduce_TerminalSet_0(
+                Self::reduce_TerminalSetItem_7(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5847,7 +6156,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             23usize => {
-                Self::reduce_TerminalSet_1(
+                Self::reduce_TerminalSetItem_8(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5858,7 +6167,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             24usize => {
-                Self::reduce_Pattern_0(
+                Self::reduce_TerminalSet_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5869,7 +6178,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             25usize => {
-                Self::reduce_Pattern_1(
+                Self::reduce_TerminalSet_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5880,7 +6189,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             26usize => {
-                Self::reduce_Pattern_2(
+                Self::reduce_TerminalSet_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5891,7 +6200,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             27usize => {
-                Self::reduce_Pattern_3(
+                Self::reduce_Pattern_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5902,7 +6211,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             28usize => {
-                Self::reduce_Pattern_4(
+                Self::reduce_Pattern_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5913,7 +6222,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             29usize => {
-                Self::reduce_Pattern_5(
+                Self::reduce_Pattern_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5924,7 +6233,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             30usize => {
-                Self::reduce_Pattern_6(
+                Self::reduce_Pattern_3(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5935,7 +6244,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             31usize => {
-                Self::reduce_Pattern_7(
+                Self::reduce_Pattern_4(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5946,7 +6255,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             32usize => {
-                Self::reduce_Pattern_8(
+                Self::reduce_Pattern_5(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5957,7 +6266,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             33usize => {
-                Self::reduce_Pattern_9(
+                Self::reduce_Pattern_6(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5968,7 +6277,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             34usize => {
-                Self::reduce_Pattern_10(
+                Self::reduce_Pattern_7(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5979,7 +6288,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             35usize => {
-                Self::reduce_Pattern_11(
+                Self::reduce_Pattern_8(
                     data_stack,
                     location_stack,
                     push_data,
@@ -5990,7 +6299,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             36usize => {
-                Self::reduce_Pattern_12(
+                Self::reduce_Pattern_9(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6001,7 +6310,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             37usize => {
-                Self::reduce_Pattern_13(
+                Self::reduce_Pattern_10(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6012,7 +6321,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             38usize => {
-                Self::reduce_Pattern_14(
+                Self::reduce_Pattern_11(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6023,7 +6332,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             39usize => {
-                Self::reduce_Pattern_15(
+                Self::reduce_Pattern_12(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6034,7 +6343,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             40usize => {
-                Self::reduce_Pattern_16(
+                Self::reduce_Pattern_13(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6045,7 +6354,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             41usize => {
-                Self::reduce_Pattern_17(
+                Self::reduce_Pattern_14(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6056,7 +6365,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             42usize => {
-                Self::reduce_Action_0(
+                Self::reduce_Pattern_15(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6067,7 +6376,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             43usize => {
-                Self::reduce_Action_1(
+                Self::reduce_Pattern_16(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6078,7 +6387,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             44usize => {
-                Self::reduce_IdentOrLiteral_0(
+                Self::reduce_Pattern_17(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6089,7 +6398,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             45usize => {
-                Self::reduce_IdentOrLiteral_1(
+                Self::reduce_Action_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6100,7 +6409,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             46usize => {
-                Self::reduce_IdentOrLiteral_2(
+                Self::reduce_Action_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6111,7 +6420,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             47usize => {
-                Self::reduce_AllowTarget_0(
+                Self::reduce_Action_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6122,7 +6431,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             48usize => {
-                Self::reduce_AllowTarget_1(
+                Self::reduce_IdentOrLiteral_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6133,7 +6442,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             49usize => {
-                Self::reduce_AllowTarget_2(
+                Self::reduce_IdentOrLiteral_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6144,7 +6453,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             50usize => {
-                Self::reduce_AllowTarget_3(
+                Self::reduce_IdentOrLiteral_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6155,7 +6464,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             51usize => {
-                Self::reduce_AllowTarget_4(
+                Self::reduce_AllowTarget_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6166,7 +6475,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             52usize => {
-                Self::reduce_AllowTarget_5(
+                Self::reduce_AllowTarget_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6177,7 +6486,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             53usize => {
-                Self::reduce_Directive_0(
+                Self::reduce_AllowTarget_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6188,7 +6497,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             54usize => {
-                Self::reduce_Directive_1(
+                Self::reduce_AllowTarget_3(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6199,7 +6508,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             55usize => {
-                Self::reduce_Directive_2(
+                Self::reduce_AllowTarget_4(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6210,7 +6519,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             56usize => {
-                Self::reduce_Directive_3(
+                Self::reduce_AllowTarget_5(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6221,7 +6530,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             57usize => {
-                Self::reduce_Directive_4(
+                Self::reduce_Directive_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6232,7 +6541,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             58usize => {
-                Self::reduce_Directive_5(
+                Self::reduce_Directive_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6243,7 +6552,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             59usize => {
-                Self::reduce_Directive_6(
+                Self::reduce_Directive_2(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6254,7 +6563,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             60usize => {
-                Self::reduce_Directive_7(
+                Self::reduce_Directive_3(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6265,7 +6574,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             61usize => {
-                Self::reduce_Directive_8(
+                Self::reduce_Directive_4(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6276,7 +6585,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             62usize => {
-                Self::reduce_Directive_9(
+                Self::reduce_Directive_5(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6287,7 +6596,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             63usize => {
-                Self::reduce_Directive_10(
+                Self::reduce_Directive_6(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6298,7 +6607,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             64usize => {
-                Self::reduce_Directive_11(
+                Self::reduce_Directive_7(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6309,7 +6618,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             65usize => {
-                Self::reduce_Directive_12(
+                Self::reduce_Directive_8(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6320,7 +6629,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             66usize => {
-                Self::reduce_Directive_13(
+                Self::reduce_Directive_9(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6331,7 +6640,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             67usize => {
-                Self::reduce_Directive_14(
+                Self::reduce_Directive_10(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6342,7 +6651,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             68usize => {
-                Self::reduce_Directive_15(
+                Self::reduce_Directive_11(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6353,7 +6662,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             69usize => {
-                Self::reduce_Directive_16(
+                Self::reduce_Directive_12(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6364,7 +6673,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             70usize => {
-                Self::reduce_Directive_17(
+                Self::reduce_Directive_13(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6375,7 +6684,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             71usize => {
-                Self::reduce_Directive_18(
+                Self::reduce_Directive_14(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6386,7 +6695,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             72usize => {
-                Self::reduce_Directive_19(
+                Self::reduce_Directive_15(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6397,7 +6706,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             73usize => {
-                Self::reduce_Directive_20(
+                Self::reduce_Directive_16(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6408,7 +6717,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             74usize => {
-                Self::reduce_Directive_21(
+                Self::reduce_Directive_17(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6419,7 +6728,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             75usize => {
-                Self::reduce_Directive_22(
+                Self::reduce_Directive_18(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6430,7 +6739,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             76usize => {
-                Self::reduce_Directive_23(
+                Self::reduce_Directive_19(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6441,7 +6750,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             77usize => {
-                Self::reduce_Directive_24(
+                Self::reduce_Directive_20(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6452,7 +6761,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             78usize => {
-                Self::reduce_Directive_25(
+                Self::reduce_Directive_21(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6463,7 +6772,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             79usize => {
-                Self::reduce_Directive_26(
+                Self::reduce_Directive_22(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6474,7 +6783,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             80usize => {
-                Self::reduce_Directive_27(
+                Self::reduce_Directive_23(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6485,7 +6794,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             81usize => {
-                Self::reduce_Directive_28(
+                Self::reduce_Directive_24(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6496,7 +6805,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             82usize => {
-                Self::reduce_Directive_29(
+                Self::reduce_Directive_25(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6507,7 +6816,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             83usize => {
-                Self::reduce_Directive_30(
+                Self::reduce_Directive_26(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6518,7 +6827,29 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             84usize => {
-                Self::reduce_GrammarLine_0(
+                Self::reduce_Directive_27(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            85usize => {
+                Self::reduce_Directive_28(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            86usize => {
+                Self::reduce_Directive_29(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6529,7 +6860,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             87usize => {
-                Self::reduce__MappedSymbolPlus16_0(
+                Self::reduce_Directive_30(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6540,7 +6871,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             88usize => {
-                Self::reduce__MappedSymbolPlus16_1(
+                Self::reduce_Directive_31(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6551,29 +6882,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             89usize => {
-                Self::reduce__MappedSymbolStar17_0(
-                    data_stack,
-                    location_stack,
-                    push_data,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
-            90usize => {
-                Self::reduce__MappedSymbolStar17_1(
-                    data_stack,
-                    location_stack,
-                    push_data,
-                    shift,
-                    lookahead,
-                    user_data,
-                    location0,
-                )
-            }
-            91usize => {
-                Self::reduce__PrecDefPlus18_0(
+                Self::reduce_GrammarLine_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6584,7 +6893,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             92usize => {
-                Self::reduce__PrecDefPlus18_1(
+                Self::reduce__MappedSymbolPlus16_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6595,7 +6904,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             93usize => {
-                Self::reduce__PrecDefStar19_0(
+                Self::reduce__MappedSymbolPlus16_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6606,7 +6915,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             94usize => {
-                Self::reduce__PrecDefStar19_1(
+                Self::reduce__MappedSymbolStar17_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6617,7 +6926,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             95usize => {
-                Self::reduce__caretQuestion20_0(
+                Self::reduce__MappedSymbolStar17_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6628,7 +6937,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             96usize => {
-                Self::reduce__caretQuestion20_1(
+                Self::reduce__PrecDefPlus18_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6639,7 +6948,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             97usize => {
-                Self::reduce__TerminalSetItemPlus21_0(
+                Self::reduce__PrecDefPlus18_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6650,7 +6959,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             98usize => {
-                Self::reduce__TerminalSetItemPlus21_1(
+                Self::reduce__PrecDefStar19_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6661,7 +6970,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             99usize => {
-                Self::reduce__TerminalSetItemStar22_0(
+                Self::reduce__PrecDefStar19_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6672,7 +6981,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             100usize => {
-                Self::reduce__TerminalSetItemStar22_1(
+                Self::reduce__caretQuestion20_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6683,7 +6992,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             101usize => {
-                Self::reduce__PatternPlus23_0(
+                Self::reduce__caretQuestion20_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6694,7 +7003,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             102usize => {
-                Self::reduce__PatternPlus23_1(
+                Self::reduce__TerminalSetItemPlus21_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6705,7 +7014,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             103usize => {
-                Self::reduce__PatternStar24_0(
+                Self::reduce__TerminalSetItemPlus21_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6716,7 +7025,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             104usize => {
-                Self::reduce__PatternStar24_1(
+                Self::reduce__TerminalSetItemStar22_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6727,7 +7036,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             105usize => {
-                Self::reduce___PatternStar24SepPlus25_0(
+                Self::reduce__TerminalSetItemStar22_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6738,7 +7047,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             106usize => {
-                Self::reduce___PatternStar24SepPlus25_1(
+                Self::reduce__PatternPlus23_0(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6749,7 +7058,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             107usize => {
-                Self::reduce__commaQuestion26_0(
+                Self::reduce__PatternPlus23_1(
                     data_stack,
                     location_stack,
                     push_data,
@@ -6760,6 +7069,61 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                 )
             }
             108usize => {
+                Self::reduce__PatternStar24_0(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            109usize => {
+                Self::reduce__PatternStar24_1(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            110usize => {
+                Self::reduce___PatternStar24SepPlus25_0(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            111usize => {
+                Self::reduce___PatternStar24SepPlus25_1(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            112usize => {
+                Self::reduce__commaQuestion26_0(
+                    data_stack,
+                    location_stack,
+                    push_data,
+                    shift,
+                    lookahead,
+                    user_data,
+                    location0,
+                )
+            }
+            113usize => {
                 Self::reduce__commaQuestion26_1(
                     data_stack,
                     location_stack,
@@ -6770,7 +7134,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            151usize => {
+            156usize => {
                 Self::reduce___TermSet27Plus28_0(
                     data_stack,
                     location_stack,
@@ -6781,7 +7145,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            152usize => {
+            157usize => {
                 Self::reduce___TermSet27Plus28_1(
                     data_stack,
                     location_stack,
@@ -6792,7 +7156,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            153usize => {
+            158usize => {
                 Self::reduce__IdentOrLiteralPlus29_0(
                     data_stack,
                     location_stack,
@@ -6803,7 +7167,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            154usize => {
+            159usize => {
                 Self::reduce__IdentOrLiteralPlus29_1(
                     data_stack,
                     location_stack,
@@ -6814,7 +7178,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            155usize => {
+            160usize => {
                 Self::reduce__GrammarLinePlus30_0(
                     data_stack,
                     location_stack,
@@ -6825,7 +7189,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
                     location0,
                 )
             }
-            156usize => {
+            161usize => {
                 Self::reduce__GrammarLinePlus30_1(
                     data_stack,
                     location_stack,
@@ -6871,389 +7235,407 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
-                    0, 1, 1, 2, 2, 3, 4, 4, 4, 4, 4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7,
-                    7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 10,
-                    10, 10, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+                    0, 0, 1, 1, 2, 2, 3, 4, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6,
+                    6, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9,
+                    9, 9, 10, 10, 10, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12,
                     12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-                    12, 12, 12, 12, 12, 13, 13, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19,
-                    19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 26, 26,
+                    12, 12, 12, 12, 12, 12, 12, 12, 13, 13, 14, 15, 15, 16, 16, 17, 17,
+                    18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26,
                     26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
                     26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-                    26, 26, 26, 26, 27, 27, 28, 28, 29, 29, 30,
+                    26, 26, 26, 26, 26, 26, 26, 27, 27, 28, 28, 29, 29, 30,
                 ];
                 static RULE_LENGTHS: &[u32] = &[
-                    5, 1, 0, 3, 1, 3, 3, 3, 3, 3, 2, 1, 3, 1, 3, 3, 1, 3, 3, 1, 3, 3, 4,
-                    1, 1, 2, 2, 2, 2, 1, 3, 3, 1, 1, 1, 1, 3, 8, 9, 9, 8, 9, 1, 0, 1, 1,
-                    1, 1, 1, 1, 3, 3, 1, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 4, 4, 4, 4, 4, 4,
-                    3, 4, 3, 3, 4, 3, 4, 3, 4, 4, 3, 4, 7, 4, 3, 1, 1, 1, 1, 2, 1, 0, 1,
-                    2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 3, 1, 0, 1, 1, 1, 1, 1, 1,
+                    5, 6, 1, 0, 3, 1, 3, 3, 3, 3, 3, 2, 1, 3, 3, 1, 3, 3, 1, 3, 3, 1, 3,
+                    3, 4, 4, 1, 1, 2, 2, 2, 2, 1, 3, 3, 1, 1, 1, 1, 3, 8, 9, 9, 8, 9, 1,
+                    1, 0, 1, 1, 1, 1, 1, 1, 3, 3, 1, 5, 4, 4, 4, 4, 4, 3, 4, 3, 4, 4, 4,
+                    4, 4, 4, 4, 3, 4, 3, 3, 4, 3, 4, 3, 4, 4, 3, 4, 7, 7, 4, 3, 1, 1, 1,
+                    1, 2, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 3, 1, 0, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1,
+                    2, 2,
                 ];
                 static SHIFT_TERM_DATA: &[u32] = &[
-                    2147516416, 2150629380, 2147549199, 2147614722, 2147647488,
+                    2147516416, 2150825988, 2147549199, 2147614722, 2147647488,
                     2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
                     2147975182, 2148007953, 2148040723, 2147680261, 2147713024,
                     2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
-                    2147975182, 2148007953, 2148040723, 2147811328, 2147844113,
+                    2147975182, 2148007953, 2148040723, 2149777451, 2147811328,
+                    2147844113, 2147713024, 2147745799, 2147778568, 2147876875,
+                    2147909644, 2147942413, 2147975182, 2148007953, 2148040723,
                     2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2147713024,
+                    2147942413, 2147975182, 2148007953, 2148040723, 2148859947,
+                    2148073478, 2148139008, 2148270091, 2148401165, 2148532267,
+                    2148171818, 2148204544, 2148237355, 2148302890, 2148335627,
+                    2148368427, 2148433962, 2148466701, 2148499499, 2148565012,
+                    2148139008, 2148270091, 2148401165, 2148728852, 2148827145,
+                    2148958246, 2148991015, 2149023784, 2149056553, 2149089322,
+                    2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
+                    2147942413, 2147975182, 2148007953, 2148040723, 2148892690,
+                    2148958246, 2148991015, 2149023784, 2149056553, 2149089322,
+                    2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
+                    2147942413, 2147975182, 2148007953, 2148040723, 2148958246,
+                    2148991015, 2149023784, 2149056553, 2147713024, 2147745799,
+                    2147778568, 2147876875, 2147909644, 2147942413, 2147975182,
+                    2148007953, 2148040723, 2148958246, 2148991015, 2149023784,
+                    2149056553, 2149089322, 2149285891, 2149351442, 2147713024,
                     2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
-                    2147975182, 2148007953, 2148040723, 2148794411, 2148073478,
-                    2148139008, 2148270091, 2148401165, 2148171818, 2148204544,
-                    2148237355, 2148302890, 2148335627, 2148368427, 2148433962,
-                    2148466701, 2148499499, 2148139008, 2148270091, 2148401165,
-                    2148663316, 2148761609, 2148892710, 2148925479, 2148958248,
-                    2148991017, 2149023786, 2147713024, 2147745799, 2147778568,
-                    2147876875, 2147909644, 2147942413, 2147975182, 2148007953,
-                    2148040723, 2148827154, 2148892710, 2148925479, 2148958248,
-                    2148991017, 2149023786, 2147713024, 2147745799, 2147778568,
-                    2147876875, 2147909644, 2147942413, 2147975182, 2148007953,
-                    2148040723, 2148892710, 2148925479, 2148958248, 2148991017,
-                    2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2148892710,
-                    2148925479, 2148958248, 2148991017, 2149023786, 2149220355,
-                    2149285906, 2147713024, 2147745799, 2147778568, 2147876875,
-                    2147909644, 2147942413, 2147975182, 2148007953, 2148040723,
-                    2149351433, 2148892710, 2148925479, 2148958248, 2148991017,
-                    2149023786, 2149580843, 2149384230, 2149449767, 2149515307,
-                    2149416978, 2149482514, 2149548050, 2149613586, 2149679122,
-                    2148892710, 2148925479, 2148958248, 2148991017, 2149023786,
-                    2149777411, 3080229, 2147647488, 2147745799, 2147778568, 2147876875,
-                    2147909644, 2147942413, 2147975182, 2148007953, 2148040723,
-                    2148892710, 2148925479, 2148958248, 2148991017, 2149023786,
+                    2147975182, 2148007953, 2148040723, 2149416969, 2148958246,
+                    2148991015, 2149023784, 2149056553, 2149089322, 2149646379,
+                    2149449766, 2149515303, 2149580843, 2149482514, 2149548050,
+                    2149613586, 2149679122, 2149744658, 2148958246, 2148991015,
+                    2149023784, 2149056553, 2149089322, 2149875715, 3211301, 2150727723,
                     2147647488, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2150006788,
-                    2150039583, 2150236194, 2150334507, 2150072320, 2150105099,
-                    2150137869, 2150170667, 2150268938, 2150301739, 2150006788,
-                    2150498320, 2150662165, 2150891542, 2151055383, 2151350296,
-                    2151514137, 2151645210, 2151776283, 2151907356, 2152038429,
-                    2152169502, 2152300576, 2152464417, 2152595491, 2152726564,
-                    2153283627, 2150072320, 2150105099, 2150137869, 2150694955, 3244069,
-                    2150072320, 2150105099, 2150137869, 3342373, 2150072320, 2150105099,
-                    2150137869, 2150924331, 3473445, 2150072320, 2150105099, 2150137869,
-                    3538981, 2151088128, 2151284779, 2151153664, 2151153665, 2151153666,
-                    2151153667, 2151153668, 2151153669, 2151153670, 2151153671,
-                    2151153672, 2151153673, 2151153674, 2151153675, 2151153676,
-                    2151153677, 2151153678, 2151153679, 2151153680, 2151153681,
-                    2151153682, 2151153683, 2151153684, 2151153685, 2151153686,
-                    2151153687, 2151153688, 2151153689, 2151153690, 2151153691,
-                    2151153692, 2151153693, 2151153694, 2151153695, 2151153696,
-                    2151153697, 2151153698, 2151153699, 2151153700, 3637285, 2151153702,
-                    2151153703, 2151153704, 2151153705, 2151153706, 2151251968,
-                    2151251969, 2151251970, 2151251971, 2151251972, 2151251973,
-                    2151251974, 2151251975, 2151251976, 2151251977, 2151251978,
-                    2151251979, 2151251980, 2151251981, 2151251982, 2151251983,
-                    2151251984, 2151251985, 2151251986, 2151251987, 2151251988,
-                    2151251989, 2151251990, 2151251991, 2151251992, 2151251993,
-                    2151251994, 2151251995, 2151251996, 2151251997, 2151251998,
-                    2151251999, 2151252000, 2151252001, 2151252002, 2151252003,
-                    2151252004, 3735589, 2151252006, 2151252007, 2151252008, 2151252009,
-                    2151252010, 3833893, 2151383040, 2151448619, 3932197, 3997733,
-                    2151153664, 2151153665, 2151153666, 2151153667, 2151153668,
-                    2151153669, 2151153670, 2151153671, 2151153672, 2151153673,
-                    2151153674, 2151153675, 2151153676, 2151153677, 2151153678,
-                    2151153679, 2151153680, 2151153681, 2151153682, 2151153683,
-                    2151153684, 2151153685, 2151153686, 2151153687, 2151153688,
-                    2151153689, 2151153690, 2151153691, 2151153692, 2151153693,
-                    2151153694, 2151153695, 2151153696, 2151153697, 2151153698,
-                    2151153699, 2151153700, 4063269, 2151153702, 2151153703, 2151153704,
-                    2151153705, 2151153706, 2151251968, 2151251969, 2151251970,
-                    2151251971, 2151251972, 2151251973, 2151251974, 2151251975,
-                    2151251976, 2151251977, 2151251978, 2151251979, 2151251980,
-                    2151251981, 2151251982, 2151251983, 2151251984, 2151251985,
-                    2151251986, 2151251987, 2151251988, 2151251989, 2151251990,
-                    2151251991, 2151251992, 2151251993, 2151251994, 2151251995,
-                    2151251996, 2151251997, 2151251998, 2151251999, 2151252000,
-                    2151252001, 2151252002, 2151252003, 2151252004, 4128805, 2151252006,
-                    2151252007, 2151252008, 2151252009, 2151252010, 2151153664,
-                    2151153665, 2151153666, 2151153667, 2151153668, 2151153669,
-                    2151153670, 2151153671, 2151153672, 2151153673, 2151153674,
-                    2151153675, 2151153676, 2151153677, 2151153678, 2151153679,
-                    2151153680, 2151153681, 2151153682, 2151153683, 2151153684,
-                    2151153685, 2151153686, 2151153687, 2151153688, 2151153689,
-                    2151153690, 2151153691, 2151153692, 2151153693, 2151153694,
-                    2151153695, 2151153696, 2151153697, 2151153698, 2151153699,
-                    2151153700, 4194341, 2151153702, 2151153703, 2151153704, 2151153705,
-                    2151153706, 2151251968, 2151251969, 2151251970, 2151251971,
-                    2151251972, 2151251973, 2151251974, 2151251975, 2151251976,
-                    2151251977, 2151251978, 2151251979, 2151251980, 2151251981,
-                    2151251982, 2151251983, 2151251984, 2151251985, 2151251986,
-                    2151251987, 2151251988, 2151251989, 2151251990, 2151251991,
-                    2151251992, 2151251993, 2151251994, 2151251995, 2151251996,
-                    2151251997, 2151251998, 2151251999, 2151252000, 2151252001,
-                    2151252002, 2151252003, 2151252004, 4259877, 2151252006, 2151252007,
-                    2151252008, 2151252009, 2151252010, 2151153664, 2151153665,
-                    2151153666, 2151153667, 2151153668, 2151153669, 2151153670,
-                    2151153671, 2151153672, 2151153673, 2151153674, 2151153675,
-                    2151153676, 2151153677, 2151153678, 2151153679, 2151153680,
-                    2151153681, 2151153682, 2151153683, 2151153684, 2151153685,
-                    2151153686, 2151153687, 2151153688, 2151153689, 2151153690,
-                    2151153691, 2151153692, 2151153693, 2151153694, 2151153695,
-                    2151153696, 2151153697, 2151153698, 2151153699, 2151153700, 4325413,
-                    2151153702, 2151153703, 2151153704, 2151153705, 2151153706,
-                    2151251968, 2151251969, 2151251970, 2151251971, 2151251972,
-                    2151251973, 2151251974, 2151251975, 2151251976, 2151251977,
-                    2151251978, 2151251979, 2151251980, 2151251981, 2151251982,
-                    2151251983, 2151251984, 2151251985, 2151251986, 2151251987,
-                    2151251988, 2151251989, 2151251990, 2151251991, 2151251992,
-                    2151251993, 2151251994, 2151251995, 2151251996, 2151251997,
-                    2151251998, 2151251999, 2151252000, 2151252001, 2151252002,
-                    2151252003, 2151252004, 4390949, 2151252006, 2151252007, 2151252008,
-                    2151252009, 2151252010, 2151153664, 2151153665, 2151153666,
-                    2151153667, 2151153668, 2151153669, 2151153670, 2151153671,
-                    2151153672, 2151153673, 2151153674, 2151153675, 2151153676,
-                    2151153677, 2151153678, 2151153679, 2151153680, 2151153681,
-                    2151153682, 2151153683, 2151153684, 2151153685, 2151153686,
-                    2151153687, 2151153688, 2151153689, 2151153690, 2151153691,
-                    2151153692, 2151153693, 2151153694, 2151153695, 2151153696,
-                    2151153697, 2151153698, 2151153699, 2151153700, 4456485, 2151153702,
-                    2151153703, 2151153704, 2151153705, 2151153706, 2151251968,
-                    2151251969, 2151251970, 2151251971, 2151251972, 2151251973,
-                    2151251974, 2151251975, 2151251976, 2151251977, 2151251978,
-                    2151251979, 2151251980, 2151251981, 2151251982, 2151251983,
-                    2151251984, 2151251985, 2151251986, 2151251987, 2151251988,
-                    2151251989, 2151251990, 2151251991, 2151251992, 2151251993,
-                    2151251994, 2151251995, 2151251996, 2151251997, 2151251998,
-                    2151251999, 2151252000, 2151252001, 2151252002, 2151252003,
-                    2151252004, 4522021, 2151252006, 2151252007, 2151252008, 2151252009,
-                    2151252010, 4587557, 2152103979, 4653093, 4718629, 2152235051,
-                    4784165, 2150072320, 2150105099, 2150137869, 2152333355, 4882469,
-                    2150072320, 2150105099, 2150137869, 4948005, 5013541, 2152529963,
-                    5079077, 2151153664, 2151153665, 2151153666, 2151153667, 2151153668,
-                    2151153669, 2151153670, 2151153671, 2151153672, 2151153673,
-                    2151153674, 2151153675, 2151153676, 2151153677, 2151153678,
-                    2151153679, 2151153680, 2151153681, 2151153682, 2151153683,
-                    2151153684, 2151153685, 2151153686, 2151153687, 2151153688,
-                    2151153689, 2151153690, 2151153691, 2151153692, 2151153693,
-                    2151153694, 2151153695, 2151153696, 2151153697, 2151153698,
-                    2151153699, 2151153700, 5144613, 2151153702, 2151153703, 2151153704,
-                    2151153705, 2151153706, 2151251968, 2151251969, 2151251970,
-                    2151251971, 2151251972, 2151251973, 2151251974, 2151251975,
-                    2151251976, 2151251977, 2151251978, 2151251979, 2151251980,
-                    2151251981, 2151251982, 2151251983, 2151251984, 2151251985,
-                    2151251986, 2151251987, 2151251988, 2151251989, 2151251990,
-                    2151251991, 2151251992, 2151251993, 2151251994, 2151251995,
-                    2151251996, 2151251997, 2151251998, 2151251999, 2151252000,
-                    2151252001, 2151252002, 2151252003, 2151252004, 5210149, 2151252006,
-                    2151252007, 2151252008, 2151252009, 2151252010, 2152759296,
-                    2153218091, 2152792081, 5701669, 2152824832, 2147745799, 2152857611,
-                    2152955917, 2148040723, 2152890410, 2152923147, 2152988714,
-                    2153021453, 2153119762, 5668901, 5767205, 5832741, 2147516416,
-                    2150629380, 2153480236,
+                    2147942413, 2147975182, 2148007953, 2148040723, 2148958246,
+                    2148991015, 2149023784, 2149056553, 2149089322, 2147647488,
+                    2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
+                    2147975182, 2148007953, 2148040723, 2150105092, 2150137887,
+                    2150334498, 2150432811, 2150170624, 2150203403, 2150236173,
+                    2150268971, 2150367242, 2150400043, 2150105092, 2150596624,
+                    2150629419, 3276837, 2150858773, 2151088150, 2151251991, 2151546904,
+                    2151710745, 2151841818, 2151972891, 2152103964, 2152235037,
+                    2152366110, 2152497184, 2152661025, 2152792099, 2152923172,
+                    2153578539, 2150170624, 2150203403, 2150236173, 2150891563, 3440677,
+                    2150170624, 2150203403, 2150236173, 3538981, 2150170624, 2150203403,
+                    2150236173, 2151120939, 3670053, 2150170624, 2150203403, 2150236173,
+                    3735589, 2151284736, 2151481387, 2151350272, 2151350273, 2151350274,
+                    2151350275, 2151350276, 2151350277, 2151350278, 2151350279,
+                    2151350280, 2151350281, 2151350282, 2151350283, 2151350284,
+                    2151350285, 2151350286, 2151350287, 2151350288, 2151350289,
+                    2151350290, 2151350291, 2151350292, 2151350293, 2151350294,
+                    2151350295, 2151350296, 2151350297, 2151350298, 2151350299,
+                    2151350300, 2151350301, 2151350302, 2151350303, 2151350304,
+                    2151350305, 2151350306, 2151350307, 2151350308, 3833893, 2151350310,
+                    2151350311, 2151350312, 2151350313, 2151350314, 2151448576,
+                    2151448577, 2151448578, 2151448579, 2151448580, 2151448581,
+                    2151448582, 2151448583, 2151448584, 2151448585, 2151448586,
+                    2151448587, 2151448588, 2151448589, 2151448590, 2151448591,
+                    2151448592, 2151448593, 2151448594, 2151448595, 2151448596,
+                    2151448597, 2151448598, 2151448599, 2151448600, 2151448601,
+                    2151448602, 2151448603, 2151448604, 2151448605, 2151448606,
+                    2151448607, 2151448608, 2151448609, 2151448610, 2151448611,
+                    2151448612, 3932197, 2151448614, 2151448615, 2151448616, 2151448617,
+                    2151448618, 4030501, 2151579648, 2151645227, 4128805, 4194341,
+                    2151350272, 2151350273, 2151350274, 2151350275, 2151350276,
+                    2151350277, 2151350278, 2151350279, 2151350280, 2151350281,
+                    2151350282, 2151350283, 2151350284, 2151350285, 2151350286,
+                    2151350287, 2151350288, 2151350289, 2151350290, 2151350291,
+                    2151350292, 2151350293, 2151350294, 2151350295, 2151350296,
+                    2151350297, 2151350298, 2151350299, 2151350300, 2151350301,
+                    2151350302, 2151350303, 2151350304, 2151350305, 2151350306,
+                    2151350307, 2151350308, 4259877, 2151350310, 2151350311, 2151350312,
+                    2151350313, 2151350314, 2151448576, 2151448577, 2151448578,
+                    2151448579, 2151448580, 2151448581, 2151448582, 2151448583,
+                    2151448584, 2151448585, 2151448586, 2151448587, 2151448588,
+                    2151448589, 2151448590, 2151448591, 2151448592, 2151448593,
+                    2151448594, 2151448595, 2151448596, 2151448597, 2151448598,
+                    2151448599, 2151448600, 2151448601, 2151448602, 2151448603,
+                    2151448604, 2151448605, 2151448606, 2151448607, 2151448608,
+                    2151448609, 2151448610, 2151448611, 2151448612, 4325413, 2151448614,
+                    2151448615, 2151448616, 2151448617, 2151448618, 2151350272,
+                    2151350273, 2151350274, 2151350275, 2151350276, 2151350277,
+                    2151350278, 2151350279, 2151350280, 2151350281, 2151350282,
+                    2151350283, 2151350284, 2151350285, 2151350286, 2151350287,
+                    2151350288, 2151350289, 2151350290, 2151350291, 2151350292,
+                    2151350293, 2151350294, 2151350295, 2151350296, 2151350297,
+                    2151350298, 2151350299, 2151350300, 2151350301, 2151350302,
+                    2151350303, 2151350304, 2151350305, 2151350306, 2151350307,
+                    2151350308, 4390949, 2151350310, 2151350311, 2151350312, 2151350313,
+                    2151350314, 2151448576, 2151448577, 2151448578, 2151448579,
+                    2151448580, 2151448581, 2151448582, 2151448583, 2151448584,
+                    2151448585, 2151448586, 2151448587, 2151448588, 2151448589,
+                    2151448590, 2151448591, 2151448592, 2151448593, 2151448594,
+                    2151448595, 2151448596, 2151448597, 2151448598, 2151448599,
+                    2151448600, 2151448601, 2151448602, 2151448603, 2151448604,
+                    2151448605, 2151448606, 2151448607, 2151448608, 2151448609,
+                    2151448610, 2151448611, 2151448612, 4456485, 2151448614, 2151448615,
+                    2151448616, 2151448617, 2151448618, 2151350272, 2151350273,
+                    2151350274, 2151350275, 2151350276, 2151350277, 2151350278,
+                    2151350279, 2151350280, 2151350281, 2151350282, 2151350283,
+                    2151350284, 2151350285, 2151350286, 2151350287, 2151350288,
+                    2151350289, 2151350290, 2151350291, 2151350292, 2151350293,
+                    2151350294, 2151350295, 2151350296, 2151350297, 2151350298,
+                    2151350299, 2151350300, 2151350301, 2151350302, 2151350303,
+                    2151350304, 2151350305, 2151350306, 2151350307, 2151350308, 4522021,
+                    2151350310, 2151350311, 2151350312, 2151350313, 2151350314,
+                    2151448576, 2151448577, 2151448578, 2151448579, 2151448580,
+                    2151448581, 2151448582, 2151448583, 2151448584, 2151448585,
+                    2151448586, 2151448587, 2151448588, 2151448589, 2151448590,
+                    2151448591, 2151448592, 2151448593, 2151448594, 2151448595,
+                    2151448596, 2151448597, 2151448598, 2151448599, 2151448600,
+                    2151448601, 2151448602, 2151448603, 2151448604, 2151448605,
+                    2151448606, 2151448607, 2151448608, 2151448609, 2151448610,
+                    2151448611, 2151448612, 4587557, 2151448614, 2151448615, 2151448616,
+                    2151448617, 2151448618, 2151350272, 2151350273, 2151350274,
+                    2151350275, 2151350276, 2151350277, 2151350278, 2151350279,
+                    2151350280, 2151350281, 2151350282, 2151350283, 2151350284,
+                    2151350285, 2151350286, 2151350287, 2151350288, 2151350289,
+                    2151350290, 2151350291, 2151350292, 2151350293, 2151350294,
+                    2151350295, 2151350296, 2151350297, 2151350298, 2151350299,
+                    2151350300, 2151350301, 2151350302, 2151350303, 2151350304,
+                    2151350305, 2151350306, 2151350307, 2151350308, 4653093, 2151350310,
+                    2151350311, 2151350312, 2151350313, 2151350314, 2151448576,
+                    2151448577, 2151448578, 2151448579, 2151448580, 2151448581,
+                    2151448582, 2151448583, 2151448584, 2151448585, 2151448586,
+                    2151448587, 2151448588, 2151448589, 2151448590, 2151448591,
+                    2151448592, 2151448593, 2151448594, 2151448595, 2151448596,
+                    2151448597, 2151448598, 2151448599, 2151448600, 2151448601,
+                    2151448602, 2151448603, 2151448604, 2151448605, 2151448606,
+                    2151448607, 2151448608, 2151448609, 2151448610, 2151448611,
+                    2151448612, 4718629, 2151448614, 2151448615, 2151448616, 2151448617,
+                    2151448618, 4784165, 2152300587, 4849701, 4915237, 2152431659,
+                    4980773, 2150170624, 2150203403, 2150236173, 2152529963, 5079077,
+                    2150170624, 2150203403, 2150236173, 5144613, 5210149, 2152726571,
+                    5275685, 2151350272, 2151350273, 2151350274, 2151350275, 2151350276,
+                    2151350277, 2151350278, 2151350279, 2151350280, 2151350281,
+                    2151350282, 2151350283, 2151350284, 2151350285, 2151350286,
+                    2151350287, 2151350288, 2151350289, 2151350290, 2151350291,
+                    2151350292, 2151350293, 2151350294, 2151350295, 2151350296,
+                    2151350297, 2151350298, 2151350299, 2151350300, 2151350301,
+                    2151350302, 2151350303, 2151350304, 2151350305, 2151350306,
+                    2151350307, 2151350308, 5341221, 2151350310, 2151350311, 2151350312,
+                    2151350313, 2151350314, 2151448576, 2151448577, 2151448578,
+                    2151448579, 2151448580, 2151448581, 2151448582, 2151448583,
+                    2151448584, 2151448585, 2151448586, 2151448587, 2151448588,
+                    2151448589, 2151448590, 2151448591, 2151448592, 2151448593,
+                    2151448594, 2151448595, 2151448596, 2151448597, 2151448598,
+                    2151448599, 2151448600, 2151448601, 2151448602, 2151448603,
+                    2151448604, 2151448605, 2151448606, 2151448607, 2151448608,
+                    2151448609, 2151448610, 2151448611, 2151448612, 5406757, 2151448614,
+                    2151448615, 2151448616, 2151448617, 2151448618, 2152955904,
+                    2153513003, 2152988689, 5996581, 2153021440, 2147745799, 2153054219,
+                    2153152525, 2148040723, 2153250859, 2153087018, 2153119755,
+                    2153185322, 2153218061, 2153283602, 5832741, 2153414674, 5963813,
+                    6062117, 6127653, 2147516416, 2150825988, 2153775148,
                 ];
                 static SHIFT_TERM_OFFSETS: &[u32] = &[
-                    0, 2, 3, 3, 4, 13, 14, 23, 23, 23, 24, 25, 34, 34, 34, 34, 34, 44,
-                    45, 45, 48, 49, 51, 51, 51, 52, 54, 54, 54, 55, 57, 57, 57, 57, 60,
-                    60, 61, 61, 61, 67, 76, 77, 77, 82, 82, 82, 82, 82, 91, 95, 104, 109,
-                    109, 111, 120, 120, 120, 127, 130, 131, 131, 132, 132, 133, 133, 134,
-                    134, 135, 135, 140, 142, 151, 151, 151, 156, 165, 165, 166, 169, 173,
-                    173, 173, 173, 173, 173, 175, 175, 175, 175, 175, 176, 176, 177, 177,
-                    177, 177, 177, 192, 196, 197, 197, 197, 201, 201, 201, 205, 206, 206,
-                    210, 210, 212, 255, 255, 255, 298, 298, 298, 299, 299, 301, 302, 302,
-                    303, 303, 346, 346, 389, 389, 432, 432, 475, 475, 518, 518, 561, 561,
-                    604, 604, 647, 647, 649, 649, 650, 650, 652, 652, 653, 653, 657, 658,
-                    658, 662, 662, 664, 664, 665, 665, 708, 708, 751, 751, 753, 755, 760,
-                    760, 761, 762, 762, 763, 764, 764, 764, 765, 766, 766, 766, 767, 767,
-                    768, 768, 768, 770, 770, 771, 771,
+                    0, 2, 3, 3, 4, 13, 14, 24, 24, 24, 25, 26, 35, 35, 35, 35, 35, 45,
+                    46, 46, 50, 51, 53, 53, 53, 54, 56, 56, 56, 57, 59, 59, 59, 60, 60,
+                    60, 63, 63, 64, 64, 64, 70, 79, 80, 80, 85, 85, 85, 85, 85, 94, 98,
+                    107, 112, 112, 114, 123, 123, 123, 130, 133, 134, 134, 135, 135, 136,
+                    136, 137, 137, 138, 138, 138, 143, 146, 155, 155, 155, 160, 169, 169,
+                    170, 173, 177, 177, 177, 177, 177, 177, 179, 179, 179, 179, 179, 180,
+                    180, 182, 182, 182, 182, 182, 183, 183, 183, 198, 202, 203, 203, 203,
+                    207, 207, 207, 211, 212, 212, 216, 216, 218, 261, 261, 261, 304, 304,
+                    304, 305, 305, 307, 308, 308, 309, 309, 352, 352, 395, 395, 438, 438,
+                    481, 481, 524, 524, 567, 567, 610, 610, 653, 653, 655, 655, 656, 656,
+                    658, 658, 659, 659, 663, 664, 664, 668, 668, 670, 670, 671, 671, 714,
+                    714, 757, 757, 759, 761, 767, 767, 768, 769, 769, 770, 771, 771, 772,
+                    773, 773, 773, 774, 775, 775, 775, 776, 776, 777, 777, 777, 779, 779,
+                    780, 780,
                 ];
                 static SHIFT_NONTERM_DATA: &[u32] = &[
-                    2153349120, 5898252, 2153381901, 2153447438, 5963805, 2147581953,
-                    2149744642, 2150596611, 2149842949, 2148696071, 2149875720,
-                    2149908495, 2149974032, 2148696071, 2149711880, 2148696071,
-                    2148728840, 2148696071, 2148859912, 2149089302, 2149154839,
-                    2149187608, 2148106259, 2148532230, 2148565012, 2148630549,
-                    2148597766, 2148696071, 2149318664, 2148696071, 2149056520,
-                    2148696071, 2149122056, 2148696071, 2148859912, 2149089302,
-                    2149253143, 2149646361, 2149810179, 2149842949, 2148696071,
-                    2149875720, 2149908495, 2149974032, 2149941253, 2148696071,
-                    2149875720, 2150367236, 2150400017, 2150465554, 2150203402,
-                    2150432772, 2150531081, 2150760458, 2150793244, 2150858762,
-                    2150760458, 2150989852, 2150858762, 2151153690, 2151186459,
-                    2151251994, 2151153690, 2151579675, 2151251994, 2151153690,
-                    2151710747, 2151251994, 2151153690, 2151841819, 2151251994,
-                    2151153690, 2151972891, 2151251994, 2150760458, 2152398876,
-                    2150858762, 2151153690, 2152661019, 2151251994, 2153054215,
-                    2153086987, 2153349120, 5898252, 2153381901, 2153414685,
+                    2153644032, 6193164, 2153676813, 2153742350, 6258717, 2147581953,
+                    2149842946, 2150793219, 2149941253, 2148761607, 2149974024,
+                    2150006799, 2150072336, 2148761607, 2149810184, 2148761607,
+                    2148794376, 2148761607, 2148925448, 2149154838, 2149220375,
+                    2149253144, 2148106259, 2148597766, 2148630548, 2148696085,
+                    2148663302, 2148761607, 2149384200, 2148761607, 2149122056,
+                    2148761607, 2149187592, 2148761607, 2148925448, 2149154838,
+                    2149318679, 2149711897, 2149908483, 2149941253, 2148761607,
+                    2149974024, 2150006799, 2150072336, 2150039557, 2148761607,
+                    2149974024, 2150465540, 2150498321, 2150563858, 2150301706,
+                    2150531076, 2150662153, 2150957066, 2150989852, 2151055370,
+                    2150957066, 2151186460, 2151055370, 2151350298, 2151383067,
+                    2151448602, 2151350298, 2151776283, 2151448602, 2151350298,
+                    2151907355, 2151448602, 2151350298, 2152038427, 2151448602,
+                    2151350298, 2152169499, 2151448602, 2150957066, 2152595484,
+                    2151055370, 2151350298, 2152857627, 2151448602, 2153349127,
+                    2153381899, 2153644032, 6193164, 2153676813, 2153709597,
                 ];
                 static SHIFT_NONTERM_OFFSETS: &[u32] = &[
                     0, 5, 6, 6, 6, 13, 13, 15, 15, 15, 15, 15, 17, 17, 17, 17, 17, 22,
-                    23, 23, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27,
-                    27, 27, 27, 27, 27, 29, 29, 29, 29, 29, 29, 29, 29, 31, 31, 33, 33,
-                    33, 33, 37, 37, 37, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38,
-                    38, 38, 44, 44, 44, 44, 47, 47, 50, 50, 51, 51, 51, 51, 51, 51, 51,
-                    51, 51, 51, 51, 52, 52, 53, 53, 53, 53, 53, 53, 55, 55, 55, 55, 56,
-                    56, 56, 58, 58, 58, 59, 59, 59, 61, 61, 61, 62, 62, 62, 62, 62, 62,
-                    62, 62, 62, 62, 64, 64, 65, 65, 67, 67, 68, 68, 70, 70, 71, 71, 73,
-                    73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 76, 76, 76, 77, 77, 77,
-                    77, 77, 77, 79, 79, 80, 80, 80, 80, 82, 82, 82, 82, 82, 82, 82, 82,
-                    82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 86, 86, 86, 86,
+                    23, 23, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+                    26, 27, 27, 27, 27, 27, 27, 29, 29, 29, 29, 29, 29, 29, 29, 31, 31,
+                    33, 33, 33, 33, 37, 37, 37, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38,
+                    38, 38, 38, 38, 38, 44, 44, 44, 44, 47, 47, 50, 50, 51, 51, 51, 51,
+                    51, 51, 51, 51, 51, 51, 51, 52, 52, 53, 53, 53, 53, 53, 53, 53, 53,
+                    53, 55, 55, 55, 55, 56, 56, 56, 58, 58, 58, 59, 59, 59, 61, 61, 61,
+                    62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 64, 64, 65, 65, 67, 67, 68,
+                    68, 70, 70, 71, 71, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74,
+                    76, 76, 76, 77, 77, 77, 77, 77, 77, 79, 79, 80, 80, 80, 80, 82, 82,
+                    82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82, 82,
+                    82, 82, 86, 86, 86, 86,
                 ];
                 static REDUCE_DATA: &[u32] = &[
-                    2, 1, 2, 2, 1, 1, 3, 1, 90, 4, 1, 90, 16, 1, 90, 37, 1, 90, 0, 1, 24,
-                    3, 1, 24, 4, 1, 24, 7, 1, 24, 8, 1, 24, 11, 1, 24, 12, 1, 24, 13, 1,
-                    24, 14, 1, 24, 16, 1, 24, 17, 1, 24, 19, 1, 24, 37, 1, 24, 38, 1, 24,
-                    39, 1, 24, 40, 1, 24, 41, 1, 24, 42, 1, 24, 0, 1, 24, 3, 1, 24, 4, 1,
-                    24, 7, 1, 24, 8, 1, 24, 9, 1, 24, 11, 1, 24, 12, 1, 24, 13, 1, 24,
-                    14, 1, 24, 16, 1, 24, 17, 1, 24, 18, 1, 24, 19, 1, 24, 37, 1, 24, 38,
-                    1, 24, 39, 1, 24, 40, 1, 24, 41, 1, 24, 42, 1, 24, 43, 1, 24, 0, 1,
-                    23, 3, 1, 23, 4, 1, 23, 7, 1, 23, 8, 1, 23, 9, 1, 23, 11, 1, 23, 12,
-                    1, 23, 13, 1, 23, 14, 1, 23, 16, 1, 23, 17, 1, 23, 18, 1, 23, 19, 1,
-                    23, 37, 1, 23, 38, 1, 23, 39, 1, 23, 40, 1, 23, 41, 1, 23, 42, 1, 23,
-                    43, 1, 23, 0, 1, 32, 3, 1, 32, 4, 1, 32, 7, 1, 32, 8, 1, 32, 9, 1,
-                    32, 11, 1, 32, 12, 1, 32, 13, 1, 32, 14, 1, 32, 16, 1, 32, 17, 1, 32,
-                    18, 1, 32, 19, 1, 32, 37, 1, 32, 38, 1, 32, 39, 1, 32, 40, 1, 32, 41,
-                    1, 32, 42, 1, 32, 43, 1, 32, 0, 1, 33, 3, 1, 33, 4, 1, 33, 7, 1, 33,
-                    8, 1, 33, 9, 1, 33, 11, 1, 33, 12, 1, 33, 13, 1, 33, 14, 1, 33, 16,
-                    1, 33, 17, 1, 33, 18, 1, 33, 19, 1, 33, 37, 1, 33, 38, 1, 33, 39, 1,
-                    33, 40, 1, 33, 41, 1, 33, 42, 1, 33, 43, 1, 33, 0, 1, 34, 3, 1, 34,
-                    4, 1, 34, 7, 1, 34, 8, 1, 34, 9, 1, 34, 11, 1, 34, 12, 1, 34, 13, 1,
-                    34, 14, 1, 34, 16, 1, 34, 17, 1, 34, 18, 1, 34, 19, 1, 34, 37, 1, 34,
-                    38, 1, 34, 39, 1, 34, 40, 1, 34, 41, 1, 34, 42, 1, 34, 43, 1, 34, 0,
-                    1, 35, 3, 1, 35, 4, 1, 35, 7, 1, 35, 8, 1, 35, 9, 1, 35, 11, 1, 35,
-                    12, 1, 35, 13, 1, 35, 14, 1, 35, 16, 1, 35, 17, 1, 35, 18, 1, 35, 19,
-                    1, 35, 37, 1, 35, 38, 1, 35, 39, 1, 35, 40, 1, 35, 41, 1, 35, 42, 1,
-                    35, 43, 1, 35, 3, 1, 104, 18, 1, 104, 0, 1, 96, 11, 1, 96, 13, 1, 96,
-                    20, 1, 96, 0, 1, 95, 11, 1, 95, 13, 1, 95, 20, 1, 95, 20, 1, 100, 0,
-                    1, 13, 11, 1, 13, 13, 1, 13, 20, 1, 13, 0, 1, 14, 11, 1, 14, 13, 1,
-                    14, 20, 1, 14, 0, 1, 15, 11, 1, 15, 13, 1, 15, 20, 1, 15, 0, 1, 19,
-                    11, 1, 19, 13, 1, 19, 20, 1, 19, 0, 1, 20, 11, 1, 20, 13, 1, 20, 20,
-                    1, 20, 0, 1, 21, 11, 1, 21, 13, 1, 21, 20, 1, 21, 0, 1, 16, 11, 1,
-                    16, 13, 1, 16, 20, 1, 16, 0, 1, 17, 11, 1, 17, 13, 1, 17, 20, 1, 17,
-                    0, 1, 18, 11, 1, 18, 13, 1, 18, 20, 1, 18, 0, 1, 97, 11, 1, 97, 13,
-                    1, 97, 20, 1, 97, 20, 1, 99, 0, 1, 98, 11, 1, 98, 13, 1, 98, 20, 1,
-                    98, 0, 1, 22, 3, 1, 22, 4, 1, 22, 7, 1, 22, 8, 1, 22, 9, 1, 22, 11,
-                    1, 22, 12, 1, 22, 13, 1, 22, 14, 1, 22, 16, 1, 22, 17, 1, 22, 18, 1,
-                    22, 19, 1, 22, 37, 1, 22, 38, 1, 22, 39, 1, 22, 40, 1, 22, 41, 1, 22,
-                    42, 1, 22, 43, 1, 22, 0, 1, 29, 3, 1, 29, 4, 1, 29, 7, 1, 29, 8, 1,
-                    29, 9, 1, 29, 11, 1, 29, 12, 1, 29, 13, 1, 29, 14, 1, 29, 16, 1, 29,
-                    17, 1, 29, 18, 1, 29, 19, 1, 29, 37, 1, 29, 38, 1, 29, 39, 1, 29, 40,
-                    1, 29, 41, 1, 29, 42, 1, 29, 43, 1, 29, 0, 1, 31, 3, 1, 31, 4, 1, 31,
-                    7, 1, 31, 8, 1, 31, 9, 1, 31, 11, 1, 31, 12, 1, 31, 13, 1, 31, 14, 1,
-                    31, 16, 1, 31, 17, 1, 31, 18, 1, 31, 19, 1, 31, 37, 1, 31, 38, 1, 31,
-                    39, 1, 31, 40, 1, 31, 41, 1, 31, 42, 1, 31, 43, 1, 31, 0, 1, 101, 3,
-                    1, 101, 7, 1, 101, 8, 1, 101, 11, 1, 101, 12, 1, 101, 13, 1, 101, 14,
-                    1, 101, 17, 1, 101, 18, 1, 101, 19, 1, 101, 0, 1, 25, 3, 1, 25, 4, 1,
-                    25, 7, 1, 25, 8, 1, 25, 9, 1, 25, 11, 1, 25, 12, 1, 25, 13, 1, 25,
-                    14, 1, 25, 16, 1, 25, 17, 1, 25, 18, 1, 25, 19, 1, 25, 37, 1, 25, 38,
-                    1, 25, 39, 1, 25, 40, 1, 25, 41, 1, 25, 42, 1, 25, 43, 1, 25, 0, 1,
-                    26, 3, 1, 26, 4, 1, 26, 7, 1, 26, 8, 1, 26, 9, 1, 26, 11, 1, 26, 12,
-                    1, 26, 13, 1, 26, 14, 1, 26, 16, 1, 26, 17, 1, 26, 18, 1, 26, 19, 1,
-                    26, 37, 1, 26, 38, 1, 26, 39, 1, 26, 40, 1, 26, 41, 1, 26, 42, 1, 26,
-                    43, 1, 26, 0, 1, 27, 3, 1, 27, 4, 1, 27, 7, 1, 27, 8, 1, 27, 9, 1,
-                    27, 11, 1, 27, 12, 1, 27, 13, 1, 27, 14, 1, 27, 16, 1, 27, 17, 1, 27,
-                    18, 1, 27, 19, 1, 27, 37, 1, 27, 38, 1, 27, 39, 1, 27, 40, 1, 27, 41,
-                    1, 27, 42, 1, 27, 43, 1, 27, 0, 1, 28, 3, 1, 28, 4, 1, 28, 7, 1, 28,
-                    8, 1, 28, 9, 1, 28, 11, 1, 28, 12, 1, 28, 13, 1, 28, 14, 1, 28, 16,
-                    1, 28, 17, 1, 28, 18, 1, 28, 19, 1, 28, 37, 1, 28, 38, 1, 28, 39, 1,
-                    28, 40, 1, 28, 41, 1, 28, 42, 1, 28, 43, 1, 28, 0, 1, 36, 3, 1, 36,
-                    4, 1, 36, 7, 1, 36, 8, 1, 36, 9, 1, 36, 11, 1, 36, 12, 1, 36, 13, 1,
-                    36, 14, 1, 36, 16, 1, 36, 17, 1, 36, 18, 1, 36, 19, 1, 36, 37, 1, 36,
-                    42, 1, 36, 43, 1, 36, 3, 1, 103, 18, 1, 103, 0, 1, 102, 3, 1, 102, 7,
-                    1, 102, 8, 1, 102, 11, 1, 102, 12, 1, 102, 13, 1, 102, 14, 1, 102,
-                    17, 1, 102, 18, 1, 102, 19, 1, 102, 3, 1, 105, 18, 1, 105, 3, 1, 104,
-                    18, 1, 104, 3, 1, 106, 18, 1, 106, 0, 1, 30, 3, 1, 30, 4, 1, 30, 7,
-                    1, 30, 8, 1, 30, 9, 1, 30, 11, 1, 30, 12, 1, 30, 13, 1, 30, 14, 1,
-                    30, 16, 1, 30, 17, 1, 30, 18, 1, 30, 19, 1, 30, 37, 1, 30, 38, 1, 30,
-                    39, 1, 30, 40, 1, 30, 41, 1, 30, 42, 1, 30, 43, 1, 30, 18, 1, 108,
-                    18, 1, 107, 0, 1, 38, 3, 1, 38, 4, 1, 38, 7, 1, 38, 8, 1, 38, 9, 1,
-                    38, 11, 1, 38, 12, 1, 38, 13, 1, 38, 14, 1, 38, 16, 1, 38, 17, 1, 38,
-                    18, 1, 38, 19, 1, 38, 37, 1, 38, 38, 1, 38, 39, 1, 38, 40, 1, 38, 41,
-                    1, 38, 42, 1, 38, 43, 1, 38, 0, 1, 39, 3, 1, 39, 4, 1, 39, 7, 1, 39,
-                    8, 1, 39, 9, 1, 39, 11, 1, 39, 12, 1, 39, 13, 1, 39, 14, 1, 39, 16,
-                    1, 39, 17, 1, 39, 18, 1, 39, 19, 1, 39, 37, 1, 39, 38, 1, 39, 39, 1,
-                    39, 40, 1, 39, 41, 1, 39, 42, 1, 39, 43, 1, 39, 0, 1, 41, 3, 1, 41,
-                    4, 1, 41, 7, 1, 41, 8, 1, 41, 9, 1, 41, 11, 1, 41, 12, 1, 41, 13, 1,
-                    41, 14, 1, 41, 16, 1, 41, 17, 1, 41, 18, 1, 41, 19, 1, 41, 37, 1, 41,
-                    38, 1, 41, 39, 1, 41, 40, 1, 41, 41, 1, 41, 42, 1, 41, 43, 1, 41, 0,
-                    1, 40, 3, 1, 40, 4, 1, 40, 7, 1, 40, 8, 1, 40, 9, 1, 40, 11, 1, 40,
-                    12, 1, 40, 13, 1, 40, 14, 1, 40, 16, 1, 40, 17, 1, 40, 18, 1, 40, 19,
-                    1, 40, 37, 1, 40, 38, 1, 40, 39, 1, 40, 40, 1, 40, 41, 1, 40, 42, 1,
-                    40, 43, 1, 40, 0, 1, 37, 3, 1, 37, 4, 1, 37, 7, 1, 37, 8, 1, 37, 9,
-                    1, 37, 11, 1, 37, 12, 1, 37, 13, 1, 37, 14, 1, 37, 16, 1, 37, 17, 1,
-                    37, 18, 1, 37, 19, 1, 37, 37, 1, 37, 38, 1, 37, 39, 1, 37, 40, 1, 37,
-                    41, 1, 37, 42, 1, 37, 43, 1, 37, 0, 1, 12, 3, 1, 12, 4, 1, 12, 7, 1,
-                    12, 8, 1, 12, 11, 1, 12, 12, 1, 12, 13, 1, 12, 14, 1, 12, 16, 1, 12,
-                    17, 1, 12, 19, 1, 12, 37, 1, 12, 3, 1, 90, 4, 1, 90, 16, 1, 90, 37,
-                    1, 90, 3, 1, 3, 37, 1, 3, 0, 1, 87, 3, 1, 87, 4, 1, 87, 7, 1, 87, 8,
-                    1, 87, 11, 1, 87, 12, 1, 87, 13, 1, 87, 14, 1, 87, 16, 1, 87, 17, 1,
-                    87, 19, 1, 87, 37, 1, 87, 0, 1, 11, 3, 1, 11, 4, 1, 11, 7, 1, 11, 8,
-                    1, 11, 11, 1, 11, 12, 1, 11, 13, 1, 11, 14, 1, 11, 16, 1, 11, 17, 1,
-                    11, 19, 1, 11, 37, 1, 11, 3, 1, 89, 4, 1, 89, 16, 1, 89, 37, 1, 89,
-                    0, 1, 88, 3, 1, 88, 4, 1, 88, 7, 1, 88, 8, 1, 88, 11, 1, 88, 12, 1,
-                    88, 13, 1, 88, 14, 1, 88, 16, 1, 88, 17, 1, 88, 19, 1, 88, 37, 1, 88,
-                    3, 1, 94, 16, 1, 94, 37, 1, 94, 0, 1, 44, 3, 1, 44, 4, 1, 44, 11, 1,
-                    44, 13, 1, 44, 16, 1, 44, 37, 1, 44, 0, 1, 45, 3, 1, 45, 4, 1, 45,
-                    11, 1, 45, 13, 1, 45, 16, 1, 45, 37, 1, 45, 0, 1, 46, 3, 1, 46, 4, 1,
-                    46, 11, 1, 46, 13, 1, 46, 16, 1, 46, 37, 1, 46, 3, 1, 7, 4, 1, 7, 16,
-                    1, 7, 37, 1, 7, 3, 1, 6, 4, 1, 6, 16, 1, 6, 37, 1, 6, 3, 1, 8, 4, 1,
-                    8, 16, 1, 8, 37, 1, 8, 3, 1, 9, 4, 1, 9, 16, 1, 9, 37, 1, 9, 3, 1,
-                    10, 4, 1, 10, 16, 1, 10, 37, 1, 10, 3, 1, 91, 4, 1, 91, 16, 1, 91,
-                    37, 1, 91, 3, 1, 93, 16, 1, 93, 37, 1, 93, 3, 1, 92, 4, 1, 92, 16, 1,
-                    92, 37, 1, 92, 3, 1, 43, 37, 1, 43, 3, 1, 42, 37, 1, 42, 3, 1, 5, 37,
-                    1, 5, 0, 1, 0, 4, 1, 0, 44, 1, 0, 3, 1, 4, 37, 1, 4, 0, 1, 63, 4, 1,
-                    63, 44, 1, 63, 0, 1, 153, 11, 1, 153, 13, 1, 153, 37, 1, 153, 0, 1,
-                    62, 4, 1, 62, 44, 1, 62, 0, 1, 154, 11, 1, 154, 13, 1, 154, 37, 1,
-                    154, 0, 1, 65, 4, 1, 65, 44, 1, 65, 0, 1, 64, 4, 1, 64, 44, 1, 64, 0,
-                    1, 54, 4, 1, 54, 44, 1, 54, 0, 1, 151, 1, 1, 151, 2, 1, 151, 3, 1,
-                    151, 4, 1, 151, 5, 1, 151, 6, 1, 151, 7, 1, 151, 8, 1, 151, 9, 1,
-                    151, 10, 1, 151, 11, 1, 151, 12, 1, 151, 13, 1, 151, 14, 1, 151, 15,
-                    1, 151, 16, 1, 151, 17, 1, 151, 18, 1, 151, 19, 1, 151, 20, 1, 151,
-                    21, 1, 151, 22, 1, 151, 23, 1, 151, 24, 1, 151, 25, 1, 151, 26, 1,
-                    151, 27, 1, 151, 28, 1, 151, 29, 1, 151, 30, 1, 151, 31, 1, 151, 32,
-                    1, 151, 33, 1, 151, 34, 1, 151, 35, 1, 151, 36, 1, 151, 37, 1, 151,
-                    38, 1, 151, 39, 1, 151, 40, 1, 151, 41, 1, 151, 42, 1, 151, 0, 1, 53,
-                    4, 1, 53, 44, 1, 53, 0, 1, 152, 1, 1, 152, 2, 1, 152, 3, 1, 152, 4,
-                    1, 152, 5, 1, 152, 6, 1, 152, 7, 1, 152, 8, 1, 152, 9, 1, 152, 10, 1,
-                    152, 11, 1, 152, 12, 1, 152, 13, 1, 152, 14, 1, 152, 15, 1, 152, 16,
-                    1, 152, 17, 1, 152, 18, 1, 152, 19, 1, 152, 20, 1, 152, 21, 1, 152,
-                    22, 1, 152, 23, 1, 152, 24, 1, 152, 25, 1, 152, 26, 1, 152, 27, 1,
-                    152, 28, 1, 152, 29, 1, 152, 30, 1, 152, 31, 1, 152, 32, 1, 152, 33,
-                    1, 152, 34, 1, 152, 35, 1, 152, 36, 1, 152, 37, 1, 152, 38, 1, 152,
-                    39, 1, 152, 40, 1, 152, 41, 1, 152, 42, 1, 152, 0, 1, 55, 4, 1, 55,
-                    44, 1, 55, 0, 1, 56, 4, 1, 56, 44, 1, 56, 0, 1, 57, 4, 1, 57, 44, 1,
-                    57, 0, 1, 59, 4, 1, 59, 44, 1, 59, 0, 1, 58, 4, 1, 58, 44, 1, 58, 0,
-                    1, 61, 4, 1, 61, 44, 1, 61, 0, 1, 60, 4, 1, 60, 44, 1, 60, 0, 1, 69,
-                    4, 1, 69, 44, 1, 69, 0, 1, 68, 4, 1, 68, 44, 1, 68, 0, 1, 71, 4, 1,
-                    71, 44, 1, 71, 0, 1, 70, 4, 1, 70, 44, 1, 70, 0, 1, 74, 4, 1, 74, 44,
-                    1, 74, 0, 1, 75, 4, 1, 75, 44, 1, 75, 0, 1, 72, 4, 1, 72, 44, 1, 72,
-                    0, 1, 73, 4, 1, 73, 44, 1, 73, 0, 1, 67, 4, 1, 67, 44, 1, 67, 0, 1,
-                    66, 4, 1, 66, 44, 1, 66, 0, 1, 76, 4, 1, 76, 44, 1, 76, 0, 1, 77, 4,
-                    1, 77, 44, 1, 77, 0, 1, 79, 4, 1, 79, 44, 1, 79, 0, 1, 78, 4, 1, 78,
-                    44, 1, 78, 18, 1, 47, 18, 1, 48, 18, 1, 51, 18, 1, 49, 18, 1, 50, 18,
-                    1, 52, 0, 1, 81, 4, 1, 81, 44, 1, 81, 0, 1, 80, 4, 1, 80, 44, 1, 80,
-                    0, 1, 82, 4, 1, 82, 44, 1, 82, 0, 1, 83, 4, 1, 83, 44, 1, 83, 0, 1,
-                    84, 4, 1, 84, 44, 1, 84, 44, 1, 155, 44, 1, 156,
+                    2, 1, 3, 2, 1, 2, 3, 1, 95, 4, 1, 95, 16, 1, 95, 37, 1, 95, 43, 1,
+                    95, 0, 1, 27, 3, 1, 27, 4, 1, 27, 7, 1, 27, 8, 1, 27, 11, 1, 27, 12,
+                    1, 27, 13, 1, 27, 14, 1, 27, 16, 1, 27, 17, 1, 27, 19, 1, 27, 37, 1,
+                    27, 38, 1, 27, 39, 1, 27, 40, 1, 27, 41, 1, 27, 42, 1, 27, 43, 1, 27,
+                    0, 1, 27, 3, 1, 27, 4, 1, 27, 7, 1, 27, 8, 1, 27, 9, 1, 27, 11, 1,
+                    27, 12, 1, 27, 13, 1, 27, 14, 1, 27, 16, 1, 27, 17, 1, 27, 18, 1, 27,
+                    19, 1, 27, 37, 1, 27, 38, 1, 27, 39, 1, 27, 40, 1, 27, 41, 1, 27, 42,
+                    1, 27, 43, 1, 27, 0, 1, 26, 3, 1, 26, 4, 1, 26, 7, 1, 26, 8, 1, 26,
+                    9, 1, 26, 11, 1, 26, 12, 1, 26, 13, 1, 26, 14, 1, 26, 16, 1, 26, 17,
+                    1, 26, 18, 1, 26, 19, 1, 26, 37, 1, 26, 38, 1, 26, 39, 1, 26, 40, 1,
+                    26, 41, 1, 26, 42, 1, 26, 43, 1, 26, 0, 1, 35, 3, 1, 35, 4, 1, 35, 7,
+                    1, 35, 8, 1, 35, 9, 1, 35, 11, 1, 35, 12, 1, 35, 13, 1, 35, 14, 1,
+                    35, 16, 1, 35, 17, 1, 35, 18, 1, 35, 19, 1, 35, 37, 1, 35, 38, 1, 35,
+                    39, 1, 35, 40, 1, 35, 41, 1, 35, 42, 1, 35, 43, 1, 35, 0, 1, 36, 3,
+                    1, 36, 4, 1, 36, 7, 1, 36, 8, 1, 36, 9, 1, 36, 11, 1, 36, 12, 1, 36,
+                    13, 1, 36, 14, 1, 36, 16, 1, 36, 17, 1, 36, 18, 1, 36, 19, 1, 36, 37,
+                    1, 36, 38, 1, 36, 39, 1, 36, 40, 1, 36, 41, 1, 36, 42, 1, 36, 43, 1,
+                    36, 0, 1, 37, 3, 1, 37, 4, 1, 37, 7, 1, 37, 8, 1, 37, 9, 1, 37, 11,
+                    1, 37, 12, 1, 37, 13, 1, 37, 14, 1, 37, 16, 1, 37, 17, 1, 37, 18, 1,
+                    37, 19, 1, 37, 37, 1, 37, 38, 1, 37, 39, 1, 37, 40, 1, 37, 41, 1, 37,
+                    42, 1, 37, 43, 1, 37, 0, 1, 38, 3, 1, 38, 4, 1, 38, 7, 1, 38, 8, 1,
+                    38, 9, 1, 38, 11, 1, 38, 12, 1, 38, 13, 1, 38, 14, 1, 38, 16, 1, 38,
+                    17, 1, 38, 18, 1, 38, 19, 1, 38, 37, 1, 38, 38, 1, 38, 39, 1, 38, 40,
+                    1, 38, 41, 1, 38, 42, 1, 38, 43, 1, 38, 3, 1, 109, 18, 1, 109, 0, 1,
+                    101, 11, 1, 101, 13, 1, 101, 20, 1, 101, 43, 1, 101, 0, 1, 100, 11,
+                    1, 100, 13, 1, 100, 20, 1, 100, 43, 1, 100, 20, 1, 105, 0, 1, 15, 11,
+                    1, 15, 13, 1, 15, 20, 1, 15, 0, 1, 16, 11, 1, 16, 13, 1, 16, 20, 1,
+                    16, 0, 1, 17, 11, 1, 17, 13, 1, 17, 20, 1, 17, 0, 1, 21, 11, 1, 21,
+                    13, 1, 21, 20, 1, 21, 0, 1, 22, 11, 1, 22, 13, 1, 22, 20, 1, 22, 0,
+                    1, 23, 11, 1, 23, 13, 1, 23, 20, 1, 23, 0, 1, 18, 11, 1, 18, 13, 1,
+                    18, 20, 1, 18, 0, 1, 19, 11, 1, 19, 13, 1, 19, 20, 1, 19, 0, 1, 20,
+                    11, 1, 20, 13, 1, 20, 20, 1, 20, 0, 1, 25, 3, 1, 25, 4, 1, 25, 7, 1,
+                    25, 8, 1, 25, 9, 1, 25, 11, 1, 25, 12, 1, 25, 13, 1, 25, 14, 1, 25,
+                    16, 1, 25, 17, 1, 25, 18, 1, 25, 19, 1, 25, 37, 1, 25, 38, 1, 25, 39,
+                    1, 25, 40, 1, 25, 41, 1, 25, 42, 1, 25, 43, 1, 25, 0, 1, 102, 11, 1,
+                    102, 13, 1, 102, 20, 1, 102, 20, 1, 104, 0, 1, 103, 11, 1, 103, 13,
+                    1, 103, 20, 1, 103, 0, 1, 24, 3, 1, 24, 4, 1, 24, 7, 1, 24, 8, 1, 24,
+                    9, 1, 24, 11, 1, 24, 12, 1, 24, 13, 1, 24, 14, 1, 24, 16, 1, 24, 17,
+                    1, 24, 18, 1, 24, 19, 1, 24, 37, 1, 24, 38, 1, 24, 39, 1, 24, 40, 1,
+                    24, 41, 1, 24, 42, 1, 24, 43, 1, 24, 0, 1, 32, 3, 1, 32, 4, 1, 32, 7,
+                    1, 32, 8, 1, 32, 9, 1, 32, 11, 1, 32, 12, 1, 32, 13, 1, 32, 14, 1,
+                    32, 16, 1, 32, 17, 1, 32, 18, 1, 32, 19, 1, 32, 37, 1, 32, 38, 1, 32,
+                    39, 1, 32, 40, 1, 32, 41, 1, 32, 42, 1, 32, 43, 1, 32, 0, 1, 34, 3,
+                    1, 34, 4, 1, 34, 7, 1, 34, 8, 1, 34, 9, 1, 34, 11, 1, 34, 12, 1, 34,
+                    13, 1, 34, 14, 1, 34, 16, 1, 34, 17, 1, 34, 18, 1, 34, 19, 1, 34, 37,
+                    1, 34, 38, 1, 34, 39, 1, 34, 40, 1, 34, 41, 1, 34, 42, 1, 34, 43, 1,
+                    34, 0, 1, 106, 3, 1, 106, 7, 1, 106, 8, 1, 106, 11, 1, 106, 12, 1,
+                    106, 13, 1, 106, 14, 1, 106, 17, 1, 106, 18, 1, 106, 19, 1, 106, 0,
+                    1, 28, 3, 1, 28, 4, 1, 28, 7, 1, 28, 8, 1, 28, 9, 1, 28, 11, 1, 28,
+                    12, 1, 28, 13, 1, 28, 14, 1, 28, 16, 1, 28, 17, 1, 28, 18, 1, 28, 19,
+                    1, 28, 37, 1, 28, 38, 1, 28, 39, 1, 28, 40, 1, 28, 41, 1, 28, 42, 1,
+                    28, 43, 1, 28, 0, 1, 29, 3, 1, 29, 4, 1, 29, 7, 1, 29, 8, 1, 29, 9,
+                    1, 29, 11, 1, 29, 12, 1, 29, 13, 1, 29, 14, 1, 29, 16, 1, 29, 17, 1,
+                    29, 18, 1, 29, 19, 1, 29, 37, 1, 29, 38, 1, 29, 39, 1, 29, 40, 1, 29,
+                    41, 1, 29, 42, 1, 29, 43, 1, 29, 0, 1, 30, 3, 1, 30, 4, 1, 30, 7, 1,
+                    30, 8, 1, 30, 9, 1, 30, 11, 1, 30, 12, 1, 30, 13, 1, 30, 14, 1, 30,
+                    16, 1, 30, 17, 1, 30, 18, 1, 30, 19, 1, 30, 37, 1, 30, 38, 1, 30, 39,
+                    1, 30, 40, 1, 30, 41, 1, 30, 42, 1, 30, 43, 1, 30, 0, 1, 31, 3, 1,
+                    31, 4, 1, 31, 7, 1, 31, 8, 1, 31, 9, 1, 31, 11, 1, 31, 12, 1, 31, 13,
+                    1, 31, 14, 1, 31, 16, 1, 31, 17, 1, 31, 18, 1, 31, 19, 1, 31, 37, 1,
+                    31, 38, 1, 31, 39, 1, 31, 40, 1, 31, 41, 1, 31, 42, 1, 31, 43, 1, 31,
+                    0, 1, 39, 3, 1, 39, 4, 1, 39, 7, 1, 39, 8, 1, 39, 9, 1, 39, 11, 1,
+                    39, 12, 1, 39, 13, 1, 39, 14, 1, 39, 16, 1, 39, 17, 1, 39, 18, 1, 39,
+                    19, 1, 39, 37, 1, 39, 42, 1, 39, 43, 1, 39, 3, 1, 108, 18, 1, 108, 0,
+                    1, 107, 3, 1, 107, 7, 1, 107, 8, 1, 107, 11, 1, 107, 12, 1, 107, 13,
+                    1, 107, 14, 1, 107, 17, 1, 107, 18, 1, 107, 19, 1, 107, 3, 1, 110,
+                    18, 1, 110, 3, 1, 109, 18, 1, 109, 3, 1, 111, 18, 1, 111, 0, 1, 33,
+                    3, 1, 33, 4, 1, 33, 7, 1, 33, 8, 1, 33, 9, 1, 33, 11, 1, 33, 12, 1,
+                    33, 13, 1, 33, 14, 1, 33, 16, 1, 33, 17, 1, 33, 18, 1, 33, 19, 1, 33,
+                    37, 1, 33, 38, 1, 33, 39, 1, 33, 40, 1, 33, 41, 1, 33, 42, 1, 33, 43,
+                    1, 33, 18, 1, 113, 18, 1, 112, 0, 1, 41, 3, 1, 41, 4, 1, 41, 7, 1,
+                    41, 8, 1, 41, 9, 1, 41, 11, 1, 41, 12, 1, 41, 13, 1, 41, 14, 1, 41,
+                    16, 1, 41, 17, 1, 41, 18, 1, 41, 19, 1, 41, 37, 1, 41, 38, 1, 41, 39,
+                    1, 41, 40, 1, 41, 41, 1, 41, 42, 1, 41, 43, 1, 41, 0, 1, 42, 3, 1,
+                    42, 4, 1, 42, 7, 1, 42, 8, 1, 42, 9, 1, 42, 11, 1, 42, 12, 1, 42, 13,
+                    1, 42, 14, 1, 42, 16, 1, 42, 17, 1, 42, 18, 1, 42, 19, 1, 42, 37, 1,
+                    42, 38, 1, 42, 39, 1, 42, 40, 1, 42, 41, 1, 42, 42, 1, 42, 43, 1, 42,
+                    0, 1, 44, 3, 1, 44, 4, 1, 44, 7, 1, 44, 8, 1, 44, 9, 1, 44, 11, 1,
+                    44, 12, 1, 44, 13, 1, 44, 14, 1, 44, 16, 1, 44, 17, 1, 44, 18, 1, 44,
+                    19, 1, 44, 37, 1, 44, 38, 1, 44, 39, 1, 44, 40, 1, 44, 41, 1, 44, 42,
+                    1, 44, 43, 1, 44, 0, 1, 43, 3, 1, 43, 4, 1, 43, 7, 1, 43, 8, 1, 43,
+                    9, 1, 43, 11, 1, 43, 12, 1, 43, 13, 1, 43, 14, 1, 43, 16, 1, 43, 17,
+                    1, 43, 18, 1, 43, 19, 1, 43, 37, 1, 43, 38, 1, 43, 39, 1, 43, 40, 1,
+                    43, 41, 1, 43, 42, 1, 43, 43, 1, 43, 0, 1, 40, 3, 1, 40, 4, 1, 40, 7,
+                    1, 40, 8, 1, 40, 9, 1, 40, 11, 1, 40, 12, 1, 40, 13, 1, 40, 14, 1,
+                    40, 16, 1, 40, 17, 1, 40, 18, 1, 40, 19, 1, 40, 37, 1, 40, 38, 1, 40,
+                    39, 1, 40, 40, 1, 40, 41, 1, 40, 42, 1, 40, 43, 1, 40, 0, 1, 14, 3,
+                    1, 14, 4, 1, 14, 7, 1, 14, 8, 1, 14, 11, 1, 14, 12, 1, 14, 13, 1, 14,
+                    14, 1, 14, 16, 1, 14, 17, 1, 14, 19, 1, 14, 37, 1, 14, 43, 1, 14, 0,
+                    1, 13, 3, 1, 13, 4, 1, 13, 7, 1, 13, 8, 1, 13, 11, 1, 13, 12, 1, 13,
+                    13, 1, 13, 14, 1, 13, 16, 1, 13, 17, 1, 13, 19, 1, 13, 37, 1, 13, 43,
+                    1, 13, 3, 1, 95, 4, 1, 95, 16, 1, 95, 37, 1, 95, 43, 1, 95, 3, 1, 4,
+                    37, 1, 4, 43, 1, 4, 0, 1, 92, 3, 1, 92, 4, 1, 92, 7, 1, 92, 8, 1, 92,
+                    11, 1, 92, 12, 1, 92, 13, 1, 92, 14, 1, 92, 16, 1, 92, 17, 1, 92, 19,
+                    1, 92, 37, 1, 92, 43, 1, 92, 0, 1, 12, 3, 1, 12, 4, 1, 12, 7, 1, 12,
+                    8, 1, 12, 11, 1, 12, 12, 1, 12, 13, 1, 12, 14, 1, 12, 16, 1, 12, 17,
+                    1, 12, 19, 1, 12, 37, 1, 12, 43, 1, 12, 3, 1, 94, 4, 1, 94, 16, 1,
+                    94, 37, 1, 94, 43, 1, 94, 0, 1, 93, 3, 1, 93, 4, 1, 93, 7, 1, 93, 8,
+                    1, 93, 11, 1, 93, 12, 1, 93, 13, 1, 93, 14, 1, 93, 16, 1, 93, 17, 1,
+                    93, 19, 1, 93, 37, 1, 93, 43, 1, 93, 3, 1, 99, 16, 1, 99, 37, 1, 99,
+                    43, 1, 99, 0, 1, 48, 3, 1, 48, 4, 1, 48, 11, 1, 48, 13, 1, 48, 16, 1,
+                    48, 37, 1, 48, 43, 1, 48, 0, 1, 49, 3, 1, 49, 4, 1, 49, 11, 1, 49,
+                    13, 1, 49, 16, 1, 49, 37, 1, 49, 43, 1, 49, 0, 1, 50, 3, 1, 50, 4, 1,
+                    50, 11, 1, 50, 13, 1, 50, 16, 1, 50, 37, 1, 50, 43, 1, 50, 3, 1, 8,
+                    4, 1, 8, 16, 1, 8, 37, 1, 8, 43, 1, 8, 3, 1, 7, 4, 1, 7, 16, 1, 7,
+                    37, 1, 7, 43, 1, 7, 3, 1, 9, 4, 1, 9, 16, 1, 9, 37, 1, 9, 43, 1, 9,
+                    3, 1, 10, 4, 1, 10, 16, 1, 10, 37, 1, 10, 43, 1, 10, 3, 1, 11, 4, 1,
+                    11, 16, 1, 11, 37, 1, 11, 43, 1, 11, 3, 1, 96, 4, 1, 96, 16, 1, 96,
+                    37, 1, 96, 43, 1, 96, 3, 1, 98, 16, 1, 98, 37, 1, 98, 43, 1, 98, 3,
+                    1, 97, 4, 1, 97, 16, 1, 97, 37, 1, 97, 43, 1, 97, 3, 1, 47, 37, 1,
+                    47, 3, 1, 45, 37, 1, 45, 43, 1, 45, 3, 1, 46, 37, 1, 46, 43, 1, 46,
+                    3, 1, 6, 37, 1, 6, 43, 1, 6, 0, 1, 0, 4, 1, 0, 44, 1, 0, 0, 1, 1, 4,
+                    1, 1, 44, 1, 1, 3, 1, 5, 37, 1, 5, 43, 1, 5, 0, 1, 67, 4, 1, 67, 44,
+                    1, 67, 0, 1, 158, 11, 1, 158, 13, 1, 158, 37, 1, 158, 0, 1, 66, 4, 1,
+                    66, 44, 1, 66, 0, 1, 159, 11, 1, 159, 13, 1, 159, 37, 1, 159, 0, 1,
+                    69, 4, 1, 69, 44, 1, 69, 0, 1, 68, 4, 1, 68, 44, 1, 68, 0, 1, 58, 4,
+                    1, 58, 44, 1, 58, 0, 1, 156, 1, 1, 156, 2, 1, 156, 3, 1, 156, 4, 1,
+                    156, 5, 1, 156, 6, 1, 156, 7, 1, 156, 8, 1, 156, 9, 1, 156, 10, 1,
+                    156, 11, 1, 156, 12, 1, 156, 13, 1, 156, 14, 1, 156, 15, 1, 156, 16,
+                    1, 156, 17, 1, 156, 18, 1, 156, 19, 1, 156, 20, 1, 156, 21, 1, 156,
+                    22, 1, 156, 23, 1, 156, 24, 1, 156, 25, 1, 156, 26, 1, 156, 27, 1,
+                    156, 28, 1, 156, 29, 1, 156, 30, 1, 156, 31, 1, 156, 32, 1, 156, 33,
+                    1, 156, 34, 1, 156, 35, 1, 156, 36, 1, 156, 37, 1, 156, 38, 1, 156,
+                    39, 1, 156, 40, 1, 156, 41, 1, 156, 42, 1, 156, 0, 1, 57, 4, 1, 57,
+                    44, 1, 57, 0, 1, 157, 1, 1, 157, 2, 1, 157, 3, 1, 157, 4, 1, 157, 5,
+                    1, 157, 6, 1, 157, 7, 1, 157, 8, 1, 157, 9, 1, 157, 10, 1, 157, 11,
+                    1, 157, 12, 1, 157, 13, 1, 157, 14, 1, 157, 15, 1, 157, 16, 1, 157,
+                    17, 1, 157, 18, 1, 157, 19, 1, 157, 20, 1, 157, 21, 1, 157, 22, 1,
+                    157, 23, 1, 157, 24, 1, 157, 25, 1, 157, 26, 1, 157, 27, 1, 157, 28,
+                    1, 157, 29, 1, 157, 30, 1, 157, 31, 1, 157, 32, 1, 157, 33, 1, 157,
+                    34, 1, 157, 35, 1, 157, 36, 1, 157, 37, 1, 157, 38, 1, 157, 39, 1,
+                    157, 40, 1, 157, 41, 1, 157, 42, 1, 157, 0, 1, 59, 4, 1, 59, 44, 1,
+                    59, 0, 1, 60, 4, 1, 60, 44, 1, 60, 0, 1, 61, 4, 1, 61, 44, 1, 61, 0,
+                    1, 63, 4, 1, 63, 44, 1, 63, 0, 1, 62, 4, 1, 62, 44, 1, 62, 0, 1, 65,
+                    4, 1, 65, 44, 1, 65, 0, 1, 64, 4, 1, 64, 44, 1, 64, 0, 1, 73, 4, 1,
+                    73, 44, 1, 73, 0, 1, 72, 4, 1, 72, 44, 1, 72, 0, 1, 75, 4, 1, 75, 44,
+                    1, 75, 0, 1, 74, 4, 1, 74, 44, 1, 74, 0, 1, 78, 4, 1, 78, 44, 1, 78,
+                    0, 1, 79, 4, 1, 79, 44, 1, 79, 0, 1, 76, 4, 1, 76, 44, 1, 76, 0, 1,
+                    77, 4, 1, 77, 44, 1, 77, 0, 1, 71, 4, 1, 71, 44, 1, 71, 0, 1, 70, 4,
+                    1, 70, 44, 1, 70, 0, 1, 80, 4, 1, 80, 44, 1, 80, 0, 1, 81, 4, 1, 81,
+                    44, 1, 81, 0, 1, 83, 4, 1, 83, 44, 1, 83, 0, 1, 82, 4, 1, 82, 44, 1,
+                    82, 18, 1, 51, 18, 1, 52, 18, 1, 55, 18, 1, 53, 18, 1, 54, 0, 1, 86,
+                    4, 1, 86, 44, 1, 86, 18, 1, 56, 0, 1, 85, 4, 1, 85, 44, 1, 85, 0, 1,
+                    84, 4, 1, 84, 44, 1, 84, 0, 1, 87, 4, 1, 87, 44, 1, 87, 0, 1, 88, 4,
+                    1, 88, 44, 1, 88, 0, 1, 89, 4, 1, 89, 44, 1, 89, 44, 1, 160, 44, 1,
+                    161,
                 ];
                 static REDUCE_OFFSETS: &[u32] = &[
-                    0, 0, 3, 6, 6, 18, 72, 72, 135, 198, 198, 198, 198, 261, 324, 387,
-                    450, 456, 468, 480, 483, 495, 495, 507, 519, 531, 531, 543, 555, 567,
-                    567, 579, 591, 603, 606, 618, 618, 681, 744, 744, 744, 744, 807, 840,
-                    903, 966, 1029, 1092, 1092, 1143, 1149, 1182, 1188, 1188, 1194, 1200,
-                    1263, 1266, 1269, 1269, 1332, 1332, 1395, 1395, 1458, 1458, 1521,
-                    1521, 1584, 1623, 1623, 1635, 1641, 1680, 1719, 1731, 1770, 1779,
-                    1779, 1779, 1800, 1821, 1842, 1854, 1866, 1866, 1878, 1890, 1902,
-                    1914, 1923, 1935, 1941, 1947, 1953, 1962, 1968, 1968, 1968, 1968,
-                    1977, 1989, 1989, 1998, 2010, 2010, 2010, 2019, 2019, 2028, 2028,
-                    2028, 2037, 2166, 2166, 2175, 2304, 2304, 2313, 2313, 2313, 2322,
-                    2322, 2331, 2331, 2340, 2340, 2349, 2349, 2358, 2358, 2367, 2367,
-                    2376, 2376, 2385, 2385, 2394, 2394, 2403, 2403, 2412, 2412, 2421,
-                    2421, 2430, 2430, 2439, 2439, 2439, 2448, 2448, 2457, 2457, 2466,
-                    2466, 2475, 2475, 2484, 2484, 2493, 2493, 2493, 2493, 2496, 2499,
-                    2499, 2502, 2505, 2505, 2508, 2511, 2511, 2511, 2520, 2529, 2529,
-                    2538, 2538, 2547, 2556, 2559, 2562, 2562, 2562,
+                    0, 0, 3, 6, 6, 21, 78, 78, 141, 204, 204, 204, 204, 267, 330, 393,
+                    456, 462, 477, 492, 495, 507, 507, 519, 531, 543, 543, 555, 567, 579,
+                    579, 591, 603, 603, 666, 678, 681, 693, 693, 756, 819, 819, 819, 819,
+                    882, 915, 978, 1041, 1104, 1167, 1167, 1218, 1224, 1257, 1263, 1263,
+                    1269, 1275, 1338, 1341, 1344, 1344, 1407, 1407, 1470, 1470, 1533,
+                    1533, 1596, 1596, 1659, 1701, 1743, 1743, 1758, 1767, 1809, 1851,
+                    1866, 1908, 1920, 1920, 1920, 1944, 1968, 1992, 2007, 2022, 2022,
+                    2037, 2052, 2067, 2082, 2094, 2109, 2115, 2124, 2133, 2142, 2151,
+                    2151, 2160, 2169, 2169, 2169, 2169, 2178, 2190, 2190, 2199, 2211,
+                    2211, 2211, 2220, 2220, 2229, 2229, 2229, 2238, 2367, 2367, 2376,
+                    2505, 2505, 2514, 2514, 2514, 2523, 2523, 2532, 2532, 2541, 2541,
+                    2550, 2550, 2559, 2559, 2568, 2568, 2577, 2577, 2586, 2586, 2595,
+                    2595, 2604, 2604, 2613, 2613, 2622, 2622, 2631, 2631, 2640, 2640,
+                    2640, 2649, 2649, 2658, 2658, 2667, 2667, 2676, 2676, 2685, 2685,
+                    2694, 2694, 2694, 2694, 2697, 2700, 2700, 2703, 2706, 2706, 2709,
+                    2709, 2709, 2718, 2721, 2721, 2721, 2730, 2739, 2739, 2748, 2748,
+                    2757, 2766, 2769, 2772, 2772, 2772,
                 ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
-                    0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 2, 2, 2, 1, 0, 0, 0, 0, 1, 0,
-                    0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0, 2, 2, 2,
-                    2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1, 0, 1, 0,
+                    0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0, 2,
+                    2, 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0,
+                    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+                    0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ];
-                let num_rules = 158usize;
+                let num_rules = 163usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
                     let lhs = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
@@ -7263,7 +7645,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                             len: RULE_LENGTHS[i] as usize,
                         });
                 }
-                let num_states = 184usize;
+                let num_states = 193usize;
                 let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;

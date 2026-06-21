@@ -123,6 +123,7 @@ While implementing:
 - Use named bindings such as `lhs=Expr` to make reduce actions readable.
 - Use `%left`, `%right`, or `%precedence` before changing grammar shape solely to fix expression conflicts.
 - Use the `error` terminal for recovery points such as delimiters, statements, or object members.
+- Include `error` in precedence declarations if recovery productions introduce a shift/reduce conflict.
 - Keep generated parser files committed only if the project convention does so.
 
 When debugging:

@@ -2801,6 +2801,11 @@ impl Grammar {
                 }
             }
         }
+        if let Some(level) = self.error_precedence {
+            if !grammar.add_precedence(TerminalSymbol::Error, level) {
+                unreachable!("set_reduce_type error");
+            }
+        }
         grammar.set_precedence_types(self.precedence_types.iter().map(|op| *op.value()).collect());
 
         // add rules
@@ -3545,6 +3550,115 @@ mod tests {
         assert_eq!(grammar_args.start_rule_name[0].value(), "Expr");
         assert_eq!(grammar_args.rules.len(), 1);
         assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+    }
+
+    #[test]
+    fn test_parse_rule_line_action_error_recovery() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : 'a' = ;
+            Term : 'b';
+        };
+
+        let grammar_args =
+            Grammar::parse_args(input).expect("Should recover from malformed reduce action");
+
+        assert_eq!(grammar_args.error_recovered.len(), 1);
+        assert_eq!(
+            grammar_args.error_recovered[0].message,
+            "Expected reduce action block or rule terminator"
+        );
+        assert_eq!(grammar_args.rules.len(), 2);
+        assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+        assert_eq!(grammar_args.rules[1].name.value(), "Term");
+    }
+
+    #[test]
+    fn test_parse_mapped_symbol_error_recovery() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : lhs= % 'a';
+            Term : 'b';
+        };
+
+        let grammar_args =
+            Grammar::parse_args(input).expect("Should recover from malformed symbol binding");
+
+        assert_eq!(grammar_args.error_recovered.len(), 1);
+        assert_eq!(
+            grammar_args.error_recovered[0].message,
+            "Expected pattern after symbol binding"
+        );
+        assert_eq!(grammar_args.rules.len(), 2);
+        assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+        assert_eq!(grammar_args.rules[1].name.value(), "Term");
+    }
+
+    #[test]
+    fn test_parse_terminal_set_error_recovery() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : [ % ];
+            Term : 'b';
+        };
+
+        let grammar_args =
+            Grammar::parse_args(input).expect("Should recover from malformed terminal set");
+
+        assert_eq!(grammar_args.error_recovered.len(), 1);
+        assert_eq!(
+            grammar_args.error_recovered[0].message,
+            "Expected terminal set item"
+        );
+        assert_eq!(grammar_args.rules.len(), 2);
+        assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+        assert_eq!(grammar_args.rules[1].name.value(), "Term");
+    }
+
+    #[test]
+    fn test_parse_allow_target_error_recovery() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %allow shift_reduce_conflict_resolved(%);
+            Expr : 'a';
+        };
+
+        let grammar_args =
+            Grammar::parse_args(input).expect("Should recover from malformed allow target");
+
+        assert_eq!(grammar_args.error_recovered.len(), 1);
+        assert_eq!(
+            grammar_args.error_recovered[0].message,
+            "Expected diagnostic suppression target"
+        );
+        assert_eq!(grammar_args.rules.len(), 1);
+        assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+    }
+
+    #[test]
+    fn test_parse_rule_body_error_recovery() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            Expr : { 1 } = ;
+            Term : 'b';
+        };
+
+        let grammar_args =
+            Grammar::parse_args(input).expect("Should recover from malformed rule body");
+
+        assert_eq!(grammar_args.error_recovered.len(), 1);
+        assert_eq!(
+            grammar_args.error_recovered[0].message,
+            "Expected semicolon or rule alternative"
+        );
+        assert_eq!(grammar_args.rules.len(), 2);
+        assert_eq!(grammar_args.rules[0].name.value(), "Expr");
+        assert_eq!(grammar_args.rules[1].name.value(), "Term");
     }
 
     #[test]
