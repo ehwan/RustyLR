@@ -88,8 +88,26 @@ Rule(box RuleDefArgs) : ident RuleType colon RuleLines semicolon {
     let $ident = ident else { // "$ident" replaced with "$ident" in the macro expansion
         unreachable!( "Rule-Ident" );
     };
-    if let Some(fisrt) = RuleLines.first_mut() {
-        fisrt.separator_location = @colon;
+    if let Some(first) = RuleLines.first_mut() {
+        first.separator_location = @colon;
+    }
+    RuleDefArgs {
+        name: Located::new(ident.to_string(), @ident),
+        typename: RuleType.map(|t| t.stream()),
+        rule_lines: RuleLines,
+    }
+}
+| ident RuleType colon RuleLines error semicolon {
+    let $ident = ident else {
+        unreachable!( "Rule-Ident" );
+    };
+    data.error_recovered.push( RecoveredError {
+        message: "Expected semicolon or rule alternative".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#production-rules".to_string(),
+        location: @error,
+    });
+    if let Some(first) = RuleLines.first_mut() {
+        first.separator_location = @colon;
     }
     RuleDefArgs {
         name: Located::new(ident.to_string(), @ident),
@@ -176,6 +194,17 @@ MappedSymbol(box (Option<Located<String>>, PatternArgs)): Pattern {
     };
     ( Some(Located::new(ident.to_string(), @ident)), Pattern )
 }
+| ident equal error {
+    let $ident = ident else {
+        unreachable!( "Token-Ident" );
+    };
+    data.error_recovered.push( RecoveredError {
+        message: "Expected pattern after symbol binding".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        location: @error,
+    });
+    ( Some(Located::new(ident.to_string(), @ident)), PatternArgs::Ident(Default::default()) )
+}
 ;
 
 TerminalSetItem(TerminalSetItem): ident {
@@ -258,6 +287,19 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
         close_location: @rbracket,
     }
 }
+| lbracket caret? error rbracket {
+    data.error_recovered.push( RecoveredError {
+        message: "Expected terminal set item".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#patterns".to_string(),
+        location: @error,
+    });
+    TerminalSet {
+        negate: caret.is_some(),
+        items: vec![],
+        open_location: @lbracket,
+        close_location: @rbracket,
+    }
+}
 | dot {
     let span = @dot;
     TerminalSet {
@@ -271,6 +313,8 @@ TerminalSet(TerminalSet): lbracket caret? TerminalSetItem* rbracket {
 
 %left minus;
 %left star plus question exclamation;
+%precedence empty_action;
+%precedence error;
 
 Pattern(PatternArgs): ident {
     let $ident = ident else {
@@ -452,7 +496,15 @@ Action(Option<Group>): bracegroup {
     };
     Some(bracegroup)
 }
-| { None }
+| error {
+    data.error_recovered.push( RecoveredError {
+        message: "Expected reduce action block or rule terminator".to_string(),
+        link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#reduceaction-optional".to_string(),
+        location: @error,
+    });
+    None
+}
+| %prec empty_action { None }
 ;
 
 IdentOrLiteral(IdentOrLiteral): ident {
@@ -682,6 +734,13 @@ Directive
             unreachable!( "AllowDef-Ident" );
         };
         data.allowed_diagnostics.push((Located::new(ident.to_string(), @ident), Some(AllowTarget)));
+    }
+    | percent allow ident lparen error rparen semicolon {
+        data.error_recovered.push( RecoveredError {
+            message: "Expected diagnostic suppression target".to_string(),
+            link: "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#diagnostic-suppression".to_string(),
+            location: @error,
+        });
     }
     | percent allow error semicolon {
         data.error_recovered.push( RecoveredError {

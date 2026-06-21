@@ -10,6 +10,7 @@ Prefer RustyLR when the parser needs:
 - Operator precedence and associativity.
 - Location-aware diagnostics.
 - Panic-mode error recovery.
+- Precedence declarations for recovery conflicts involving the reserved `error` terminal.
 - Ambiguous grammar support through GLR.
 - Parser-state diagnostics for conflict debugging.
 
