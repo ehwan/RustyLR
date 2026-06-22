@@ -3,10 +3,10 @@ use lsp_types::{
     notification::{
         DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument, PublishDiagnostics,
     },
-    request::{Completion, GotoDefinition},
-    CompletionOptions, Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Location, OneOf,
-    PublishDiagnosticsParams, Range, ServerCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, Url,
+    request::{Completion, GotoDefinition, HoverRequest},
+    CompletionOptions, Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Hover,
+    HoverProviderCapability, Location, OneOf, PublishDiagnosticsParams, Range, ServerCapabilities,
+    TextDocumentSyncCapability, TextDocumentSyncKind, Url,
 };
 use std::collections::HashMap;
 use std::error::Error;
@@ -19,6 +19,7 @@ use lsp_types::request::Request as LspRequest;
 mod completion;
 mod diagnostics;
 mod goto_definition;
+mod hover;
 mod position;
 
 fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -31,6 +32,7 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let server_capabilities = serde_json::to_value(&ServerCapabilities {
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         definition_provider: Some(OneOf::Left(true)),
+        hover_provider: Some(HoverProviderCapability::Simple(true)),
         completion_provider: Some(CompletionOptions {
             trigger_characters: Some(completion_trigger_characters()),
             ..Default::default()
@@ -106,6 +108,29 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                         }
                     } else {
                         Response::new_ok(id, lsp_types::CompletionResponse::Array(Vec::new()))
+                    };
+                    connection.sender.send(Message::Response(response))?;
+                } else if req.method == HoverRequest::METHOD {
+                    let (id, params) = match cast_request::<HoverRequest>(req) {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!("Error extracting hover request: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let uri = params.text_document_position_params.text_document.uri;
+                    let position = params.text_document_position_params.position;
+                    let response = if let Some(content) = documents.get(&uri) {
+                        match catch_lsp_panic(|| hover::hover(content, position)) {
+                            Ok(hover) => Response::new_ok(id, hover),
+                            Err(message) => {
+                                eprintln!("RustyLR hover panicked: {message}");
+                                Response::new_ok(id, Option::<Hover>::None)
+                            }
+                        }
+                    } else {
+                        Response::new_ok(id, Option::<Hover>::None)
                     };
                     connection.sender.send(Message::Response(response))?;
                 }

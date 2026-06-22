@@ -11,7 +11,7 @@ use std::str::FromStr;
 use crate::diagnostics::split_stream;
 use crate::position::{offset_to_position, position_to_offset};
 
-const DIRECTIVES: &[&str] = &[
+pub(crate) const DIRECTIVES: &[&str] = &[
     "%token",
     "%start",
     "%tokentype",
@@ -31,7 +31,7 @@ const DIRECTIVES: &[&str] = &[
     "%moduleprefix",
 ];
 
-const SUBSTITUTION_VARIABLES: &[&str] = &[
+pub(crate) const SUBSTITUTION_VARIABLES: &[&str] = &[
     "$tokentype",
     "$location",
     "$userdata",
@@ -39,7 +39,7 @@ const SUBSTITUTION_VARIABLES: &[&str] = &[
     "$errortype",
 ];
 
-const ALLOW_DIAGNOSTICS: &[&str] = &[
+pub(crate) const ALLOW_DIAGNOSTICS: &[&str] = &[
     "nonterm_unreachable",
     "nonterm_unproductive",
     "unused_nonterm_data",
@@ -53,7 +53,7 @@ const ALLOW_DIAGNOSTICS: &[&str] = &[
     "reduce_reduce_conflict_glr",
 ];
 
-const KEYWORDS: &[&str] = &[
+pub(crate) const KEYWORDS: &[&str] = &[
     "error",
     "auto",
     "dense",
@@ -64,7 +64,7 @@ const KEYWORDS: &[&str] = &[
     "shift",
 ];
 
-const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
+pub(crate) const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum CompletionMode {
@@ -210,7 +210,7 @@ fn add_symbol_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
     }
 }
 
-fn parse_args(content: &str) -> Result<GrammarArgs, ()> {
+pub(crate) fn parse_args(content: &str) -> Result<GrammarArgs, ()> {
     let token_stream = TokenStream::from_str(content).map_err(|_| ())?;
     let (_, macro_stream) = split_stream(token_stream).map_err(|_| ())?;
     Grammar::parse_args(macro_stream).map_err(|_| ())
@@ -257,7 +257,7 @@ fn replacement_range(content: &str, offset: usize, mode: CompletionMode) -> Rang
     )
 }
 
-fn current_prefix_start(content: &str, offset: usize, include_sigils: bool) -> usize {
+pub(crate) fn current_prefix_start(content: &str, offset: usize, include_sigils: bool) -> usize {
     let mut start = offset.min(content.len());
     while start > 0 {
         let Some(ch) = content[..start].chars().next_back() else {
@@ -281,7 +281,7 @@ fn line_prefix(content: &str, offset: usize) -> &str {
     &content[line_start..offset]
 }
 
-fn is_ident_continue(ch: char) -> bool {
+pub(crate) fn is_ident_continue(ch: char) -> bool {
     ch == '_' || ch.is_ascii_alphanumeric()
 }
 
@@ -402,7 +402,11 @@ fn resolved_rust_type(ty: Option<&TokenStream>, boxed: bool) -> ResolvedRustType
     ResolvedRustType { name, boxed }
 }
 
-fn line_text_for_location(args: &GrammarArgs, content: &str, location: &Location) -> String {
+pub(crate) fn line_text_for_location(
+    args: &GrammarArgs,
+    content: &str,
+    location: &Location,
+) -> String {
     let offset = args
         .span_manager
         .get_byterange(location)
@@ -416,7 +420,7 @@ fn line_text_for_location(args: &GrammarArgs, content: &str, location: &Location
     content[start..end].trim().to_string()
 }
 
-fn rule_definition_text(
+pub(crate) fn rule_definition_text(
     args: &GrammarArgs,
     content: &str,
     rule: &rusty_lr_parser::RuleDefArgs,
@@ -467,15 +471,8 @@ fn rule_line_tokens_text(
 ) -> String {
     line.tokens
         .iter()
-        .map(|(mapped_name, pattern)| {
-            let start = mapped_name
-                .as_ref()
-                .and_then(|name| {
-                    args.span_manager
-                        .get_byterange(&name.location())
-                        .map(|range| range.start)
-                })
-                .unwrap_or_else(|| pattern_start(args, pattern));
+        .map(|(_, pattern)| {
+            let start = pattern_start(args, pattern);
             let end = pattern_end(args, pattern);
             content[start.min(content.len())..end.min(content.len())]
                 .trim()
@@ -732,7 +729,7 @@ fn type_line(rust_type: Option<&ResolvedRustType>) -> String {
     }
 }
 
-fn keyword_documentation(label: &str) -> Option<String> {
+pub(crate) fn keyword_documentation(label: &str) -> Option<String> {
     let documentation = match label {
         "%token" => format!(
             "Defines a terminal symbol and the Rust pattern that recognizes it.\n\nExample:\n\n```rustylr\n%token num Token::Num(_);\n```\n\n[Token definition]({SYNTAX_URL}#token-definition-must-defined)"
@@ -805,7 +802,7 @@ fn keyword_documentation(label: &str) -> Option<String> {
     Some(documentation)
 }
 
-fn substitution_documentation(label: &str) -> Option<String> {
+pub(crate) fn substitution_documentation(label: &str) -> Option<String> {
     let documentation = match label {
         "$tokentype" => "`$tokentype` substitutes to the type defined by `%tokentype`.",
         "$location" => "`$location` substitutes to the type defined by `%location`.",
@@ -819,19 +816,19 @@ fn substitution_documentation(label: &str) -> Option<String> {
     ))
 }
 
-fn location_documentation(label: &str) -> Option<String> {
+pub(crate) fn location_documentation(label: &str) -> Option<String> {
     Some(format!(
         "`{label}` refers to a source-location value in the current reduce action.\n\nExamples:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ println!(\"{{:?}}\", @left); }};\nExpr : Expr plus Term {{ println!(\"{{:?}}\", @1); }};\nExpr : Term {{ println!(\"{{:?}}\", @$); }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
     ))
 }
 
-fn allow_diagnostic_documentation(name: &str) -> Option<String> {
+pub(crate) fn allow_diagnostic_documentation(name: &str) -> Option<String> {
     Some(format!(
         "Diagnostic suppression name `{name}`.\n\nExample:\n\n```rustylr\n%allow {name};\n%allow {name}(SomeTarget);\n```\n\n[Diagnostic suppression]({SYNTAX_URL}#diagnostic-suppression)"
     ))
 }
 
-fn markdown_documentation(value: String) -> Documentation {
+pub(crate) fn markdown_documentation(value: String) -> Documentation {
     Documentation::MarkupContent(MarkupContent {
         kind: MarkupKind::Markdown,
         value,
@@ -997,8 +994,9 @@ Boxed(box $tokentype) : num { num };
         let markup = markdown_value(nonterminal);
         assert!(markup.contains("Rust type: `i32`"));
         assert!(markup.contains("E(i32)"));
-        assert!(markup.contains("E(i32)\n : left=E plus num"));
-        assert!(markup.contains("left=E plus num"));
+        assert!(markup.contains("E(i32)\n : E plus num"));
+        assert!(markup.contains("E plus num"));
+        assert!(!markup.contains("left=E"));
         assert!(markup.contains("\n | num"));
         assert!(!markup.contains("{ $ }"));
         assert!(!markup.contains("{ num }"));
