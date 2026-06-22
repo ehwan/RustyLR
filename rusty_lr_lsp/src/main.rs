@@ -4,11 +4,13 @@ use lsp_types::{
         DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument, PublishDiagnostics,
     },
     request::GotoDefinition,
-    GotoDefinitionResponse, InitializeParams, Location, OneOf, PublishDiagnosticsParams,
-    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Url,
+    Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Location, OneOf,
+    PublishDiagnosticsParams, Range, ServerCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, Url,
 };
 use std::collections::HashMap;
 use std::error::Error;
+use std::panic::{catch_unwind, set_hook, take_hook, AssertUnwindSafe};
 
 // Import the traits providing `METHOD` constant:
 use lsp_types::notification::Notification as LspNotification;
@@ -31,8 +33,7 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         ..Default::default()
     })?;
 
-    let initialization_params = connection.initialize(server_capabilities)?;
-    let _params: InitializeParams = serde_json::from_value(initialization_params)?;
+    connection.initialize(server_capabilities)?;
 
     eprintln!("RustyLR LSP server initialized successfully.");
 
@@ -61,9 +62,18 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
                     let mut response = Response::new_ok(id.clone(), serde_json::Value::Null);
                     if let Some(content) = documents.get(&uri) {
-                        if let Some(range) = goto_definition::find_definition(content, position) {
-                            let loc = Location::new(uri.clone(), range);
-                            response = Response::new_ok(id, GotoDefinitionResponse::Scalar(loc));
+                        match catch_lsp_panic(|| {
+                            goto_definition::find_definition(content, position)
+                        }) {
+                            Ok(Some(range)) => {
+                                let loc = Location::new(uri.clone(), range);
+                                response =
+                                    Response::new_ok(id, GotoDefinitionResponse::Scalar(loc));
+                            }
+                            Ok(None) => {}
+                            Err(message) => {
+                                eprintln!("RustyLR goto-definition panicked: {message}");
+                            }
                         }
                     }
                     connection.sender.send(Message::Response(response))?;
@@ -121,7 +131,20 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 }
 
 fn publish_diagnostics(connection: &Connection, uri: Url, content: &str) {
-    let diags = diagnostics::compile_and_get_diagnostics(content);
+    let diags = match catch_lsp_panic(|| diagnostics::compile_and_get_diagnostics(content)) {
+        Ok(diags) => diags,
+        Err(message) => vec![Diagnostic {
+            range: Range::default(),
+            severity: Some(DiagnosticSeverity::ERROR),
+            code: None,
+            code_description: None,
+            source: Some("rusty_lr".to_string()),
+            message: format!("RustyLR compiler panicked: {message}"),
+            related_information: None,
+            tags: None,
+            data: None,
+        }],
+    };
     let params = PublishDiagnosticsParams {
         uri,
         diagnostics: diags,
@@ -129,6 +152,24 @@ fn publish_diagnostics(connection: &Connection, uri: Url, content: &str) {
     };
     let notification = Notification::new(PublishDiagnostics::METHOD.to_string(), params);
     let _ = connection.sender.send(Message::Notification(notification));
+}
+
+fn catch_lsp_panic<T>(f: impl FnOnce() -> T) -> Result<T, String> {
+    let hook = take_hook();
+    set_hook(Box::new(|_| {}));
+    let result = catch_unwind(AssertUnwindSafe(f)).map_err(panic_message);
+    set_hook(hook);
+    result
+}
+
+fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
+    if let Some(message) = payload.downcast_ref::<&str>() {
+        (*message).to_string()
+    } else if let Some(message) = payload.downcast_ref::<String>() {
+        message.clone()
+    } else {
+        "unknown panic payload".to_string()
+    }
 }
 
 fn cast_request<R>(

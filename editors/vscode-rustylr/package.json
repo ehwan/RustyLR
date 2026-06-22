@@ -1,0 +1,97 @@
+{
+  "name": "rustylr-vscode",
+  "displayName": "RustyLR",
+  "description": "Temporary VSCode extension client for the RustyLR language server.",
+  "version": "0.0.1",
+  "publisher": "rustylr",
+  "license": "MIT OR Apache-2.0",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:rustylr",
+    "workspaceContains:**/grammar.rs",
+    "workspaceContains:**/src/parser.rs",
+    "onCommand:rustylr.restartServer"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "rustylr.restartServer",
+        "title": "RustyLR: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "RustyLR",
+      "properties": {
+        "rustylr.server.command": {
+          "type": "string",
+          "default": "",
+          "description": "Command used to start the RustyLR LSP server. Empty means auto-detect target/debug/rusty_lr_lsp and fall back to cargo run."
+        },
+        "rustylr.server.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Arguments passed to rustylr.server.command."
+        },
+        "rustylr.server.cwd": {
+          "type": "string",
+          "default": "",
+          "description": "Working directory for the RustyLR LSP server. Empty means the extension will use the RustyLR workspace root when it can find one."
+        },
+        "rustylr.server.documentPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/grammar.rs",
+            "**/src/parser.rs",
+            "**/*.rustylr.rs",
+            "**/*.rustylr",
+            "**/*.lr"
+          ],
+          "description": "Additional file globs handled by the RustyLR LSP server."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "rustylr",
+        "aliases": [
+          "RustyLR",
+          "rustylr"
+        ],
+        "extensions": [
+          ".rustylr",
+          ".lr"
+        ],
+        "filenamePatterns": [
+          "grammar.rs",
+          "*.rustylr.rs"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rustylr",
+        "scopeName": "source.rustylr",
+        "path": "./syntaxes/rustylr.tmLanguage.json"
+      }
+    ]
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "1.84.0"
+  }
+}

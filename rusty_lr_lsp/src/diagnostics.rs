@@ -156,6 +156,11 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
         }
     };
 
+    if grammar.optimize {
+        grammar.optimize(25);
+    }
+    grammar.builder = grammar.create_builder();
+
     // 7. Verify Shift/Reduce and Reduce/Reduce conflicts in non-GLR mode
     let diags_collector = grammar.build_grammar();
     if !grammar.glr {

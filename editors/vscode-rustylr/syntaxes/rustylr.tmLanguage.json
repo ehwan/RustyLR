@@ -1,0 +1,80 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "RustyLR",
+  "scopeName": "source.rustylr",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#directives"
+    },
+    {
+      "include": "#punctuation"
+    },
+    {
+      "include": "#strings"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.rustylr",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.rustylr",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "name": "keyword.control.directive.rustylr",
+          "match": "%(?:allow|eof|error|errortype|fallback|glr|lalr|layout|left|location|nonassoc|prec|right|start|token|tokentype)\\b"
+        },
+        {
+          "name": "keyword.operator.section.rustylr",
+          "match": "%%"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.production.rustylr",
+          "match": "[:;|]"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.rustylr",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.rustylr",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.rustylr",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.rustylr",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
