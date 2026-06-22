@@ -389,9 +389,17 @@ fn pattern_keyword_documentation(pattern: &PatternArgs) -> Option<String> {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct HoverRustType {
+pub(crate) struct HoverRustType {
     name: String,
     boxed: bool,
+}
+
+pub(crate) fn pattern_final_type(
+    args: &GrammarArgs,
+    grammar: &Grammar,
+    pattern: &PatternArgs,
+) -> String {
+    hover_type_name(pattern_type(args, grammar, pattern).as_ref())
 }
 
 fn hover_type_line(ty: Option<&HoverRustType>) -> String {
@@ -402,7 +410,15 @@ fn hover_type_line(ty: Option<&HoverRustType>) -> String {
     }
 }
 
-fn pattern_type(
+fn hover_type_name(ty: Option<&HoverRustType>) -> String {
+    match ty {
+        Some(ty) if ty.boxed => format!("{} (boxed)", ty.name),
+        Some(ty) => ty.name.clone(),
+        None => "()".to_string(),
+    }
+}
+
+pub(crate) fn pattern_type(
     args: &GrammarArgs,
     grammar: &Grammar,
     pattern: &PatternArgs,

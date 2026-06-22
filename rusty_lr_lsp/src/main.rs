@@ -3,10 +3,11 @@ use lsp_types::{
     notification::{
         DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument, PublishDiagnostics,
     },
-    request::{Completion, GotoDefinition, HoverRequest},
+    request::{Completion, GotoDefinition, HoverRequest, InlayHintRequest},
     CompletionOptions, Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Hover,
-    HoverProviderCapability, Location, OneOf, PublishDiagnosticsParams, Range, ServerCapabilities,
-    TextDocumentSyncCapability, TextDocumentSyncKind, Url,
+    HoverProviderCapability, InlayHint, InlayHintOptions, InlayHintServerCapabilities, Location,
+    OneOf, PublishDiagnosticsParams, Range, ServerCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, Url,
 };
 use std::collections::HashMap;
 use std::error::Error;
@@ -20,6 +21,7 @@ mod completion;
 mod diagnostics;
 mod goto_definition;
 mod hover;
+mod inlay_hint;
 mod position;
 
 fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -33,6 +35,12 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         definition_provider: Some(OneOf::Left(true)),
         hover_provider: Some(HoverProviderCapability::Simple(true)),
+        inlay_hint_provider: Some(OneOf::Right(InlayHintServerCapabilities::Options(
+            InlayHintOptions {
+                resolve_provider: Some(false),
+                ..Default::default()
+            },
+        ))),
         completion_provider: Some(CompletionOptions {
             trigger_characters: Some(completion_trigger_characters()),
             ..Default::default()
@@ -131,6 +139,29 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                         }
                     } else {
                         Response::new_ok(id, Option::<Hover>::None)
+                    };
+                    connection.sender.send(Message::Response(response))?;
+                } else if req.method == InlayHintRequest::METHOD {
+                    let (id, params) = match cast_request::<InlayHintRequest>(req) {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!("Error extracting inlay hint request: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let uri = params.text_document.uri;
+                    let range = params.range;
+                    let response = if let Some(content) = documents.get(&uri) {
+                        match catch_lsp_panic(|| inlay_hint::inlay_hints(content, range)) {
+                            Ok(hints) => Response::new_ok(id, Some(hints)),
+                            Err(message) => {
+                                eprintln!("RustyLR inlay hint panicked: {message}");
+                                Response::new_ok(id, Option::<Vec<InlayHint>>::None)
+                            }
+                        }
+                    } else {
+                        Response::new_ok(id, Option::<Vec<InlayHint>>::None)
                     };
                     connection.sender.send(Message::Response(response))?;
                 }

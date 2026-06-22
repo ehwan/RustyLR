@@ -16,6 +16,7 @@ Other Rust files are intentionally not matched by default.
 - **Diagnostics:** Parses open RustyLR grammar files and publishes grammar errors, recovered parser errors, warnings, and conflict diagnostics.
 - **Go to Definition:** Resolves terminal and non-terminal references to their `%token` declarations or production definitions.
 - **Hover:** Shows directive and keyword documentation. Hovering over grammar patterns also shows the pattern syntax, explanation, and final Rust type.
+- **Inlay Hints:** Shows `Pattern: Type` hints for top-level patterns in non-terminal definitions.
 - **Completion for symbols:** Suggests declared terminal names and non-terminal names in grammar positions. Completion details include the resolved Rust type for terminals and non-terminals, including inferred placeholders and a note when the value is boxed for parser storage.
 - **Completion for directives and keywords:** Suggests directives such as `%token`, `%start`, `%tokentype`, `%left`, `%right`, `%precedence`, `%prec`, `%dprec`, `%glr`, `%lalr`, `%nooptim`, `%allow`, and common identifiers such as `error`, `$sep`, `data`, `lookahead`, and `shift`.
 - **Completion for `$...` variables:** Suggests built-in substitutions (`$tokentype`, `$location`, `$userdata`, `$error`, `$errortype`), terminal and non-terminal substitutions (`$terminal_name`, `$NonTerminalName`), current reduce-action bindings (`$left`, `$value`, etc.), and positional semantic variables (`$1`, `$2`, ...).
