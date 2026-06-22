@@ -3,11 +3,11 @@ use lsp_types::{
     notification::{
         DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument, PublishDiagnostics,
     },
-    request::{Completion, GotoDefinition, HoverRequest, InlayHintRequest},
-    CompletionOptions, Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Hover,
-    HoverProviderCapability, InlayHint, InlayHintOptions, InlayHintServerCapabilities, Location,
-    OneOf, PublishDiagnosticsParams, Range, ServerCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, Url,
+    request::{CodeActionRequest, Completion, GotoDefinition, HoverRequest, InlayHintRequest},
+    CodeActionKind, CodeActionOptions, CompletionOptions, Diagnostic, DiagnosticSeverity,
+    GotoDefinitionResponse, Hover, HoverProviderCapability, InlayHint, InlayHintOptions,
+    InlayHintServerCapabilities, Location, OneOf, PublishDiagnosticsParams, Range,
+    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Url,
 };
 use std::collections::HashMap;
 use std::error::Error;
@@ -17,6 +17,7 @@ use std::panic::{catch_unwind, set_hook, take_hook, AssertUnwindSafe};
 use lsp_types::notification::Notification as LspNotification;
 use lsp_types::request::Request as LspRequest;
 
+mod code_action;
 mod completion;
 mod diagnostics;
 mod goto_definition;
@@ -34,6 +35,13 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let server_capabilities = serde_json::to_value(&ServerCapabilities {
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         definition_provider: Some(OneOf::Left(true)),
+        code_action_provider: Some(lsp_types::CodeActionProviderCapability::Options(
+            CodeActionOptions {
+                code_action_kinds: Some(vec![CodeActionKind::QUICKFIX]),
+                resolve_provider: Some(false),
+                ..Default::default()
+            },
+        )),
         hover_provider: Some(HoverProviderCapability::Simple(true)),
         inlay_hint_provider: Some(OneOf::Right(InlayHintServerCapabilities::Options(
             InlayHintOptions {
@@ -162,6 +170,30 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                         }
                     } else {
                         Response::new_ok(id, Option::<Vec<InlayHint>>::None)
+                    };
+                    connection.sender.send(Message::Response(response))?;
+                } else if req.method == CodeActionRequest::METHOD {
+                    let (id, params) = match cast_request::<CodeActionRequest>(req) {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!("Error extracting code action request: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let uri = params.text_document.uri;
+                    let response = if let Some(content) = documents.get(&uri) {
+                        match catch_lsp_panic(|| {
+                            code_action::code_actions(content, uri, params.context.diagnostics)
+                        }) {
+                            Ok(actions) => Response::new_ok(id, Some(actions)),
+                            Err(message) => {
+                                eprintln!("RustyLR code action panicked: {message}");
+                                Response::new_ok(id, Option::<lsp_types::CodeActionResponse>::None)
+                            }
+                        }
+                    } else {
+                        Response::new_ok(id, Option::<lsp_types::CodeActionResponse>::None)
                     };
                     connection.sender.send(Message::Response(response))?;
                 }

@@ -1,6 +1,7 @@
 use lsp_types::{Diagnostic, DiagnosticSeverity, Range};
 use proc_macro2::{Spacing, TokenStream, TokenTree};
 use rusty_lr_parser::grammar::Grammar;
+use serde_json::json;
 use std::str::FromStr;
 
 use crate::position::range_to_lsp_range;
@@ -260,7 +261,7 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
                 message: msg,
                 related_information: None,
                 tags: None,
-                data: None,
+                data: Some(json!({ "rustylr_allow": warning.suggestion(&grammar) })),
             });
         } else {
             for loc in locs {
@@ -274,7 +275,7 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
                     message: msg.clone(),
                     related_information: None,
                     tags: None,
-                    data: None,
+                    data: Some(json!({ "rustylr_allow": warning.suggestion(&grammar) })),
                 });
             }
         }
