@@ -5,6 +5,7 @@ use lsp_types::{
     },
     request::{
         CodeActionRequest, Completion, Formatting, GotoDefinition, HoverRequest, InlayHintRequest,
+        SemanticTokensFullRequest,
     },
     CodeActionKind, CodeActionOptions, CompletionOptions, Diagnostic, DiagnosticSeverity,
     GotoDefinitionResponse, Hover, HoverProviderCapability, InlayHint, InlayHintOptions,
@@ -27,6 +28,7 @@ mod goto_definition;
 mod hover;
 mod inlay_hint;
 mod position;
+mod semantic_tokens;
 
 fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     eprintln!("Starting RustyLR LSP server...");
@@ -57,6 +59,28 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             trigger_characters: Some(completion_trigger_characters()),
             ..Default::default()
         }),
+        semantic_tokens_provider: Some(
+            lsp_types::SemanticTokensServerCapabilities::SemanticTokensOptions(
+                lsp_types::SemanticTokensOptions {
+                    work_done_progress_options: lsp_types::WorkDoneProgressOptions {
+                        work_done_progress: Some(false),
+                    },
+                    legend: lsp_types::SemanticTokensLegend {
+                        token_types: vec![
+                            lsp_types::SemanticTokenType::ENUM_MEMBER, // terminal
+                            lsp_types::SemanticTokenType::TYPE,        // non-terminal
+                            lsp_types::SemanticTokenType::KEYWORD,     // directive
+                            lsp_types::SemanticTokenType::PARAMETER,   // binding
+                            lsp_types::SemanticTokenType::VARIABLE,    // $var
+                            lsp_types::SemanticTokenType::PROPERTY,    // @loc
+                        ],
+                        token_modifiers: vec![],
+                    },
+                    range: Some(false),
+                    full: Some(lsp_types::SemanticTokensFullOptions::Bool(true)),
+                },
+            ),
+        ),
         ..Default::default()
     })?;
 
@@ -66,6 +90,7 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     // Store open document contents
     let mut documents: HashMap<Url, String> = HashMap::new();
+    let mut semantic_tokens_enabled = true;
 
     // Main event loop
     for msg in &connection.receiver {
@@ -222,6 +247,42 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                         Response::new_ok(id, Option::<Vec<lsp_types::TextEdit>>::None)
                     };
                     connection.sender.send(Message::Response(response))?;
+                } else if req.method == SemanticTokensFullRequest::METHOD {
+                    let (id, params) = match cast_request::<SemanticTokensFullRequest>(req) {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!("Error extracting semantic tokens request: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let uri = params.text_document.uri;
+                    let response = if semantic_tokens_enabled {
+                        if let Some(content) = documents.get(&uri) {
+                            match catch_lsp_panic(|| semantic_tokens::semantic_tokens(content)) {
+                                Ok(Some(tokens)) => Response::new_ok(
+                                    id,
+                                    Some(lsp_types::SemanticTokensResult::Tokens(tokens)),
+                                ),
+                                Ok(None) => Response::new_ok(
+                                    id,
+                                    Option::<lsp_types::SemanticTokensResult>::None,
+                                ),
+                                Err(message) => {
+                                    eprintln!("RustyLR semantic tokens panicked: {message}");
+                                    Response::new_ok(
+                                        id,
+                                        Option::<lsp_types::SemanticTokensResult>::None,
+                                    )
+                                }
+                            }
+                        } else {
+                            Response::new_ok(id, Option::<lsp_types::SemanticTokensResult>::None)
+                        }
+                    } else {
+                        Response::new_ok(id, Option::<lsp_types::SemanticTokensResult>::None)
+                    };
+                    connection.sender.send(Message::Response(response))?;
                 }
             }
             Message::Response(_resp) => {}
@@ -264,6 +325,40 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                     let uri = params.text_document.uri;
                     if let Some(text) = documents.get(&uri) {
                         publish_diagnostics(&connection, uri, text);
+                    }
+                } else if not.method == lsp_types::notification::DidChangeConfiguration::METHOD {
+                    let params = match cast_notification::<
+                        lsp_types::notification::DidChangeConfiguration,
+                    >(not)
+                    {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!(
+                                "Error extracting didChangeConfiguration notification: {:?}",
+                                e
+                            );
+                            continue;
+                        }
+                    };
+                    let mut enabled = None;
+                    if let Some(rustylr) = params.settings.get("rustylr") {
+                        if let Some(sem_toks) = rustylr.get("semanticTokens") {
+                            if let Some(val) = sem_toks.get("enabled").and_then(|v| v.as_bool()) {
+                                enabled = Some(val);
+                            }
+                        }
+                    }
+                    if enabled.is_none() {
+                        if let Some(val) = params
+                            .settings
+                            .get("rustylr.semanticTokens.enabled")
+                            .and_then(|v| v.as_bool())
+                        {
+                            enabled = Some(val);
+                        }
+                    }
+                    if let Some(val) = enabled {
+                        semantic_tokens_enabled = val;
                     }
                 }
             }

@@ -56,6 +56,11 @@
             "**/rustylr.rs"
           ],
           "description": "Additional file globs handled by the RustyLR LSP server."
+        },
+        "rustylr.semanticTokens.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable semantic token highlighting for RustyLR grammar files."
         }
       }
     },
@@ -89,7 +94,8 @@
           "comments": false,
           "strings": false
         },
-        "editor.suggestOnTriggerCharacters": true
+        "editor.suggestOnTriggerCharacters": true,
+        "editor.semanticHighlighting.enabled": true
       }
     }
   },
