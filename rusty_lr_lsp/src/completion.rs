@@ -1,11 +1,11 @@
 use lsp_types::{
-    CompletionItem, CompletionItemKind, CompletionResponse, CompletionTextEdit, Position, Range,
-    TextEdit,
+    CompletionItem, CompletionItemKind, CompletionResponse, CompletionTextEdit, Documentation,
+    MarkupContent, MarkupKind, Position, Range, TextEdit,
 };
 use proc_macro2::{TokenStream, TokenTree};
 use rusty_lr_parser::grammar::Grammar;
-use rusty_lr_parser::{GrammarArgs, PatternArgs};
-use std::collections::BTreeSet;
+use rusty_lr_parser::{GrammarArgs, Location, PatternArgs};
+use std::collections::{BTreeMap, BTreeSet};
 use std::str::FromStr;
 
 use crate::diagnostics::split_stream;
@@ -64,6 +64,8 @@ const KEYWORDS: &[&str] = &[
     "shift",
 ];
 
+const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum CompletionMode {
     Directive,
@@ -81,7 +83,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     let parsed = parse_args(content).ok();
     let names = parsed
         .as_ref()
-        .map(CompletionNames::from_args)
+        .map(|args| CompletionNames::from_args(args, content))
         .unwrap_or_else(|| CompletionNames::from_text(content));
     let line_variables = parsed
         .as_ref()
@@ -93,52 +95,105 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     match mode {
         CompletionMode::Directive => {
             for directive in DIRECTIVES {
-                builder.keyword(directive, "RustyLR directive");
+                builder.keyword(
+                    directive,
+                    "RustyLR directive",
+                    keyword_documentation(directive),
+                );
             }
         }
         CompletionMode::Dollar => {
             for variable in SUBSTITUTION_VARIABLES {
-                builder.variable(variable, "built-in RustCode substitution");
+                builder.variable(
+                    variable,
+                    "built-in RustCode substitution",
+                    substitution_documentation(variable),
+                );
             }
-            for name in &names.nonterminals {
-                builder.variable(&format!("${name}"), "non-terminal production type");
+            for (name, documentation) in &names.nonterminals {
+                builder.variable(
+                    &format!("${name}"),
+                    "non-terminal production type",
+                    Some(format!(
+                        "Substitutes to the production type of non-terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+                    )),
+                );
             }
-            for name in &names.terminals {
-                builder.variable(&format!("${name}"), "terminal definition substitution");
+            for (name, documentation) in &names.terminals {
+                builder.variable(
+                    &format!("${name}"),
+                    "terminal definition substitution",
+                    Some(format!(
+                        "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+                    )),
+                );
             }
             for variable in &line_variables.value_names {
-                builder.variable(&format!("${variable}"), "current production binding");
+                builder.variable(
+                    &format!("${variable}"),
+                    "current production binding",
+                    Some(format!(
+                        "Semantic value bound by the current production line.\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\nHere `$left` and `$right` can be used in RustCode substitution contexts.\n\n[Named variables]({SYNTAX_URL}#named-variables)"
+                    )),
+                );
             }
             for index in 1..=line_variables.value_count {
-                builder.variable(&format!("${index}"), "positional semantic value");
+                builder.variable(
+                    &format!("${index}"),
+                    "positional semantic value",
+                    Some(format!(
+                        "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
+                    )),
+                );
             }
         }
         CompletionMode::Location => {
-            builder.variable("@$", "current production location");
-            builder.variable("@0", "current production location");
+            builder.variable(
+                "@$",
+                "current production location",
+                location_documentation("@$"),
+            );
+            builder.variable(
+                "@0",
+                "current production location",
+                location_documentation("@0"),
+            );
             for variable in &line_variables.value_names {
                 builder.variable(
                     &format!("@{variable}"),
                     "current production binding location",
+                    location_documentation(&format!("@{variable}")),
                 );
             }
             for index in 1..=line_variables.value_count {
-                builder.variable(&format!("@{index}"), "positional location");
+                builder.variable(
+                    &format!("@{index}"),
+                    "positional location",
+                    location_documentation(&format!("@{index}")),
+                );
             }
         }
         CompletionMode::AllowDiagnostic => {
             for diagnostic in ALLOW_DIAGNOSTICS {
-                builder.keyword(diagnostic, "diagnostic suppression name");
+                builder.keyword(
+                    diagnostic,
+                    "diagnostic suppression name",
+                    allow_diagnostic_documentation(diagnostic),
+                );
             }
             add_symbol_items(&mut builder, &names);
         }
         CompletionMode::Symbol => {
             add_symbol_items(&mut builder, &names);
             for keyword in KEYWORDS {
-                builder.keyword(keyword, "RustyLR keyword");
+                builder.keyword(keyword, "RustyLR keyword", keyword_documentation(keyword));
             }
             for directive in DIRECTIVES {
-                builder.keyword(directive, "RustyLR directive");
+                builder.keyword(
+                    directive,
+                    "RustyLR directive",
+                    keyword_documentation(directive),
+                );
             }
         }
     }
@@ -147,11 +202,11 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
 }
 
 fn add_symbol_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
-    for name in &names.nonterminals {
-        builder.nonterminal(name);
+    for (name, documentation) in &names.nonterminals {
+        builder.nonterminal(name, documentation.clone());
     }
-    for name in &names.terminals {
-        builder.terminal(name);
+    for (name, documentation) in &names.terminals {
+        builder.terminal(name, documentation.clone());
     }
 }
 
@@ -232,18 +287,36 @@ fn is_ident_continue(ch: char) -> bool {
 
 #[derive(Default)]
 struct CompletionNames {
-    terminals: BTreeSet<String>,
-    nonterminals: BTreeSet<String>,
+    terminals: BTreeMap<String, String>,
+    nonterminals: BTreeMap<String, String>,
 }
 
 impl CompletionNames {
-    fn from_args(args: &GrammarArgs) -> Self {
+    fn from_args(args: &GrammarArgs, content: &str) -> Self {
         let mut names = CompletionNames::default();
+        let types = ResolvedTypes::from_args(args);
         for (terminal, _) in &args.terminals {
-            names.terminals.insert(terminal.value().clone());
+            let line = line_text_for_location(args, content, &terminal.location());
+            names.terminals.insert(
+                terminal.value().clone(),
+                terminal_documentation(terminal.value(), &line, types.token_type.as_ref()),
+            );
         }
         for rule in &args.rules {
-            names.nonterminals.insert(rule.name.value().clone());
+            let snippet = rule_definition_text(args, content, rule);
+            let documentation = nonterminal_documentation(
+                rule.name.value(),
+                &snippet,
+                types.nonterminals.get(rule.name.value()),
+            );
+            names
+                .nonterminals
+                .entry(rule.name.value().clone())
+                .and_modify(|existing| {
+                    existing.push_str("\n\n---\n\n");
+                    existing.push_str(&documentation);
+                })
+                .or_insert(documentation);
         }
         names
     }
@@ -258,7 +331,9 @@ impl CompletionNames {
             let line = raw_line.trim_start();
             if let Some(rest) = line.strip_prefix("%token") {
                 if let Some(name) = first_ident(rest) {
-                    names.terminals.insert(name.to_string());
+                    names
+                        .terminals
+                        .insert(name.to_string(), terminal_documentation(name, line, None));
                 }
                 continue;
             }
@@ -270,13 +345,110 @@ impl CompletionNames {
             if let Some(colon_idx) = line.find(':') {
                 let head = &line[..colon_idx];
                 if let Some(name) = first_ident(head) {
-                    names.nonterminals.insert(name.to_string());
+                    names.nonterminals.insert(
+                        name.to_string(),
+                        nonterminal_documentation(name, line.trim(), None),
+                    );
                 }
             }
         }
 
         names
     }
+}
+
+#[derive(Default)]
+struct ResolvedTypes {
+    token_type: Option<ResolvedRustType>,
+    nonterminals: BTreeMap<String, ResolvedRustType>,
+}
+
+struct ResolvedRustType {
+    name: String,
+    boxed: bool,
+}
+
+impl ResolvedTypes {
+    fn from_args(args: &GrammarArgs) -> Self {
+        let Ok(grammar) = Grammar::from_grammar_args(args.clone()) else {
+            return ResolvedTypes::default();
+        };
+
+        let mut types = ResolvedTypes {
+            token_type: Some(resolved_rust_type(
+                Some(grammar.token_type()),
+                grammar.token_type_boxed(),
+            )),
+            nonterminals: BTreeMap::new(),
+        };
+        for rule in &args.rules {
+            if let Some((rule_type, boxed)) = grammar.nonterminal_type(rule.name.value()) {
+                types.nonterminals.insert(
+                    rule.name.value().clone(),
+                    resolved_rust_type(rule_type, boxed),
+                );
+            }
+        }
+
+        types
+    }
+}
+
+fn resolved_rust_type(ty: Option<&TokenStream>, boxed: bool) -> ResolvedRustType {
+    let name = ty
+        .map(TokenStream::to_string)
+        .filter(|ty| !ty.is_empty())
+        .unwrap_or_else(|| "()".to_string());
+    ResolvedRustType { name, boxed }
+}
+
+fn line_text_for_location(args: &GrammarArgs, content: &str, location: &Location) -> String {
+    let offset = args
+        .span_manager
+        .get_byterange(location)
+        .map_or(0, |range| range.start);
+    let start = content[..offset.min(content.len())]
+        .rfind('\n')
+        .map_or(0, |idx| idx + 1);
+    let end = content[offset.min(content.len())..]
+        .find('\n')
+        .map_or(content.len(), |idx| offset + idx);
+    content[start..end].trim().to_string()
+}
+
+fn rule_definition_text(
+    args: &GrammarArgs,
+    content: &str,
+    rule: &rusty_lr_parser::RuleDefArgs,
+) -> String {
+    let rule_start = args
+        .span_manager
+        .get_byterange(&rule.name.location())
+        .map_or(0, |range| range.start);
+    let start = content[..rule_start.min(content.len())]
+        .rfind('\n')
+        .map_or(0, |idx| idx + 1);
+    let first_separator = rule.rule_lines.first().and_then(|line| {
+        args.span_manager
+            .get_byterange(&line.separator_location)
+            .map(|range| range.start)
+    });
+    let header_end = first_separator.unwrap_or(rule_start).min(content.len());
+    let header = content[start..header_end].trim();
+    let mut definition = String::new();
+    definition.push_str(header);
+    for (line_idx, line) in rule.rule_lines.iter().enumerate() {
+        let tokens = rule_line_tokens_text(args, content, line);
+        definition.push('\n');
+        definition.push(' ');
+        definition.push(if line_idx == 0 { ':' } else { '|' });
+        if !tokens.is_empty() {
+            definition.push(' ');
+            definition.push_str(&tokens);
+        }
+    }
+    definition.push_str("\n ;");
+    definition
 }
 
 fn first_ident(text: &str) -> Option<&str> {
@@ -286,6 +458,31 @@ fn first_ident(text: &str) -> Option<&str> {
         .find(|ch: char| !(ch == '_' || ch.is_ascii_alphanumeric()))
         .unwrap_or(rest.len());
     Some(&rest[..end])
+}
+
+fn rule_line_tokens_text(
+    args: &GrammarArgs,
+    content: &str,
+    line: &rusty_lr_parser::RuleLineArgs,
+) -> String {
+    line.tokens
+        .iter()
+        .map(|(mapped_name, pattern)| {
+            let start = mapped_name
+                .as_ref()
+                .and_then(|name| {
+                    args.span_manager
+                        .get_byterange(&name.location())
+                        .map(|range| range.start)
+                })
+                .unwrap_or_else(|| pattern_start(args, pattern));
+            let end = pattern_end(args, pattern);
+            content[start.min(content.len())..end.min(content.len())]
+                .trim()
+                .to_string()
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 #[derive(Default)]
@@ -416,6 +613,48 @@ fn pattern_end(args: &GrammarArgs, pattern: &PatternArgs) -> usize {
     }
 }
 
+fn pattern_start(args: &GrammarArgs, pattern: &PatternArgs) -> usize {
+    match pattern {
+        PatternArgs::Ident(ident) => args
+            .span_manager
+            .get_byterange(&ident.location())
+            .map_or(0, |range| range.start),
+        PatternArgs::Plus { base, .. }
+        | PatternArgs::Star { base, .. }
+        | PatternArgs::Question { base, .. }
+        | PatternArgs::Exclamation { base, .. } => pattern_start(args, base),
+        PatternArgs::TerminalSet(set) => args
+            .span_manager
+            .get_byterange(&set.location())
+            .map_or(0, |range| range.start),
+        PatternArgs::Group { open_location, .. } => args
+            .span_manager
+            .get_byterange(open_location)
+            .map_or(0, |range| range.start),
+        PatternArgs::Byte(lit) => args
+            .span_manager
+            .get_byterange(&lit.location())
+            .map_or(0, |range| range.start),
+        PatternArgs::ByteString(lit) => args
+            .span_manager
+            .get_byterange(&lit.location())
+            .map_or(0, |range| range.start),
+        PatternArgs::Char(lit) => args
+            .span_manager
+            .get_byterange(&lit.location())
+            .map_or(0, |range| range.start),
+        PatternArgs::String(lit) => args
+            .span_manager
+            .get_byterange(&lit.location())
+            .map_or(0, |range| range.start),
+        PatternArgs::Minus { base, .. } => pattern_start(args, base),
+        PatternArgs::Sep { location, .. } => args
+            .span_manager
+            .get_byterange(location)
+            .map_or(0, |range| range.start),
+    }
+}
+
 fn token_stream_end(stream: &TokenStream) -> usize {
     stream
         .clone()
@@ -463,6 +702,142 @@ fn collect_default_bindings(pattern: &PatternArgs, names: &mut BTreeSet<String>)
     }
 }
 
+fn terminal_documentation(
+    name: &str,
+    definition: &str,
+    rust_type: Option<&ResolvedRustType>,
+) -> String {
+    let type_line = type_line(rust_type);
+    format!(
+        "Terminal symbol `{name}`.\n\n{type_line}\n\nDefinition:\n\n```rustylr\n{definition}\n```\n\n[Token definition]({SYNTAX_URL}#token-definition-must-defined)"
+    )
+}
+
+fn nonterminal_documentation(
+    name: &str,
+    definition: &str,
+    rust_type: Option<&ResolvedRustType>,
+) -> String {
+    let type_line = type_line(rust_type);
+    format!(
+        "Non-terminal symbol `{name}`.\n\n{type_line}\n\nDefinition:\n\n```rustylr\n{definition}\n```\n\n[Production rules]({SYNTAX_URL}#production-rules)"
+    )
+}
+
+fn type_line(rust_type: Option<&ResolvedRustType>) -> String {
+    match rust_type {
+        Some(rust_type) if rust_type.boxed => format!("Rust type: `{}` (boxed)", rust_type.name),
+        Some(rust_type) => format!("Rust type: `{}`", rust_type.name),
+        None => "Rust type: unavailable until the grammar parses successfully.".to_string(),
+    }
+}
+
+fn keyword_documentation(label: &str) -> Option<String> {
+    let documentation = match label {
+        "%token" => format!(
+            "Defines a terminal symbol and the Rust pattern that recognizes it.\n\nExample:\n\n```rustylr\n%token num Token::Num(_);\n```\n\n[Token definition]({SYNTAX_URL}#token-definition-must-defined)"
+        ),
+        "%start" => format!(
+            "Declares a start non-terminal for parser generation.\n\nExample:\n\n```rustylr\n%start Expr;\n```\n\n[Start symbol]({SYNTAX_URL}#start-symbol-must-defined)"
+        ),
+        "%tokentype" => format!(
+            "Sets the Rust type used as the parser's input terminal token type.\n\nExample:\n\n```rustylr\n%tokentype Token;\n```\n\n[Token type]({SYNTAX_URL}#token-type-must-defined)"
+        ),
+        "%userdata" => format!(
+            "Sets the mutable user-data type threaded through parser contexts and reduce actions.\n\nExample:\n\n```rustylr\n%userdata ParserState;\n```\n\n[Userdata type]({SYNTAX_URL}#userdata-type-optional)"
+        ),
+        "%error" | "%errortype" => format!(
+            "Sets the custom error type returned by reduce actions.\n\nExample:\n\n```rustylr\n%error String;\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
+        ),
+        "%location" => format!(
+            "Sets the source-location type used by `@...` location bindings.\n\nExample:\n\n```rustylr\n%location Span;\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+        ),
+        "%left" => format!(
+            "Declares left-associative operator precedence for one or more terminals.\n\nExample:\n\n```rustylr\n%left plus minus;\n```\n\n[Operator precedence]({SYNTAX_URL}#operator-precedence)"
+        ),
+        "%right" => format!(
+            "Declares right-associative operator precedence for one or more terminals.\n\nExample:\n\n```rustylr\n%right caret;\n```\n\n[Operator precedence]({SYNTAX_URL}#operator-precedence)"
+        ),
+        "%precedence" => format!(
+            "Declares precedence without associativity.\n\nExample:\n\n```rustylr\n%precedence unary_minus;\n```\n\n[Operator precedence]({SYNTAX_URL}#operator-precedence)"
+        ),
+        "%prec" => format!(
+            "Overrides the precedence of a specific production line.\n\nExample:\n\n```rustylr\nExpr : minus Expr %prec unary_minus {{ Expr }};\n```\n\n[Explicit precedence]({SYNTAX_URL}#explicit-precedence-prec)"
+        ),
+        "%dprec" => format!(
+            "Assigns a dynamic precedence priority to a production, mainly for GLR reduce/reduce control.\n\nExample:\n\n```rustylr\nExpr : Expr star Expr %dprec 2 {{ ... }};\n```\n\n[Rule priority]({SYNTAX_URL}#rule-priority)"
+        ),
+        "%glr" => format!(
+            "Enables Generalized LR parser generation for ambiguous grammars.\n\nExample:\n\n```rustylr\n%glr;\n```\n\n[GLR parser generation]({SYNTAX_URL}#glr-parser-generation)"
+        ),
+        "%lalr" => format!(
+            "Generates LALR(1) parsing tables instead of the default LR construction.\n\nExample:\n\n```rustylr\n%lalr;\n```\n\n[LALR parser generation]({SYNTAX_URL}#lalr-parser-generation)"
+        ),
+        "%nooptim" => format!(
+            "Disables parser table optimization.\n\nExample:\n\n```rustylr\n%nooptim;\n```\n\n[No optimization]({SYNTAX_URL}#no-optimization)"
+        ),
+        "%allow" => format!(
+            "Suppresses a RustyLR diagnostic globally or for a specific target.\n\nExample:\n\n```rustylr\n%allow unused_terminals(plus);\n```\n\n[Diagnostic suppression]({SYNTAX_URL}#diagnostic-suppression)"
+        ),
+        "%moduleprefix" => {
+            "Internal directive used by RustyLR's own generated parser code. Most grammars should not use this directly.".to_string()
+        }
+        "error" => format!(
+            "Reserved terminal used for panic-mode error recovery.\n\nExample:\n\n```rustylr\nBlock : lbrace error rbrace {{ recover() }};\n```\n\n[Panic-mode error recovery]({SYNTAX_URL}#panic-mode-error-recovery)"
+        ),
+        "$sep" => format!(
+            "Pattern helper for separated repetition.\n\nExample:\n\n```rustylr\nList : $sep(Item, comma, +) {{ Item }};\n```\n\n[Patterns]({SYNTAX_URL}#patterns)"
+        ),
+        "data" => format!(
+            "Mutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({SYNTAX_URL}#4-user-data-data)"
+        ),
+        "lookahead" => format!(
+            "GLR reduce-action control binding for inspecting the next terminal.\n\nExample:\n\n```rustylr\nif let Some(term) = lookahead.to_term() {{ /* ... */ }}\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+        ),
+        "shift" => format!(
+            "GLR reduce-action control binding used to allow or prune a shift branch.\n\nExample:\n\n```rustylr\n*shift = false;\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+        ),
+        "auto" => "Table layout mode selected automatically by RustyLR.".to_string(),
+        "dense" => "Dense table layout mode.".to_string(),
+        "sparse" => "Sparse table layout mode.".to_string(),
+        _ => return None,
+    };
+    Some(documentation)
+}
+
+fn substitution_documentation(label: &str) -> Option<String> {
+    let documentation = match label {
+        "$tokentype" => "`$tokentype` substitutes to the type defined by `%tokentype`.",
+        "$location" => "`$location` substitutes to the type defined by `%location`.",
+        "$userdata" => "`$userdata` substitutes to the type defined by `%userdata`.",
+        "$error" => "`$error` substitutes to the configured reduce-action error type.",
+        "$errortype" => "`$errortype` is an alias for the configured reduce-action error type.",
+        _ => return None,
+    };
+    Some(format!(
+        "{documentation}\n\nExample:\n\n```rustylr\nRule($tokentype) : token {{ $tokentype }};\n```\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+    ))
+}
+
+fn location_documentation(label: &str) -> Option<String> {
+    Some(format!(
+        "`{label}` refers to a source-location value in the current reduce action.\n\nExamples:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ println!(\"{{:?}}\", @left); }};\nExpr : Expr plus Term {{ println!(\"{{:?}}\", @1); }};\nExpr : Term {{ println!(\"{{:?}}\", @$); }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+    ))
+}
+
+fn allow_diagnostic_documentation(name: &str) -> Option<String> {
+    Some(format!(
+        "Diagnostic suppression name `{name}`.\n\nExample:\n\n```rustylr\n%allow {name};\n%allow {name}(SomeTarget);\n```\n\n[Diagnostic suppression]({SYNTAX_URL}#diagnostic-suppression)"
+    ))
+}
+
+fn markdown_documentation(value: String) -> Documentation {
+    Documentation::MarkupContent(MarkupContent {
+        kind: MarkupKind::Markdown,
+        value,
+    })
+}
+
 struct CompletionBuilder {
     range: Range,
     seen: BTreeSet<String>,
@@ -478,23 +853,39 @@ impl CompletionBuilder {
         }
     }
 
-    fn terminal(&mut self, label: &str) {
-        self.push(label, CompletionItemKind::ENUM_MEMBER, "terminal symbol");
+    fn terminal(&mut self, label: &str, documentation: String) {
+        self.push(
+            label,
+            CompletionItemKind::ENUM_MEMBER,
+            "terminal symbol",
+            Some(documentation),
+        );
     }
 
-    fn nonterminal(&mut self, label: &str) {
-        self.push(label, CompletionItemKind::CLASS, "non-terminal symbol");
+    fn nonterminal(&mut self, label: &str, documentation: String) {
+        self.push(
+            label,
+            CompletionItemKind::CLASS,
+            "non-terminal symbol",
+            Some(documentation),
+        );
     }
 
-    fn keyword(&mut self, label: &str, detail: &str) {
-        self.push(label, CompletionItemKind::KEYWORD, detail);
+    fn keyword(&mut self, label: &str, detail: &str, documentation: Option<String>) {
+        self.push(label, CompletionItemKind::KEYWORD, detail, documentation);
     }
 
-    fn variable(&mut self, label: &str, detail: &str) {
-        self.push(label, CompletionItemKind::VARIABLE, detail);
+    fn variable(&mut self, label: &str, detail: &str, documentation: Option<String>) {
+        self.push(label, CompletionItemKind::VARIABLE, detail, documentation);
     }
 
-    fn push(&mut self, label: &str, kind: CompletionItemKind, detail: &str) {
+    fn push(
+        &mut self,
+        label: &str,
+        kind: CompletionItemKind,
+        detail: &str,
+        documentation: Option<String>,
+    ) {
         if !self.seen.insert(label.to_string()) {
             return;
         }
@@ -507,6 +898,7 @@ impl CompletionBuilder {
                 range: self.range,
                 new_text: label.to_string(),
             })),
+            documentation: documentation.map(markdown_documentation),
             ..Default::default()
         });
     }
@@ -538,6 +930,8 @@ pub enum Token {
 E(i32) : left=E plus num { $ }
        | num { num }
        ;
+
+Boxed(box $tokentype) : num { num };
 "#;
 
     fn labels(response: CompletionResponse) -> BTreeSet<String> {
@@ -547,6 +941,13 @@ E(i32) : left=E plus num { $ }
                 .map(|item| item.label)
                 .collect::<BTreeSet<_>>(),
             _ => BTreeSet::new(),
+        }
+    }
+
+    fn items(response: CompletionResponse) -> Vec<CompletionItem> {
+        match response {
+            CompletionResponse::Array(items) => items,
+            _ => Vec::new(),
         }
     }
 
@@ -580,5 +981,40 @@ E(i32) : left=E plus num { $ }
         let labels = labels(completions(content, Position::new(1, 1)));
         assert!(labels.contains("%token"));
         assert!(labels.contains("%start"));
+    }
+
+    #[test]
+    fn completion_items_include_markdown_documentation() {
+        let pos = offset_to_position(MOCK_GRAMMAR, MOCK_GRAMMAR.find("plus num").unwrap());
+        let items = items(completions(MOCK_GRAMMAR, pos));
+
+        let terminal = items.iter().find(|item| item.label == "plus").unwrap();
+        let markup = markdown_value(terminal);
+        assert!(markup.contains("Rust type: `Token`"));
+        assert!(markup.contains("%token plus Token::Plus;"));
+
+        let nonterminal = items.iter().find(|item| item.label == "E").unwrap();
+        let markup = markdown_value(nonterminal);
+        assert!(markup.contains("Rust type: `i32`"));
+        assert!(markup.contains("E(i32)"));
+        assert!(markup.contains("E(i32)\n : left=E plus num"));
+        assert!(markup.contains("left=E plus num"));
+        assert!(markup.contains("\n | num"));
+        assert!(!markup.contains("{ $ }"));
+        assert!(!markup.contains("{ num }"));
+
+        let boxed = items.iter().find(|item| item.label == "Boxed").unwrap();
+        let markup = markdown_value(boxed);
+        assert!(markup.contains("Rust type: `Token` (boxed)"));
+        assert!(markup.contains("Boxed(box $tokentype)"));
+        assert!(!markup.contains("{ num }"));
+    }
+
+    fn markdown_value(item: &CompletionItem) -> &str {
+        let documentation = item.documentation.as_ref().unwrap();
+        let Documentation::MarkupContent(markup) = documentation else {
+            panic!("expected markdown documentation");
+        };
+        &markup.value
     }
 }
