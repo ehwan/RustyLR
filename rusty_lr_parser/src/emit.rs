@@ -193,21 +193,17 @@ impl Grammar {
                                 Self::with_default_userdata()
                             }
                         }
-                        #[cfg(feature = "tree")]
                         impl std::fmt::Display for #ctx_name
                         where
-                            #token_typename: std::fmt::Display + Clone,
-                            #nonterm_typename: std::fmt::Display + Clone,
+                            #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>: std::fmt::Display,
                         {
                             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                                 std::fmt::Display::fmt(&self.inner, f)
                             }
                         }
-                        #[cfg(feature = "tree")]
                         impl std::fmt::Debug for #ctx_name
                         where
-                            #token_typename: std::fmt::Debug + Clone,
-                            #nonterm_typename: std::fmt::Debug + Clone,
+                            #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>: std::fmt::Debug,
                         {
                             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                                 std::fmt::Debug::fmt(&self.inner, f)
@@ -306,21 +302,17 @@ impl Grammar {
                                 Self::with_default_userdata()
                             }
                         }
-                        #[cfg(feature = "tree")]
                         impl std::fmt::Display for #ctx_name
                         where
-                            #token_typename: std::fmt::Display + Clone,
-                            #nonterm_typename: std::fmt::Display + Clone + #module_prefix::parser::nonterminal::NonTerminal,
+                            #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>: std::fmt::Display,
                         {
                             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                                 std::fmt::Display::fmt(&self.inner, f)
                             }
                         }
-                        #[cfg(feature = "tree")]
                         impl std::fmt::Debug for #ctx_name
                         where
-                            #token_typename: std::fmt::Debug + Clone,
-                            #nonterm_typename: std::fmt::Debug + Clone + #module_prefix::parser::nonterminal::NonTerminal,
+                            #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>: std::fmt::Debug,
                         {
                             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                                 std::fmt::Debug::fmt(&self.inner, f)
