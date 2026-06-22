@@ -74,6 +74,7 @@ pub struct Grammar {
 
     /// %start
     pub(crate) start_rule_name: Located<String>,
+    pub(crate) start_rule_names: Vec<Located<String>>,
 
     pub terminals: Vec<TerminalInfo>,
     /// ident -> index map for terminals
@@ -177,6 +178,7 @@ impl Grammar {
         scopes: &[Option<ResolvedAllowTarget>],
     ) -> bool {
         match term {
+            TerminalSymbol::VirtualStart(_) => return true,
             TerminalSymbol::Error => {
                 for opt_target in scopes {
                     match opt_target {
@@ -491,14 +493,6 @@ impl Grammar {
         // %start
         if grammar_args.start_rule_name.is_empty() {
             return Err(ArgError::StartNotDefined);
-        } else if grammar_args.start_rule_name.len() > 1 {
-            return Err(ArgError::MultipleStartDefinition(
-                grammar_args
-                    .start_rule_name
-                    .iter()
-                    .map(|start| start.location())
-                    .collect(),
-            ));
         }
 
         // %prec and %dprec in each production rules
@@ -1097,7 +1091,8 @@ impl Grammar {
             userdata_typename: grammar_args.userdata_typename.into_iter().next().unwrap().1,
 
             error_typename,
-            start_rule_name: grammar_args.start_rule_name.into_iter().next().unwrap(),
+            start_rule_name: grammar_args.start_rule_name.first().unwrap().clone(),
+            start_rule_names: grammar_args.start_rule_name.clone(),
 
             terminals: Default::default(),
             terminals_index: Default::default(),
@@ -1406,8 +1401,8 @@ impl Grammar {
                                         return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                                     }
                                 }
-                                TerminalSymbol::Eof => {
-                                    unreachable!("eof token cannot be used in %prec, nor cannot be used in production rules")
+                                TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
+                                    unreachable!("eof/virtual start token cannot be used in %prec, nor cannot be used in production rules")
                                 }
                             }
                         } else {
@@ -1443,8 +1438,8 @@ impl Grammar {
                                         break;
                                     }
                                 }
-                                TerminalSymbol::Eof => {
-                                    unreachable!("eof token cannot be used in %prec, nor cannot be used in production rules, this case must be filtered out in parsing stage")
+                                TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
+                                    unreachable!("eof/virtual start token cannot be used in %prec, nor cannot be used in production rules, this case must be filtered out in parsing stage")
                                 }
                             }
                         }
@@ -1886,57 +1881,100 @@ impl Grammar {
             }
         }
 
-        // check start rule is valid
-        if !grammar
-            .nonterminals_index
-            .contains_key(grammar.start_rule_name.value())
-        {
-            return Err(ParseError::StartNonTerminalNotDefined(
-                grammar.start_rule_name.location(),
-            ));
+        // check start rules are valid
+        for start_rule_name in &grammar.start_rule_names {
+            if !grammar
+                .nonterminals_index
+                .contains_key(start_rule_name.value())
+            {
+                return Err(ParseError::StartNonTerminalNotDefined(
+                    start_rule_name.location(),
+                ));
+            }
         }
 
         // insert augmented rule
         {
             let augmented_name =
                 Located::new(utils::AUGMENTED_NAME.to_string(), Location::CallSite);
-            let start_idx = grammar
-                .nonterminals_index
-                .get(grammar.start_rule_name.value())
-                .unwrap();
-            let augmented_rule = Rule {
-                tokens: vec![
-                    MappedSymbol {
-                        symbol: Symbol::NonTerminal(*start_idx),
-                        mapto: None,
-                        location: Location::CallSite,
-                        reduce_action_chains: Vec::new(),
-                    },
-                    MappedSymbol {
-                        symbol: Symbol::Terminal(TerminalSymbol::Eof),
-                        mapto: None,
-                        location: Location::CallSite,
-                        reduce_action_chains: Vec::new(),
-                    },
-                ],
-                reduce_action: None,
-                separator_location: Location::CallSite,
-                prec: None,
-                dprec: None,
-                is_used: true,
-            };
+            let mut augmented_rules = Vec::new();
+
+            if grammar.start_rule_names.len() > 1 {
+                for (i, start_rule_name) in grammar.start_rule_names.iter().enumerate() {
+                    let start_idx = grammar
+                        .nonterminals_index
+                        .get(start_rule_name.value())
+                        .unwrap();
+                    let rule = Rule {
+                        tokens: vec![
+                            MappedSymbol {
+                                symbol: Symbol::Terminal(TerminalSymbol::VirtualStart(i as u32)),
+                                mapto: None,
+                                location: Location::CallSite,
+                                reduce_action_chains: Vec::new(),
+                            },
+                            MappedSymbol {
+                                symbol: Symbol::NonTerminal(*start_idx),
+                                mapto: None,
+                                location: Location::CallSite,
+                                reduce_action_chains: Vec::new(),
+                            },
+                            MappedSymbol {
+                                symbol: Symbol::Terminal(TerminalSymbol::Eof),
+                                mapto: None,
+                                location: Location::CallSite,
+                                reduce_action_chains: Vec::new(),
+                            },
+                        ],
+                        reduce_action: None,
+                        separator_location: Location::CallSite,
+                        prec: None,
+                        dprec: None,
+                        is_used: true,
+                    };
+                    augmented_rules.push(rule);
+                    grammar.nonterminals[*start_idx].protected = true;
+                }
+            } else {
+                let start_idx = grammar
+                    .nonterminals_index
+                    .get(grammar.start_rule_name.value())
+                    .unwrap();
+                let augmented_rule = Rule {
+                    tokens: vec![
+                        MappedSymbol {
+                            symbol: Symbol::NonTerminal(*start_idx),
+                            mapto: None,
+                            location: Location::CallSite,
+                            reduce_action_chains: Vec::new(),
+                        },
+                        MappedSymbol {
+                            symbol: Symbol::Terminal(TerminalSymbol::Eof),
+                            mapto: None,
+                            location: Location::CallSite,
+                            reduce_action_chains: Vec::new(),
+                        },
+                    ],
+                    reduce_action: None,
+                    separator_location: Location::CallSite,
+                    prec: None,
+                    dprec: None,
+                    is_used: true,
+                };
+                augmented_rules.push(augmented_rule);
+                grammar.nonterminals[*start_idx].protected = true;
+            }
+
             let nonterminal_info = NonTerminalInfo {
                 name: augmented_name.clone(),
                 pretty_name: utils::AUGMENTED_NAME.to_string(),
                 ruletype: None,
                 ruletype_boxed: false,
                 root_location: None,
-                rules: vec![augmented_rule],
+                rules: augmented_rules,
                 protected: true,
                 nonterm_type: Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Augmented),
             };
-            // start rule is protected
-            grammar.nonterminals[*start_idx].protected = true;
 
             let augmented_idx = grammar.nonterminals.len();
             grammar.nonterminals.push(nonterminal_info);
@@ -2226,14 +2264,16 @@ impl Grammar {
             self.other_used = other_was_used;
         }
 
-        // Reachability analysis from the start symbol
+        // Reachability analysis from the start symbols
         let mut nonterm_used = vec![false; self.nonterminals.len()];
         let mut queue = Vec::new();
 
-        let start_idx_opt = self.nonterminals_index.get(self.start_rule_name.value());
-        if let Some(&start_idx) = start_idx_opt {
-            nonterm_used[start_idx] = true;
-            queue.push(start_idx);
+        for start_rule_name in &self.start_rule_names {
+            let start_idx_opt = self.nonterminals_index.get(start_rule_name.value());
+            if let Some(&start_idx) = start_idx_opt {
+                nonterm_used[start_idx] = true;
+                queue.push(start_idx);
+            }
         }
 
         // Also queue protected non-terminals
@@ -2490,16 +2530,17 @@ impl Grammar {
         // check if RuleType and ReduceAction can be removed from certain non-terminals
         let mut add_to_diags = BTreeSet::new();
         loop {
-            let start_rule_idx = *self
-                .nonterminals_index
-                .get(self.start_rule_name.value())
-                .unwrap();
+            let start_rule_indices: std::collections::HashSet<usize> = self
+                .start_rule_names
+                .iter()
+                .map(|name| *self.nonterminals_index.get(name.value()).unwrap())
+                .collect();
             let mut changed = false;
             let mut can_removes = Vec::new();
 
             for (i, nonterm) in self.nonterminals.iter().enumerate() {
-                if i == start_rule_idx {
-                    // do not remove ruletype from start rule
+                if start_rule_indices.contains(&i) {
+                    // do not remove ruletype from start rules
                     continue;
                 }
 
@@ -2739,6 +2780,7 @@ impl Grammar {
         match class {
             TerminalSymbol::Error => return "error".to_string(),
             TerminalSymbol::Eof => return "eof".to_string(),
+            TerminalSymbol::VirtualStart(i) => return format!("VirtualStart({})", i),
             TerminalSymbol::Terminal(class_idx) => {
                 let class = &self.terminal_classes[class_idx];
                 let len: usize = class
@@ -3061,6 +3103,9 @@ impl Grammar {
                         TerminalSymbol::Terminal(t) => t,
                         TerminalSymbol::Error => self.terminal_classes.len(),
                         TerminalSymbol::Eof => self.terminal_classes.len() + 1,
+                        TerminalSymbol::VirtualStart(i) => {
+                            self.terminal_classes.len() + 2 + i as usize
+                        }
                     }
                 };
 
@@ -4321,5 +4366,28 @@ mod tests {
             has_range,
             "Expected range 'b'-'d' to be registered and split in terminals"
         );
+    }
+
+    #[test]
+    fn test_multiple_start_symbols() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %start Stmt;
+
+            Expr : 'a';
+            Stmt : 'b';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        assert_eq!(grammar_args.start_rule_name.len(), 2);
+        assert_eq!(grammar_args.start_rule_name[0].value(), "Expr");
+        assert_eq!(grammar_args.start_rule_name[1].value(), "Stmt");
+
+        let grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
+        assert_eq!(grammar.start_rule_names.len(), 2);
+        assert_eq!(grammar.start_rule_names[0].value(), "Expr");
+        assert_eq!(grammar.start_rule_names[1].value(), "Stmt");
     }
 }

@@ -289,6 +289,11 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
             _ => JsonTerminalClasses::TermClass2,
         }
     }
+    fn from_virtual_start(branch_idx: u32) -> Self {
+        match branch_idx {
+            _ => panic!("Invalid virtual start branch index: {}", branch_idx),
+        }
+    }
 }
 impl std::fmt::Display for JsonTerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -490,10 +495,14 @@ pub enum JsonData {
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub struct JsonDataStack {
     pub __stack: Vec<JsonData>,
+    pub branch_idx: u32,
 }
 impl Default for JsonDataStack {
     fn default() -> Self {
-        Self { __stack: Vec::new() }
+        Self {
+            __stack: Vec::new(),
+            branch_idx: 0,
+        }
     }
 }
 #[rustfmt::skip]
@@ -1493,6 +1502,9 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     fn push_empty(&mut self) {
         self.__stack.push(JsonData::Empty);
     }
+    fn set_branch_idx(&mut self, branch_idx: u32) {
+        self.branch_idx = branch_idx;
+    }
     fn clear(&mut self) {
         self.__stack.clear();
     }
@@ -1502,6 +1514,7 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
     fn split_off(&mut self, at: usize) -> Self {
         Self {
             __stack: self.__stack.split_off(at),
+            branch_idx: self.branch_idx,
         }
     }
     fn truncate(&mut self, at: usize) {

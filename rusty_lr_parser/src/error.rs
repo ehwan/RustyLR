@@ -616,6 +616,7 @@ impl Info {
                     TerminalSymbol::Terminal(t) => grammar.class_pretty_name_abbr(*t),
                     TerminalSymbol::Error => "error".to_string(),
                     TerminalSymbol::Eof => "$".to_string(),
+                    TerminalSymbol::VirtualStart(i) => format!("start_branch_{}", i),
                 };
                 format!("%allow {}({});", self.name(), term_name)
             }
@@ -625,6 +626,7 @@ impl Info {
                         TerminalSymbol::Terminal(t) => grammar.class_pretty_name_abbr(*t),
                         TerminalSymbol::Error => "error".to_string(),
                         TerminalSymbol::Eof => "$".to_string(),
+                        TerminalSymbol::VirtualStart(i) => format!("start_branch_{}", i),
                     };
                     return format!("%allow {}({});", self.name(), term_name);
                 }

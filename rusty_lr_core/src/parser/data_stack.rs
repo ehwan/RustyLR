@@ -23,6 +23,7 @@ pub trait DataStack: Sized + Default {
     fn pop(&mut self);
     fn push_terminal(&mut self, term: Self::Term);
     fn push_empty(&mut self);
+    fn set_branch_idx(&mut self, _branch_idx: u32) {}
 
     fn clear(&mut self);
     fn reserve(&mut self, additional: usize);

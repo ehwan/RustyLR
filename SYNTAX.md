@@ -336,6 +336,24 @@ Expr(i32) : '('! Expr ')'! ;
 
 Defines the entry point of the grammar. RustyLR automatically creates an augmented rule `Augmented -> NonTerminalName eof`.
 
+### Multiple Start Symbols
+
+You can define multiple start symbols by writing multiple `%start` directives:
+
+```
+%start Expr;
+%start Stmt;
+```
+
+When multiple start symbols are defined, RustyLR generates virtual start symbols internally to avoid conflicts in the initial state:
+\[
+\text{Augmented} \rightarrow \text{VirtualStart}(0) \text{ Expr eof} \mid \text{VirtualStart}(1) \text{ Stmt eof}
+\]
+
+Instead of a single `Context` type alias, RustyLR generates individual wrapper structs for each start symbol (e.g., `ExprContext` and `StmtContext`).
+- Initializing the context (via `ExprContext::new(...)` or `StmtContext::new(...)`) automatically pushes the branch's virtual start terminal to transition to the correct starting state.
+- Calling `accept()` on a context wrapper returns the exact type of that start symbol.
+
 ---
 
 ## Userdata Type (Optional)
