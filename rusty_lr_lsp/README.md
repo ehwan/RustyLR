@@ -15,6 +15,7 @@ Other Rust files are intentionally not matched by default.
 
 - **Diagnostics:** Parses open RustyLR grammar files and publishes grammar errors, recovered parser errors, warnings, and conflict diagnostics.
 - **Code Actions:** Offers quick fixes for suppressible diagnostics by inserting the appropriate `%allow ...;` directive.
+- **Formatting:** Normalizes `%token` declarations, one-space pattern separators, and indentation for production rules and reduce-action bodies.
 - **Go to Definition:** Resolves terminal and non-terminal references to their `%token` declarations or production definitions.
 - **Hover:** Shows directive and keyword documentation. Hovering over grammar patterns also shows the pattern syntax, explanation, and final Rust type.
 - **Inlay Hints:** Shows `Pattern: Type` hints for top-level patterns in non-terminal definitions.
