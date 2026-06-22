@@ -14,8 +14,8 @@
   "main": "./extension.js",
   "activationEvents": [
     "onLanguage:rustylr",
-    "workspaceContains:**/grammar.rs",
-    "workspaceContains:**/src/parser.rs",
+    "workspaceContains:**/*.rustylr",
+    "workspaceContains:**/rustylr.rs",
     "onCommand:rustylr.restartServer"
   ],
   "contributes": {
@@ -52,11 +52,8 @@
             "type": "string"
           },
           "default": [
-            "**/grammar.rs",
-            "**/src/parser.rs",
-            "**/*.rustylr.rs",
             "**/*.rustylr",
-            "**/*.lr"
+            "**/rustylr.rs"
           ],
           "description": "Additional file globs handled by the RustyLR LSP server."
         }
@@ -70,12 +67,10 @@
           "rustylr"
         ],
         "extensions": [
-          ".rustylr",
-          ".lr"
+          ".rustylr"
         ],
         "filenamePatterns": [
-          "grammar.rs",
-          "*.rustylr.rs"
+          "rustylr.rs"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -86,7 +81,17 @@
         "scopeName": "source.rustylr",
         "path": "./syntaxes/rustylr.tmLanguage.json"
       }
-    ]
+    ],
+    "configurationDefaults": {
+      "[rustylr]": {
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": false
+        },
+        "editor.suggestOnTriggerCharacters": true
+      }
+    }
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"

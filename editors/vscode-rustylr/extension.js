@@ -5,6 +5,7 @@ const { LanguageClient, TransportKind } = require("vscode-languageclient/node");
 
 let client;
 let outputChannel;
+let startingClient;
 
 async function activate(context) {
   outputChannel = vscode.window.createOutputChannel("RustyLR LSP");
@@ -22,11 +23,7 @@ async function activate(context) {
     })
   );
 
-  try {
-    await startClient(context);
-  } catch (error) {
-    reportStartError(error);
-  }
+  startClient(context).catch(reportStartError);
 }
 
 async function deactivate() {
@@ -34,6 +31,22 @@ async function deactivate() {
 }
 
 async function startClient(context) {
+  if (startingClient) {
+    return startingClient;
+  }
+  if (client) {
+    return;
+  }
+
+  startingClient = doStartClient(context);
+  try {
+    await startingClient;
+  } finally {
+    startingClient = undefined;
+  }
+}
+
+async function doStartClient(context) {
   const config = vscode.workspace.getConfiguration("rustylr.server");
   const workspaceFolder =
     vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0
@@ -56,11 +69,8 @@ async function startClient(context) {
   });
 
   const patterns = config.get("documentPatterns", [
-    "**/grammar.rs",
-    "**/src/parser.rs",
-    "**/*.rustylr.rs",
     "**/*.rustylr",
-    "**/*.lr",
+    "**/rustylr.rs",
   ]);
 
   const documentSelector = [
@@ -93,6 +103,14 @@ async function startClient(context) {
 }
 
 async function stopClient() {
+  if (startingClient) {
+    try {
+      await startingClient;
+    } catch (_error) {
+      // The start failure will already be reported by the original caller.
+    }
+  }
+
   if (!client) {
     return;
   }

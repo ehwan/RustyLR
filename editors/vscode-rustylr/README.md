@@ -4,10 +4,10 @@ Temporary VSCode extension client for the `rusty_lr_lsp` server in this reposito
 
 ## Run From This Repository
 
-1. Build or check the language server once:
+1. Build the language server once:
 
    ```bash
-   cargo check -p rusty_lr_lsp
+   cargo build -p rusty_lr_lsp
    ```
 
 2. Install the extension client dependencies:
@@ -25,7 +25,7 @@ Temporary VSCode extension client for the `rusty_lr_lsp` server in this reposito
 
 4. Press `F5` and choose `VS Code Extension Development` if prompted.
 
-5. In the Extension Development Host window, open the RustyLR repository folder and then open a grammar file such as `example/calculator/src/parser.rs`, or `src/grammar.rs` in a downstream project.
+5. In the Extension Development Host window, open the RustyLR repository folder and then open a grammar file such as `example/calculator/src/parser.rustylr`, or `src/rustylr.rs` in a downstream project.
 
 The extension starts the already-built server binary when it exists:
 
@@ -49,20 +49,13 @@ The extension searches upward for the RustyLR repository root and uses that as t
 
 The extension contributes a `rustylr` language mode for:
 
-- `grammar.rs`
-- `src/parser.rs`
-- `*.rustylr.rs`
 - `*.rustylr`
-- `*.lr`
+- `rustylr.rs`
 
 It also sends those file patterns to the LSP server even when the VSCode language mode is not manually changed.
 
-For a differently named grammar file, add it to:
+## Features
 
-```json
-{
-  "rustylr.server.documentPatterns": ["**/grammar.rs", "**/src/parser.rs", "**/my_parser_input.rs"]
-}
-```
+The extension is intentionally thin: VSCode starts `rusty_lr_lsp` over stdio and the server provides the language features.
 
-Then run `RustyLR: Restart Language Server` from the command palette.
+See [`rusty_lr_lsp/README.md`](../../rusty_lr_lsp/README.md) for the current diagnostics, go-to-definition, and completion feature details.

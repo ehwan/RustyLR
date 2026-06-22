@@ -3,8 +3,8 @@ use lsp_types::{
     notification::{
         DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument, PublishDiagnostics,
     },
-    request::GotoDefinition,
-    Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Location, OneOf,
+    request::{Completion, GotoDefinition},
+    CompletionOptions, Diagnostic, DiagnosticSeverity, GotoDefinitionResponse, Location, OneOf,
     PublishDiagnosticsParams, Range, ServerCapabilities, TextDocumentSyncCapability,
     TextDocumentSyncKind, Url,
 };
@@ -16,6 +16,7 @@ use std::panic::{catch_unwind, set_hook, take_hook, AssertUnwindSafe};
 use lsp_types::notification::Notification as LspNotification;
 use lsp_types::request::Request as LspRequest;
 
+mod completion;
 mod diagnostics;
 mod goto_definition;
 mod position;
@@ -30,6 +31,10 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let server_capabilities = serde_json::to_value(&ServerCapabilities {
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         definition_provider: Some(OneOf::Left(true)),
+        completion_provider: Some(CompletionOptions {
+            trigger_characters: Some(completion_trigger_characters()),
+            ..Default::default()
+        }),
         ..Default::default()
     })?;
 
@@ -76,6 +81,32 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                             }
                         }
                     }
+                    connection.sender.send(Message::Response(response))?;
+                } else if req.method == Completion::METHOD {
+                    let (id, params) = match cast_request::<Completion>(req) {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!("Error extracting completion request: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let uri = params.text_document_position.text_document.uri;
+                    let position = params.text_document_position.position;
+                    let response = if let Some(content) = documents.get(&uri) {
+                        match catch_lsp_panic(|| completion::completions(content, position)) {
+                            Ok(completions) => Response::new_ok(id, completions),
+                            Err(message) => {
+                                eprintln!("RustyLR completion panicked: {message}");
+                                Response::new_ok(
+                                    id,
+                                    lsp_types::CompletionResponse::Array(Vec::new()),
+                                )
+                            }
+                        }
+                    } else {
+                        Response::new_ok(id, lsp_types::CompletionResponse::Array(Vec::new()))
+                    };
                     connection.sender.send(Message::Response(response))?;
                 }
             }
@@ -128,6 +159,13 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     io_threads.join()?;
     eprintln!("RustyLR LSP server stopped.");
     Ok(())
+}
+
+fn completion_trigger_characters() -> Vec<String> {
+    "%@$_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        .chars()
+        .map(|ch| ch.to_string())
+        .collect()
 }
 
 fn publish_diagnostics(connection: &Connection, uri: Url, content: &str) {
