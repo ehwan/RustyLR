@@ -5,12 +5,12 @@
 //!
 //! ```ignore
 //! fn main() {
-//!     println!("cargo::rerun-if-changed=src/parser/parser.rs");
+//!     println!("cargo::rerun-if-changed=src/parser/parser.rustylr");
 //!
 //!     let output_dir = std::env::var("OUT_DIR").unwrap();
 //!     let output = format!("{}/parser.rs", output_dir);
 //!     Builder::new()
-//!        .file("src/parser/parser.rs")
+//!        .file("src/parser/parser.rustylr")
 //!        .build(&output);
 //! }
 //!

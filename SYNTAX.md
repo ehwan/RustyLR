@@ -39,7 +39,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 
 RustyLR grammars can be defined in two ways:
 1. **Procedural Macros:** Using the `lr1!` macro inline in your Rust code.
-2. **Build Scripts:** Using a standalone grammar file (e.g., `src/grammar.rs`) processed by the `rustylr` command-line tool. stand-alone files use the `%%` delimiter to separate Rust helper code (imports, custom enums) from the grammar definition. Everything preceding `%%` is copied as-is into the generated parser file.
+2. **Build Scripts:** Using a standalone grammar file (e.g., `src/grammar.rustylr`) processed by the `rustylr` command-line tool. stand-alone files use the `%%` delimiter to separate Rust helper code (imports, custom enums) from the grammar definition. Everything preceding `%%` is copied as-is into the generated parser file.
 
 ---
 

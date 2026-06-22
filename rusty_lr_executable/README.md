@@ -9,7 +9,7 @@ cargo install rustylr
 
 ## Usage
 ```bash
-$ rustylr my_grammar.rs my_parser.rs
+$ rustylr my_grammar.rustylr my_parser.rs
 ```
 
 The first argument is the grammar file. The optional second argument is the generated Rust output file; when omitted, RustyLR writes `out.tab.rs`.
@@ -84,7 +84,7 @@ The program searches for `%%` in the input file to separate Rust code from gramm
 
 Here's a simple example showing how to create a grammar file and generate a parser:
 
-**Input file** (`my_grammar.rs`):
+**Input file** (`my_grammar.rustylr`):
 ```rust
 // Rust imports and type definitions
 use std::collections::HashMap;
@@ -122,7 +122,7 @@ E: lparen E rparen { E }
 
 **Generate the parser:**
 ```bash
-$ rustylr my_grammar.rs my_parser.rs
+$ rustylr my_grammar.rustylr my_parser.rs
 ```
 
 This will create `my_parser.rs` containing the generated parser code.
@@ -160,7 +160,7 @@ fn main() {
 You can inspect the details of a specific parser state using the `--state` option. This is useful for debugging and understanding how the parser processes input.
 
 ```bash
-$ rustylr my_grammar.rs --state 5 // get details of state 5
+$ rustylr my_grammar.rustylr --state 5 // get details of state 5
 ```
 ```
 State 5:

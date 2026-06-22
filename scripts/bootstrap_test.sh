@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Bootstrap rusty_lr_parser/src/parser/parser.rs with different configurations
+# Bootstrap rusty_lr_parser/src/parser/parser.rustylr with different configurations
 # and check if the output files are identical.
 
 compare_files() {
@@ -42,9 +42,9 @@ is_from_github_actions=$1
 
 process_and_compare() {
     local config="$1"
-    cargo run --quiet --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs $config > /dev/null
+    cargo run --quiet --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rustylr" out.tab.rs $config > /dev/null
     mv out.tab.rs "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs"
-    cargo run --quiet --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rs" out.tab.rs $config > /dev/null
+    cargo run --quiet --bin rustylr -- "$rustylr_path/rusty_lr_parser/src/parser/parser.rustylr" out.tab.rs $config > /dev/null
     compare_files "$rustylr_path/rusty_lr_parser/src/parser/parser_expanded.rs" out.tab.rs
     if [ $? -ne 0 ]; then
         exit 1
@@ -65,9 +65,9 @@ echo "RustyLR path: $rustylr_path"
 
 
 # to briefly see the difference of the generated parser in the PR, run for the sample calculator and json parsers
-cargo run --quiet --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rs" "$rustylr_path/scripts/diff/calculator_new.rs" > /dev/null
-cargo run --quiet --bin rustylr -- "$rustylr_path/example/calculator_u8/src/parser.rs" "$rustylr_path/scripts/diff/calculator_u8_new.rs" > /dev/null
-cargo run --quiet --bin rustylr -- "$rustylr_path/example/json/src/parser.rs" "$rustylr_path/scripts/diff/json_new.rs" > /dev/null
+cargo run --quiet --bin rustylr -- "$rustylr_path/example/calculator/src/parser.rustylr" "$rustylr_path/scripts/diff/calculator_new.rs" > /dev/null
+cargo run --quiet --bin rustylr -- "$rustylr_path/example/calculator_u8/src/parser.rustylr" "$rustylr_path/scripts/diff/calculator_u8_new.rs" > /dev/null
+cargo run --quiet --bin rustylr -- "$rustylr_path/example/json/src/parser.rustylr" "$rustylr_path/scripts/diff/json_new.rs" > /dev/null
 if [ "$is_from_github_actions" = "true" ]; then
     diff "$rustylr_path/scripts/diff/calculator.rs" "$rustylr_path/scripts/diff/calculator_new.rs" >/dev/null
     if [ $? -ne 0 ]; then
