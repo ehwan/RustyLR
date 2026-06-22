@@ -93,6 +93,10 @@ fn pattern_at_offset(
 }
 
 fn pattern_documentation(args: &GrammarArgs, pattern: &PatternArgs, content: &str) -> String {
+    if let Some(documentation) = identifier_pattern_documentation(args, pattern, content) {
+        return documentation;
+    }
+
     let pattern_text = pattern_text(args, pattern, content);
     let grammar = Grammar::from_grammar_args(args.clone()).ok();
     let pattern_type = grammar
@@ -116,6 +120,21 @@ fn pattern_documentation(args: &GrammarArgs, pattern: &PatternArgs, content: &st
     }
     documentation.push_str(&format!("\n\n[Patterns]({SYNTAX_URL}#patterns)"));
     documentation
+}
+
+fn identifier_pattern_documentation(
+    args: &GrammarArgs,
+    pattern: &PatternArgs,
+    content: &str,
+) -> Option<String> {
+    let PatternArgs::Ident(ident) = pattern else {
+        return None;
+    };
+
+    let grammar = Grammar::from_grammar_args(args.clone()).ok()?;
+    nonterminal_symbol_documentation(args, &grammar, content, ident.value())
+        .or_else(|| terminal_symbol_documentation(args, &grammar, content, ident.value()))
+        .or_else(|| pattern_keyword_documentation(pattern))
 }
 
 fn pattern_text(args: &GrammarArgs, pattern: &PatternArgs, content: &str) -> String {
@@ -577,13 +596,13 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         let HoverContents::Markup(markup) = hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup.value.contains("Pattern `num`"));
         assert!(markup.value.contains("Final type: `Token`"));
-        assert!(markup.value.contains("Identifiers:"));
         assert!(markup.value.contains("**Terminal `num`**"));
         assert!(markup
             .value
             .contains("```rustylr\n%token num Token::Num(_);\n```"));
+        assert!(!markup.value.contains("Pattern `num`"));
+        assert!(!markup.value.contains("Identifiers:"));
         assert!(!markup.value.contains("Identifier pattern"));
     }
 
