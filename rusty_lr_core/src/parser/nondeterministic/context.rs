@@ -9,6 +9,7 @@ use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 use crate::parser::Parser;
+use crate::Location;
 use crate::TerminalSymbol;
 
 /// Iterator for traverse node to root.
@@ -127,6 +128,48 @@ impl<
         Data::UserData: Default,
     {
         Self::new(Default::default())
+    }
+
+    pub fn new_with_branch(userdata: Data::UserData, branch_idx: u32) -> Self
+    where
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+    {
+        let mut context = Self::new(userdata);
+        let class = P::TermClass::from_virtual_start(branch_idx);
+        let shift_to = context
+            .tables
+            .shift_goto_class(0, class)
+            .unwrap_or_else(|| {
+                panic!(
+                    "Failed to resolve shift for virtual start branch {}",
+                    branch_idx
+                )
+            });
+        let root_node_idx = context.current_nodes[0];
+        let root_node = context.node_mut(root_node_idx);
+        root_node.data_stack.set_branch_idx(branch_idx);
+        root_node.state_stack.push(shift_to.state);
+        root_node.data_stack.push_empty();
+        root_node
+            .location_stack
+            .push(Data::Location::new(std::iter::empty(), 0));
+        #[cfg(feature = "tree")]
+        {
+            root_node.tree_stack.push(crate::tree::Tree::new_terminal(
+                TerminalSymbol::VirtualStart(branch_idx),
+            ));
+        }
+        context
+    }
+
+    pub fn with_default_userdata_and_branch(branch_idx: u32) -> Self
+    where
+        Data::UserData: Default,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+    {
+        Self::new_with_branch(Default::default(), branch_idx)
     }
 
     /// Borrow the user data for the first active path.
@@ -915,7 +958,9 @@ impl<
                         TerminalSymbol::Terminal(term) => {
                             node_.data_stack.push_terminal(term);
                         }
-                        TerminalSymbol::Error | TerminalSymbol::Eof => {
+                        TerminalSymbol::Error
+                        | TerminalSymbol::Eof
+                        | TerminalSymbol::VirtualStart(_) => {
                             node_.data_stack.push_empty();
                         }
                     }
@@ -923,7 +968,8 @@ impl<
                     match term {
                         TerminalSymbol::Terminal(_)
                         | TerminalSymbol::Error
-                        | TerminalSymbol::Eof => {
+                        | TerminalSymbol::Eof
+                        | TerminalSymbol::VirtualStart(_) => {
                             node_.data_stack.push_empty();
                         }
                     }
@@ -951,13 +997,18 @@ impl<
                     TerminalSymbol::Terminal(term) => {
                         node_.data_stack.push_terminal(term);
                     }
-                    TerminalSymbol::Error | TerminalSymbol::Eof => {
+                    TerminalSymbol::Error
+                    | TerminalSymbol::Eof
+                    | TerminalSymbol::VirtualStart(_) => {
                         node_.data_stack.push_empty();
                     }
                 }
             } else {
                 match term {
-                    TerminalSymbol::Terminal(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
+                    TerminalSymbol::Terminal(_)
+                    | TerminalSymbol::Error
+                    | TerminalSymbol::Eof
+                    | TerminalSymbol::VirtualStart(_) => {
                         node_.data_stack.push_empty();
                     }
                 }

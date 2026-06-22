@@ -78,6 +78,29 @@ fn test_parser() {
     assert_eq!(results, [answer]);
 }
 
+#[test]
+fn test_multiple_start_symbols() {
+    // Test parsing with the EContext entry point
+    {
+        let mut context = parser::EContext::with_default_userdata();
+        for ch in "12+34".chars() {
+            context.feed(ch).unwrap();
+        }
+        let (val, _) = context.accept().unwrap();
+        assert_eq!(val, 46);
+    }
+
+    // Test parsing with the NumberContext entry point
+    {
+        let mut context = parser::NumberContext::with_default_userdata();
+        for ch in " 567 ".chars() {
+            context.feed(ch).unwrap();
+        }
+        let (val, _) = context.accept().unwrap();
+        assert_eq!(val, 567);
+    }
+}
+
 #[cfg(test)]
 mod userdata_branch_tests {
     use rusty_lr::lr1;
