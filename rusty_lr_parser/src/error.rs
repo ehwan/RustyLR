@@ -43,6 +43,12 @@ pub enum ArgError {
 
     /// can't use reserved keyword as token name
     ReservedName(Vec<Located<String>>),
+
+    /// Duplicate start symbol defined
+    DuplicateStartSymbol {
+        location: Location,
+        name: String,
+    },
 }
 
 #[derive(Debug)]
@@ -163,6 +169,7 @@ impl ArgError {
             | ArgError::MultipleDPrecDefinition(locs) => locs.clone(),
             ArgError::MultipleNameDefinition(_, locs) => locs.clone(),
             ArgError::ReservedName(names) => names.iter().map(|name| name.location()).collect(),
+            ArgError::DuplicateStartSymbol { location, .. } => vec![*location],
             _ => vec![Location::default()],
         }
     }
@@ -187,6 +194,9 @@ impl ArgError {
                 format!("Duplicated name for terminal or non-terminal: {}", name)
             }
             ArgError::ReservedName(_) => "This name is reserved and cannot be used".into(),
+            ArgError::DuplicateStartSymbol { name, .. } => {
+                format!("Duplicate start symbol definition: `{}`", name)
+            }
         }
     }
 }

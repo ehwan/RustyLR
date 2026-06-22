@@ -494,6 +494,18 @@ impl Grammar {
         if grammar_args.start_rule_name.is_empty() {
             return Err(ArgError::StartNotDefined);
         }
+        {
+            let mut seen_starts = HashSet::default();
+            for start_rule_name in &grammar_args.start_rule_name {
+                let name = start_rule_name.value();
+                if !seen_starts.insert(name.clone()) {
+                    return Err(ArgError::DuplicateStartSymbol {
+                        location: start_rule_name.location(),
+                        name: name.clone(),
+                    });
+                }
+            }
+        }
 
         // %prec and %dprec in each production rules
         for rules in grammar_args.rules.iter() {
@@ -1883,10 +1895,8 @@ impl Grammar {
 
         // check start rules are valid
         for start_rule_name in &grammar.start_rule_names {
-            if !grammar
-                .nonterminals_index
-                .contains_key(start_rule_name.value())
-            {
+            let name = start_rule_name.value();
+            if !grammar.nonterminals_index.contains_key(name) {
                 return Err(ParseError::StartNonTerminalNotDefined(
                     start_rule_name.location(),
                 ));
@@ -4389,5 +4399,27 @@ mod tests {
         assert_eq!(grammar.start_rule_names.len(), 2);
         assert_eq!(grammar.start_rule_names[0].value(), "Expr");
         assert_eq!(grammar.start_rule_names[1].value(), "Stmt");
+    }
+
+    #[test]
+    fn test_duplicate_start_symbol() {
+        let input = quote! {
+            %tokentype char;
+            %start Expr;
+            %start Expr;
+
+            Expr : 'a';
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
+        let err = match Grammar::arg_check_error(&grammar_args) {
+            Ok(_) => panic!("Expected arg check to fail"),
+            Err(e) => e,
+        };
+        assert!(
+            matches!(err, ArgError::DuplicateStartSymbol { ref name, .. } if name == "Expr"),
+            "Expected DuplicateStartSymbol error, got {:?}",
+            err
+        );
     }
 }
