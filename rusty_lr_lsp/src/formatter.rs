@@ -1,6 +1,7 @@
 use lsp_types::TextEdit;
 use proc_macro2::{TokenStream, TokenTree};
 use rusty_lr_parser::{GrammarArgs, PatternArgs};
+use std::ops::Range;
 
 use crate::completion;
 use crate::position::range_to_lsp_range;
@@ -14,43 +15,178 @@ pub fn formatting(content: &str) -> Vec<TextEdit> {
     };
 
     let mut edits = Vec::new();
-    edits.extend(token_edits(&args, content));
+    edits.extend(directive_edits(content));
     edits.extend(rule_edits(&args, content));
     edits
 }
 
-fn token_edits(args: &GrammarArgs, content: &str) -> Vec<TextEdit> {
-    args.terminals
-        .iter()
-        .filter_map(|(name, body)| {
-            let name_range = args.span_manager.get_byterange(&name.location())?;
-            let line_start = line_start(content, name_range.start);
-            let line_end = line_end(content, name_range.end);
-            let semicolon = content[name_range.end.min(content.len())..line_end]
-                .find(';')
-                .map(|idx| name_range.end + idx)?;
+fn directive_edits(content: &str) -> Vec<TextEdit> {
+    let Some(grammar_start) = content.find("%%").map(|idx| idx + 2) else {
+        return Vec::new();
+    };
 
-            let body_text = token_stream_text(content, body).unwrap_or_default();
-            let trailing = content[semicolon + 1..line_end].trim_end();
-            let formatted = if body_text.is_empty() {
-                format!("%token {}", name.value())
-            } else {
-                format!("%token {} {}", name.value(), body_text)
-            };
-            let mut new_text = format!("{formatted};");
-            if !trailing.is_empty() {
-                new_text.push_str(trailing);
+    let comments = comment_ranges(content);
+    let mut edits = Vec::new();
+    let mut offset = line_start(content, grammar_start);
+    while offset < content.len() {
+        let current_line_end = line_end(content, offset);
+        if offset >= grammar_start {
+            let line_prefix = &content[offset..current_line_end];
+            let leading = line_prefix.len() - line_prefix.trim_start().len();
+            let directive_start = offset + leading;
+            if content[directive_start..current_line_end].starts_with('%') {
+                if let Some((range_end, new_text)) =
+                    format_directive_block(content, directive_start, &comments)
+                {
+                    edits.push(TextEdit {
+                        range: range_to_lsp_range(content, offset..range_end),
+                        new_text,
+                    });
+                    offset = content[range_end..]
+                        .find('\n')
+                        .map_or(content.len(), |idx| range_end + idx + 1);
+                    continue;
+                }
             }
+        }
+        offset = content[current_line_end..]
+            .find('\n')
+            .map_or(content.len(), |idx| current_line_end + idx + 1);
+    }
+    edits
+}
 
-            Some(TextEdit {
-                range: range_to_lsp_range(content, line_start..line_end),
-                new_text,
-            })
-        })
-        .collect()
+fn format_directive_block(
+    content: &str,
+    start: usize,
+    comments: &[Range<usize>],
+) -> Option<(usize, String)> {
+    let semicolon = find_directive_semicolon(content, start)?;
+    if range_has_comment(comments, start..semicolon) {
+        return None;
+    }
+
+    let range_end = line_end(content, semicolon + 1);
+    let directive = &content[start..semicolon];
+    let trailing = content[semicolon + 1..range_end].trim_end();
+    let mut formatted = normalize_directive_spacing(directive);
+    formatted.push(';');
+    if !trailing.is_empty() {
+        formatted.push_str(trailing);
+    }
+
+    (formatted != content[line_start(content, start)..range_end]).then_some((range_end, formatted))
+}
+
+fn normalize_directive_spacing(directive: &str) -> String {
+    let mut result = String::new();
+    let mut pending_space = false;
+    let trimmed = directive.trim();
+    let mut chars = trimmed.char_indices();
+    let mut quote = None;
+    let mut escaped = false;
+
+    while let Some((idx, ch)) = chars.next() {
+        if let Some(quote_ch) = quote {
+            result.push(ch);
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == quote_ch {
+                quote = None;
+            }
+            continue;
+        }
+
+        if ch == '"' || (ch == '\'' && is_single_quote_literal_start(trimmed, idx)) {
+            if pending_space && !result.is_empty() {
+                result.push(' ');
+                pending_space = false;
+            }
+            result.push(ch);
+            quote = Some(ch);
+        } else if ch.is_whitespace() {
+            pending_space = true;
+        } else {
+            if pending_space && !result.is_empty() {
+                result.push(' ');
+                pending_space = false;
+            }
+            result.push(ch);
+        }
+    }
+
+    result
+}
+
+fn find_directive_semicolon(content: &str, start: usize) -> Option<usize> {
+    let mut quote = None;
+    let mut escaped = false;
+    let mut paren_depth = 0usize;
+    let mut bracket_depth = 0usize;
+    let mut brace_depth = 0usize;
+
+    let remaining = &content[start..];
+    for (relative_idx, ch) in remaining.char_indices() {
+        if let Some(quote_ch) = quote {
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == quote_ch {
+                quote = None;
+            }
+            continue;
+        }
+
+        match ch {
+            '"' => quote = Some(ch),
+            '\'' if is_single_quote_literal_start(remaining, relative_idx) => quote = Some(ch),
+            '(' => paren_depth += 1,
+            ')' => paren_depth = paren_depth.saturating_sub(1),
+            '[' => bracket_depth += 1,
+            ']' => bracket_depth = bracket_depth.saturating_sub(1),
+            '{' => brace_depth += 1,
+            '}' => brace_depth = brace_depth.saturating_sub(1),
+            ';' if paren_depth == 0 && bracket_depth == 0 && brace_depth == 0 => {
+                return Some(start + relative_idx);
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+fn is_single_quote_literal_start(text: &str, quote_idx: usize) -> bool {
+    let mut escaped = false;
+    for (relative_idx, ch) in text[quote_idx + 1..].char_indices() {
+        if ch == '\n' || ch == '\r' {
+            return false;
+        }
+
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        if ch == '\\' {
+            escaped = true;
+            continue;
+        }
+        if ch == '\'' {
+            let close_end = quote_idx + 1 + relative_idx + ch.len_utf8();
+            return match text[close_end..].chars().next() {
+                Some(next) => !matches!(next, '_' | 'a'..='z' | 'A'..='Z' | '0'..='9'),
+                None => true,
+            };
+        }
+    }
+
+    false
 }
 
 fn rule_edits(args: &GrammarArgs, content: &str) -> Vec<TextEdit> {
+    let comments = comment_ranges(content);
     args.rules
         .iter()
         .filter_map(|rule| {
@@ -97,6 +233,15 @@ fn rule_edits(args: &GrammarArgs, content: &str) -> Vec<TextEdit> {
             formatted.push(';');
 
             let end = rule_block_end(args, content, rule)?;
+            let action_ranges = rule
+                .rule_lines
+                .iter()
+                .filter_map(|line| line.reduce_action.as_ref().and_then(token_stream_range))
+                .collect::<Vec<_>>();
+            if has_comment_outside_ranges(&comments, start..end, &action_ranges) {
+                return None;
+            }
+
             Some(TextEdit {
                 range: range_to_lsp_range(content, start..end),
                 new_text: formatted,
@@ -151,6 +296,92 @@ fn strip_indent(line: &str, indent: usize) -> &str {
     } else {
         line.trim_start()
     }
+}
+
+fn comment_ranges(content: &str) -> Vec<Range<usize>> {
+    let mut ranges = Vec::new();
+    let mut iter = content.char_indices().peekable();
+    let mut quote = None;
+    let mut escaped = false;
+
+    while let Some((idx, ch)) = iter.next() {
+        if let Some(quote_ch) = quote {
+            if escaped {
+                escaped = false;
+            } else if ch == '\\' {
+                escaped = true;
+            } else if ch == quote_ch {
+                quote = None;
+            }
+            continue;
+        }
+
+        match ch {
+            '"' => quote = Some(ch),
+            '\'' if is_single_quote_literal_start(content, idx) => quote = Some(ch),
+            '/' => match iter.peek().copied() {
+                Some((next_idx, '/')) => {
+                    iter.next();
+                    let end = content[next_idx + 1..]
+                        .find('\n')
+                        .map_or(content.len(), |line_end| next_idx + 1 + line_end);
+                    ranges.push(idx..end);
+                    while let Some((comment_idx, _)) = iter.peek().copied() {
+                        if comment_idx >= end {
+                            break;
+                        }
+                        iter.next();
+                    }
+                }
+                Some((_, '*')) => {
+                    iter.next();
+                    let end = content[idx + 2..]
+                        .find("*/")
+                        .map_or(content.len(), |comment_end| idx + 2 + comment_end + 2);
+                    ranges.push(idx..end);
+                    while let Some((comment_idx, _)) = iter.peek().copied() {
+                        if comment_idx >= end {
+                            break;
+                        }
+                        iter.next();
+                    }
+                }
+                _ => {}
+            },
+            _ => {}
+        }
+    }
+
+    ranges
+}
+
+fn range_has_comment(comments: &[Range<usize>], range: Range<usize>) -> bool {
+    comments
+        .iter()
+        .any(|comment| ranges_overlap(comment, &range))
+}
+
+fn has_comment_outside_ranges(
+    comments: &[Range<usize>],
+    outer: Range<usize>,
+    allowed: &[Range<usize>],
+) -> bool {
+    comments
+        .iter()
+        .filter(|comment| ranges_overlap(comment, &outer))
+        .any(|comment| {
+            !allowed
+                .iter()
+                .any(|allowed_range| range_contains(allowed_range, comment))
+        })
+}
+
+fn ranges_overlap(left: &Range<usize>, right: &Range<usize>) -> bool {
+    left.start < right.end && right.start < left.end
+}
+
+fn range_contains(outer: &Range<usize>, inner: &Range<usize>) -> bool {
+    outer.start <= inner.start && inner.end <= outer.end
 }
 
 fn line_tokens_text(
@@ -429,8 +660,17 @@ pub enum Token {
 
 %%
 
-%tokentype Token;
-%start E;
+%tokentype
+    Token;
+%start    E;
+%userdata
+    ParserState;
+%allow
+    unused_terminals([
+        'a'-'z'
+        '+'
+    ]);
+%left    plus   "spaced literal";
 %token n Token::Num(_);
 %token plus   Token::Plus;
 
@@ -448,6 +688,11 @@ E(i32):left=E plus n { left }
 
         assert!(formatted.contains("%token n Token::Num(_);"));
         assert!(formatted.contains("%token plus Token::Plus;"));
+        assert!(formatted.contains("%tokentype Token;"));
+        assert!(formatted.contains("%start E;"));
+        assert!(formatted.contains("%userdata ParserState;"));
+        assert!(formatted.contains("%allow unused_terminals([ 'a'-'z' '+' ]);"));
+        assert!(formatted.contains("%left plus \"spaced literal\";"));
         assert!(formatted
             .contains("E(i32)\n    : left=E plus n { left }\n    | n {\n        n\n    }\n    ;"));
     }
@@ -473,6 +718,78 @@ E(i32):left=E plus n { left }
             format_reduce_action(action),
             "{\n        if n > 0 {\n            n\n        } else {\n            0\n        }\n    }"
         );
+    }
+
+    #[test]
+    fn formats_multiline_directive_as_one_line() {
+        let content = "%%\n%tokentype\n    [u8; 32];\n%userdata\n    &'a   str;\n%start\n    E;\n";
+        let formatted = apply_edits(content, directive_edits(content));
+
+        assert!(formatted.contains("%tokentype [u8; 32];"));
+        assert!(formatted.contains("%userdata &'a str;"));
+        assert!(formatted.contains("%start E;"));
+    }
+
+    #[test]
+    fn skips_rule_formatting_when_grammar_comment_would_be_lost() {
+        let content = r#"
+#[derive(Debug, Clone)]
+pub enum Token { A }
+
+%%
+
+%tokentype Token;
+%token a Token::A;
+
+Rule(i32): a { 1 }
+// | a { 2 }
+;
+"#;
+        let formatted = apply_edits(content, formatting(content));
+
+        assert!(formatted.contains("Rule(i32): a { 1 }\n// | a { 2 }\n;"));
+    }
+
+    #[test]
+    fn formats_reduce_action_comments_inside_action_range() {
+        let content = r#"
+#[derive(Debug, Clone)]
+pub enum Token { A }
+
+%%
+
+%tokentype Token;
+%token a Token::A;
+
+Rule(i32): a {
+    // keep this comment
+    1
+}
+;
+"#;
+        let formatted = apply_edits(content, formatting(content));
+
+        assert!(formatted.contains(
+            "Rule(i32)\n    : a {\n        // keep this comment\n        1\n    }\n    ;"
+        ));
+    }
+
+    #[test]
+    fn skips_multiline_directive_with_inline_comment() {
+        let content = "%%\n%tokentype\n    // token type comment\n    Token;\n";
+        let formatted = apply_edits(content, directive_edits(content));
+
+        assert!(formatted.contains("%tokentype\n    // token type comment\n    Token;"));
+    }
+
+    #[test]
+    fn preserves_comments_in_parser_grammar_fixture() {
+        let content = include_str!("../../rusty_lr_parser/src/parser/parser.rustylr");
+        let formatted = apply_edits(content, formatting(content));
+
+        assert!(formatted.contains("// | Pattern error {"));
+        assert!(formatted.contains("//     Pattern"));
+        assert!(crate::completion::parse_args(&formatted).is_ok());
     }
 
     fn apply_edits(content: &str, edits: Vec<TextEdit>) -> String {
