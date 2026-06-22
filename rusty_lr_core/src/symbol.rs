@@ -7,9 +7,10 @@ use std::hash::Hash;
 /// and future support for other special tokens.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum TerminalSymbol<Term> {
-    Terminal(Term), // index in the terminals vector
-    Error,          // error token
-    Eof,            // end of file token
+    Terminal(Term),    // index in the terminals vector
+    Error,             // error token
+    Eof,               // end of file token
+    VirtualStart(u32), // virtual start branch token for multiple start symbols
 }
 impl<Term> TerminalSymbol<Term> {
     pub fn is_error(&self) -> bool {
@@ -21,20 +22,21 @@ impl<Term> TerminalSymbol<Term> {
     pub fn is_eof(&self) -> bool {
         matches!(self, TerminalSymbol::Eof)
     }
+    pub fn is_virtual_start(&self) -> bool {
+        matches!(self, TerminalSymbol::VirtualStart(_))
+    }
     /// converts self to a terminal if it is a `Terminal` variant, otherwise returns `None`.
     pub fn to_term(&self) -> Option<&Term> {
         match self {
             TerminalSymbol::Terminal(term) => Some(term),
-            TerminalSymbol::Error => None,
-            TerminalSymbol::Eof => None,
+            _ => None,
         }
     }
     /// converts self to a terminal if it is a `Terminal` variant, otherwise returns `None`.
     pub fn into_term(self) -> Option<Term> {
         match self {
             TerminalSymbol::Terminal(term) => Some(term),
-            TerminalSymbol::Error => None,
-            TerminalSymbol::Eof => None,
+            _ => None,
         }
     }
 }
@@ -45,6 +47,7 @@ impl<Term: Display> std::fmt::Display for TerminalSymbol<Term> {
             TerminalSymbol::Terminal(term) => write!(f, "{}", term),
             TerminalSymbol::Error => write!(f, "error"),
             TerminalSymbol::Eof => write!(f, "eof"),
+            TerminalSymbol::VirtualStart(i) => write!(f, "start_branch_{}", i),
         }
     }
 }

@@ -63,6 +63,42 @@ impl<
     {
         Self::new(Default::default())
     }
+    /// Create a new context with a virtual start branch.
+    pub fn new_with_branch(userdata: Data::UserData, branch_idx: u32) -> Self
+    where
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+    {
+        let mut ctx = Self::new(userdata);
+        ctx.data_stack.set_branch_idx(branch_idx);
+        let class = P::TermClass::from_virtual_start(branch_idx);
+        let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
+            panic!(
+                "Failed to resolve shift for virtual start branch {}",
+                branch_idx
+            )
+        });
+        ctx.state_stack.push(shift_to.state);
+        ctx.data_stack.push_empty();
+        ctx.location_stack
+            .push(Data::Location::new(std::iter::empty(), 0));
+        #[cfg(feature = "tree")]
+        {
+            ctx.tree_stack.push(crate::tree::Tree::new_terminal(
+                TerminalSymbol::VirtualStart(branch_idx),
+            ));
+        }
+        ctx
+    }
+    /// Create a new context with a virtual start branch using `Default::default()` as user data.
+    pub fn with_default_userdata_and_branch(branch_idx: u32) -> Self
+    where
+        Data::UserData: Default,
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+    {
+        Self::new_with_branch(Default::default(), branch_idx)
+    }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
     /// `state_stack` is initialized with [0] (root state).
     pub fn with_capacity(capacity: usize, userdata: Data::UserData) -> Self {
@@ -89,6 +125,36 @@ impl<
         Data::UserData: Default,
     {
         Self::with_capacity(capacity, Default::default())
+    }
+    /// Create a new context with capacity and a virtual start branch.
+    pub fn with_capacity_and_branch(
+        capacity: usize,
+        userdata: Data::UserData,
+        branch_idx: u32,
+    ) -> Self
+    where
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+    {
+        let mut ctx = Self::with_capacity(capacity, userdata);
+        let class = P::TermClass::from_virtual_start(branch_idx);
+        let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
+            panic!(
+                "Failed to resolve shift for virtual start branch {}",
+                branch_idx
+            )
+        });
+        ctx.state_stack.push(shift_to.state);
+        ctx.data_stack.push_empty();
+        ctx.location_stack
+            .push(Data::Location::new(std::iter::empty(), 0));
+        #[cfg(feature = "tree")]
+        {
+            ctx.tree_stack.push(crate::tree::Tree::new_terminal(
+                TerminalSymbol::VirtualStart(branch_idx),
+            ));
+        }
+        ctx
     }
     /// Borrow the user data owned by this context.
     pub fn userdata(&self) -> &Data::UserData {
@@ -496,13 +562,16 @@ impl<
             if next_state_id.push {
                 match term {
                     TerminalSymbol::Terminal(t) => self.data_stack.push_terminal(t),
-                    TerminalSymbol::Error | TerminalSymbol::Eof => self.data_stack.push_empty(),
+                    TerminalSymbol::Error
+                    | TerminalSymbol::Eof
+                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push_empty(),
                 }
             } else {
                 match term {
-                    TerminalSymbol::Terminal(_) | TerminalSymbol::Error | TerminalSymbol::Eof => {
-                        self.data_stack.push_empty()
-                    }
+                    TerminalSymbol::Terminal(_)
+                    | TerminalSymbol::Error
+                    | TerminalSymbol::Eof
+                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push_empty(),
                 }
             }
 

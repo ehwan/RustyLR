@@ -581,6 +581,17 @@ impl Builder {
                             .with_labels(labels)
                             .with_notes(vec!["Name is reserved and cannot be used".to_string()])
                     }
+
+                    ArgError::DuplicateStartSymbol { location, name } => {
+                        let range = grammar_args
+                            .span_manager
+                            .get_byterange(&location)
+                            .unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message(format!("Duplicate start symbol definition: `{}`", name))
+                            .with_labels(vec![Label::primary(file_id, range)
+                                .with_message("duplicate start symbol defined here")])
+                    }
                 };
 
                 let writer = self.stream();

@@ -5,6 +5,7 @@ lr1! {
     %glr;
     %tokentype char;
     %start E;
+    %start Number;
 
     WS0: ' '*;
 

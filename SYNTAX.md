@@ -336,6 +336,19 @@ Expr(i32) : '('! Expr ')'! ;
 
 Defines the entry point of the grammar. RustyLR automatically creates an augmented rule `Augmented -> NonTerminalName eof`.
 
+### Multiple Start Symbols
+
+You can define multiple start symbols by writing multiple `%start` directives:
+
+```
+%start Expr;
+%start Stmt;
+```
+
+When multiple start symbols are defined, RustyLR generates individual wrapper structs for each start symbol (e.g., `ExprContext` and `StmtContext`).
+- Initializing the context (via `ExprContext::new(...)` or `StmtContext::new(...)`) automatically transitions the parser to the correct starting state for that symbol.
+- Calling `accept()` on a context wrapper returns the exact type of that start symbol.
+
 ---
 
 ## Userdata Type (Optional)

@@ -393,6 +393,11 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
             _ => GrammarTerminalClasses::TermClass1,
         }
     }
+    fn from_virtual_start(branch_idx: u32) -> Self {
+        match branch_idx {
+            _ => panic!("Invalid virtual start branch index: {}", branch_idx),
+        }
+    }
 }
 impl std::fmt::Display for GrammarTerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -613,11 +618,13 @@ pub enum GrammarData {
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 pub struct GrammarDataStack {
     pub __stack: Vec<GrammarData>,
+    pub branch_idx: u32,
 }
 impl Default for GrammarDataStack {
     fn default() -> Self {
         Self {
             __stack: Vec::new(),
+            branch_idx: 0,
         }
     }
 }
@@ -5874,6 +5881,9 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     fn push_empty(&mut self) {
         self.__stack.push(GrammarData::Empty);
     }
+    fn set_branch_idx(&mut self, branch_idx: u32) {
+        self.branch_idx = branch_idx;
+    }
     fn clear(&mut self) {
         self.__stack.clear();
     }
@@ -5883,6 +5893,7 @@ impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
     fn split_off(&mut self, at: usize) -> Self {
         Self {
             __stack: self.__stack.split_off(at),
+            branch_idx: self.branch_idx,
         }
     }
     fn truncate(&mut self, at: usize) {

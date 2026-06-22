@@ -11,4 +11,9 @@ pub trait TerminalClass: Copy {
     fn to_usize(&self) -> usize;
 
     fn from_term(term: &Self::Term) -> Self;
+
+    /// Gets the terminal class for a virtual start branch.
+    fn from_virtual_start(_branch_idx: u32) -> Self {
+        panic!("from_virtual_start not supported on this terminal class")
+    }
 }
