@@ -18,7 +18,7 @@ Whenever a change is made to the parser generator's specifications, APIs, or run
 When new grammar productions, directives, pattern operators, or reduce action features are introduced:
 - Add a detailed explanation with examples inside [SYNTAX.md](SYNTAX.md).
 - Match the formatting, tone, and organization of the existing syntax reference.
-- Preserve exact header anchor names referenced as diagnostic URLs in code, especially from [rusty_lr_parser/src/parser/parser.rs](rusty_lr_parser/src/parser/parser.rs).
+- Preserve exact header anchor names referenced as diagnostic URLs in code, especially from [rusty_lr_parser/src/parser/parser.rustylr](rusty_lr_parser/src/parser/parser.rustylr).
 
 ## 3. Verify and Bootstrap
 
@@ -38,7 +38,7 @@ When modifying code:
 
 ## 5. External Link Validity
 
-When adding or modifying Markdown files, ensure external links referenced from `rusty_lr_parser/src/parser/parser.rs` and `rusty_lr_buildscript/src/lib.rs` remain valid and reachable.
+When adding or modifying Markdown files, ensure external links referenced from `rusty_lr_parser/src/parser/parser.rustylr` and `rusty_lr_buildscript/src/lib.rs` remain valid and reachable.
 
 ## 6. Pull Requests
 

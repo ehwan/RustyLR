@@ -45,7 +45,7 @@ cargo install rustylr
 
 The `rustylr` CLI and `rusty_lr` runtime must be from compatible releases. Avoid mixing arbitrary generator/runtime versions.
 
-3. Create `src/grammar.rs`:
+3. Create `src/grammar.rustylr`:
 
 ```rust
 #[derive(Debug, Clone)]
@@ -88,7 +88,7 @@ Expr(i64)
 4. Generate the parser:
 
 ```bash
-rustylr src/grammar.rs src/parser.rs
+rustylr src/grammar.rustylr src/parser.rs
 ```
 
 5. Use the generated context:
@@ -137,5 +137,5 @@ When debugging:
 - [README.md](README.md): Installation, quick start, generated code shape, examples.
 - [SYNTAX.md](SYNTAX.md): Complete grammar syntax reference.
 - [GLR.md](GLR.md): GLR parsing behavior and branch-local user data.
-- [example/calculator/src/parser.rs](example/calculator/src/parser.rs): Enum-token expression grammar.
-- [example/json/src/parser.rs](example/json/src/parser.rs): Character-token JSON grammar with location-aware recovery.
+- [example/calculator/src/parser.rustylr](example/calculator/src/parser.rustylr): Enum-token expression grammar.
+- [example/json/src/parser.rustylr](example/json/src/parser.rustylr): Character-token JSON grammar with location-aware recovery.

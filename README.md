@@ -26,8 +26,8 @@ Use RustyLR when the task needs one or more of these:
 Default integration path:
 1. Add `rusty_lr` to the target Rust crate.
 2. Install a compatible `rustylr` CLI release with `cargo install rustylr`.
-3. Write a `src/grammar.rs` file with Rust helper code above `%%` and grammar rules below `%%`.
-4. Generate `src/parser.rs` with `rustylr src/grammar.rs src/parser.rs`.
+3. Write a `src/grammar.rustylr` file with Rust helper code above `%%` and grammar rules below `%%`.
+4. Generate `src/parser.rs` with `rustylr src/grammar.rustylr src/parser.rs`.
 5. Feed lexer tokens into `<Start>Context` and call `accept()`.
 
 For a compact agent-oriented reference, see [USING_RUSTYLR_WITH_AI.md](USING_RUSTYLR_WITH_AI.md) and [llms.txt](llms.txt).
@@ -64,10 +64,10 @@ cargo install rustylr
 ```
 
 ### 3. Create a Grammar File
-Create a grammar file, e.g., `src/grammar.rs`. Any Rust code placed *above* the `%%` delimiter is copied directly to the generated parser file. The section *below* `%%` defines directives and production rules.
+Create a grammar file, e.g., `src/grammar.rustylr`. Any Rust code placed *above* the `%%` delimiter is copied directly to the generated parser file. The section *below* `%%` defines directives and production rules.
 
 ```rust
-// src/grammar.rs
+// src/grammar.rustylr
 
 #[derive(Debug, Clone, Copy)]
 pub enum Token {
@@ -122,7 +122,7 @@ Expr(i32)
 Run the CLI to compile your grammar into a Rust module:
 
 ```bash
-rustylr src/grammar.rs src/parser.rs
+rustylr src/grammar.rustylr src/parser.rs
 ```
 
 ### 5. Parse a Token Stream
@@ -239,7 +239,7 @@ See [SYNTAX.md - Location Tracking](SYNTAX.md#location-tracking) for configurati
 You can inspect the generated parser states using the `--state` option. This outputs a color-coded state listing showing core items, lookahead sets, transitions, and conflict reports.
 
 ```bash
-rustylr --state src/grammar.rs
+rustylr src/grammar.rustylr --state 5
 ```
 
 ![State Machine Debug](images/state_option.png)
@@ -260,12 +260,12 @@ println!("{}", context);   // Formats the state tree (requires 'tree' feature)
 
 ## Examples
 
-- [Calculator (enum tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator/src/parser.rs): A numeric expression parser using custom token enums.
-- [Calculator (u8 tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator_u8/src/parser.rs): A byte-stream numeric calculator.
-- [JSON Validator](https://github.com/ehwan/RustyLR/blob/main/example/json/src/parser.rs): A validator checking JSON syntax.
+- [Calculator (enum tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator/src/parser.rustylr): A numeric expression parser using custom token enums.
+- [Calculator (u8 tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator_u8/src/parser.rustylr): A byte-stream numeric calculator.
+- [JSON Validator](https://github.com/ehwan/RustyLR/blob/main/example/json/src/parser.rustylr): A validator checking JSON syntax.
 - [Lua 5.4 Parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete parser for the Lua 5.4 programming language.
 - [C Parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/main/src/ast/parser_lr.rs): An LR-based parser for the C programming language.
-- [Bootstrap Parser](https://github.com/ehwan/RustyLR/blob/main/rusty_lr_parser/src/parser/parser.rs): RustyLR's own grammar parser, written using RustyLR.
+- [Bootstrap Parser](https://github.com/ehwan/RustyLR/blob/main/rusty_lr_parser/src/parser/parser.rustylr): RustyLR's own grammar parser, written using RustyLR.
 
 ---
 

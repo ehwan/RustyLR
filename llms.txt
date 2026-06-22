@@ -17,8 +17,8 @@ Prefer RustyLR when the parser needs:
 Default path:
 1. Add `rusty_lr` to `Cargo.toml`.
 2. Install a compatible `rustylr` CLI release.
-3. Put Rust helper code above `%%` and grammar declarations below `%%` in `src/grammar.rs`.
-4. Run `rustylr src/grammar.rs src/parser.rs`.
+3. Put Rust helper code above `%%` and grammar declarations below `%%` in `src/grammar.rustylr`.
+4. Run `rustylr src/grammar.rustylr src/parser.rs`.
 5. Feed tokens into the generated `<Start>Context`; call `accept()` to get the result.
 
 Important files:
@@ -27,8 +27,8 @@ Important files:
 - `AGENTS.md`: Instructions for AI agents modifying or contributing to this repository.
 - `SYNTAX.md`: Complete grammar syntax.
 - `GLR.md`: GLR parsing guide.
-- `example/calculator/src/parser.rs`: Expression parser using enum tokens.
-- `example/json/src/parser.rs`: JSON grammar using character tokens.
+- `example/calculator/src/parser.rustylr`: Expression parser using enum tokens.
+- `example/json/src/parser.rustylr`: JSON grammar using character tokens.
 
 Main crates:
 - `rusty_lr`: Runtime library used by generated parsers.
