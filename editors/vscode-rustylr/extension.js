@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { execFile } = require("child_process");
 const vscode = require("vscode");
 const { LanguageClient, TransportKind } = require("vscode-languageclient/node");
 
@@ -67,6 +68,7 @@ async function doStartClient(context) {
     repoRoot,
     cwd,
   });
+  await ensureCompatibleServerVersion(server, cwd, context);
 
   const patterns = config.get("documentPatterns", [
     "**/*.rustylr",
@@ -139,9 +141,12 @@ function expandPath(value, vars) {
 
 function resolveServerCommand(configuredCommand, configuredArgs, vars) {
   if (configuredCommand) {
+    const command = expandPath(configuredCommand, vars);
+    const args = configuredArgs.map((arg) => expandPath(arg, vars));
     return {
-      command: expandPath(configuredCommand, vars),
-      args: configuredArgs.map((arg) => expandPath(arg, vars)),
+      command,
+      args,
+      versionCommand: resolveVersionCommand(command, args),
     };
   }
 
@@ -156,7 +161,11 @@ function resolveServerCommand(configuredCommand, configuredArgs, vars) {
     ];
     for (const candidate of candidates) {
       if (fs.existsSync(candidate)) {
-        return { command: candidate, args: lspArgs };
+        return {
+          command: candidate,
+          args: lspArgs,
+          versionCommand: { command: candidate, args: ["--version"] },
+        };
       }
     }
   }
@@ -169,7 +178,11 @@ function resolveServerCommand(configuredCommand, configuredArgs, vars) {
     const fullPath = path.join(dir, binaryName);
     try {
       if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
-        return { command: fullPath, args: lspArgs };
+        return {
+          command: fullPath,
+          args: lspArgs,
+          versionCommand: { command: fullPath, args: ["--version"] },
+        };
       }
     } catch (_e) {
       // Ignore filesystem errors for inaccessible path entries
@@ -181,6 +194,10 @@ function resolveServerCommand(configuredCommand, configuredArgs, vars) {
     return {
       command: "cargo",
       args: ["run", "--quiet", "--package", "rustylr", "--", "lsp"],
+      versionCommand: {
+        command: "cargo",
+        args: ["run", "--quiet", "--package", "rustylr", "--", "--version"],
+      },
     };
   }
 
@@ -188,7 +205,108 @@ function resolveServerCommand(configuredCommand, configuredArgs, vars) {
   return {
     command: binaryName,
     args: lspArgs,
+    versionCommand: { command: binaryName, args: ["--version"] },
   };
+}
+
+function resolveVersionCommand(command, args) {
+  const commandName = path.basename(command).toLowerCase();
+  if (commandName === "cargo" || commandName === "cargo.exe") {
+    const separatorIndex = args.indexOf("--");
+    if (separatorIndex >= 0) {
+      return {
+        command,
+        args: [...args.slice(0, separatorIndex + 1), "--version"],
+      };
+    }
+    return {
+      command,
+      args: [...args, "--", "--version"],
+    };
+  }
+
+  return { command, args: ["--version"] };
+}
+
+async function ensureCompatibleServerVersion(server, cwd, context) {
+  const expectedVersion = getRequiredServerVersion(context);
+  if (!expectedVersion) {
+    return;
+  }
+
+  const versionCommand = server.versionCommand || resolveVersionCommand(server.command, server.args);
+  const output = await execFileText(versionCommand.command, versionCommand.args, cwd);
+  const actualVersion = parseRustylrVersion(output);
+  if (!actualVersion) {
+    throw new Error(
+      `Could not parse RustyLR language server version from '${versionCommand.command} ${versionCommand.args.join(" ")}'. Output: ${output.trim()}`
+    );
+  }
+
+  if (actualVersion === expectedVersion) {
+    outputChannel.appendLine(`RustyLR LSP version check passed: ${actualVersion}`);
+    return;
+  }
+
+  const installCommand = `cargo install rustylr --version ${expectedVersion} --force`;
+  outputChannel.appendLine(
+    `RustyLR LSP version mismatch: expected ${expectedVersion}, found ${actualVersion}.`
+  );
+  outputChannel.appendLine(`Install the compatible server with: ${installCommand}`);
+
+  const selection = await vscode.window.showErrorMessage(
+    `RustyLR extension expects rustylr ${expectedVersion}, but found ${actualVersion}. Install the compatible rustylr version before using the language server.`,
+    "Copy Install Command",
+    "Continue Anyway"
+  );
+
+  if (selection === "Copy Install Command") {
+    await vscode.env.clipboard.writeText(installCommand);
+    vscode.window.showInformationMessage(`Copied: ${installCommand}`);
+  } else if (selection === "Continue Anyway") {
+    outputChannel.appendLine("Continuing with an incompatible RustyLR language server version.");
+    return;
+  }
+
+  throw new Error(
+    `RustyLR language server version mismatch. Expected ${expectedVersion}, found ${actualVersion}. Run: ${installCommand}`
+  );
+}
+
+function getRequiredServerVersion(context) {
+  return context.extension.packageJSON &&
+    context.extension.packageJSON.rustylr &&
+    context.extension.packageJSON.rustylr.requiredServerVersion
+    ? context.extension.packageJSON.rustylr.requiredServerVersion
+    : undefined;
+}
+
+function execFileText(command, args, cwd) {
+  return new Promise((resolve, reject) => {
+    execFile(
+      command,
+      args,
+      {
+        cwd,
+        timeout: 10000,
+        maxBuffer: 1024 * 1024,
+      },
+      (error, stdout, stderr) => {
+        const output = `${stdout || ""}${stderr || ""}`;
+        if (error) {
+          error.message = `${error.message}\nCommand: ${command} ${args.join(" ")}\n${output}`;
+          reject(error);
+          return;
+        }
+        resolve(output);
+      }
+    );
+  });
+}
+
+function parseRustylrVersion(output) {
+  const match = output.match(/\brustylr\s+([0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)/);
+  return match ? match[1] : undefined;
 }
 
 function findRustyLrRoot(startPath) {

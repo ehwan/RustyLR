@@ -36,6 +36,9 @@
     "color": "#1f2937",
     "theme": "dark"
   },
+  "rustylr": {
+    "requiredServerVersion": "1.34.0"
+  },
   "main": "./dist/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run compile",
