@@ -1,6 +1,12 @@
-# RustyLR Language Support
+# RustyLR LSP
 
-This extension provides rich language support for the [RustyLR](https://github.com/ehwan/RustyLR) parser generator grammar files (`*.rustylr` and `rustylr.rs`).
+RustyLR LSP provides rich language support for [RustyLR](https://github.com/ehwan/RustyLR) grammar files (`*.rustylr` and `rustylr.rs`). Language features are powered by the `rustylr lsp` language server.
+
+Install it from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp), or run this command from VS Code Quick Open:
+
+```text
+ext install ehwan.rustylr-lsp
+```
 
 ## Features
 
@@ -19,15 +25,24 @@ This extension provides rich language support for the [RustyLR](https://github.c
 This extension contributes the following settings to control the language server behavior:
 
 * `rustylr.server.command`: Path to the `rustylr` executable. Leave empty to automatically detect or run from Cargo.
-* `rustylr.server.args`: Arguments passed to the language server command. When pointing directly at `rustylr`, use `["lsp"]`.
+* `rustylr.server.args`: Arguments passed to the language server command. Leave empty for automatic detection; when pointing directly at `rustylr`, use `["lsp"]`.
 * `rustylr.server.cwd`: Working directory for the language server.
+* `rustylr.server.documentPatterns`: Additional file globs handled by the RustyLR language server.
 * `rustylr.semanticTokens.enabled`: Toggle semantic token syntax highlighting.
 
 ## Installation & Requirements
 
 This extension requires the **RustyLR Language Server**, which is built into the `rustylr` executable and started with `rustylr lsp`.
 
-### 1. Install the Language Server (Recommended)
+### 1. Install the VSCode Extension
+
+Install [RustyLR LSP](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp) from the Marketplace, or use VS Code Quick Open:
+
+```text
+ext install ehwan.rustylr-lsp
+```
+
+### 2. Install the Language Server
 
 You can install the RustyLR executable globally using Cargo:
 
@@ -35,10 +50,29 @@ You can install the RustyLR executable globally using Cargo:
 cargo install rustylr
 ```
 
-Ensure that your cargo binary directory (usually `~/.cargo/bin`) is in your system's `PATH`. The extension will automatically detect it.
+When installed this way, Cargo places the `rustylr` executable in Cargo's binary directory (commonly `~/.cargo/bin` on Unix-like systems). Make sure that directory is in your `PATH`; the extension looks for `rustylr` on `PATH` when `rustylr.server.command` is empty.
 
-### 2. For RustyLR Workspace Contributors
+The extension checks the `rustylr` executable version before starting the language server. If the installed version is not compatible with this extension release, it shows the exact versioned install command for the expected server version.
+
+If you use a custom path instead of automatic detection:
+
+```json
+{
+  "rustylr.server.command": "/path/to/rustylr",
+  "rustylr.server.args": ["lsp"]
+}
+```
+
+### 3. Open a RustyLR Grammar File
+
+Open any `*.rustylr` file or a file named `rustylr.rs`. The extension starts `rustylr lsp` automatically and enables diagnostics, completion, hover, formatting, go to definition, find references, inlay hints, semantic tokens, and quick fixes.
+
+### 4. For RustyLR Workspace Contributors
 
 If you are developing or contributing to the RustyLR repository:
 - The extension will automatically detect built binaries in the `target/debug` or `target/release` folders of your repository root.
 - If no prebuilt binary is found, it falls back to running the server dynamically using `cargo run --package rustylr -- lsp`.
+
+## Marketplace Status
+
+This extension is published as [RustyLR LSP](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp) and remains in preview while the RustyLR language server continues to evolve.

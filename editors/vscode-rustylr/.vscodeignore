@@ -3,3 +3,5 @@
 package-lock.json
 extension.js
 node_modules/**
+npm-debug.log
+*.vsix

@@ -36,4 +36,8 @@ Main crates:
 - `rusty_lr_buildscript`: Build-script helper API.
 - `rusty_lr_derive`: Procedural macro API.
 
+Editor support:
+- RustyLR LSP for VSCode is published at https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp.
+- The extension requires a compatible `rustylr` executable and starts the server with `rustylr lsp`.
+
 The `rustylr` CLI and `rusty_lr` runtime must use compatible releases. Follow the README's versioning guidance.

@@ -92,7 +92,7 @@ Options:
 
 ### Language Server
 
-`rustylr lsp` starts the RustyLR language server over stdio. It is intended to be launched by editor clients such as the VSCode extension in [`../editors/vscode-rustylr`](../editors/vscode-rustylr). For LSP clients that append an explicit transport argument, `rustylr lsp --stdio` is accepted as an equivalent form.
+`rustylr lsp` starts the RustyLR language server over stdio. It is intended to be launched by editor clients such as the [RustyLR LSP VSCode extension](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp) in [`../editors/vscode-rustylr`](../editors/vscode-rustylr). For LSP clients that append an explicit transport argument, `rustylr lsp --stdio` is accepted as an equivalent form.
 
 The language server currently targets `*.rustylr` files and files named `rustylr.rs`, and supports diagnostics, quick fixes, formatting, go to definition, find references, hover documentation, inlay hints, semantic tokens, and completion.
 

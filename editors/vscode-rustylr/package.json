@@ -1,10 +1,11 @@
 {
-  "name": "rustylr-vscode",
-  "displayName": "RustyLR",
-  "description": "Rich language support for the RustyLR parser generator, featuring diagnostics, formatting, auto-completion, hover, goto-definition, find-references, and inlay hints.",
+  "name": "rustylr-lsp",
+  "displayName": "RustyLR LSP",
+  "description": "LSP-powered language support for RustyLR grammar files.",
   "version": "0.1.0",
   "publisher": "ehwan",
   "license": "MIT OR Apache-2.0",
+  "preview": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/ehwan/RustyLR.git"
@@ -31,6 +32,13 @@
     "Linters",
     "Formatters"
   ],
+  "galleryBanner": {
+    "color": "#1f2937",
+    "theme": "dark"
+  },
+  "rustylr": {
+    "requiredServerVersion": "1.34.0"
+  },
   "main": "./dist/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -56,7 +64,7 @@
         "rustylr.server.command": {
           "type": "string",
           "default": "",
-          "description": "Command used to start the RustyLR LSP server. Empty means auto-detect target/debug/rustylr and fall back to cargo run."
+          "description": "Command used to start the RustyLR LSP server. Empty means auto-detect target/debug/rustylr, then PATH rustylr, then fall back to cargo run."
         },
         "rustylr.server.args": {
           "type": "array",
@@ -64,7 +72,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "Arguments passed to rustylr.server.command."
+          "description": "Arguments passed to rustylr.server.command. Leave empty for automatic detection; use [\"lsp\"] when manually pointing at rustylr."
         },
         "rustylr.server.cwd": {
           "type": "string",
