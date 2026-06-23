@@ -1,7 +1,9 @@
 use lsp_types::{Diagnostic, DiagnosticSeverity, Range};
 use proc_macro2::{Spacing, TokenStream, TokenTree};
+use rusty_lr_core::{production::LR0ItemRef, TerminalSymbol};
 use rusty_lr_parser::grammar::Grammar;
 use serde_json::json;
+use std::collections::{BTreeMap, BTreeSet};
 use std::str::FromStr;
 
 use crate::lsp::position::range_to_lsp_range;
@@ -26,6 +28,77 @@ pub fn split_stream(token_stream: TokenStream) -> Result<(TokenStream, TokenStre
         output_stream.extend(std::iter::once(token));
     }
     Err(())
+}
+
+fn format_lr0_item(grammar: &Grammar, item: LR0ItemRef) -> String {
+    grammar.builder.rules[item.production_idx]
+        .rule
+        .clone()
+        .map(
+            |class| grammar.class_pretty_name_list(class, 5),
+            |nonterm| grammar.nonterm_pretty_name(nonterm),
+        )
+        .into_shifted(item.dot)
+        .to_string()
+}
+
+fn format_production(grammar: &Grammar, rule: usize) -> String {
+    grammar.builder.rules[rule]
+        .rule
+        .clone()
+        .map(
+            |class| grammar.class_pretty_name_list(class, 5),
+            |nonterm| grammar.nonterm_pretty_name(nonterm),
+        )
+        .to_string()
+}
+
+fn format_shift_reduce_conflict_message(
+    grammar: &Grammar,
+    term: TerminalSymbol<usize>,
+    shift_rules: &[LR0ItemRef],
+    reduce_rules: &BTreeMap<usize, Vec<LR0ItemRef>>,
+) -> String {
+    let term_str = grammar.class_pretty_name_list(term, 5);
+    let mut message = format!("Shift/Reduce conflict detected with terminal(class): {term_str}");
+
+    message.push_str("\n\nConflicting rules:");
+    message.push_str("\n- Shift:");
+    for &shift_rule in shift_rules {
+        message.push_str(&format!("\n  >>> {}", format_lr0_item(grammar, shift_rule)));
+    }
+    message.push_str("\n- Reduce:");
+    for &reduce_rule in reduce_rules.keys() {
+        message.push_str(&format!(
+            "\n  >>> {}",
+            format_production(grammar, reduce_rule)
+        ));
+    }
+
+    message
+}
+
+fn format_reduce_reduce_conflict_message(
+    grammar: &Grammar,
+    reduce_rules: &[(usize, Vec<LR0ItemRef>)],
+    reduce_terms: &BTreeSet<TerminalSymbol<usize>>,
+) -> String {
+    let terms = reduce_terms
+        .iter()
+        .map(|&term| grammar.class_pretty_name_list(term, 5))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let mut message = format!("Reduce/Reduce conflict detected with terminals: {terms}");
+
+    message.push_str("\n\nConflicting rules:");
+    for &(reduce_rule, _) in reduce_rules {
+        message.push_str(&format!(
+            "\n  >>> {}",
+            format_production(grammar, reduce_rule)
+        ));
+    }
+
+    message
 }
 
 /// Runs the compiler's parser/builder pipeline on the given file content and gathers all diagnostics.
@@ -167,11 +240,8 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
     if !grammar.glr {
         // Shift/Reduce conflicts
         for ((term, shift_rules, _), reduce_rules) in diags_collector.shift_reduce_conflicts {
-            let term_str = grammar.class_pretty_name_list(term, 5);
-            let message = format!(
-                "Shift/Reduce conflict detected with terminal(class): {}",
-                term_str
-            );
+            let message =
+                format_shift_reduce_conflict_message(&grammar, term, &shift_rules, &reduce_rules);
 
             for shift_rule in shift_rules {
                 if let Some((nonterm, local_rule)) =
@@ -185,7 +255,7 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
                         code: None,
                         code_description: None,
                         source: Some("rusty_lr".to_string()),
-                        message: format!("(Shift) {}", message),
+                        message: format!("(Shift) {message}"),
                         related_information: None,
                         tags: None,
                         data: None,
@@ -202,7 +272,7 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
                         code: None,
                         code_description: None,
                         source: Some("rusty_lr".to_string()),
-                        message: format!("(Reduce) {}", message),
+                        message: format!("(Reduce) {message}"),
                         related_information: None,
                         tags: None,
                         data: None,
@@ -213,14 +283,8 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
 
         // Reduce/Reduce conflicts
         for (reduce_rules, reduce_terms) in diags_collector.reduce_reduce_conflicts {
-            let mut terms = Vec::new();
-            for term in reduce_terms {
-                terms.push(grammar.class_pretty_name_list(term, 5));
-            }
-            let message = format!(
-                "Reduce/Reduce conflict detected with terminals: {}",
-                terms.join(", ")
-            );
+            let message =
+                format_reduce_reduce_conflict_message(&grammar, &reduce_rules, &reduce_terms);
 
             for (reduce_rule, _) in reduce_rules {
                 if let Some((nonterm, local_rule)) = grammar.get_rule_by_id(reduce_rule) {
@@ -282,4 +346,104 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
     }
 
     diagnostics
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SHIFT_REDUCE_CONFLICT_GRAMMAR: &str = r#"
+#[derive(Debug, Clone)]
+pub enum Token {
+    Num(i32),
+    Plus,
+}
+
+%%
+
+%tokentype Token;
+%start E;
+
+%token num Token::Num(_);
+%token plus Token::Plus;
+
+E(i32) : E plus E { 0 }
+  | num { 0 }
+  ;
+"#;
+
+    const REDUCE_REDUCE_CONFLICT_GRAMMAR: &str = r#"
+#[derive(Debug, Clone)]
+pub enum Token {
+    Num(i32),
+}
+
+%%
+
+%tokentype Token;
+%start S;
+
+%token num Token::Num(_);
+
+S(i32) : A { A }
+  | B { B }
+  ;
+A(i32) : num { 0 };
+B(i32) : num { 0 };
+"#;
+
+    #[test]
+    fn conflict_diagnostics_include_conflicting_rules() {
+        let diagnostics = compile_and_get_diagnostics(SHIFT_REDUCE_CONFLICT_GRAMMAR);
+        let conflict = diagnostics
+            .iter()
+            .find(|diagnostic| {
+                diagnostic
+                    .message
+                    .contains("Shift/Reduce conflict detected")
+            })
+            .unwrap_or_else(|| {
+                panic!(
+                    "expected a shift/reduce conflict diagnostic, got: {:?}",
+                    diagnostics
+                        .iter()
+                        .map(|diagnostic| diagnostic.message.as_str())
+                        .collect::<Vec<_>>()
+                )
+            });
+
+        assert!(conflict.message.contains("Conflicting rules:"));
+        assert!(conflict.message.contains("- Shift:"));
+        assert!(conflict.message.contains("- Reduce:"));
+        assert!(conflict.message.contains(">>> E ->"));
+        assert!(conflict.message.contains("•"));
+        assert!(!conflict.message.contains("backtrace"));
+        assert!(!conflict.message.contains("item trace"));
+    }
+
+    #[test]
+    fn reduce_reduce_conflict_diagnostics_include_conflicting_rules() {
+        let diagnostics = compile_and_get_diagnostics(REDUCE_REDUCE_CONFLICT_GRAMMAR);
+        let conflict = diagnostics
+            .iter()
+            .find(|diagnostic| {
+                diagnostic
+                    .message
+                    .contains("Reduce/Reduce conflict detected")
+            })
+            .unwrap_or_else(|| {
+                panic!(
+                    "expected a reduce/reduce conflict diagnostic, got: {:?}",
+                    diagnostics
+                        .iter()
+                        .map(|diagnostic| diagnostic.message.as_str())
+                        .collect::<Vec<_>>()
+                )
+            });
+
+        assert!(conflict.message.contains("Conflicting rules:"));
+        assert!(conflict.message.contains(">>> S -> num"));
+        assert!(!conflict.message.contains("backtrace"));
+        assert!(!conflict.message.contains("item trace"));
+    }
 }
