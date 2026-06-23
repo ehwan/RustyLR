@@ -268,7 +268,7 @@ For VSCode, install [RustyLR LSP from the Visual Studio Marketplace](https://mar
 ext install ehwan.rustylr-lsp
 ```
 
-The extension targets `*.rustylr` files and files named `rustylr.rs`. It provides diagnostics, quick fixes, formatting, go to definition, find references, hover documentation, inlay hints, semantic tokens, and completion.
+The extension targets `*.rustylr` files and files named `rustylr.rs`. It provides diagnostics, quick fixes, formatting, go to definition, find references, hover documentation, inlay hints, semantic tokens, and completion. Conflict diagnostics include the shift and reduce rules involved.
 
 The VSCode extension launches the language server from the `rustylr` executable. Install it with:
 
