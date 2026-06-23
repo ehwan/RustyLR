@@ -13,17 +13,28 @@ Other Rust files are intentionally not matched by default.
 
 ## Features
 
-- **Diagnostics:** Parses open RustyLR grammar files and publishes grammar errors, recovered parser errors, warnings, and conflict diagnostics.
-- **Code Actions:** Offers quick fixes for suppressible diagnostics by inserting the appropriate `%allow ...;` directive.
-- **Formatting:** Normalizes directive declarations into one-space, single-line forms, one-space pattern separators, and indentation for production rules and reduce-action bodies.
-- **Go to Definition:** Resolves terminal and non-terminal references to their `%token` declarations or production definitions.
-- **Hover:** Shows directive and keyword documentation. Hovering over grammar patterns also shows the pattern syntax, explanation, and final Rust type.
-- **Inlay Hints:** Shows `Pattern: Type` hints for top-level patterns in non-terminal definitions.
-- **Completion for symbols:** Suggests declared terminal names and non-terminal names in grammar positions. Completion details include the resolved Rust type for terminals and non-terminals, including inferred placeholders and a note when the value is boxed for parser storage.
-- **Completion for directives and keywords:** Suggests directives such as `%token`, `%start`, `%tokentype`, `%left`, `%right`, `%precedence`, `%prec`, `%dprec`, `%glr`, `%lalr`, `%nooptim`, `%allow`, and common identifiers such as `error`, `$sep`, `data`, `lookahead`, and `shift`.
-- **Completion for `$...` variables:** Suggests built-in substitutions (`$tokentype`, `$location`, `$userdata`, `$error`, `$errortype`), terminal and non-terminal substitutions (`$terminal_name`, `$NonTerminalName`), current reduce-action bindings (`$left`, `$value`, etc.), and positional semantic variables (`$1`, `$2`, ...).
-- **Completion for locations:** Suggests `@$`, `@0`, positional locations (`@1`, `@2`, ...), and named binding locations (`@left`, `@value`, etc.).
-- **Completion for `%allow`:** Suggests valid diagnostic names such as `nonterm_unreachable`, `unused_terminals`, and conflict-resolution diagnostic identifiers.
+### Supported Features
+
+- [x] **Diagnostics:** Parses open RustyLR grammar files and publishes grammar errors, recovered parser errors, warnings, and conflict diagnostics.
+- [x] **Code Actions:** Offers quick fixes for suppressible diagnostics by inserting the appropriate `%allow ...;` directive.
+- [x] **Formatting:** Normalizes directive declarations into one-space, single-line forms, one-space pattern separators, and indentation for production rules and reduce-action bodies.
+- [x] **Go to Definition:** Resolves terminal and non-terminal references to their `%token` declarations or production definitions, including `%prec` and precedence symbols.
+- [x] **Find References:** Finds all references to terminal and non-terminal symbols throughout the grammar definitions, `%start` rules, `%token` definitions, precedence symbols, and the `error` keyword.
+- [x] **Hover:** Shows directive and keyword documentation. Hovering over grammar patterns also shows the pattern syntax, explanation, and final Rust type.
+- [x] **Inlay Hints:** Shows `Pattern: Type` hints for top-level patterns in non-terminal definitions, and `ReduceAction` labels before action blocks.
+- [x] **Completion for symbols:** Suggests declared terminal names and non-terminal names in grammar positions. Completion details include the resolved Rust type for terminals and non-terminals, including inferred placeholders and a note when the value is boxed for parser storage.
+- [x] **Completion for directives and keywords:** Suggests directives such as `%token`, `%start`, `%tokentype`, `%left`, `%right`, `%precedence`, `%prec`, `%dprec`, `%glr`, `%lalr`, `%nooptim`, `%allow`, and common identifiers such as `error`, `$sep`, `data`, `lookahead`, and `shift`.
+- [x] **Completion for `$...` variables:** Suggests built-in substitutions (`$tokentype`, `$location`, `$userdata`, `$error`, `$errortype`), terminal and non-terminal substitutions (`$terminal_name`, `$NonTerminalName`), current reduce-action bindings (`$left`, `$value`, etc.), and positional semantic variables (`$1`, `$2`, ...).
+- [x] **Completion for locations:** Suggests `@$`, `@0`, positional locations (`@1`, `@2`, ...), and named binding locations (`@left`, `@value`, etc.).
+- [x] **Completion for `%allow`:** Suggests valid diagnostic names such as `nonterm_unreachable`, `unused_terminals`, and conflict-resolution diagnostic identifiers.
+
+### Unsupported / Planned Features
+
+- [ ] **Go to Definition / Find References inside Reduce Actions:** Navigating to definitions or finding references of symbols inside `ReduceAction` Rust code blocks is currently not supported.
+- [ ] **Document Symbols / Outline:** Showing all rules and tokens in the file outline window is not supported.
+- [ ] **Rename Symbol:** Rename refactoring of terminal and non-terminal symbols throughout the grammar file is not supported.
+- [ ] **Signature Help:** Parameter information for helper patterns like `$sep` is not supported.
+- [ ] **Multi-file Project Support:** Referencing definitions across multiple files is not supported (the grammar file is treated as a self-contained unit).
 
 ## Running the Server
 

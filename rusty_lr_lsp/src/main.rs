@@ -28,6 +28,7 @@ mod goto_definition;
 mod hover;
 mod inlay_hint;
 mod position;
+mod references;
 mod semantic_tokens;
 
 fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -40,6 +41,7 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let server_capabilities = serde_json::to_value(&ServerCapabilities {
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         definition_provider: Some(OneOf::Left(true)),
+        references_provider: Some(OneOf::Left(true)),
         document_formatting_provider: Some(OneOf::Left(true)),
         code_action_provider: Some(lsp_types::CodeActionProviderCapability::Options(
             CodeActionOptions {
@@ -125,6 +127,39 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                             Ok(None) => {}
                             Err(message) => {
                                 eprintln!("RustyLR goto-definition panicked: {message}");
+                            }
+                        }
+                    }
+                    connection.sender.send(Message::Response(response))?;
+                } else if req.method == lsp_types::request::References::METHOD {
+                    let (id, params) = match cast_request::<lsp_types::request::References>(req) {
+                        Ok(res) => res,
+                        Err(e) => {
+                            eprintln!("Error extracting references request: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let uri = params.text_document_position.text_document.uri;
+                    let position = params.text_document_position.position;
+
+                    let mut response = Response::new_ok(id.clone(), serde_json::Value::Null);
+                    if let Some(content) = documents.get(&uri) {
+                        match catch_lsp_panic(|| {
+                            references::find_references(content, position)
+                        }) {
+                            Ok(Some(locations)) => {
+                                let mapped_locations = locations
+                                    .into_iter()
+                                    .map(|range| Location::new(uri.clone(), range))
+                                    .collect::<Vec<_>>();
+                                response = Response::new_ok(id, mapped_locations);
+                            }
+                            Ok(None) => {
+                                response = Response::new_ok(id, Vec::<Location>::new());
+                            }
+                            Err(message) => {
+                                eprintln!("RustyLR references panicked: {message}");
                             }
                         }
                     }

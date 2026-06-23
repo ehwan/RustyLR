@@ -16,7 +16,9 @@ pub mod terminal_info;
 pub(crate) mod terminalset;
 pub mod utils;
 
-pub use parser::args::{GrammarArgs, PatternArgs, RuleDefArgs, RuleLineArgs, TableLayout};
+pub use parser::args::{
+    GrammarArgs, IdentOrLiteral, PatternArgs, PrecDPrecArgs, RuleDefArgs, RuleLineArgs, TableLayout,
+};
 pub use parser::location::{Located, Location};
 pub use terminalset::{TerminalSet, TerminalSetItem};
 

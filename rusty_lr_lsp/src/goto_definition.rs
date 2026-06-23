@@ -1,7 +1,9 @@
 use lsp_types::{Position, Range};
 use proc_macro2::TokenStream;
 use rusty_lr_parser::grammar::Grammar;
-use rusty_lr_parser::{GrammarArgs, Located, PatternArgs, TerminalSetItem};
+use rusty_lr_parser::{
+    GrammarArgs, IdentOrLiteral, Located, PatternArgs, PrecDPrecArgs, TerminalSetItem,
+};
 use std::str::FromStr;
 
 use crate::diagnostics::split_stream;
@@ -21,12 +23,21 @@ fn collect_located(args: &GrammarArgs) -> Vec<Located<String>> {
         collected.push(t_name.clone());
     }
 
-    // 3. %allow diagnostics names
+    // 3. Precedence definitions
+    for (_, _, items) in &args.precedences {
+        for item in items {
+            if let IdentOrLiteral::Ident(ident) = item {
+                collected.push(ident.clone());
+            }
+        }
+    }
+
+    // 4. %allow diagnostics names
     for (allow_name, _) in &args.allowed_diagnostics {
         collected.push(allow_name.clone());
     }
 
-    // 4. Rule definitions
+    // 5. Rule definitions
     for rule in &args.rules {
         collected.push(rule.name.clone());
         for line in &rule.rule_lines {
@@ -35,6 +46,12 @@ fn collect_located(args: &GrammarArgs) -> Vec<Located<String>> {
                     collected.push(loc.clone());
                 }
                 collect_pattern_located(pattern, &mut collected);
+            }
+            // %prec identifiers
+            for prec in &line.precs {
+                if let PrecDPrecArgs::Prec(IdentOrLiteral::Ident(ident)) = prec {
+                    collected.push(ident.clone());
+                }
             }
         }
     }
@@ -130,6 +147,18 @@ pub fn find_definition(content: &str, target_pos: Position) -> Option<Range> {
         return Some(range_to_lsp_range(content, def_range));
     }
 
+    // 3. Check precedence definitions
+    for (_, _, items) in &grammar_args.precedences {
+        for item in items {
+            if let IdentOrLiteral::Ident(ident) = item {
+                if ident.value() == name {
+                    let def_range = span_manager.get_byterange(&ident.location())?;
+                    return Some(range_to_lsp_range(content, def_range));
+                }
+            }
+        }
+    }
+
     None
 }
 
@@ -211,6 +240,44 @@ E : num plus error ;
         let token_def_index = MOCK_GRAMMAR.find("%token plus").unwrap();
         let expected_start_pos =
             crate::position::offset_to_position(MOCK_GRAMMAR, token_def_index + 7); // start of 'plus'
+        assert_eq!(def_range.start, expected_start_pos);
+    }
+
+    #[test]
+    fn test_goto_definition_prec() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token {
+    Num(i32),
+}
+
+%%
+
+%tokentype Token;
+%start E;
+
+%precedence empty_action;
+%token num Token::Num(_);
+
+E(_) : num
+     | %prec empty_action { 0 }
+     ;
+"#;
+
+        // Click on 'empty_action' after '%prec'
+        let index = grammar.find("%prec empty_action").unwrap() + 6; // start of 'empty_action'
+        let pos = crate::position::offset_to_position(grammar, index);
+
+        let def_range = find_definition(grammar, pos).unwrap();
+
+        // The definition should point to '%precedence empty_action;'
+        let def_offset = crate::position::position_to_offset(grammar, def_range.start);
+        let def_substring = &grammar[def_offset..];
+        assert!(def_substring.starts_with("empty_action"));
+
+        let prec_def_index = grammar.find("%precedence empty_action").unwrap();
+        let expected_start_pos =
+            crate::position::offset_to_position(grammar, prec_def_index + 12); // start of 'empty_action'
         assert_eq!(def_range.start, expected_start_pos);
     }
 }
