@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 /// Converts a context-free grammar into a deterministic finite automaton (DFA) tables,
 /// and generates a Rust code that can be used as a parser for that grammar.
@@ -8,8 +8,30 @@ use clap::Parser;
 #[command(version)]
 #[command(about)]
 pub struct Args {
+    #[command(subcommand)]
+    pub command: Option<Command>,
+
+    #[command(flatten)]
+    pub generate: GenerateArgs,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum Command {
+    /// Run the RustyLR language server over stdio.
+    Lsp(LspArgs),
+}
+
+#[derive(clap::Args, Debug)]
+pub struct LspArgs {
+    /// Run the language server over stdio.
+    #[arg(long, default_value = "false")]
+    pub stdio: bool,
+}
+
+#[derive(clap::Args, Debug)]
+pub struct GenerateArgs {
     /// Input_file to read
-    pub input_file: String,
+    pub input_file: Option<String>,
 
     /// Output_file to write
     #[arg(default_value = "out.tab.rs")]

@@ -6,10 +6,8 @@ members = [
   "rusty_lr_parser",
   "rusty_lr_buildscript",
   "rusty_lr_executable",
-  "rusty_lr_lsp",
   "example/calculator",
   "example/calculator_u8",
   "example/glr",
   "example/json",
 ]
-

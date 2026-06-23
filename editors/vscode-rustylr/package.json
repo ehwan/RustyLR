@@ -3,7 +3,7 @@
   "displayName": "RustyLR",
   "description": "Rich language support for the RustyLR parser generator, featuring diagnostics, formatting, auto-completion, hover, goto-definition, find-references, and inlay hints.",
   "version": "0.1.0",
-  "publisher": "rustylr",
+  "publisher": "ehwan",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
@@ -24,14 +24,19 @@
     "compiler"
   ],
   "engines": {
-    "vscode": "^1.84.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "Programming Languages",
     "Linters",
     "Formatters"
   ],
-  "main": "./extension.js",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "esbuild extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "watch": "esbuild extension.js --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch"
+  },
   "activationEvents": [
     "onLanguage:rustylr",
     "workspaceContains:**/*.rustylr",
@@ -51,7 +56,7 @@
         "rustylr.server.command": {
           "type": "string",
           "default": "",
-          "description": "Command used to start the RustyLR LSP server. Empty means auto-detect target/debug/rusty_lr_lsp and fall back to cargo run."
+          "description": "Command used to start the RustyLR LSP server. Empty means auto-detect target/debug/rustylr and fall back to cargo run."
         },
         "rustylr.server.args": {
           "type": "array",
@@ -120,9 +125,10 @@
     }
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^10.0.0"
   },
   "devDependencies": {
-    "@types/vscode": "1.84.0"
+    "@types/vscode": "1.90.0",
+    "esbuild": "^0.28.1"
   }
 }

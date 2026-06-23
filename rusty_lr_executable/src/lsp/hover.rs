@@ -6,10 +6,10 @@ use rusty_lr_parser::{GrammarArgs, PatternArgs, TerminalSetItem};
 use std::collections::BTreeSet;
 use std::ops::Range as ByteRange;
 
-use crate::completion::{
+use crate::lsp::completion::{
     self, ALLOW_DIAGNOSTICS, DIRECTIVES, KEYWORDS, SUBSTITUTION_VARIABLES, SYNTAX_URL,
 };
-use crate::position::position_to_offset;
+use crate::lsp::position::position_to_offset;
 
 pub fn hover(content: &str, position: Position) -> Option<Hover> {
     let offset = position_to_offset(content, position);
@@ -95,7 +95,7 @@ fn markdown_hover(content: &str, value: String, range: Option<ByteRange<usize>>)
             kind: MarkupKind::Markdown,
             value,
         }),
-        range: range.map(|range| crate::position::range_to_lsp_range(content, range)),
+        range: range.map(|range| crate::lsp::position::range_to_lsp_range(content, range)),
     }
 }
 
@@ -711,7 +711,7 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         let offset = MOCK_GRAMMAR.find("%token num").unwrap() + 1;
         let hover = hover(
             MOCK_GRAMMAR,
-            crate::position::offset_to_position(MOCK_GRAMMAR, offset),
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup) = hover.contents else {
@@ -726,7 +726,7 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         let offset = MOCK_GRAMMAR[offset..].find("num").unwrap() + offset;
         let hover = hover(
             MOCK_GRAMMAR,
-            crate::position::offset_to_position(MOCK_GRAMMAR, offset),
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup) = hover.contents else {
@@ -747,7 +747,7 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         let offset = MOCK_GRAMMAR.find("$sep").unwrap() + 1;
         let hover = hover(
             MOCK_GRAMMAR,
-            crate::position::offset_to_position(MOCK_GRAMMAR, offset),
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup) = hover.contents else {
@@ -778,7 +778,7 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         let offset = MOCK_GRAMMAR[sep_offset..].find("comma").unwrap() + sep_offset + 1;
         let hover = hover(
             MOCK_GRAMMAR,
-            crate::position::offset_to_position(MOCK_GRAMMAR, offset),
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup) = hover.contents else {
@@ -810,7 +810,7 @@ Expr : num { *data += 1; 0 };
         let offset = grammar_with_userdata.find("*data").unwrap() + 1; // points to 'd' in 'data'
         let hover = hover(
             grammar_with_userdata,
-            crate::position::offset_to_position(grammar_with_userdata, offset),
+            crate::lsp::position::offset_to_position(grammar_with_userdata, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup) = hover.contents else {
@@ -836,7 +836,7 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
         let offset = grammar.find("@1").unwrap();
         let hover1 = hover(
             grammar,
-            crate::position::offset_to_position(grammar, offset),
+            crate::lsp::position::offset_to_position(grammar, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup1) = hover1.contents else {
@@ -848,7 +848,7 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
         let offset = grammar.find("@$").unwrap();
         let hover2 = hover(
             grammar,
-            crate::position::offset_to_position(grammar, offset),
+            crate::lsp::position::offset_to_position(grammar, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup2) = hover2.contents else {
@@ -875,7 +875,7 @@ Expr : Expr plus Expr
         let offset = grammar.find("minus").unwrap();
         let hover_res = hover(
             grammar,
-            crate::position::offset_to_position(grammar, offset),
+            crate::lsp::position::offset_to_position(grammar, offset),
         )
         .unwrap();
         let HoverContents::Markup(markup) = hover_res.contents else {
@@ -904,7 +904,7 @@ Expr : num { 0 }
         let start_brace_offset = grammar.find("{ 0 }").unwrap();
         let hover_start = hover(
             grammar,
-            crate::position::offset_to_position(grammar, start_brace_offset),
+            crate::lsp::position::offset_to_position(grammar, start_brace_offset),
         )
         .unwrap();
         let HoverContents::Markup(markup_start) = hover_start.contents else {
@@ -917,7 +917,7 @@ Expr : num { 0 }
         assert!(markup_start.value.contains("#reduceaction-optional"));
         assert_eq!(
             hover_start.range.unwrap(),
-            crate::position::range_to_lsp_range(
+            crate::lsp::position::range_to_lsp_range(
                 grammar,
                 start_brace_offset..start_brace_offset + 1
             )
@@ -927,7 +927,7 @@ Expr : num { 0 }
         let end_brace_offset = start_brace_offset + 4; // points to '}' of '{ 0 }'
         let hover_end = hover(
             grammar,
-            crate::position::offset_to_position(grammar, end_brace_offset),
+            crate::lsp::position::offset_to_position(grammar, end_brace_offset),
         )
         .unwrap();
         let HoverContents::Markup(markup_end) = hover_end.contents else {
@@ -936,14 +936,17 @@ Expr : num { 0 }
         assert!(markup_end.value.contains("### Reduce Action"));
         assert_eq!(
             hover_end.range.unwrap(),
-            crate::position::range_to_lsp_range(grammar, end_brace_offset..end_brace_offset + 1)
+            crate::lsp::position::range_to_lsp_range(
+                grammar,
+                end_brace_offset..end_brace_offset + 1
+            )
         );
 
         // 3. Double brace start hover (first brace)
         let dstart_brace_offset = grammar.find("{{ 0 }}").unwrap();
         let hover_dstart1 = hover(
             grammar,
-            crate::position::offset_to_position(grammar, dstart_brace_offset),
+            crate::lsp::position::offset_to_position(grammar, dstart_brace_offset),
         )
         .unwrap();
         let HoverContents::Markup(markup_dstart1) = hover_dstart1.contents else {
@@ -952,7 +955,7 @@ Expr : num { 0 }
         assert!(markup_dstart1.value.contains("### Reduce Action"));
         assert_eq!(
             hover_dstart1.range.unwrap(),
-            crate::position::range_to_lsp_range(
+            crate::lsp::position::range_to_lsp_range(
                 grammar,
                 dstart_brace_offset..dstart_brace_offset + 2
             )
@@ -961,7 +964,7 @@ Expr : num { 0 }
         // 4. Double brace start hover (second brace)
         let hover_dstart2 = hover(
             grammar,
-            crate::position::offset_to_position(grammar, dstart_brace_offset + 1),
+            crate::lsp::position::offset_to_position(grammar, dstart_brace_offset + 1),
         )
         .unwrap();
         let HoverContents::Markup(markup_dstart2) = hover_dstart2.contents else {
@@ -970,7 +973,7 @@ Expr : num { 0 }
         assert!(markup_dstart2.value.contains("### Reduce Action"));
         assert_eq!(
             hover_dstart2.range.unwrap(),
-            crate::position::range_to_lsp_range(
+            crate::lsp::position::range_to_lsp_range(
                 grammar,
                 dstart_brace_offset..dstart_brace_offset + 2
             )
@@ -980,7 +983,7 @@ Expr : num { 0 }
         let dend_brace_offset = grammar.find("}}").unwrap();
         let hover_dend1 = hover(
             grammar,
-            crate::position::offset_to_position(grammar, dend_brace_offset),
+            crate::lsp::position::offset_to_position(grammar, dend_brace_offset),
         )
         .unwrap();
         let HoverContents::Markup(markup_dend1) = hover_dend1.contents else {
@@ -989,7 +992,10 @@ Expr : num { 0 }
         assert!(markup_dend1.value.contains("### Reduce Action"));
         assert_eq!(
             hover_dend1.range.unwrap(),
-            crate::position::range_to_lsp_range(grammar, dend_brace_offset..dend_brace_offset + 2)
+            crate::lsp::position::range_to_lsp_range(
+                grammar,
+                dend_brace_offset..dend_brace_offset + 2
+            )
         );
     }
 }

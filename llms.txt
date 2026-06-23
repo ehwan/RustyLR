@@ -32,7 +32,7 @@ Important files:
 
 Main crates:
 - `rusty_lr`: Runtime library used by generated parsers.
-- `rustylr`: CLI parser generator executable.
+- `rustylr`: CLI parser generator executable. Its `lsp` subcommand runs the RustyLR language server over stdio.
 - `rusty_lr_buildscript`: Build-script helper API.
 - `rusty_lr_derive`: Procedural macro API.
 

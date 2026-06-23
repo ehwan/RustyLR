@@ -6,8 +6,8 @@ use rusty_lr_parser::{
 };
 use std::str::FromStr;
 
-use crate::diagnostics::split_stream;
-use crate::position::{position_to_offset, range_to_lsp_range};
+use crate::lsp::diagnostics::split_stream;
+use crate::lsp::position::{position_to_offset, range_to_lsp_range};
 
 /// Traverses the AST of GrammarArgs to collect only terminal, non-terminal, prec, and error references.
 fn collect_references(args: &GrammarArgs) -> Vec<Located<String>> {
@@ -179,7 +179,7 @@ E(_) : E plus num { 0 }
     fn test_find_references_terminal() {
         // Find position of the 'plus' in rule "E plus num"
         let index = MOCK_GRAMMAR.find("plus num").unwrap();
-        let pos = crate::position::offset_to_position(MOCK_GRAMMAR, index);
+        let pos = crate::lsp::position::offset_to_position(MOCK_GRAMMAR, index);
 
         let refs = find_references(MOCK_GRAMMAR, pos).unwrap();
 
@@ -190,8 +190,8 @@ E(_) : E plus num { 0 }
 
         // Verify the content at each range
         for range in refs {
-            let start = crate::position::position_to_offset(MOCK_GRAMMAR, range.start);
-            let end = crate::position::position_to_offset(MOCK_GRAMMAR, range.end);
+            let start = crate::lsp::position::position_to_offset(MOCK_GRAMMAR, range.start);
+            let end = crate::lsp::position::position_to_offset(MOCK_GRAMMAR, range.end);
             assert_eq!(&MOCK_GRAMMAR[start..end], "plus");
         }
     }
@@ -200,7 +200,7 @@ E(_) : E plus num { 0 }
     fn test_find_references_nonterminal() {
         // Find position of '%start E'
         let index = MOCK_GRAMMAR.find("start E").unwrap() + 6; // start of 'E'
-        let pos = crate::position::offset_to_position(MOCK_GRAMMAR, index);
+        let pos = crate::lsp::position::offset_to_position(MOCK_GRAMMAR, index);
 
         let refs = find_references(MOCK_GRAMMAR, pos).unwrap();
 
@@ -211,8 +211,8 @@ E(_) : E plus num { 0 }
         assert_eq!(refs.len(), 3);
 
         for range in refs {
-            let start = crate::position::position_to_offset(MOCK_GRAMMAR, range.start);
-            let end = crate::position::position_to_offset(MOCK_GRAMMAR, range.end);
+            let start = crate::lsp::position::position_to_offset(MOCK_GRAMMAR, range.start);
+            let end = crate::lsp::position::position_to_offset(MOCK_GRAMMAR, range.end);
             assert_eq!(&MOCK_GRAMMAR[start..end], "E");
         }
     }
@@ -247,7 +247,7 @@ E(_) : E plus E
         // 1. Find references to precedence/terminal 'minus'
         // Click on '%prec minus'
         let index = grammar.find("%prec minus").unwrap() + 6; // start of 'minus'
-        let pos = crate::position::offset_to_position(grammar, index);
+        let pos = crate::lsp::position::offset_to_position(grammar, index);
         let refs = find_references(grammar, pos).unwrap();
 
         // References to 'minus':
@@ -257,20 +257,20 @@ E(_) : E plus E
         // - "%prec minus" (precedence override)
         assert_eq!(refs.len(), 4);
         for range in refs {
-            let start = crate::position::position_to_offset(grammar, range.start);
-            let end = crate::position::position_to_offset(grammar, range.end);
+            let start = crate::lsp::position::position_to_offset(grammar, range.start);
+            let end = crate::lsp::position::position_to_offset(grammar, range.end);
             assert_eq!(&grammar[start..end], "minus");
         }
 
         // 2. Find references to 'error'
         let index = grammar.find("error").unwrap();
-        let pos = crate::position::offset_to_position(grammar, index);
+        let pos = crate::lsp::position::offset_to_position(grammar, index);
         let refs = find_references(grammar, pos).unwrap();
 
         assert_eq!(refs.len(), 1);
         let range = refs[0];
-        let start = crate::position::position_to_offset(grammar, range.start);
-        let end = crate::position::position_to_offset(grammar, range.end);
+        let start = crate::lsp::position::position_to_offset(grammar, range.start);
+        let end = crate::lsp::position::position_to_offset(grammar, range.end);
         assert_eq!(&grammar[start..end], "error");
     }
 
@@ -280,7 +280,7 @@ E(_) : E plus E
         // If we search inside the reduce action, it shouldn't match anything.
         // We verify that clicking inside `{ 0 }` returns None.
         let index = MOCK_GRAMMAR.find("{ 0 }").unwrap() + 2; // points to '0'
-        let pos = crate::position::offset_to_position(MOCK_GRAMMAR, index);
+        let pos = crate::lsp::position::offset_to_position(MOCK_GRAMMAR, index);
 
         let refs = find_references(MOCK_GRAMMAR, pos);
         assert!(refs.is_none());

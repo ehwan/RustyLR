@@ -3,8 +3,8 @@ use proc_macro2::{TokenStream, TokenTree};
 use rusty_lr_parser::{GrammarArgs, PatternArgs};
 use std::ops::Range;
 
-use crate::completion;
-use crate::position::range_to_lsp_range;
+use crate::lsp::completion;
+use crate::lsp::position::range_to_lsp_range;
 
 const RULE_INDENT: &str = "    ";
 const ACTION_INNER_INDENT: &str = "        ";
@@ -673,7 +673,7 @@ fn line_end(content: &str, offset: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::position_to_offset;
+    use crate::lsp::position::position_to_offset;
 
     const MOCK_GRAMMAR: &str = r#"
 #[derive(Debug, Clone)]
@@ -827,12 +827,12 @@ Rule(i32): a {
 
     #[test]
     fn preserves_comments_in_parser_grammar_fixture() {
-        let content = include_str!("../../rusty_lr_parser/src/parser/parser.rustylr");
+        let content = include_str!("../../../rusty_lr_parser/src/parser/parser.rustylr");
         let formatted = apply_edits(content, formatting(content));
 
         assert!(formatted.contains("// | Pattern error {"));
         assert!(formatted.contains("//     Pattern"));
-        assert!(crate::completion::parse_args(&formatted).is_ok());
+        assert!(crate::lsp::completion::parse_args(&formatted).is_ok());
     }
 
     fn apply_edits(content: &str, edits: Vec<TextEdit>) -> String {

@@ -4,7 +4,7 @@ use rusty_lr_parser::grammar::Grammar;
 use serde_json::json;
 use std::str::FromStr;
 
-use crate::position::range_to_lsp_range;
+use crate::lsp::position::range_to_lsp_range;
 
 /// Splits a TokenStream by the `%%` separator.
 pub fn split_stream(token_stream: TokenStream) -> Result<(TokenStream, TokenStream), ()> {

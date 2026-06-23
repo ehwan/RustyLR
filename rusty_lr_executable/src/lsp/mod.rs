@@ -10,7 +10,7 @@ use lsp_types::{
     CodeActionKind, CodeActionOptions, CompletionOptions, Diagnostic, DiagnosticSeverity,
     GotoDefinitionResponse, Hover, HoverProviderCapability, InlayHint, InlayHintOptions,
     InlayHintServerCapabilities, Location, OneOf, PublishDiagnosticsParams, Range,
-    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Url,
+    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
 };
 use std::collections::HashMap;
 use std::error::Error;
@@ -31,7 +31,7 @@ mod position;
 mod references;
 mod semantic_tokens;
 
-fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
+pub fn run() -> Result<(), Box<dyn Error + Send + Sync>> {
     eprintln!("Starting RustyLR LSP server...");
 
     // Create stdio transport connection
@@ -91,7 +91,7 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     eprintln!("RustyLR LSP server initialized successfully.");
 
     // Store open document contents
-    let mut documents: HashMap<Url, String> = HashMap::new();
+    let mut documents: HashMap<Uri, String> = HashMap::new();
     let mut semantic_tokens_enabled = true;
 
     // Main event loop
@@ -410,7 +410,7 @@ fn completion_trigger_characters() -> Vec<String> {
         .collect()
 }
 
-fn publish_diagnostics(connection: &Connection, uri: Url, content: &str) {
+fn publish_diagnostics(connection: &Connection, uri: Uri, content: &str) {
     let diags = match catch_lsp_panic(|| diagnostics::compile_and_get_diagnostics(content)) {
         Ok(diags) => diags,
         Err(message) => vec![Diagnostic {

@@ -18,17 +18,27 @@ This extension provides rich language support for the [RustyLR](https://github.c
 
 This extension contributes the following settings to control the language server behavior:
 
-* `rustylr.server.command`: Path to the `rusty_lr_lsp` server binary. Leave empty to automatically detect or run from Cargo.
-* `rustylr.server.args`: Arguments passed to the language server command.
+* `rustylr.server.command`: Path to the `rustylr` executable. Leave empty to automatically detect or run from Cargo.
+* `rustylr.server.args`: Arguments passed to the language server command. When pointing directly at `rustylr`, use `["lsp"]`.
 * `rustylr.server.cwd`: Working directory for the language server.
 * `rustylr.semanticTokens.enabled`: Toggle semantic token syntax highlighting.
 
-## Requirements
+## Installation & Requirements
 
-The language features require the `rusty_lr_lsp` server, which is part of the RustyLR cargo workspace. You can build it from the repository root:
+This extension requires the **RustyLR Language Server**, which is built into the `rustylr` executable and started with `rustylr lsp`.
+
+### 1. Install the Language Server (Recommended)
+
+You can install the RustyLR executable globally using Cargo:
 
 ```bash
-cargo build -p rusty_lr_lsp
+cargo install rustylr
 ```
 
-By default, the extension will attempt to auto-detect the built binary in your workspace target folder or run it dynamically using Cargo.
+Ensure that your cargo binary directory (usually `~/.cargo/bin`) is in your system's `PATH`. The extension will automatically detect it.
+
+### 2. For RustyLR Workspace Contributors
+
+If you are developing or contributing to the RustyLR repository:
+- The extension will automatically detect built binaries in the `target/debug` or `target/release` folders of your repository root.
+- If no prebuilt binary is found, it falls back to running the server dynamically using `cargo run --package rustylr -- lsp`.

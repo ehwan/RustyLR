@@ -1,12 +1,12 @@
 use lsp_types::{
-    CodeAction, CodeActionKind, CodeActionOrCommand, Diagnostic, Position, Range, TextEdit, Url,
+    CodeAction, CodeActionKind, CodeActionOrCommand, Diagnostic, Position, Range, TextEdit, Uri,
     WorkspaceEdit,
 };
 use std::collections::{HashMap, HashSet};
 
 pub fn code_actions(
     content: &str,
-    uri: Url,
+    uri: Uri,
     diagnostics: Vec<Diagnostic>,
 ) -> Vec<CodeActionOrCommand> {
     let insert_position = allow_insert_position(content);
@@ -75,7 +75,7 @@ mod tests {
 
     #[test]
     fn creates_allow_quick_fix_from_diagnostic_data() {
-        let uri = Url::parse("file:///test.rustylr").unwrap();
+        let uri = "file:///test.rustylr".parse().unwrap();
         let diagnostic = Diagnostic {
             range: Range::default(),
             severity: Some(DiagnosticSeverity::WARNING),
@@ -104,7 +104,7 @@ mod tests {
 
     #[test]
     fn deduplicates_same_allow_suggestion() {
-        let uri = Url::parse("file:///test.rustylr").unwrap();
+        let uri = "file:///test.rustylr".parse().unwrap();
         let diagnostic = Diagnostic {
             range: Range::default(),
             severity: Some(DiagnosticSeverity::WARNING),

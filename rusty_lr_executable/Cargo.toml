@@ -3,7 +3,7 @@ name = "rustylr"
 version = "1.33.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "Executable for rusty_lr, a Bison-like Parser generator & Compiler frontend framework for Rust generating IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing."
+description = "CLI and language server for rusty_lr, a Bison-like parser generator and compiler frontend framework for Rust supporting IELR(1), LALR(1), and GLR parsing."
 repository = "https://github.com/ehwan/RustyLR"
 readme = "../README.md"
 keywords = ["parser", "bison", "lr", "glr", "compiler"]
@@ -12,5 +12,13 @@ categories = ["parsing"]
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
 rusty_lr_buildscript = { version = "0.67.0", path = "../rusty_lr_buildscript" }
+rusty_lr_core = { version = "4.2.0", path = "../rusty_lr_core", features = ["builder"] }
+rusty_lr_parser = { version = "4.2.1", path = "../rusty_lr_parser" }
+lsp-server = "0.7.6"
+lsp-types = "0.97.0"
 prettyplease = "0.2"
-syn = "2.0"
+proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
+quote = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+syn = { version = "2.0", features = ["full", "extra-traits"] }

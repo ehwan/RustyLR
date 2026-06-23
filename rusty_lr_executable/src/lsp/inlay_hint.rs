@@ -2,9 +2,9 @@ use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, Range};
 use rusty_lr_parser::grammar::Grammar;
 use rusty_lr_parser::{GrammarArgs, PatternArgs};
 
-use crate::completion;
-use crate::hover;
-use crate::position::{offset_to_position, position_to_offset};
+use crate::lsp::completion;
+use crate::lsp::hover;
+use crate::lsp::position::{offset_to_position, position_to_offset};
 
 pub fn inlay_hints(content: &str, range: Range) -> Vec<InlayHint> {
     let Ok(args) = completion::parse_args(content) else {

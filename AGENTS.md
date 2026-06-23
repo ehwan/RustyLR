@@ -59,5 +59,5 @@ For user-facing Bison-inspired syntax, keep familiar Bison terminology such as `
 ## 9. Keep LSP Synchronized with Grammar Changes
 
 Whenever changes are made to the grammar syntax, directives, patterns, or variables:
-- Update the LSP implementation in `rusty_lr_lsp` to fully support and recognize the updated grammar.
+- Update the LSP implementation in `rusty_lr_executable/src/lsp` to fully support and recognize the updated grammar.
 - Ensure that semantic tokens, hover information, completions, inlay hints, and diagnostic handling are kept aligned with the new grammar specifications.

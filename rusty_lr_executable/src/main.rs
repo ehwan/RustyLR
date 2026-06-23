@@ -1,8 +1,9 @@
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 
 use std::fs::write;
 
 mod arg;
+mod lsp;
 
 fn main() {
     let args = match arg::Args::try_parse() {
@@ -13,9 +14,30 @@ fn main() {
         }
     };
 
+    if let Some(command) = args.command {
+        match command {
+            arg::Command::Lsp(_) => {
+                if let Err(e) = lsp::run() {
+                    eprintln!("RustyLR language server error: {e}");
+                }
+            }
+        }
+        return;
+    }
+
+    let args = args.generate;
+    let input_file = match args.input_file.as_deref() {
+        Some(input_file) => input_file,
+        None => {
+            let _ = arg::Args::command().print_help();
+            eprintln!();
+            return;
+        }
+    };
+
     let mut builder = rusty_lr_buildscript::Builder::new();
     builder.is_executable = true;
-    builder.file(&args.input_file);
+    builder.file(input_file);
     if args.no_conflict {
         builder.note_conflicts(false);
     }

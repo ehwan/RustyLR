@@ -1,5 +1,5 @@
 # rustylr
-Executable for rusty_lr, a bison-like parser generator & compiler frontend for Rust supporting IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing.
+CLI and language server for rusty_lr, a Bison-like parser generator and compiler frontend framework for Rust supporting IELR(1), LALR(1), and GLR parsing.
 
 
 ## Installation
@@ -14,15 +14,25 @@ $ rustylr my_grammar.rustylr my_parser.rs
 
 The first argument is the grammar file. The optional second argument is the generated Rust output file; when omitted, RustyLR writes `out.tab.rs`.
 
+To run the RustyLR language server over stdio for editor clients:
+
+```bash
+$ rustylr lsp
+```
+
 ## Advanced CLI Options
 
 The options below are mainly useful for formatting control, parser-mode overrides, and diagnostics.
 
 ```bash
-Usage: rustylr [OPTIONS] <INPUT_FILE> [OUTPUT_FILE]
+Usage: rustylr [OPTIONS] [INPUT_FILE] [OUTPUT_FILE] [COMMAND]
+
+Commands:
+  lsp   Run the RustyLR language server over stdio
+  help  Print this message or the help of the given subcommand(s)
 
 Arguments:
-  <INPUT_FILE>
+  [INPUT_FILE]
           Input_file to read
 
   [OUTPUT_FILE]
@@ -53,10 +63,16 @@ Options:
 
           [possible values: true, false]
 
-      --dense <DENSE>
-          Override the written code and set generated parser table to use dense arrays
+      --layout <LAYOUT>
+          Set generated parser table layout representation
 
-          [possible values: true, false]
+          [default: auto]
+          [possible values: auto, dense, sparse]
+
+      --dense-limit <DENSE_LIMIT>
+          Set dense limit in bytes for auto-layout detection
+
+          [default: 32768]
 
       --state <STATE>
           Print the details of a specific state
@@ -72,7 +88,13 @@ Options:
 
 - `--state <STATE>` prints details for a specific generated state.
 - `--no-conflict`, `--no-conflict-resolve`, and `--no-backtrace` reduce conflict diagnostic output.
-- `--glr <true|false>` and `--dense <true|false>` override parser-mode settings from the grammar file.
+- `--glr <true|false>` and `--layout <auto|dense|sparse>` override parser-mode and table-layout settings from the grammar file.
+
+### Language Server
+
+`rustylr lsp` starts the RustyLR language server over stdio. It is intended to be launched by editor clients such as the VSCode extension in [`../editors/vscode-rustylr`](../editors/vscode-rustylr). For LSP clients that append an explicit transport argument, `rustylr lsp --stdio` is accepted as an equivalent form.
+
+The language server currently targets `*.rustylr` files and files named `rustylr.rs`, and supports diagnostics, quick fixes, formatting, go to definition, find references, hover documentation, inlay hints, semantic tokens, and completion.
 
 ## Grammar File Format
 The program searches for `%%` in the input file to separate Rust code from grammar definitions.

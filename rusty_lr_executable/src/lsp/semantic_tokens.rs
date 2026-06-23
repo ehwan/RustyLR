@@ -1,4 +1,4 @@
-use crate::position::offset_to_position;
+use crate::lsp::position::offset_to_position;
 use lsp_types::{SemanticToken, SemanticTokens};
 use proc_macro2::{TokenStream, TokenTree};
 use std::collections::HashSet;
@@ -24,7 +24,7 @@ pub fn semantic_tokens(content: &str) -> Option<SemanticTokens> {
     let (mut terminals, mut non_terminals) = collect_names(&tokens);
 
     // Also attempt to get names from completion module's parsed GrammarArgs if possible
-    if let Ok(args) = crate::completion::parse_args(content) {
+    if let Ok(args) = crate::lsp::completion::parse_args(content) {
         for (term, _) in args.terminals {
             terminals.insert(term.value().clone());
         }
@@ -471,7 +471,7 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
 
             // Find substring in MOCK_GRAMMAR
             let pos = lsp_types::Position::new(current_line, current_char);
-            let start_offset = crate::position::position_to_offset(MOCK_GRAMMAR, pos);
+            let start_offset = crate::lsp::position::position_to_offset(MOCK_GRAMMAR, pos);
             let end_offset = start_offset + token.length as usize;
             let text = &MOCK_GRAMMAR[start_offset..end_offset];
             decoded.push((text.to_string(), token.token_type));

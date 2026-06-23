@@ -1,0 +1,5 @@
+.vscode/**
+.gitignore
+package-lock.json
+extension.js
+node_modules/**

@@ -8,7 +8,7 @@ let outputChannel;
 let startingClient;
 
 async function activate(context) {
-  outputChannel = vscode.window.createOutputChannel("RustyLR LSP");
+  outputChannel = vscode.window.createOutputChannel("RustyLR LSP", { log: true });
   context.subscriptions.push(outputChannel);
 
   context.subscriptions.push(
@@ -145,21 +145,49 @@ function resolveServerCommand(configuredCommand, configuredArgs, vars) {
     };
   }
 
-  const binaryName = process.platform === "win32" ? "rusty_lr_lsp.exe" : "rusty_lr_lsp";
-  const candidates = [
-    vars.repoRoot && path.join(vars.repoRoot, "target", "debug", binaryName),
-    vars.repoRoot && path.join(vars.repoRoot, "target", "release", binaryName),
-  ].filter(Boolean);
+  const binaryName = process.platform === "win32" ? "rustylr.exe" : "rustylr";
+  const lspArgs = ["lsp"];
 
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      return { command: candidate, args: [] };
+  // 1. Try local repository targets if inside RustyLR repository (for development)
+  if (vars.repoRoot) {
+    const candidates = [
+      path.join(vars.repoRoot, "target", "debug", binaryName),
+      path.join(vars.repoRoot, "target", "release", binaryName),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        return { command: candidate, args: lspArgs };
+      }
     }
   }
 
+  // 2. Try searching the system PATH
+  const pathEnv = process.env.PATH || "";
+  const pathDirs = pathEnv.split(path.delimiter);
+  for (const dir of pathDirs) {
+    if (!dir) continue;
+    const fullPath = path.join(dir, binaryName);
+    try {
+      if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+        return { command: fullPath, args: lspArgs };
+      }
+    } catch (_e) {
+      // Ignore filesystem errors for inaccessible path entries
+    }
+  }
+
+  // 3. Fallback to cargo run ONLY if we are inside the RustyLR repo
+  if (vars.repoRoot) {
+    return {
+      command: "cargo",
+      args: ["run", "--quiet", "--package", "rustylr", "--", "lsp"],
+    };
+  }
+
+  // 4. Default fallback: assume it is on the PATH and let it fail gracefully
   return {
-    command: "cargo",
-    args: ["run", "--quiet", "--package", "rusty_lr_lsp"],
+    command: binaryName,
+    args: lspArgs,
   };
 }
 
@@ -172,7 +200,7 @@ function findRustyLrRoot(startPath) {
   while (true) {
     if (
       fs.existsSync(path.join(current, "Cargo.toml")) &&
-      fs.existsSync(path.join(current, "rusty_lr_lsp", "Cargo.toml"))
+      fs.existsSync(path.join(current, "rusty_lr_executable", "Cargo.toml"))
     ) {
       return current;
     }
@@ -192,7 +220,15 @@ function reportStartError(error) {
     outputChannel.appendLine(message);
     outputChannel.show(true);
   }
-  vscode.window.showErrorMessage("Failed to start RustyLR language server. See Output: RustyLR LSP.");
+
+  vscode.window.showErrorMessage(
+    "Failed to start RustyLR language server. Please make sure you have installed 'rustylr' by running 'cargo install rustylr'.",
+    "Open README"
+  ).then((selection) => {
+    if (selection === "Open README") {
+      vscode.env.openExternal(vscode.Uri.parse("https://github.com/ehwan/RustyLR/tree/main/editors/vscode-rustylr#readme"));
+    }
+  });
 }
 
 module.exports = {

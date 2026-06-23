@@ -8,8 +8,8 @@ use rusty_lr_parser::{GrammarArgs, Location, PatternArgs};
 use std::collections::{BTreeMap, BTreeSet};
 use std::str::FromStr;
 
-use crate::diagnostics::split_stream;
-use crate::position::{offset_to_position, position_to_offset};
+use crate::lsp::diagnostics::split_stream;
+use crate::lsp::position::{offset_to_position, position_to_offset};
 
 pub(crate) const DIRECTIVES: &[&str] = &[
     "%token",
