@@ -1,6 +1,6 @@
 # RustyLR Language Support
 
-This extension provides rich language support for the [RustyLR](https://github.com/ehwan/RustyLR) parser generator grammar files (`*.rustylr` and `rustylr.rs`).
+This extension provides rich language support for [RustyLR](https://github.com/ehwan/RustyLR) grammar files (`*.rustylr` and `rustylr.rs`). Language features are powered by the `rustylr lsp` language server.
 
 ## Features
 
@@ -19,8 +19,9 @@ This extension provides rich language support for the [RustyLR](https://github.c
 This extension contributes the following settings to control the language server behavior:
 
 * `rustylr.server.command`: Path to the `rustylr` executable. Leave empty to automatically detect or run from Cargo.
-* `rustylr.server.args`: Arguments passed to the language server command. When pointing directly at `rustylr`, use `["lsp"]`.
+* `rustylr.server.args`: Arguments passed to the language server command. Leave empty for automatic detection; when pointing directly at `rustylr`, use `["lsp"]`.
 * `rustylr.server.cwd`: Working directory for the language server.
+* `rustylr.server.documentPatterns`: Additional file globs handled by the RustyLR language server.
 * `rustylr.semanticTokens.enabled`: Toggle semantic token syntax highlighting.
 
 ## Installation & Requirements
@@ -37,8 +38,21 @@ cargo install rustylr
 
 Ensure that your cargo binary directory (usually `~/.cargo/bin`) is in your system's `PATH`. The extension will automatically detect it.
 
+If you use a custom path instead of automatic detection:
+
+```json
+{
+  "rustylr.server.command": "/path/to/rustylr",
+  "rustylr.server.args": ["lsp"]
+}
+```
+
 ### 2. For RustyLR Workspace Contributors
 
 If you are developing or contributing to the RustyLR repository:
 - The extension will automatically detect built binaries in the `target/debug` or `target/release` folders of your repository root.
 - If no prebuilt binary is found, it falls back to running the server dynamically using `cargo run --package rustylr -- lsp`.
+
+## Marketplace Status
+
+This extension is published as a preview while the RustyLR language server continues to evolve.
