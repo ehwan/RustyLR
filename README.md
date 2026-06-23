@@ -290,7 +290,7 @@ The extension source is available in [`editors/vscode-rustylr`](editors/vscode-r
 - [Calculator (u8 tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator_u8/src/parser.rustylr): A byte-stream numeric calculator.
 - [JSON Validator](https://github.com/ehwan/RustyLR/blob/main/example/json/src/parser.rustylr): A validator checking JSON syntax.
 - [Lua 5.4 Parser](https://github.com/ehwan/lua_rust/blob/main/parser/src/parser.rs): A complete parser for the Lua 5.4 programming language.
-- [C Parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/main/src/ast/parser_lr.rs): An LR-based parser for the C programming language.
+- [C Parser](https://github.com/ehwan/C-language-Parser-In-Rust/blob/3ba286acd37e8e540f74f3aca2857fe7e3bfcfe9/src/ast/parser.rustylr): An LR-based parser for the C programming language.
 - [Bootstrap Parser](https://github.com/ehwan/RustyLR/blob/main/rusty_lr_parser/src/parser/parser.rustylr): RustyLR's own grammar parser, written using RustyLR.
 
 ---
