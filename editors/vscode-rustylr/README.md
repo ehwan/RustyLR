@@ -1,6 +1,6 @@
-# RustyLR Language Support
+# RustyLR LSP
 
-This extension provides rich language support for [RustyLR](https://github.com/ehwan/RustyLR) grammar files (`*.rustylr` and `rustylr.rs`). Language features are powered by the `rustylr lsp` language server.
+RustyLR LSP provides rich language support for [RustyLR](https://github.com/ehwan/RustyLR) grammar files (`*.rustylr` and `rustylr.rs`). Language features are powered by the `rustylr lsp` language server.
 
 ## Features
 

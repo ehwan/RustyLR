@@ -1,7 +1,7 @@
 {
-  "name": "rustylr-vscode",
-  "displayName": "RustyLR",
-  "description": "Language support for RustyLR grammar files powered by the rustylr lsp language server.",
+  "name": "rustylr-lsp",
+  "displayName": "RustyLR LSP",
+  "description": "LSP-powered language support for RustyLR grammar files.",
   "version": "0.1.0",
   "publisher": "ehwan",
   "license": "MIT",
