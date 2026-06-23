@@ -65,13 +65,26 @@ fn markdown_hover(content: &str, value: String, range: Option<ByteRange<usize>>)
 }
 
 fn hover_word(content: &str, offset: usize) -> Option<String> {
-    let offset = offset.min(content.len());
+    let mut offset = offset.min(content.len());
+    if offset < content.len() {
+        let ch = content[offset..].chars().next()?;
+        if ch == '@' || ch == '$' || ch == '%' {
+            offset += ch.len_utf8();
+        }
+    }
+
     let start = completion::current_prefix_start(content, offset, true);
     let mut end = offset;
     while end < content.len() {
         let ch = content[end..].chars().next()?;
         if completion::is_ident_continue(ch) {
             end += ch.len_utf8();
+        } else if ch == '$' && &content[start..end] == "@" {
+            end += ch.len_utf8();
+            break;
+        } else if ch == '$' && &content[start..end] == "$" {
+            end += ch.len_utf8();
+            break;
         } else {
             break;
         }
@@ -707,5 +720,41 @@ Expr : num { *data += 1; 0 };
         assert!(markup.value.contains("data: &mut MyCoolData"));
         assert!(markup.value.contains("%userdata MyCoolData;"));
     }
-}
 
+    #[test]
+    fn hovers_sigils() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%userdata MyCoolData;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
+"#;
+        // Hover on '@' of '@1'
+        let offset = grammar.find("@1").unwrap();
+        let hover1 = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup1) = hover1.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup1.value.contains("`@1` refers to a source-location"));
+
+        // Hover on '@' of '@$'
+        let offset = grammar.find("@$").unwrap();
+        let hover2 = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup2) = hover2.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup2.value.contains("`@$` refers to a source-location"));
+    }
+}
