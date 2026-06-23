@@ -63,8 +63,7 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
     if documentation.is_none() {
         if let Some(args) = &parsed {
             documentation = reduce_action_variable_documentation(args, &word).or_else(|| {
-                completion::reduce_action_binding_type_for_offset(args, content, offset, &word)
-                    .map(|ty| reduce_action_binding_documentation(&word, &ty))
+                reduce_action_reference_documentation_for_word(args, content, offset, &word)
             });
         }
     }
@@ -184,11 +183,93 @@ pub(crate) fn reduce_action_binding_detail(name: &str, ty: &str) -> String {
 }
 
 pub(crate) fn reduce_action_binding_documentation(name: &str, ty: &str) -> String {
+    reduce_action_binding_documentation_impl(name, ty, None)
+}
+
+pub(crate) fn reduce_action_binding_reference_documentation(
+    name: &str,
+    reference: &completion::ReduceActionReference,
+) -> String {
+    reduce_action_binding_documentation_impl(name, &reference.ty, Some(reference))
+}
+
+fn reduce_action_binding_documentation_impl(
+    name: &str,
+    ty: &str,
+    reference: Option<&completion::ReduceActionReference>,
+) -> String {
+    let reference_section = production_reference_section(reference);
     format!(
-        "### `{}`\n\nSemantic value bound by the current production line.\n\nFinal type: `{}`\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\n[Named variables]({SYNTAX_URL}#named-variables)",
+        "### `{}`\n\nSemantic value bound by the current production line.\n\nFinal type: `{}`{reference_section}\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\n[Named variables]({SYNTAX_URL}#named-variables)",
         reduce_action_binding_detail(name, ty),
         ty
     )
+}
+
+pub(crate) fn reduce_action_location_reference_detail(args: &GrammarArgs, label: &str) -> String {
+    format!("{label}: {}", resolved_location_type_name(args))
+}
+
+pub(crate) fn reduce_action_location_reference_documentation(
+    args: &GrammarArgs,
+    label: &str,
+    reference: Option<&completion::ReduceActionReference>,
+) -> String {
+    let location_type = resolved_location_type_name(args);
+    let reference_section = production_reference_section(reference);
+    format!(
+        "### `{label}: {location_type}`\n\nSource-location value for a referenced production token.{reference_section}\n\nExamples:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ println!(\"{{:?}}\", @left); }};\nExpr : Expr plus Term {{ println!(\"{{:?}}\", @1); }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+    )
+}
+
+fn production_reference_section(reference: Option<&completion::ReduceActionReference>) -> String {
+    let Some(reference) = reference else {
+        return String::new();
+    };
+
+    format!(
+        "\n\nReferences RHS symbol #{}:\n\n```rustylr\n{}\n{}\n```",
+        reference.index, reference.production, reference.marker
+    )
+}
+
+fn reduce_action_reference_documentation_for_word(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+    word: &str,
+) -> Option<String> {
+    if let Some(name) = word.strip_prefix('@') {
+        if name == "0" || name == "$" {
+            return None;
+        }
+        if let Ok(index) = name.parse::<usize>() {
+            return completion::reduce_action_positional_reference_for_offset(
+                args, content, offset, index,
+            )
+            .map(|reference| {
+                reduce_action_location_reference_documentation(args, word, Some(&reference))
+            });
+        }
+        return completion::reduce_action_binding_reference_for_offset(args, content, offset, name)
+            .map(|reference| {
+                reduce_action_location_reference_documentation(args, word, Some(&reference))
+            });
+    }
+
+    if let Some(name) = word.strip_prefix('$') {
+        if let Ok(index) = name.parse::<usize>() {
+            return completion::reduce_action_positional_reference_for_offset(
+                args, content, offset, index,
+            )
+            .map(|reference| reduce_action_binding_reference_documentation(word, &reference));
+        }
+        return completion::reduce_action_binding_reference_for_offset(args, content, offset, name)
+            .map(|reference| reduce_action_binding_reference_documentation(word, &reference));
+    }
+
+    completion::reduce_action_binding_reference_for_offset(args, content, offset, word)
+        .map(|reference| reduce_action_binding_reference_documentation(word, &reference))
 }
 
 fn data_documentation(args: &GrammarArgs) -> String {
@@ -1064,7 +1145,9 @@ Expr : num { println!("{:?}, {:?}, {:?}", @1, @0, @$); 0 };
         let HoverContents::Markup(markup1) = hover1.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup1.value.contains("`@1` refers to a source-location"));
+        assert!(markup1.value.contains("@1: Span"));
+        assert!(markup1.value.contains("Expr : num"));
+        assert!(markup1.value.contains("       ^^^"));
 
         // Hover on '@' of '@0'
         let offset = grammar.find("@0").unwrap();
@@ -1316,6 +1399,50 @@ Expr(i32) : left=Expr plus right=Expr { left + right };
         };
         assert!(markup.value.contains("left: i32"));
         assert!(markup.value.contains("Semantic value bound"));
+        assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
+        assert!(markup.value.contains("       ^^^^^^^^^"));
+
+        let positional_offset = grammar.find("+ right").unwrap() + 2;
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, positional_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("right: i32"));
+        assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
+        assert!(markup.value.contains("^^^^^^^^^"));
+
+        let dollar_grammar = grammar.replace(
+            "{ left + right }",
+            "{ let _ = $1; let _ = @2; left + right }",
+        );
+        let dollar_offset = dollar_grammar.find("$1").unwrap();
+        let hover_res = hover(
+            &dollar_grammar,
+            crate::lsp::position::offset_to_position(&dollar_grammar, dollar_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("$1: i32"));
+        assert!(markup.value.contains("       ^^^^^^^^^"));
+
+        let location_offset = dollar_grammar.find("@2").unwrap();
+        let hover_res = hover(
+            &dollar_grammar,
+            crate::lsp::position::offset_to_position(&dollar_grammar, location_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("@2:"));
+        assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
+        assert!(markup.value.contains("                 ^^^^"));
     }
 
     #[test]

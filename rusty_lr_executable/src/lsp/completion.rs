@@ -131,22 +131,46 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                 );
             }
             for variable in &line_variables.value_names {
-                builder.variable(
-                    &format!("${variable}"),
-                    "current production binding",
-                    Some(format!(
-                        "Semantic value bound by the current production line.\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\nHere `$left` and `$right` can be used in RustCode substitution contexts.\n\n[Named variables]({SYNTAX_URL}#named-variables)"
-                    )),
-                );
+                let (detail, documentation) = if let Some(reference) =
+                    line_variables.value_references.get(variable)
+                {
+                    (
+                        format!("${variable}: {}", reference.ty),
+                        Some(hover::reduce_action_binding_reference_documentation(
+                            &format!("${variable}"),
+                            reference,
+                        )),
+                    )
+                } else {
+                    (
+                            "current production binding".to_string(),
+                            Some(format!(
+                                "Semantic value bound by the current production line.\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\nHere `$left` and `$right` can be used in RustCode substitution contexts.\n\n[Named variables]({SYNTAX_URL}#named-variables)"
+                            )),
+                        )
+                };
+                builder.variable(&format!("${variable}"), &detail, documentation);
             }
             for index in 1..=line_variables.value_count {
-                builder.variable(
-                    &format!("${index}"),
-                    "positional semantic value",
-                    Some(format!(
-                        "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
-                    )),
-                );
+                let (detail, documentation) = if let Some(reference) =
+                    line_variables.position_references.get(&index)
+                {
+                    (
+                        format!("${index}: {}", reference.ty),
+                        Some(hover::reduce_action_binding_reference_documentation(
+                            &format!("${index}"),
+                            reference,
+                        )),
+                    )
+                } else {
+                    (
+                            "positional semantic value".to_string(),
+                            Some(format!(
+                                "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
+                            )),
+                        )
+                };
+                builder.variable(&format!("${index}"), &detail, documentation);
             }
         }
         CompletionMode::Location => {
@@ -155,18 +179,50 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             let (detail, documentation) = location_completion_info(parsed.as_ref(), "@0");
             builder.variable("@0", &detail, documentation);
             for variable in &line_variables.value_names {
-                builder.variable(
-                    &format!("@{variable}"),
-                    "current production binding location",
-                    location_documentation(&format!("@{variable}")),
-                );
+                let label = format!("@{variable}");
+                let (detail, documentation) =
+                    if let Some(reference) = line_variables.value_references.get(variable) {
+                        (
+                            hover::reduce_action_location_reference_detail(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                            ),
+                            Some(hover::reduce_action_location_reference_documentation(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                                Some(reference),
+                            )),
+                        )
+                    } else {
+                        (
+                            "current production binding location".to_string(),
+                            location_documentation(&label),
+                        )
+                    };
+                builder.variable(&label, &detail, documentation);
             }
             for index in 1..=line_variables.value_count {
-                builder.variable(
-                    &format!("@{index}"),
-                    "positional location",
-                    location_documentation(&format!("@{index}")),
-                );
+                let label = format!("@{index}");
+                let (detail, documentation) =
+                    if let Some(reference) = line_variables.position_references.get(&index) {
+                        (
+                            hover::reduce_action_location_reference_detail(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                            ),
+                            Some(hover::reduce_action_location_reference_documentation(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                                Some(reference),
+                            )),
+                        )
+                    } else {
+                        (
+                            "positional location".to_string(),
+                            location_documentation(&label),
+                        )
+                    };
+                builder.variable(&label, &detail, documentation);
             }
         }
         CompletionMode::AllowDiagnostic => {
@@ -182,11 +238,21 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
         CompletionMode::Symbol => {
             if line_variables.in_reduce_action {
                 for (name, ty) in &line_variables.value_types {
-                    builder.variable(
-                        name,
-                        &hover::reduce_action_binding_detail(name, ty),
-                        Some(hover::reduce_action_binding_documentation(name, ty)),
-                    );
+                    if let Some(reference) = line_variables.value_references.get(name) {
+                        builder.variable(
+                            name,
+                            &hover::reduce_action_binding_detail(name, ty),
+                            Some(hover::reduce_action_binding_reference_documentation(
+                                name, reference,
+                            )),
+                        );
+                    } else {
+                        builder.variable(
+                            name,
+                            &hover::reduce_action_binding_detail(name, ty),
+                            Some(hover::reduce_action_binding_documentation(name, ty)),
+                        );
+                    }
                 }
             }
             add_symbol_items(&mut builder, &names);
@@ -522,8 +588,18 @@ fn rule_line_tokens_text(
 struct LineVariables {
     value_names: BTreeSet<String>,
     value_types: BTreeMap<String, String>,
+    value_references: BTreeMap<String, ReduceActionReference>,
+    position_references: BTreeMap<usize, ReduceActionReference>,
     value_count: usize,
     in_reduce_action: bool,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ReduceActionReference {
+    pub(crate) ty: String,
+    pub(crate) production: String,
+    pub(crate) marker: String,
+    pub(crate) index: usize,
 }
 
 fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> LineVariables {
@@ -538,8 +614,19 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
             if start <= offset && offset <= end {
                 let mut variables = LineVariables::default();
                 variables.in_reduce_action = reduce_action_contains_offset(line, offset);
+                let token_references = grammar
+                    .as_ref()
+                    .map(|grammar| {
+                        production_token_references(args, content, rule, line_idx, grammar)
+                    })
+                    .unwrap_or_default();
                 for (mapped_name, pattern) in &line.tokens {
                     variables.value_count += 1;
+                    if let Some(reference) = token_references.get(variables.value_count - 1) {
+                        variables
+                            .position_references
+                            .insert(variables.value_count, reference.clone());
+                    }
                     if let Some(name) = mapped_name {
                         variables.value_names.insert(name.value().clone());
                         if let Some(grammar) = &grammar {
@@ -548,14 +635,26 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
                                 hover::pattern_final_type(args, grammar, pattern),
                             );
                         }
+                        if let Some(reference) = token_references.get(variables.value_count - 1) {
+                            variables
+                                .value_references
+                                .insert(name.value().clone(), reference.clone());
+                        }
                     } else {
                         collect_default_bindings(pattern, &mut variables.value_names);
-                        if let Some(grammar) = &grammar {
+                        if let (Some(grammar), Some(reference)) =
+                            (&grammar, token_references.get(variables.value_count - 1))
+                        {
                             collect_default_binding_types(
                                 args,
                                 grammar,
                                 pattern,
                                 &mut variables.value_types,
+                            );
+                            collect_default_binding_references(
+                                pattern,
+                                reference,
+                                &mut variables.value_references,
                             );
                         }
                     }
@@ -568,17 +667,30 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
     LineVariables::default()
 }
 
-pub(crate) fn reduce_action_binding_type_for_offset(
+pub(crate) fn reduce_action_binding_reference_for_offset(
     args: &GrammarArgs,
     content: &str,
     offset: usize,
     name: &str,
-) -> Option<String> {
+) -> Option<ReduceActionReference> {
     let variables = variables_for_offset(args, content, offset);
     if !variables.in_reduce_action {
         return None;
     }
-    variables.value_types.get(name).cloned()
+    variables.value_references.get(name).cloned()
+}
+
+pub(crate) fn reduce_action_positional_reference_for_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+    index: usize,
+) -> Option<ReduceActionReference> {
+    let variables = variables_for_offset(args, content, offset);
+    if !variables.in_reduce_action {
+        return None;
+    }
+    variables.position_references.get(&index).cloned()
 }
 
 fn reduce_action_contains_offset(line: &rusty_lr_parser::RuleLineArgs, offset: usize) -> bool {
@@ -586,6 +698,60 @@ fn reduce_action_contains_offset(line: &rusty_lr_parser::RuleLineArgs, offset: u
         .as_ref()
         .and_then(token_stream_range)
         .is_some_and(|range| range.contains(&offset))
+}
+
+fn production_token_references(
+    args: &GrammarArgs,
+    content: &str,
+    rule: &rusty_lr_parser::RuleDefArgs,
+    line_idx: usize,
+    grammar: &Grammar,
+) -> Vec<ReduceActionReference> {
+    let line = &rule.rule_lines[line_idx];
+    let separator = if line_idx == 0 { ':' } else { '|' };
+    let mut production = format!("{} {separator}", rule.name.value());
+    let mut token_spans = Vec::new();
+    for (mapped_name, pattern) in &line.tokens {
+        let token_text = mapped_pattern_text(args, content, mapped_name.as_ref(), pattern);
+        if token_text.is_empty() {
+            continue;
+        }
+        production.push(' ');
+        let start = production.chars().count();
+        production.push_str(&token_text);
+        let width = token_text.chars().count().max(1);
+        token_spans.push((
+            start,
+            width,
+            hover::pattern_final_type(args, grammar, pattern),
+        ));
+    }
+
+    token_spans
+        .into_iter()
+        .enumerate()
+        .map(|(idx, (start, width, ty))| ReduceActionReference {
+            ty,
+            production: production.clone(),
+            marker: format!("{}{}", " ".repeat(start), "^".repeat(width)),
+            index: idx + 1,
+        })
+        .collect()
+}
+
+fn mapped_pattern_text(
+    args: &GrammarArgs,
+    content: &str,
+    mapped_name: Option<&rusty_lr_parser::Located<String>>,
+    pattern: &PatternArgs,
+) -> String {
+    let start = mapped_name
+        .and_then(|name| args.span_manager.get_byterange(&name.location()))
+        .map_or_else(|| pattern_start(args, pattern), |range| range.start);
+    let end = pattern_end(args, pattern);
+    content[start.min(content.len())..end.min(content.len())]
+        .trim()
+        .to_string()
 }
 
 fn rule_line_end(
@@ -799,6 +965,37 @@ fn collect_default_binding_types(
         }
         PatternArgs::Sep { base, .. } => {
             collect_default_binding_types(args, grammar, base, bindings);
+        }
+        PatternArgs::Exclamation { .. }
+        | PatternArgs::Group { .. }
+        | PatternArgs::TerminalSet(_)
+        | PatternArgs::Byte(_)
+        | PatternArgs::ByteString(_)
+        | PatternArgs::Char(_)
+        | PatternArgs::String(_) => {}
+    }
+}
+
+fn collect_default_binding_references(
+    pattern: &PatternArgs,
+    reference: &ReduceActionReference,
+    bindings: &mut BTreeMap<String, ReduceActionReference>,
+) {
+    match pattern {
+        PatternArgs::Ident(ident) => {
+            bindings.insert(ident.value().clone(), reference.clone());
+        }
+        PatternArgs::Plus { base, .. }
+        | PatternArgs::Star { base, .. }
+        | PatternArgs::Question { base, .. } => {
+            collect_default_binding_references(base, reference, bindings);
+        }
+        PatternArgs::Minus { base, exclude } => {
+            collect_default_binding_references(base, reference, bindings);
+            collect_default_binding_references(exclude, reference, bindings);
+        }
+        PatternArgs::Sep { base, .. } => {
+            collect_default_binding_references(base, reference, bindings);
         }
         PatternArgs::Exclamation { .. }
         | PatternArgs::Group { .. }
@@ -1233,15 +1430,49 @@ pub enum Token { Num(i32), Plus }
 Expr(i32) : left=Expr plus right=Expr {  };
 "#;
         let offset = grammar.find("{  }").unwrap() + 2;
-        let items = items(completions(grammar, offset_to_position(grammar, offset)));
+        let completion_items = items(completions(grammar, offset_to_position(grammar, offset)));
 
-        let left = items.iter().find(|item| item.label == "left").unwrap();
+        let left = completion_items
+            .iter()
+            .find(|item| item.label == "left")
+            .unwrap();
         assert_eq!(left.detail.as_deref(), Some("left: i32"));
-        assert!(markdown_value(left).contains("left: i32"));
+        let left_markup = markdown_value(left);
+        assert!(left_markup.contains("left: i32"));
+        assert!(left_markup.contains("Expr : left=Expr plus right=Expr"));
+        assert!(left_markup.contains("       ^^^^^^^^^"));
 
-        let right = items.iter().find(|item| item.label == "right").unwrap();
+        let right = completion_items
+            .iter()
+            .find(|item| item.label == "right")
+            .unwrap();
         assert_eq!(right.detail.as_deref(), Some("right: i32"));
-        assert!(markdown_value(right).contains("right: i32"));
+        let right_markup = markdown_value(right);
+        assert!(right_markup.contains("right: i32"));
+        assert!(right_markup.contains("Expr : left=Expr plus right=Expr"));
+        assert!(right_markup.contains("                      ^^^^^^^^^"));
+
+        let dollar_grammar = grammar.replacen("{  }", "{ $ }", 1);
+        let dollar_offset = dollar_grammar.find("{ $").unwrap() + 3;
+        let dollar_items = items(completions(
+            &dollar_grammar,
+            offset_to_position(&dollar_grammar, dollar_offset),
+        ));
+        let first = dollar_items.iter().find(|item| item.label == "$1").unwrap();
+        assert_eq!(first.detail.as_deref(), Some("$1: i32"));
+        assert!(markdown_value(first).contains("       ^^^^^^^^^"));
+
+        let location_grammar = grammar.replacen("{  }", "{ @ }", 1);
+        let location_offset = location_grammar.find("{ @").unwrap() + 3;
+        let location_items = items(completions(
+            &location_grammar,
+            offset_to_position(&location_grammar, location_offset),
+        ));
+        let first_location = location_items
+            .iter()
+            .find(|item| item.label == "@1")
+            .unwrap();
+        assert!(markdown_value(first_location).contains("       ^^^^^^^^^"));
     }
 
     fn markdown_value(item: &CompletionItem) -> &str {
