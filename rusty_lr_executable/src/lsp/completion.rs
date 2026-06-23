@@ -180,6 +180,15 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             add_symbol_items(&mut builder, &names);
         }
         CompletionMode::Symbol => {
+            if line_variables.in_reduce_action {
+                for (name, ty) in &line_variables.value_types {
+                    builder.variable(
+                        name,
+                        &hover::reduce_action_binding_detail(name, ty),
+                        Some(hover::reduce_action_binding_documentation(name, ty)),
+                    );
+                }
+            }
             add_symbol_items(&mut builder, &names);
             for keyword in KEYWORDS {
                 let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
@@ -512,10 +521,13 @@ fn rule_line_tokens_text(
 #[derive(Default)]
 struct LineVariables {
     value_names: BTreeSet<String>,
+    value_types: BTreeMap<String, String>,
     value_count: usize,
+    in_reduce_action: bool,
 }
 
 fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> LineVariables {
+    let grammar = Grammar::from_grammar_args(args.clone()).ok();
     for rule in &args.rules {
         for (line_idx, line) in rule.rule_lines.iter().enumerate() {
             let start = args
@@ -525,12 +537,27 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
             let end = rule_line_end(args, content, rule, line_idx);
             if start <= offset && offset <= end {
                 let mut variables = LineVariables::default();
+                variables.in_reduce_action = reduce_action_contains_offset(line, offset);
                 for (mapped_name, pattern) in &line.tokens {
                     variables.value_count += 1;
                     if let Some(name) = mapped_name {
                         variables.value_names.insert(name.value().clone());
+                        if let Some(grammar) = &grammar {
+                            variables.value_types.insert(
+                                name.value().clone(),
+                                hover::pattern_final_type(args, grammar, pattern),
+                            );
+                        }
                     } else {
                         collect_default_bindings(pattern, &mut variables.value_names);
+                        if let Some(grammar) = &grammar {
+                            collect_default_binding_types(
+                                args,
+                                grammar,
+                                pattern,
+                                &mut variables.value_types,
+                            );
+                        }
                     }
                 }
                 return variables;
@@ -539,6 +566,26 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
     }
 
     LineVariables::default()
+}
+
+pub(crate) fn reduce_action_binding_type_for_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+    name: &str,
+) -> Option<String> {
+    let variables = variables_for_offset(args, content, offset);
+    if !variables.in_reduce_action {
+        return None;
+    }
+    variables.value_types.get(name).cloned()
+}
+
+fn reduce_action_contains_offset(line: &rusty_lr_parser::RuleLineArgs, offset: usize) -> bool {
+    line.reduce_action
+        .as_ref()
+        .and_then(token_stream_range)
+        .is_some_and(|range| range.contains(&offset))
 }
 
 fn rule_line_end(
@@ -688,6 +735,35 @@ fn token_stream_end(stream: &TokenStream) -> usize {
         .unwrap_or(0)
 }
 
+fn token_stream_range(stream: &TokenStream) -> Option<std::ops::Range<usize>> {
+    let mut ranges = stream.clone().into_iter().filter_map(token_tree_range);
+    let first = ranges.next()?;
+    let range = ranges.fold(first, |acc, range| {
+        acc.start.min(range.start)..acc.end.max(range.end)
+    });
+    Some(range)
+}
+
+fn token_tree_range(token: TokenTree) -> Option<std::ops::Range<usize>> {
+    match token {
+        TokenTree::Group(group) => {
+            let stream_range = token_stream_range(&group.stream());
+            let open = group.span_open().byte_range();
+            let close = group.span_close().byte_range();
+            let delimiter_range = open.start.min(close.start)..open.end.max(close.end);
+            Some(if let Some(stream_range) = stream_range {
+                delimiter_range.start.min(stream_range.start)
+                    ..delimiter_range.end.max(stream_range.end)
+            } else {
+                delimiter_range
+            })
+        }
+        TokenTree::Ident(ident) => Some(ident.span().byte_range()),
+        TokenTree::Punct(punct) => Some(punct.span().byte_range()),
+        TokenTree::Literal(lit) => Some(lit.span().byte_range()),
+    }
+}
+
 fn token_tree_end(token: TokenTree) -> usize {
     match token {
         TokenTree::Group(group) => token_stream_end(&group.stream())
@@ -696,6 +772,41 @@ fn token_tree_end(token: TokenTree) -> usize {
         TokenTree::Ident(ident) => ident.span().byte_range().end,
         TokenTree::Punct(punct) => punct.span().byte_range().end,
         TokenTree::Literal(lit) => lit.span().byte_range().end,
+    }
+}
+
+fn collect_default_binding_types(
+    args: &GrammarArgs,
+    grammar: &Grammar,
+    pattern: &PatternArgs,
+    bindings: &mut BTreeMap<String, String>,
+) {
+    match pattern {
+        PatternArgs::Ident(ident) => {
+            bindings.insert(
+                ident.value().clone(),
+                hover::pattern_final_type(args, grammar, pattern),
+            );
+        }
+        PatternArgs::Plus { base, .. }
+        | PatternArgs::Star { base, .. }
+        | PatternArgs::Question { base, .. } => {
+            collect_default_binding_types(args, grammar, base, bindings);
+        }
+        PatternArgs::Minus { base, exclude } => {
+            collect_default_binding_types(args, grammar, base, bindings);
+            collect_default_binding_types(args, grammar, exclude, bindings);
+        }
+        PatternArgs::Sep { base, .. } => {
+            collect_default_binding_types(args, grammar, base, bindings);
+        }
+        PatternArgs::Exclamation { .. }
+        | PatternArgs::Group { .. }
+        | PatternArgs::TerminalSet(_)
+        | PatternArgs::Byte(_)
+        | PatternArgs::ByteString(_)
+        | PatternArgs::Char(_)
+        | PatternArgs::String(_) => {}
     }
 }
 
@@ -1107,6 +1218,30 @@ Expr : num { let _ = ; let _ = @0; 0 };
             .unwrap();
         assert_eq!(at0.detail.as_deref(), Some("@0: &mut ::my_prefix::Span"));
         assert!(markdown_value(at0).contains("@0: &mut ::my_prefix::Span"));
+    }
+
+    #[test]
+    fn completes_mapped_symbols_inside_reduce_action() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr(i32) : left=Expr plus right=Expr {  };
+"#;
+        let offset = grammar.find("{  }").unwrap() + 2;
+        let items = items(completions(grammar, offset_to_position(grammar, offset)));
+
+        let left = items.iter().find(|item| item.label == "left").unwrap();
+        assert_eq!(left.detail.as_deref(), Some("left: i32"));
+        assert!(markdown_value(left).contains("left: i32"));
+
+        let right = items.iter().find(|item| item.label == "right").unwrap();
+        assert_eq!(right.detail.as_deref(), Some("right: i32"));
+        assert!(markdown_value(right).contains("right: i32"));
     }
 
     fn markdown_value(item: &CompletionItem) -> &str {

@@ -62,7 +62,10 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
 
     if documentation.is_none() {
         if let Some(args) = &parsed {
-            documentation = reduce_action_variable_documentation(args, &word);
+            documentation = reduce_action_variable_documentation(args, &word).or_else(|| {
+                completion::reduce_action_binding_type_for_offset(args, content, offset, &word)
+                    .map(|ty| reduce_action_binding_documentation(&word, &ty))
+            });
         }
     }
 
@@ -174,6 +177,18 @@ pub(crate) fn reduce_action_variable_detail(args: &GrammarArgs, word: &str) -> O
         )),
         _ => None,
     }
+}
+
+pub(crate) fn reduce_action_binding_detail(name: &str, ty: &str) -> String {
+    format!("{name}: {ty}")
+}
+
+pub(crate) fn reduce_action_binding_documentation(name: &str, ty: &str) -> String {
+    format!(
+        "### `{}`\n\nSemantic value bound by the current production line.\n\nFinal type: `{}`\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\n[Named variables]({SYNTAX_URL}#named-variables)",
+        reduce_action_binding_detail(name, ty),
+        ty
+    )
 }
 
 fn data_documentation(args: &GrammarArgs) -> String {
@@ -1276,6 +1291,31 @@ Expr : num { let _ = data; let _ = @$; let _ = lookahead; Err(Default::default()
             .value
             .contains("Result::Err(::my_prefix::UserData)"));
         assert!(!err_markup.value.contains("$userdata"));
+    }
+
+    #[test]
+    fn hovers_mapped_symbols_inside_reduce_action() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr(i32) : left=Expr plus right=Expr { left + right };
+"#;
+        let offset = grammar.find("{ left").unwrap() + 2;
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("left: i32"));
+        assert!(markup.value.contains("Semantic value bound"));
     }
 
     #[test]
