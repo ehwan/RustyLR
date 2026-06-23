@@ -26,7 +26,31 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
     }
 
     let word = hover_word(content, offset)?;
-    let documentation = hover_word_documentation(&word)?;
+    let documentation = if word == "data" {
+        let mut userdata_type = "()".to_string();
+        let mut definition_info = "".to_string();
+
+        if let Some(args) = &parsed {
+            if let Some((_, ts)) = args.userdata_typename.first() {
+                userdata_type = ts.to_string();
+                definition_info = format!(
+                    "\n\nDefinition:\n```rustylr\n%userdata {};\n```",
+                    userdata_type
+                );
+            }
+        }
+
+        Some(format!(
+            "### `data: &mut {}`{}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({}#4-user-data-data)",
+            userdata_type,
+            definition_info,
+            SYNTAX_URL
+        ))
+    } else {
+        hover_word_documentation(&word)
+    };
+
+    let documentation = documentation?;
     Some(markdown_hover(content, documentation, None))
 }
 
@@ -658,4 +682,30 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
             .value
             .contains("Pattern helper for separated repetition"));
     }
+
+    #[test]
+    fn hovers_data_with_userdata_type() {
+        let grammar_with_userdata = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%userdata MyCoolData;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { *data += 1; 0 };
+"#;
+        let offset = grammar_with_userdata.find("*data").unwrap() + 1; // points to 'd' in 'data'
+        let hover = hover(
+            grammar_with_userdata,
+            crate::position::offset_to_position(grammar_with_userdata, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("data: &mut MyCoolData"));
+        assert!(markup.value.contains("%userdata MyCoolData;"));
+    }
 }
+
