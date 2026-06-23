@@ -379,11 +379,11 @@ fn resolve_provider_stream(
     name: &str,
     stack: &mut Vec<String>,
 ) -> Option<TokenStream> {
+    let stream = provider_stream(args, name)?;
     if stack.iter().any(|entry| entry == name) || stack.len() >= 100 {
         return None;
     }
     stack.push(name.to_string());
-    let stream = provider_stream(args, name)?;
     let resolved = resolve_type_stream(args, stream, stack);
     stack.pop();
     Some(resolved)
