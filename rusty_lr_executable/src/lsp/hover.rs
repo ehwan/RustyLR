@@ -2,7 +2,7 @@ use lsp_types::{Hover, HoverContents, MarkupContent, MarkupKind, Position};
 use proc_macro2::TokenStream;
 use rusty_lr_parser::grammar::Grammar;
 use rusty_lr_parser::terminal_info::TerminalName;
-use rusty_lr_parser::{GrammarArgs, PatternArgs, TerminalSetItem};
+use rusty_lr_parser::{GrammarArgs, Location, PatternArgs, TerminalSetItem};
 use std::collections::BTreeSet;
 use std::ops::Range as ByteRange;
 
@@ -60,29 +60,13 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
     }
 
     if documentation.is_none() {
-        if word == "data" {
-            let mut userdata_type = "()".to_string();
-            let mut definition_info = "".to_string();
-
-            if let Some(args) = &parsed {
-                if let Some((_, ts)) = args.userdata_typename.first() {
-                    userdata_type = ts.to_string();
-                    definition_info = format!(
-                        "\n\nDefinition:\n```rustylr\n%userdata {};\n```",
-                        userdata_type
-                    );
-                }
-            }
-
-            documentation = Some(format!(
-                "### `data: &mut {}`{}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({}#4-user-data-data)",
-                userdata_type,
-                definition_info,
-                SYNTAX_URL
-            ));
-        } else {
-            documentation = hover_word_documentation(&word);
+        if let Some(args) = &parsed {
+            documentation = reduce_action_variable_documentation(args, &word);
         }
+    }
+
+    if documentation.is_none() {
+        documentation = hover_word_documentation(&word);
     }
 
     let documentation = documentation?;
@@ -161,6 +145,89 @@ fn reduce_action_documentation() -> String {
         "### Reduce Action\n\nA block of Rust code executed when this production rule is reduced.\n\n[Reduce Actions]({}#reduceaction-optional)",
         SYNTAX_URL
     )
+}
+
+fn reduce_action_variable_documentation(args: &GrammarArgs, word: &str) -> Option<String> {
+    match word {
+        "data" => Some(data_documentation(args)),
+        "lookahead" => Some(lookahead_documentation(args)),
+        "shift" => Some(shift_documentation()),
+        "Err" => Some(err_variant_documentation(args)),
+        "@0" | "@$" => Some(current_location_documentation(args, word)),
+        _ => None,
+    }
+}
+
+fn data_documentation(args: &GrammarArgs) -> String {
+    let userdata_type = grammar_type_name(&args.userdata_typename, "()");
+    let definition_info = type_definition("userdata", &args.userdata_typename);
+
+    format!(
+        "### `data: &mut {userdata_type}`{definition_info}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({SYNTAX_URL}#4-user-data-data)"
+    )
+}
+
+fn lookahead_documentation(args: &GrammarArgs) -> String {
+    let token_type = token_type_name(args);
+    let definition_info = type_definition("tokentype", &args.token_typename);
+
+    format!(
+        "### `lookahead: &{token_type}`{definition_info}\n\nGLR reduce-action control binding for inspecting the next terminal.\n\nExample:\n\n```rustylr\nif let Some(term) = lookahead.to_term() {{ /* ... */ }}\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+    )
+}
+
+fn shift_documentation() -> String {
+    format!(
+        "### `shift: &mut bool`\n\nGLR reduce-action control binding used to allow or prune a shift branch.\n\nExample:\n\n```rustylr\n*shift = false;\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+    )
+}
+
+fn err_variant_documentation(args: &GrammarArgs) -> String {
+    let error_type = grammar_type_name(
+        &args.error_typename,
+        "$moduleprefix::DefaultReduceActionError",
+    );
+    let definition_info = type_definition("error", &args.error_typename);
+
+    format!(
+        "### `Result::Err({error_type})`{definition_info}\n\n`Err` constructs the error variant returned from a reduce action's `Result<_, {error_type}>`.\n\nExample:\n\n```rustylr\nExpr : num {{ Err(MyError::InvalidNumber)? }};\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
+    )
+}
+
+fn current_location_documentation(args: &GrammarArgs, label: &str) -> String {
+    let location_type =
+        grammar_type_name(&args.location_typename, "$moduleprefix::DefaultLocation");
+    let definition_info = type_definition("location", &args.location_typename);
+
+    format!(
+        "### `{label}: &mut {location_type}`{definition_info}\n\nCurrent production source-location binding available inside reduce actions.\n\nExamples:\n\n```rustylr\nExpr : Term {{ println!(\"{{:?}}\", @$); }};\nExpr : {{ println!(\"{{:?}}\", @0); }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+    )
+}
+
+fn grammar_type_name(items: &[(Location, TokenStream)], default: &str) -> String {
+    items
+        .first()
+        .map(|(_, ty)| ty.to_string())
+        .filter(|ty| !ty.is_empty())
+        .unwrap_or_else(|| default.to_string())
+}
+
+fn token_type_name(args: &GrammarArgs) -> String {
+    Grammar::from_grammar_args(args.clone())
+        .ok()
+        .map(|grammar| grammar.token_type().to_string())
+        .unwrap_or_else(|| grammar_type_name(&args.token_typename, "()"))
+}
+
+fn type_definition(directive: &str, items: &[(Location, TokenStream)]) -> String {
+    let Some((location, ty)) = items.first() else {
+        return String::new();
+    };
+    if matches!(location, Location::CallSite) {
+        return String::new();
+    }
+
+    format!("\n\nDefinition:\n```rustylr\n%{directive} {};\n```", ty)
 }
 
 fn hover_word(content: &str, offset: usize) -> Option<String> {
@@ -826,11 +893,12 @@ Expr : num { *data += 1; 0 };
 #[derive(Debug, Clone)]
 pub enum Token { Num(i32) }
 %%
+%location Span;
 %userdata MyCoolData;
 %tokentype Token;
 %start Expr;
 %token num Token::Num(_);
-Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
+Expr : num { println!("{:?}, {:?}, {:?}", @1, @0, @$); 0 };
 "#;
         // Hover on '@' of '@1'
         let offset = grammar.find("@1").unwrap();
@@ -844,8 +912,8 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
         };
         assert!(markup1.value.contains("`@1` refers to a source-location"));
 
-        // Hover on '@' of '@$'
-        let offset = grammar.find("@$").unwrap();
+        // Hover on '@' of '@0'
+        let offset = grammar.find("@0").unwrap();
         let hover2 = hover(
             grammar,
             crate::lsp::position::offset_to_position(grammar, offset),
@@ -854,7 +922,97 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
         let HoverContents::Markup(markup2) = hover2.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup2.value.contains("`@$` refers to a source-location"));
+        assert!(markup2.value.contains("@0: &mut Span"));
+        assert!(markup2.value.contains("%location Span;"));
+
+        // Hover on '@' of '@$'
+        let offset = grammar.find("@$").unwrap();
+        let hover3 = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup3) = hover3.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup3.value.contains("@$: &mut Span"));
+        assert!(markup3.value.contains("%location Span;"));
+    }
+
+    #[test]
+    fn hovers_shift_with_mutable_bool_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%glr;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { *shift = false; 0 };
+"#;
+        let offset = grammar.find("shift").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("shift: &mut bool"));
+        assert!(markup.value.contains("GLR reduce-action control binding"));
+    }
+
+    #[test]
+    fn hovers_lookahead_with_token_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%glr;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { if let Some(_term) = lookahead.to_term() {} 0 };
+"#;
+        let offset = grammar.find("lookahead").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("lookahead: &Token"));
+        assert!(markup.value.contains("%tokentype Token;"));
+    }
+
+    #[test]
+    fn hovers_err_with_reduce_error_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+struct MyError;
+%%
+%error MyError;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { Err(MyError)?; 0 };
+"#;
+        let offset = grammar.find("Err(").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("Result::Err(MyError)"));
+        assert!(markup.value.contains("%error MyError;"));
     }
 
     #[test]
