@@ -1,7 +1,7 @@
 {
   "name": "rustylr-lsp",
   "displayName": "RustyLR LSP",
-  "description": "LSP-powered language support for RustyLR grammar files.",
+  "description": "LSP support for RustyLR, a Bison-inspired parser generator and compiler frontend framework for Rust.",
   "version": "0.1.0",
   "publisher": "ehwan",
   "license": "MIT OR Apache-2.0",
