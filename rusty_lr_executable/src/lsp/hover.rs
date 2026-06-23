@@ -1,10 +1,11 @@
 use lsp_types::{Hover, HoverContents, MarkupContent, MarkupKind, Position};
-use proc_macro2::TokenStream;
+use proc_macro2::{Group, TokenStream, TokenTree};
 use rusty_lr_parser::grammar::Grammar;
 use rusty_lr_parser::terminal_info::TerminalName;
 use rusty_lr_parser::{GrammarArgs, Location, PatternArgs, TerminalSetItem};
 use std::collections::BTreeSet;
 use std::ops::Range as ByteRange;
+use std::str::FromStr;
 
 use crate::lsp::completion::{
     self, ALLOW_DIAGNOSTICS, DIRECTIVES, KEYWORDS, SUBSTITUTION_VARIABLES, SYNTAX_URL,
@@ -159,7 +160,7 @@ fn reduce_action_variable_documentation(args: &GrammarArgs, word: &str) -> Optio
 }
 
 fn data_documentation(args: &GrammarArgs) -> String {
-    let userdata_type = grammar_type_name(&args.userdata_typename, "()");
+    let userdata_type = resolved_userdata_type_name(args);
     let definition_info = type_definition("userdata", &args.userdata_typename);
 
     format!(
@@ -183,10 +184,7 @@ fn shift_documentation() -> String {
 }
 
 fn err_variant_documentation(args: &GrammarArgs) -> String {
-    let error_type = grammar_type_name(
-        &args.error_typename,
-        "$moduleprefix::DefaultReduceActionError",
-    );
+    let error_type = resolved_error_type_name(args);
     let definition_info = type_definition("error", &args.error_typename);
 
     format!(
@@ -195,8 +193,7 @@ fn err_variant_documentation(args: &GrammarArgs) -> String {
 }
 
 fn current_location_documentation(args: &GrammarArgs, label: &str) -> String {
-    let location_type =
-        grammar_type_name(&args.location_typename, "$moduleprefix::DefaultLocation");
+    let location_type = resolved_location_type_name(args);
     let definition_info = type_definition("location", &args.location_typename);
 
     format!(
@@ -205,18 +202,143 @@ fn current_location_documentation(args: &GrammarArgs, label: &str) -> String {
 }
 
 fn grammar_type_name(items: &[(Location, TokenStream)], default: &str) -> String {
-    items
+    let name = items
         .first()
         .map(|(_, ty)| ty.to_string())
         .filter(|ty| !ty.is_empty())
-        .unwrap_or_else(|| default.to_string())
+        .unwrap_or_else(|| default.to_string());
+    normalize_path_spacing(&name)
+}
+
+fn normalize_path_spacing(name: &str) -> String {
+    name.replace(":: ", "::").replace(" ::", "::")
 }
 
 fn token_type_name(args: &GrammarArgs) -> String {
     Grammar::from_grammar_args(args.clone())
         .ok()
-        .map(|grammar| grammar.token_type().to_string())
-        .unwrap_or_else(|| grammar_type_name(&args.token_typename, "()"))
+        .map(|grammar| type_stream_name(grammar.token_type()))
+        .unwrap_or_else(|| {
+            resolve_provider_type_name(args, "tokentype")
+                .unwrap_or_else(|| grammar_type_name(&args.token_typename, "()"))
+        })
+}
+
+fn resolved_userdata_type_name(args: &GrammarArgs) -> String {
+    resolve_provider_type_name(args, "userdata")
+        .unwrap_or_else(|| grammar_type_name(&args.userdata_typename, "()"))
+}
+
+fn resolved_error_type_name(args: &GrammarArgs) -> String {
+    resolve_provider_type_name(args, "errortype").unwrap_or_else(|| {
+        grammar_type_name(
+            &args.error_typename,
+            &default_module_type(args, "DefaultReduceActionError"),
+        )
+    })
+}
+
+fn resolved_location_type_name(args: &GrammarArgs) -> String {
+    resolve_provider_type_name(args, "location").unwrap_or_else(|| {
+        grammar_type_name(
+            &args.location_typename,
+            &default_module_type(args, "DefaultLocation"),
+        )
+    })
+}
+
+fn default_module_type(args: &GrammarArgs, type_name: &str) -> String {
+    let module_prefix =
+        resolve_provider_type_name(args, "moduleprefix").unwrap_or_else(|| "::rusty_lr".into());
+    format!("{module_prefix}::{type_name}")
+}
+
+fn type_stream_name(ty: &TokenStream) -> String {
+    normalize_path_spacing(&ty.to_string())
+}
+
+fn resolve_provider_type_name(args: &GrammarArgs, name: &str) -> Option<String> {
+    resolve_provider_stream(args, name, &mut Vec::new()).map(|stream| type_stream_name(&stream))
+}
+
+fn resolve_provider_stream(
+    args: &GrammarArgs,
+    name: &str,
+    stack: &mut Vec<String>,
+) -> Option<TokenStream> {
+    if stack.iter().any(|entry| entry == name) || stack.len() >= 100 {
+        return None;
+    }
+    stack.push(name.to_string());
+    let stream = provider_stream(args, name)?;
+    let resolved = resolve_type_stream(args, stream, stack);
+    stack.pop();
+    Some(resolved)
+}
+
+fn provider_stream(args: &GrammarArgs, name: &str) -> Option<TokenStream> {
+    match name {
+        "moduleprefix" => args
+            .module_prefix
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("::rusty_lr")),
+        "userdata" => args
+            .userdata_typename
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("()")),
+        "errortype" | "error" => args
+            .error_typename
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("$moduleprefix::DefaultReduceActionError")),
+        "location" => args
+            .location_typename
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("$moduleprefix::DefaultLocation")),
+        "tokentype" => args
+            .token_typename
+            .first()
+            .map(|(_, stream)| stream.clone()),
+        _ => None,
+    }
+}
+
+fn resolve_type_stream(
+    args: &GrammarArgs,
+    stream: TokenStream,
+    stack: &mut Vec<String>,
+) -> TokenStream {
+    let mut resolved = TokenStream::new();
+    let mut tokens = stream.into_iter().peekable();
+    while let Some(token) = tokens.next() {
+        match token {
+            TokenTree::Punct(punct) if punct.as_char() == '$' => {
+                if let Some(TokenTree::Ident(ident)) = tokens.peek() {
+                    let ident_name = ident.to_string();
+                    if let Some(substitution) = resolve_provider_stream(args, &ident_name, stack) {
+                        resolved.extend(substitution);
+                        tokens.next();
+                        continue;
+                    }
+                }
+                resolved.extend([TokenTree::Punct(punct)]);
+            }
+            TokenTree::Group(group) => {
+                let delimiter = group.delimiter();
+                let stream = resolve_type_stream(args, group.stream(), stack);
+                resolved.extend([TokenTree::Group(Group::new(delimiter, stream))]);
+            }
+            token => resolved.extend([token]),
+        }
+    }
+    resolved
+}
+
+fn token_stream_from_str(value: &str) -> Option<TokenStream> {
+    TokenStream::from_str(value).ok()
 }
 
 fn type_definition(directive: &str, items: &[(Location, TokenStream)]) -> String {
@@ -1013,6 +1135,130 @@ Expr : num { Err(MyError)?; 0 };
         };
         assert!(markup.value.contains("Result::Err(MyError)"));
         assert!(markup.value.contains("%error MyError;"));
+    }
+
+    #[test]
+    fn hovers_err_with_default_reduce_error_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { Err(Default::default())?; 0 };
+"#;
+        let offset = grammar.find("Err(").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup
+            .value
+            .contains("Result::Err(::rusty_lr::DefaultReduceActionError)"));
+        assert!(!markup.value.contains("moduleprefix"));
+    }
+
+    #[test]
+    fn hovers_err_with_default_reduce_error_type_and_module_prefix() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%moduleprefix ::my_prefix;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { Err(Default::default())?; 0 };
+"#;
+        let offset = grammar.find("Err(").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup
+            .value
+            .contains("Result::Err(::my_prefix::DefaultReduceActionError)"));
+        assert!(!markup.value.contains("moduleprefix"));
+    }
+
+    #[test]
+    fn hovers_reduce_action_types_after_substitution() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%moduleprefix ::my_prefix;
+%userdata $moduleprefix::UserData;
+%location $moduleprefix::Span;
+%error $userdata;
+%tokentype $moduleprefix::Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { let _ = data; let _ = @$; let _ = lookahead; Err(Default::default())?; 0 };
+"#;
+
+        let data_offset = grammar.find("let _ = data").unwrap() + "let _ = ".len();
+        let data_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, data_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(data_markup) = data_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(data_markup
+            .value
+            .contains("data: &mut ::my_prefix::UserData"));
+        assert!(!data_markup.value.contains("$moduleprefix"));
+
+        let location_offset = grammar.find("@$").unwrap();
+        let location_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, location_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(location_markup) = location_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(location_markup.value.contains("@$: &mut ::my_prefix::Span"));
+        assert!(!location_markup.value.contains("$location"));
+
+        let lookahead_offset = grammar.find("lookahead").unwrap();
+        let lookahead_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, lookahead_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(lookahead_markup) = lookahead_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(lookahead_markup
+            .value
+            .contains("lookahead: &::my_prefix::Token"));
+        assert!(!lookahead_markup.value.contains("$moduleprefix"));
+
+        let err_offset = grammar.find("Err(").unwrap();
+        let err_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, err_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(err_markup) = err_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(err_markup
+            .value
+            .contains("Result::Err(::my_prefix::UserData)"));
+        assert!(!err_markup.value.contains("$userdata"));
     }
 
     #[test]
