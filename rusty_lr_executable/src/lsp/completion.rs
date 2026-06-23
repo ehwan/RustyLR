@@ -9,6 +9,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::str::FromStr;
 
 use crate::lsp::diagnostics::split_stream;
+use crate::lsp::hover;
 use crate::lsp::position::{offset_to_position, position_to_offset};
 
 pub(crate) const DIRECTIVES: &[&str] = &[
@@ -62,6 +63,7 @@ pub(crate) const KEYWORDS: &[&str] = &[
     "data",
     "lookahead",
     "shift",
+    "Err",
 ];
 
 pub(crate) const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
@@ -148,16 +150,10 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             }
         }
         CompletionMode::Location => {
-            builder.variable(
-                "@$",
-                "current production location",
-                location_documentation("@$"),
-            );
-            builder.variable(
-                "@0",
-                "current production location",
-                location_documentation("@0"),
-            );
+            let (detail, documentation) = location_completion_info(parsed.as_ref(), "@$");
+            builder.variable("@$", &detail, documentation);
+            let (detail, documentation) = location_completion_info(parsed.as_ref(), "@0");
+            builder.variable("@0", &detail, documentation);
             for variable in &line_variables.value_names {
                 builder.variable(
                     &format!("@{variable}"),
@@ -186,7 +182,8 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
         CompletionMode::Symbol => {
             add_symbol_items(&mut builder, &names);
             for keyword in KEYWORDS {
-                builder.keyword(keyword, "RustyLR keyword", keyword_documentation(keyword));
+                let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
+                builder.keyword(keyword, &detail, documentation);
             }
             for directive in DIRECTIVES {
                 builder.keyword(
@@ -199,6 +196,36 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     }
 
     CompletionResponse::Array(builder.finish())
+}
+
+fn keyword_completion_info(args: Option<&GrammarArgs>, keyword: &str) -> (String, Option<String>) {
+    if let Some(args) = args {
+        if let Some(documentation) = hover::reduce_action_variable_documentation(args, keyword) {
+            let detail = hover::reduce_action_variable_detail(args, keyword)
+                .unwrap_or_else(|| "RustyLR keyword".to_string());
+            return (detail, Some(documentation));
+        }
+    }
+
+    (
+        "RustyLR keyword".to_string(),
+        keyword_documentation(keyword),
+    )
+}
+
+fn location_completion_info(args: Option<&GrammarArgs>, label: &str) -> (String, Option<String>) {
+    if let Some(args) = args {
+        if let Some(documentation) = hover::reduce_action_variable_documentation(args, label) {
+            let detail = hover::reduce_action_variable_detail(args, label)
+                .unwrap_or_else(|| "current production location".to_string());
+            return (detail, Some(documentation));
+        }
+    }
+
+    (
+        "current production location".to_string(),
+        location_documentation(label),
+    )
 }
 
 fn add_symbol_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
@@ -794,6 +821,9 @@ pub(crate) fn keyword_documentation(label: &str) -> Option<String> {
         "shift" => format!(
             "GLR reduce-action control binding used to allow or prune a shift branch.\n\nExample:\n\n```rustylr\n*shift = false;\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
         ),
+        "Err" => format!(
+            "`Err` constructs the error variant returned from a reduce action's `Result<_, %error>`.\n\nExample:\n\n```rustylr\nExpr : num {{ Err(MyError::InvalidNumber)? }};\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
+        ),
         "auto" => "Table layout mode selected automatically by RustyLR.".to_string(),
         "dense" => "Dense table layout mode.".to_string(),
         "sparse" => "Sparse table layout mode.".to_string(),
@@ -1006,6 +1036,77 @@ Boxed(box $tokentype) : num { num };
         assert!(markup.contains("Rust type: `Token` (boxed)"));
         assert!(markup.contains("Boxed(box $tokentype)"));
         assert!(!markup.contains("{ num }"));
+    }
+
+    #[test]
+    fn completion_items_use_hover_reduce_action_documentation() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%moduleprefix ::my_prefix;
+%userdata $moduleprefix::UserData;
+%location $moduleprefix::Span;
+%error $userdata;
+%tokentype $moduleprefix::Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { let _ = ; let _ = @0; 0 };
+"#;
+        let action_offset = grammar.find("let _ = ;").unwrap() + "let _ = ".len();
+        let action_items = items(completions(
+            grammar,
+            offset_to_position(grammar, action_offset),
+        ));
+
+        let data = action_items
+            .iter()
+            .find(|item| item.label == "data")
+            .unwrap();
+        assert_eq!(
+            data.detail.as_deref(),
+            Some("data: &mut ::my_prefix::UserData")
+        );
+        assert!(markdown_value(data).contains("data: &mut ::my_prefix::UserData"));
+
+        let lookahead = action_items
+            .iter()
+            .find(|item| item.label == "lookahead")
+            .unwrap();
+        assert_eq!(
+            lookahead.detail.as_deref(),
+            Some("lookahead: &::my_prefix::Token")
+        );
+        assert!(markdown_value(lookahead).contains("lookahead: &::my_prefix::Token"));
+
+        let shift = action_items
+            .iter()
+            .find(|item| item.label == "shift")
+            .unwrap();
+        assert_eq!(shift.detail.as_deref(), Some("shift: &mut bool"));
+        assert!(markdown_value(shift).contains("shift: &mut bool"));
+
+        let err = action_items
+            .iter()
+            .find(|item| item.label == "Err")
+            .unwrap();
+        assert_eq!(
+            err.detail.as_deref(),
+            Some("Result::Err(::my_prefix::UserData)")
+        );
+        assert!(markdown_value(err).contains("Result::Err(::my_prefix::UserData)"));
+
+        let location_offset = grammar.find("@0").unwrap() + 1;
+        let location_items = items(completions(
+            grammar,
+            offset_to_position(grammar, location_offset),
+        ));
+        let at0 = location_items
+            .iter()
+            .find(|item| item.label == "@0")
+            .unwrap();
+        assert_eq!(at0.detail.as_deref(), Some("@0: &mut ::my_prefix::Span"));
+        assert!(markdown_value(at0).contains("@0: &mut ::my_prefix::Span"));
     }
 
     fn markdown_value(item: &CompletionItem) -> &str {

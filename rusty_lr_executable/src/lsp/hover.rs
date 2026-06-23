@@ -148,13 +148,30 @@ fn reduce_action_documentation() -> String {
     )
 }
 
-fn reduce_action_variable_documentation(args: &GrammarArgs, word: &str) -> Option<String> {
+pub(crate) fn reduce_action_variable_documentation(
+    args: &GrammarArgs,
+    word: &str,
+) -> Option<String> {
     match word {
         "data" => Some(data_documentation(args)),
         "lookahead" => Some(lookahead_documentation(args)),
         "shift" => Some(shift_documentation()),
         "Err" => Some(err_variant_documentation(args)),
         "@0" | "@$" => Some(current_location_documentation(args, word)),
+        _ => None,
+    }
+}
+
+pub(crate) fn reduce_action_variable_detail(args: &GrammarArgs, word: &str) -> Option<String> {
+    match word {
+        "data" => Some(format!("data: &mut {}", resolved_userdata_type_name(args))),
+        "lookahead" => Some(format!("lookahead: &{}", token_type_name(args))),
+        "shift" => Some("shift: &mut bool".to_string()),
+        "Err" => Some(format!("Result::Err({})", resolved_error_type_name(args))),
+        "@0" | "@$" => Some(format!(
+            "{word}: &mut {}",
+            resolved_location_type_name(args)
+        )),
         _ => None,
     }
 }
