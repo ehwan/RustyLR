@@ -33,6 +33,7 @@ This extension contributes the following settings to control the language server
 ## Installation & Requirements
 
 This extension requires the **RustyLR Language Server**, which is built into the `rustylr` executable and started with `rustylr lsp`.
+The extension checks the server's `major.minor` version before startup and allows patch-version differences.
 
 ### 1. Install the VSCode Extension
 

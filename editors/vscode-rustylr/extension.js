@@ -237,25 +237,31 @@ async function ensureCompatibleServerVersion(server, cwd, context) {
   const versionCommand = server.versionCommand || resolveVersionCommand(server.command, server.args);
   const output = await execFileText(versionCommand.command, versionCommand.args, cwd);
   const actualVersion = parseRustylrVersion(output);
+  const expectedVersionInfo = parseVersion(expectedVersion);
   if (!actualVersion) {
     throw new Error(
       `Could not parse RustyLR language server version from '${versionCommand.command} ${versionCommand.args.join(" ")}'. Output: ${output.trim()}`
     );
   }
+  if (!expectedVersionInfo) {
+    throw new Error(`Could not parse required RustyLR language server version '${expectedVersion}'.`);
+  }
 
-  if (actualVersion === expectedVersion) {
-    outputChannel.appendLine(`RustyLR LSP version check passed: ${actualVersion}`);
+  if (sameMajorMinor(actualVersion, expectedVersionInfo)) {
+    outputChannel.appendLine(
+      `RustyLR LSP version check passed: expected ${formatMajorMinor(expectedVersionInfo)}.x, found ${actualVersion.raw}.`
+    );
     return;
   }
 
   const installCommand = `cargo install rustylr --version ${expectedVersion} --force`;
   outputChannel.appendLine(
-    `RustyLR LSP version mismatch: expected ${expectedVersion}, found ${actualVersion}.`
+    `RustyLR LSP version mismatch: expected ${formatMajorMinor(expectedVersionInfo)}.x, found ${actualVersion.raw}.`
   );
   outputChannel.appendLine(`Install the compatible server with: ${installCommand}`);
 
   const selection = await vscode.window.showErrorMessage(
-    `RustyLR extension expects rustylr ${expectedVersion}, but found ${actualVersion}. Install the compatible rustylr version before using the language server.`,
+    `RustyLR extension expects rustylr ${formatMajorMinor(expectedVersionInfo)}.x, but found ${actualVersion.raw}. Install a compatible rustylr version before using the language server.`,
     "Copy Install Command",
     "Continue Anyway"
   );
@@ -269,7 +275,7 @@ async function ensureCompatibleServerVersion(server, cwd, context) {
   }
 
   throw new Error(
-    `RustyLR language server version mismatch. Expected ${expectedVersion}, found ${actualVersion}. Run: ${installCommand}`
+    `RustyLR language server version mismatch. Expected ${formatMajorMinor(expectedVersionInfo)}.x, found ${actualVersion.raw}. Run: ${installCommand}`
   );
 }
 
@@ -306,7 +312,27 @@ function execFileText(command, args, cwd) {
 
 function parseRustylrVersion(output) {
   const match = output.match(/\brustylr\s+([0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)/);
-  return match ? match[1] : undefined;
+  return match ? parseVersion(match[1]) : undefined;
+}
+
+function parseVersion(version) {
+  const match = version.match(/^([0-9]+)\.([0-9]+)\.([0-9]+)(?:[-+][0-9A-Za-z.-]+)?$/);
+  return match
+    ? {
+        raw: version,
+        major: Number(match[1]),
+        minor: Number(match[2]),
+        patch: Number(match[3]),
+      }
+    : undefined;
+}
+
+function sameMajorMinor(left, right) {
+  return left.major === right.major && left.minor === right.minor;
+}
+
+function formatMajorMinor(version) {
+  return `${version.major}.${version.minor}`;
 }
 
 function findRustyLrRoot(startPath) {
