@@ -1,0 +1,128 @@
+{
+  "name": "rustylr-vscode",
+  "displayName": "RustyLR",
+  "description": "Rich language support for the RustyLR parser generator, featuring diagnostics, formatting, auto-completion, hover, goto-definition, find-references, and inlay hints.",
+  "version": "0.1.0",
+  "publisher": "rustylr",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ehwan/RustyLR.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ehwan/RustyLR/issues"
+  },
+  "homepage": "https://github.com/ehwan/RustyLR#readme",
+  "keywords": [
+    "parser",
+    "grammar",
+    "lsp",
+    "rust",
+    "rustylr",
+    "bison",
+    "yacc",
+    "compiler"
+  ],
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:rustylr",
+    "workspaceContains:**/*.rustylr",
+    "workspaceContains:**/rustylr.rs",
+    "onCommand:rustylr.restartServer"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "rustylr.restartServer",
+        "title": "RustyLR: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "RustyLR",
+      "properties": {
+        "rustylr.server.command": {
+          "type": "string",
+          "default": "",
+          "description": "Command used to start the RustyLR LSP server. Empty means auto-detect target/debug/rusty_lr_lsp and fall back to cargo run."
+        },
+        "rustylr.server.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Arguments passed to rustylr.server.command."
+        },
+        "rustylr.server.cwd": {
+          "type": "string",
+          "default": "",
+          "description": "Working directory for the RustyLR LSP server. Empty means the extension will use the RustyLR workspace root when it can find one."
+        },
+        "rustylr.server.documentPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/*.rustylr",
+            "**/rustylr.rs"
+          ],
+          "description": "Additional file globs handled by the RustyLR LSP server."
+        },
+        "rustylr.semanticTokens.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable semantic token highlighting for RustyLR grammar files."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "rustylr",
+        "aliases": [
+          "RustyLR",
+          "rustylr"
+        ],
+        "extensions": [
+          ".rustylr"
+        ],
+        "filenamePatterns": [
+          "rustylr.rs"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rustylr",
+        "scopeName": "source.rustylr",
+        "path": "./syntaxes/rustylr.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[rustylr]": {
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": false
+        },
+        "editor.suggestOnTriggerCharacters": true,
+        "editor.semanticHighlighting.enabled": true
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "1.84.0"
+  }
+}

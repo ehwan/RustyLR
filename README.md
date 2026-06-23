@@ -258,6 +258,13 @@ println!("{}", context);   // Formats the state tree (requires 'tree' feature)
 
 ---
 
+## Editor Support
+
+An experimental RustyLR language server is under development in [`rusty_lr_lsp`](rusty_lr_lsp), with a temporary VSCode client in [`editors/vscode-rustylr`](editors/vscode-rustylr).
+It currently targets `*.rustylr` files and files named `rustylr.rs`.
+
+---
+
 ## Examples
 
 - [Calculator (enum tokens)](https://github.com/ehwan/RustyLR/blob/main/example/calculator/src/parser.rustylr): A numeric expression parser using custom token enums.

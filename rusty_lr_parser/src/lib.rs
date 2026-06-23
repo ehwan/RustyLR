@@ -16,9 +16,11 @@ pub mod terminal_info;
 pub(crate) mod terminalset;
 pub mod utils;
 
-pub use parser::args::TableLayout;
-/// Re-export Location for use by external crates (e.g. rusty_lr_buildscript)
-pub use parser::location::Location;
+pub use parser::args::{
+    GrammarArgs, IdentOrLiteral, PatternArgs, PrecDPrecArgs, RuleDefArgs, RuleLineArgs, TableLayout,
+};
+pub use parser::location::{Located, Location};
+pub use terminalset::{TerminalSet, TerminalSetItem};
 
 /// This, `rusty_lr_parser` is designed to generate a code, that will be relied on `rusty_lr`.
 ///

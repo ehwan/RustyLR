@@ -154,6 +154,26 @@ pub enum ResolvedAllowTarget {
 }
 
 impl Grammar {
+    /// Resolved Rust type for `%tokentype`, after substitutions such as `$tokentype`
+    /// and storage modifiers such as `box` have been stripped.
+    pub fn token_type(&self) -> &TokenStream {
+        &self.token_typename
+    }
+
+    /// Whether terminal values are stored as `Box<%tokentype>` in the generated
+    /// parser's data enum.
+    pub fn token_type_boxed(&self) -> bool {
+        self.is_tokentype_boxed
+    }
+
+    /// Resolved Rust type for a non-terminal by name, plus whether it is boxed
+    /// in the generated parser's data enum.
+    pub fn nonterminal_type(&self, name: &str) -> Option<(Option<&TokenStream>, bool)> {
+        let index = self.nonterminals_index.get(name)?;
+        let nonterminal = &self.nonterminals[*index];
+        Some((nonterminal.ruletype.as_ref(), nonterminal.ruletype_boxed))
+    }
+
     fn is_terminal_allowed_by_target(&self, term: Terminal, target: &ResolvedAllowTarget) -> bool {
         match target {
             ResolvedAllowTarget::Name(name) => {

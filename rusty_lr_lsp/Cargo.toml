@@ -1,0 +1,17 @@
+[package]
+name = "rusty_lr_lsp"
+version = "0.1.0"
+edition = "2021"
+description = "LSP server for rusty_lr grammar files"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+lsp-server = "0.7.6"
+lsp-types = "0.95.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
+quote = "1.0"
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+rusty_lr_core = { version = "4.2.0", path = "../rusty_lr_core", features = ["builder"] }
+rusty_lr_parser = { version = "4.2.1", path = "../rusty_lr_parser" }

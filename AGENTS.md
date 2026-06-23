@@ -55,3 +55,9 @@ If an implementation plan artifact is created, also print the full plan directly
 When modifying code, comments, or documentation, use formal terminology based on Programming Language Theory, Theory of Computation, and Type Theory for internal logic. Prefer terms such as `Symbol` and `Production` internally.
 
 For user-facing Bison-inspired syntax, keep familiar Bison terminology such as `%token` and `%tokentype`.
+
+## 9. Keep LSP Synchronized with Grammar Changes
+
+Whenever changes are made to the grammar syntax, directives, patterns, or variables:
+- Update the LSP implementation in `rusty_lr_lsp` to fully support and recognize the updated grammar.
+- Ensure that semantic tokens, hover information, completions, inlay hints, and diagnostic handling are kept aligned with the new grammar specifications.
