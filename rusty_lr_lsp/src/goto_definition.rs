@@ -276,8 +276,7 @@ E(_) : num
         assert!(def_substring.starts_with("empty_action"));
 
         let prec_def_index = grammar.find("%precedence empty_action").unwrap();
-        let expected_start_pos =
-            crate::position::offset_to_position(grammar, prec_def_index + 12); // start of 'empty_action'
+        let expected_start_pos = crate::position::offset_to_position(grammar, prec_def_index + 12); // start of 'empty_action'
         assert_eq!(def_range.start, expected_start_pos);
     }
 }

@@ -38,7 +38,9 @@ pub fn inlay_hints(content: &str, range: Range) -> Vec<InlayHint> {
             }
 
             if let Some(reduce_action) = &line.reduce_action {
-                if let Some(proc_macro2::TokenTree::Group(group)) = reduce_action.clone().into_iter().next() {
+                if let Some(proc_macro2::TokenTree::Group(group)) =
+                    reduce_action.clone().into_iter().next()
+                {
                     if group.delimiter() == proc_macro2::Delimiter::Brace {
                         let action_range = group.span().byte_range();
                         if ranges_overlap(
@@ -189,7 +191,9 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
             let tooltip = hint.tooltip.as_ref().unwrap();
             match tooltip {
                 lsp_types::InlayHintTooltip::MarkupContent(markup) => {
-                    assert!(markup.value.contains("A block of Rust code executed when this production rule is reduced"));
+                    assert!(markup.value.contains(
+                        "A block of Rust code executed when this production rule is reduced"
+                    ));
                     assert!(markup.value.contains("#reduceaction-optional"));
                 }
                 _ => panic!("expected MarkupContent tooltip"),

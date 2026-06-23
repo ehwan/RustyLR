@@ -145,9 +145,7 @@ fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
                     let mut response = Response::new_ok(id.clone(), serde_json::Value::Null);
                     if let Some(content) = documents.get(&uri) {
-                        match catch_lsp_panic(|| {
-                            references::find_references(content, position)
-                        }) {
+                        match catch_lsp_panic(|| references::find_references(content, position)) {
                             Ok(Some(locations)) => {
                                 let mapped_locations = locations
                                     .into_iter()

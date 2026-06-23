@@ -128,7 +128,8 @@ fn find_directive_semicolon(content: &str, start: usize) -> Option<usize> {
     let mut brace_depth = 0usize;
 
     let remaining = &content[start..];
-    for (relative_idx, ch) in remaining.char_indices() {
+    let mut iter = remaining.char_indices().peekable();
+    while let Some((relative_idx, ch)) = iter.next() {
         if let Some(quote_ch) = quote {
             if escaped {
                 escaped = false;
@@ -143,6 +144,29 @@ fn find_directive_semicolon(content: &str, start: usize) -> Option<usize> {
         match ch {
             '"' => quote = Some(ch),
             '\'' if is_single_quote_literal_start(remaining, relative_idx) => quote = Some(ch),
+            '/' => match iter.peek().copied() {
+                Some((_, '/')) => {
+                    iter.next();
+                    while let Some((_, next_ch)) = iter.peek() {
+                        if *next_ch == '\n' || *next_ch == '\r' {
+                            break;
+                        }
+                        iter.next();
+                    }
+                }
+                Some((_, '*')) => {
+                    iter.next();
+                    while let Some((_, next_ch)) = iter.next() {
+                        if next_ch == '*' {
+                            if let Some((_, '/')) = iter.peek() {
+                                iter.next();
+                                break;
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            },
             '(' => paren_depth += 1,
             ')' => paren_depth = paren_depth.saturating_sub(1),
             '[' => bracket_depth += 1,
@@ -780,6 +804,25 @@ Rule(i32): a {
         let formatted = apply_edits(content, directive_edits(content));
 
         assert!(formatted.contains("%tokentype\n    // token type comment\n    Token;"));
+    }
+
+    #[test]
+    fn formats_directive_with_comments_containing_semicolons() {
+        // Single-line comment with semicolon
+        let content1 = "%%\n%token num Token::Num(_); // comment; here\n";
+        let formatted1 = apply_edits(content1, formatting(content1));
+        assert_eq!(
+            formatted1,
+            "%%\n%token num Token::Num(_); // comment; here\n"
+        );
+
+        // Multi-line block comment with semicolon
+        let content2 = "%%\n%token num Token::Num(_) /* comment; here */ ;\n";
+        let formatted2 = apply_edits(content2, formatting(content2));
+        assert_eq!(
+            formatted2,
+            "%%\n%token num Token::Num(_) /* comment; here */ ;\n"
+        );
     }
 
     #[test]
