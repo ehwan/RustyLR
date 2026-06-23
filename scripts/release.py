@@ -88,8 +88,8 @@ def calculate_bumped_version(version_str):
         return f"{major}.{minor + 1}.0"
     return version_str
 
-def update_vscode_extension_server_version(root_dir, old_version, new_version):
-    """Update the VSCode extension's required rustylr server version and matching docs."""
+def update_vscode_extension_versions(root_dir, old_version, new_version):
+    """Update the VSCode extension version, required rustylr server version, and matching docs."""
     package_json_path = os.path.join(root_dir, 'editors', 'vscode-rustylr', 'package.json')
     readme_path = os.path.join(root_dir, 'editors', 'vscode-rustylr', 'README.md')
     
@@ -97,11 +97,25 @@ def update_vscode_extension_server_version(root_dir, old_version, new_version):
         with open(package_json_path, 'r', encoding='utf-8') as f:
             package_content = f.read()
             
-        pattern = r'("requiredServerVersion"\s*:\s*")[^"]+(")'
-        if re.search(pattern, package_content):
-            package_content = re.sub(pattern, rf'\g<1>{new_version}\g<2>', package_content)
-            with open(package_json_path, 'w', encoding='utf-8') as f:
-                f.write(package_content)
+        updated_package = False
+        version_pattern = r'("version"\s*:\s*")[^"]+(")'
+        if re.search(version_pattern, package_content):
+            package_content = re.sub(version_pattern, rf'\g<1>{new_version}\g<2>', package_content, count=1)
+            updated_package = True
+            print(
+                f"Updated VSCode extension package version in "
+                f"{os.path.relpath(package_json_path, root_dir)}: {old_version} -> {new_version}"
+            )
+        else:
+            print(
+                f"Warning: Could not find extension version in "
+                f"{os.path.relpath(package_json_path, root_dir)}"
+            )
+            
+        server_pattern = r'("requiredServerVersion"\s*:\s*")[^"]+(")'
+        if re.search(server_pattern, package_content):
+            package_content = re.sub(server_pattern, rf'\g<1>{new_version}\g<2>', package_content)
+            updated_package = True
             print(
                 f"Updated VSCode extension requiredServerVersion in "
                 f"{os.path.relpath(package_json_path, root_dir)}: {old_version} -> {new_version}"
@@ -111,6 +125,10 @@ def update_vscode_extension_server_version(root_dir, old_version, new_version):
                 f"Warning: Could not find requiredServerVersion in "
                 f"{os.path.relpath(package_json_path, root_dir)}"
             )
+            
+        if updated_package:
+            with open(package_json_path, 'w', encoding='utf-8') as f:
+                f.write(package_content)
     else:
         print(f"Warning: {package_json_path} does not exist.")
         
@@ -246,7 +264,7 @@ def run_bump(root_dir):
                 
     rustylr_info = package_map.get('rustylr')
     if rustylr_info:
-        update_vscode_extension_server_version(
+        update_vscode_extension_versions(
             root_dir,
             rustylr_info['old_version'],
             rustylr_info['new_version']
@@ -294,7 +312,7 @@ def run_git_commit(root_dir, package_map):
     rustylr_info = package_map.get('rustylr')
     if rustylr_info:
         commit_msg += (
-            f"- vscode extension requiredServerVersion: "
+            f"- vscode extension: "
             f"{rustylr_info['old_version']} -> {rustylr_info['new_version']}\n"
         )
         
