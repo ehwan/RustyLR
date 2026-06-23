@@ -2,6 +2,12 @@
 
 RustyLR LSP provides rich language support for [RustyLR](https://github.com/ehwan/RustyLR) grammar files (`*.rustylr` and `rustylr.rs`). Language features are powered by the `rustylr lsp` language server.
 
+Install it from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp), or run this command from VS Code Quick Open:
+
+```text
+ext install ehwan.rustylr-lsp
+```
+
 ## Features
 
 - **Diagnostics & Error Reporting:** Real-time diagnostics for grammar syntax errors, unused symbols, conflict resolutions, and more.
@@ -28,7 +34,15 @@ This extension contributes the following settings to control the language server
 
 This extension requires the **RustyLR Language Server**, which is built into the `rustylr` executable and started with `rustylr lsp`.
 
-### 1. Install the Language Server (Recommended)
+### 1. Install the VSCode Extension
+
+Install [RustyLR LSP](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp) from the Marketplace, or use VS Code Quick Open:
+
+```text
+ext install ehwan.rustylr-lsp
+```
+
+### 2. Install the Language Server
 
 You can install the RustyLR executable globally using Cargo:
 
@@ -53,7 +67,11 @@ If you use a custom path instead of automatic detection:
 }
 ```
 
-### 2. For RustyLR Workspace Contributors
+### 3. Open a RustyLR Grammar File
+
+Open any `*.rustylr` file or a file named `rustylr.rs`. The extension starts `rustylr lsp` automatically and enables diagnostics, completion, hover, formatting, go to definition, find references, inlay hints, semantic tokens, and quick fixes.
+
+### 4. For RustyLR Workspace Contributors
 
 If you are developing or contributing to the RustyLR repository:
 - The extension will automatically detect built binaries in the `target/debug` or `target/release` folders of your repository root.
@@ -61,4 +79,4 @@ If you are developing or contributing to the RustyLR repository:
 
 ## Marketplace Status
 
-This extension is published as a preview while the RustyLR language server continues to evolve.
+This extension is published as [RustyLR LSP](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp) and remains in preview while the RustyLR language server continues to evolve.

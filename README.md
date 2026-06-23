@@ -260,9 +260,25 @@ println!("{}", context);   // Formats the state tree (requires 'tree' feature)
 
 ## Editor Support
 
-An experimental RustyLR language server is included in the `rustylr` executable and can be started with `rustylr lsp`.
-A temporary VSCode client is available in [`editors/vscode-rustylr`](editors/vscode-rustylr).
-It currently targets `*.rustylr` files and files named `rustylr.rs`.
+RustyLR provides LSP-based editor support through the `rustylr lsp` language server, which is included in the `rustylr` executable.
+
+For VSCode, install [RustyLR LSP from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp), or run:
+
+```text
+ext install ehwan.rustylr-lsp
+```
+
+The extension targets `*.rustylr` files and files named `rustylr.rs`. It provides diagnostics, quick fixes, formatting, go to definition, find references, hover documentation, inlay hints, semantic tokens, and completion.
+
+The VSCode extension launches the language server from the `rustylr` executable. Install it with:
+
+```bash
+cargo install rustylr
+```
+
+The extension checks the installed `rustylr` version before starting the server and suggests the matching `cargo install rustylr --version ... --force` command if the versions are incompatible.
+
+The extension source is available in [`editors/vscode-rustylr`](editors/vscode-rustylr).
 
 ---
 
