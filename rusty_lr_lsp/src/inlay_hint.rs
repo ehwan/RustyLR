@@ -36,6 +36,37 @@ pub fn inlay_hints(content: &str, range: Range) -> Vec<InlayHint> {
 
                 hints.push(pattern_inlay_hint(&args, &grammar, content, pattern));
             }
+
+            if let Some(reduce_action) = &line.reduce_action {
+                if let Some(proc_macro2::TokenTree::Group(group)) = reduce_action.clone().into_iter().next() {
+                    if group.delimiter() == proc_macro2::Delimiter::Brace {
+                        let action_range = group.span().byte_range();
+                        if ranges_overlap(
+                            action_range.start,
+                            action_range.end,
+                            range_start,
+                            range_end,
+                        ) {
+                            hints.push(InlayHint {
+                                position: offset_to_position(content, action_range.start),
+                                label: InlayHintLabel::String("ReduceAction".to_string()),
+                                kind: None,
+                                text_edits: None,
+                                tooltip: Some(lsp_types::InlayHintTooltip::MarkupContent(lsp_types::MarkupContent {
+                                    kind: lsp_types::MarkupKind::Markdown,
+                                    value: format!(
+                                        "A block of Rust code executed when this production rule is reduced.\n\n[Reduce Actions]({}#reduceaction-optional)",
+                                        completion::SYNTAX_URL
+                                    ),
+                                })),
+                                padding_left: Some(true),
+                                padding_right: Some(true),
+                                data: None,
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -135,6 +166,34 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
             })
             .collect::<Vec<_>>();
 
-        assert_eq!(labels, vec![": Vec<i32>"]);
+        assert_eq!(labels, vec![": Vec<i32>", "ReduceAction"]);
+    }
+
+    #[test]
+    fn hints_reduce_actions_with_custom_tooltip() {
+        let hints = inlay_hints(
+            MOCK_GRAMMAR,
+            Range::new(Position::new(0, 0), Position::new(100, 0)),
+        );
+
+        let reduce_action_hints = hints
+            .iter()
+            .filter(|hint| match &hint.label {
+                InlayHintLabel::String(label) => label == "ReduceAction",
+                _ => false,
+            })
+            .collect::<Vec<_>>();
+
+        assert!(!reduce_action_hints.is_empty());
+        for hint in reduce_action_hints {
+            let tooltip = hint.tooltip.as_ref().unwrap();
+            match tooltip {
+                lsp_types::InlayHintTooltip::MarkupContent(markup) => {
+                    assert!(markup.value.contains("A block of Rust code executed when this production rule is reduced"));
+                    assert!(markup.value.contains("#reduceaction-optional"));
+                }
+                _ => panic!("expected MarkupContent tooltip"),
+            }
+        }
     }
 }

@@ -10,7 +10,7 @@ This document provides a comprehensive guide to the grammar definition syntax us
 - [Token Definition (`%token`)](#token-definition-must-defined)
 - [Production Rules](#production-rules)
 - [Patterns](#patterns)
-- [ProductionType (Non-Terminal Types)](#ruletype-optional)
+- [ProductionType (Non-Terminal Types)](#productiontype-optional)
 - [Reduce Actions](#reduceaction-optional)
 - [Accessing Data in Reduce Actions](#accessing-token-data-in-reduceaction)
 - [Exclamation Mark (`!`) Value Discard](#exclamation-mark-)

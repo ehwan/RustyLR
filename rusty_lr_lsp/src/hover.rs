@@ -16,6 +16,10 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
     let parsed = completion::parse_args(content).ok();
 
     if let Some(args) = &parsed {
+        if let Some((brace_range, doc)) = reduce_action_brace_at_offset(args, content, offset) {
+            return Some(markdown_hover(content, doc, Some(brace_range)));
+        }
+
         if let Some((pattern, range)) = pattern_at_offset(args, offset) {
             return Some(markdown_hover(
                 content,
@@ -93,6 +97,64 @@ fn markdown_hover(content: &str, value: String, range: Option<ByteRange<usize>>)
         }),
         range: range.map(|range| crate::position::range_to_lsp_range(content, range)),
     }
+}
+
+fn reduce_action_brace_at_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+) -> Option<(ByteRange<usize>, String)> {
+    for rule in &args.rules {
+        for line in &rule.rule_lines {
+            if let Some(reduce_action) = &line.reduce_action {
+                if let Some(proc_macro2::TokenTree::Group(group)) = reduce_action.clone().into_iter().next() {
+                    if group.delimiter() == proc_macro2::Delimiter::Brace {
+                        let action_range = group.span().byte_range();
+                        
+                        // Check start brace(s)
+                        if action_range.start < content.len() && content.as_bytes()[action_range.start] == b'{' {
+                            let start_brace_end = if action_range.start + 1 < action_range.end 
+                                && content.as_bytes()[action_range.start + 1] == b'{' 
+                            {
+                                action_range.start + 2
+                            } else {
+                                action_range.start + 1
+                            };
+                            let start_brace_range = action_range.start .. start_brace_end;
+                            if start_brace_range.contains(&offset) {
+                                return Some((start_brace_range, reduce_action_documentation()));
+                            }
+                        }
+
+                        // Check end brace(s)
+                        if action_range.end > action_range.start && action_range.end <= content.len() {
+                            if content.as_bytes()[action_range.end - 1] == b'}' {
+                                let end_brace_start = if action_range.end - 2 >= action_range.start
+                                    && content.as_bytes()[action_range.end - 2] == b'}'
+                                {
+                                    action_range.end - 2
+                                } else {
+                                    action_range.end - 1
+                                };
+                                let end_brace_range = end_brace_start .. action_range.end;
+                                if end_brace_range.contains(&offset) {
+                                    return Some((end_brace_range, reduce_action_documentation()));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+fn reduce_action_documentation() -> String {
+    format!(
+        "### Reduce Action\n\nA block of Rust code executed when this production rule is reduced.\n\n[Reduce Actions]({}#reduceaction-optional)",
+        SYNTAX_URL
+    )
 }
 
 fn hover_word(content: &str, offset: usize) -> Option<String> {
@@ -815,5 +877,102 @@ Expr : Expr plus Expr
         };
         assert!(markup.value.contains("Precedence Symbol `minus`"));
         assert!(markup.value.contains("```rustylr\n%left plus minus;\n```"));
+    }
+
+    #[test]
+    fn hovers_reduce_action_braces() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr : num { 0 }
+     | num plus num {{ 0 }}
+     ;
+"#;
+
+        // 1. Single brace start hover
+        let start_brace_offset = grammar.find("{ 0 }").unwrap();
+        let hover_start = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, start_brace_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup_start) = hover_start.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup_start.value.contains("### Reduce Action"));
+        assert!(markup_start.value.contains("A block of Rust code executed when this production rule is reduced"));
+        assert!(markup_start.value.contains("#reduceaction-optional"));
+        assert_eq!(
+            hover_start.range.unwrap(),
+            crate::position::range_to_lsp_range(grammar, start_brace_offset .. start_brace_offset + 1)
+        );
+
+        // 2. Single brace end hover
+        let end_brace_offset = start_brace_offset + 4; // points to '}' of '{ 0 }'
+        let hover_end = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, end_brace_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup_end) = hover_end.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup_end.value.contains("### Reduce Action"));
+        assert_eq!(
+            hover_end.range.unwrap(),
+            crate::position::range_to_lsp_range(grammar, end_brace_offset .. end_brace_offset + 1)
+        );
+
+        // 3. Double brace start hover (first brace)
+        let dstart_brace_offset = grammar.find("{{ 0 }}").unwrap();
+        let hover_dstart1 = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, dstart_brace_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup_dstart1) = hover_dstart1.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup_dstart1.value.contains("### Reduce Action"));
+        assert_eq!(
+            hover_dstart1.range.unwrap(),
+            crate::position::range_to_lsp_range(grammar, dstart_brace_offset .. dstart_brace_offset + 2)
+        );
+
+        // 4. Double brace start hover (second brace)
+        let hover_dstart2 = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, dstart_brace_offset + 1),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup_dstart2) = hover_dstart2.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup_dstart2.value.contains("### Reduce Action"));
+        assert_eq!(
+            hover_dstart2.range.unwrap(),
+            crate::position::range_to_lsp_range(grammar, dstart_brace_offset .. dstart_brace_offset + 2)
+        );
+
+        // 5. Double brace end hover (first of closing braces)
+        let dend_brace_offset = grammar.find("}}").unwrap();
+        let hover_dend1 = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, dend_brace_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup_dend1) = hover_dend1.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup_dend1.value.contains("### Reduce Action"));
+        assert_eq!(
+            hover_dend1.range.unwrap(),
+            crate::position::range_to_lsp_range(grammar, dend_brace_offset .. dend_brace_offset + 2)
+        );
     }
 }
