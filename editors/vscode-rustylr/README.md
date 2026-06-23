@@ -1,61 +1,34 @@
-# RustyLR VSCode Extension
+# RustyLR Language Support
 
-Temporary VSCode extension client for the `rusty_lr_lsp` server in this repository.
-
-## Run From This Repository
-
-1. Build the language server once:
-
-   ```bash
-   cargo build -p rusty_lr_lsp
-   ```
-
-2. Install the extension client dependencies:
-
-   ```bash
-   cd editors/vscode-rustylr
-   npm install
-   ```
-
-3. Open this extension folder in VSCode:
-
-   ```bash
-   code editors/vscode-rustylr
-   ```
-
-4. Press `F5` and choose `VS Code Extension Development` if prompted.
-
-5. In the Extension Development Host window, open the RustyLR repository folder and then open a grammar file such as `example/calculator/src/parser.rustylr`, or `src/rustylr.rs` in a downstream project.
-
-The extension starts the already-built server binary when it exists:
-
-```bash
-/home/ehwan/workspace/RustyLR/target/debug/rusty_lr_lsp
-```
-
-If that binary does not exist yet, it falls back to `cargo run --quiet --package rusty_lr_lsp`.
-
-The extension searches upward for the RustyLR repository root and uses that as the server working directory. You can override the command, arguments, and working directory with VSCode settings:
-
-```json
-{
-  "rustylr.server.command": "/home/ehwan/workspace/RustyLR/target/debug/rusty_lr_lsp",
-  "rustylr.server.args": [],
-  "rustylr.server.cwd": "/home/ehwan/workspace/RustyLR"
-}
-```
-
-## File Matching
-
-The extension contributes a `rustylr` language mode for:
-
-- `*.rustylr`
-- `rustylr.rs`
-
-It also sends those file patterns to the LSP server even when the VSCode language mode is not manually changed.
+This extension provides rich language support for the [RustyLR](https://github.com/ehwan/RustyLR) parser generator grammar files (`*.rustylr` and `rustylr.rs`).
 
 ## Features
 
-The extension is intentionally thin: VSCode starts `rusty_lr_lsp` over stdio and the server provides the language features.
+- **Diagnostics & Error Reporting:** Real-time diagnostics for grammar syntax errors, unused symbols, conflict resolutions, and more.
+- **Go to Definition:** Quickly navigate to rule definitions, terminal declarations, and precedence rules.
+- **Find References:** Find all occurrences and usages of terminals, non-terminals, and precedence symbols.
+- **Syntax Highlighting (Semantic Tokens):** Distinct, theme-aligned colors for terminal names, non-terminal rules, directives, bindings, location bindings (`@loc`), and variables (`$var`).
+- **Formatting:** Automatic document formatter that standardizes directives, separates rules, and indents rule lines and reduce-action bodies.
+- **Code Actions (Quick Fixes):** Fast diagnostic suppression actions using the `%allow` directive.
+- **Hover tooltips:** Documented explanations and types for terminal tokens, non-terminal rules, keywords, and patterns.
+- **Inlay Hints:** Inline type annotations and reduce action indicators.
+- **Auto-Completion:** Intelligent suggestions for directives, symbols, locations, variables, and diagnostics.
 
-See [`rusty_lr_lsp/README.md`](../../rusty_lr_lsp/README.md) for the current diagnostics, go-to-definition, and completion feature details.
+## Extension Settings
+
+This extension contributes the following settings to control the language server behavior:
+
+* `rustylr.server.command`: Path to the `rusty_lr_lsp` server binary. Leave empty to automatically detect or run from Cargo.
+* `rustylr.server.args`: Arguments passed to the language server command.
+* `rustylr.server.cwd`: Working directory for the language server.
+* `rustylr.semanticTokens.enabled`: Toggle semantic token syntax highlighting.
+
+## Requirements
+
+The language features require the `rusty_lr_lsp` server, which is part of the RustyLR cargo workspace. You can build it from the repository root:
+
+```bash
+cargo build -p rusty_lr_lsp
+```
+
+By default, the extension will attempt to auto-detect the built binary in your workspace target folder or run it dynamically using Cargo.

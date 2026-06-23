@@ -1,15 +1,35 @@
 {
   "name": "rustylr-vscode",
   "displayName": "RustyLR",
-  "description": "Temporary VSCode extension client for the RustyLR language server.",
-  "version": "0.0.1",
+  "description": "Rich language support for the RustyLR parser generator, featuring diagnostics, formatting, auto-completion, hover, goto-definition, find-references, and inlay hints.",
+  "version": "0.1.0",
   "publisher": "rustylr",
   "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ehwan/RustyLR.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ehwan/RustyLR/issues"
+  },
+  "homepage": "https://github.com/ehwan/RustyLR#readme",
+  "keywords": [
+    "parser",
+    "grammar",
+    "lsp",
+    "rust",
+    "rustylr",
+    "bison",
+    "yacc",
+    "compiler"
+  ],
   "engines": {
     "vscode": "^1.84.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Linters",
+    "Formatters"
   ],
   "main": "./extension.js",
   "activationEvents": [
