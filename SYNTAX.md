@@ -511,7 +511,7 @@ You can use variables prefixed with `$` inside any RustCode block in the grammar
 - `$location` -> Evaluates to the type defined by `%location` (defaults to `::rusty_lr::DefaultLocation`).
 - `$userdata` -> Evaluates to the type defined by `%userdata` (defaults to `()`).
 - `$error` or `$errortype` -> Evaluates to the type defined by `%errortype` / `%error` (defaults to `::rusty_lr::DefaultReduceActionError`).
-- `$NonTerminalName` -> Evaluates to the `ruletype` defined for `NonTerminalName`.
+- `$NonTerminalName` -> Evaluates to the `ProductionType` defined for `NonTerminalName`.
 - `$terminal_name` -> Evaluates to the match pattern/definition of `<terminal_name>`.
 
 ### Substitution Errors
