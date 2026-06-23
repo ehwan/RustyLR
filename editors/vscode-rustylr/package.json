@@ -4,7 +4,7 @@
   "description": "LSP-powered language support for RustyLR grammar files.",
   "version": "0.1.0",
   "publisher": "ehwan",
-  "license": "MIT",
+  "license": "MIT OR Apache-2.0",
   "preview": true,
   "repository": {
     "type": "git",
