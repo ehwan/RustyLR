@@ -1,6 +1,6 @@
 [package]
 name = "rusty_lr"
-version = "4.2.0"
+version = "4.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "A Bison-like Parser generator & Compiler frontend framework for Rust generating IELR(1), LALR(1) parser tables, with deterministic LR and non-deterministic LR (GLR) parsing."
@@ -10,9 +10,9 @@ keywords = ["parser", "bison", "lr", "glr", "compiler"]
 categories = ["parsing", "compilers", "parser-implementations"]
 
 [dependencies]
-rusty_lr_core = { version = "4.2.0", path = "../rusty_lr_core" }
-rusty_lr_derive = { version = "2.48.0", path = "../rusty_lr_derive", optional = true }
-rusty_lr_buildscript = { version = "0.67.0", path = "../rusty_lr_buildscript", optional = true }
+rusty_lr_core = { version = "4.3.0", path = "../rusty_lr_core" }
+rusty_lr_derive = { version = "2.49.0", path = "../rusty_lr_derive", optional = true }
+rusty_lr_buildscript = { version = "0.68.0", path = "../rusty_lr_buildscript", optional = true }
 
 [features]
 default = ["derive"]
