@@ -31,6 +31,11 @@ pub fn semantic_tokens(content: &str) -> Option<SemanticTokens> {
         for rule in args.rules {
             non_terminals.insert(rule.name.value().clone());
         }
+        for (_, _, items) in args.precedences {
+            for item in items {
+                terminals.insert(item.to_string());
+            }
+        }
     }
 
     terminals.insert("error".to_string());
@@ -115,10 +120,38 @@ fn collect_names(tokens: &[TokenTree]) -> (HashSet<String>, HashSet<String>) {
         match token {
             TokenTree::Punct(punct) if punct.as_char() == '%' => {
                 if let Some(TokenTree::Ident(ident)) = iter.peek() {
-                    if ident.to_string() == "token" {
+                    let directive = ident.to_string();
+                    if directive == "token" {
                         iter.next(); // consume "token"
                         if let Some(TokenTree::Ident(term_name)) = iter.peek() {
                             terminals.insert(term_name.to_string());
+                        }
+                    } else if directive == "left"
+                        || directive == "right"
+                        || directive == "precedence"
+                    {
+                        iter.next(); // consume directive keyword
+                        while let Some(next_token) = iter.peek() {
+                            match next_token {
+                                TokenTree::Punct(p) if p.as_char() == ';' => {
+                                    iter.next();
+                                    break;
+                                }
+                                TokenTree::Ident(id) => {
+                                    terminals.insert(id.to_string());
+                                    iter.next();
+                                }
+                                TokenTree::Literal(lit) => {
+                                    terminals.insert(lit.to_string());
+                                    iter.next();
+                                }
+                                TokenTree::Punct(_) => {
+                                    iter.next();
+                                }
+                                _ => {
+                                    iter.next();
+                                }
+                            }
                         }
                     }
                 }
@@ -405,12 +438,15 @@ pub enum Token {
 %tokentype Token;
 %start List;
 
+%left plus minus;
+
 %token num Token::Num(_);
 %token plus Token::Plus;
 %token comma Token::Comma;
 
 E(i32) : left=E plus num { $1 + $3 }
        | error { *data += 1; 0 }
+       | num %prec minus { 0 }
        ;
 List(Vec<i32>) : $sep(E, comma, +) { E };
 "#;
@@ -445,11 +481,14 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         assert!(decoded.contains(&("%tokentype".to_string(), 2)));
         assert!(decoded.contains(&("%start".to_string(), 2)));
         assert!(decoded.contains(&("%token".to_string(), 2)));
+        assert!(decoded.contains(&("%left".to_string(), 2)));
+        assert!(decoded.contains(&("%prec".to_string(), 2)));
 
         // Terminals (type 0)
         assert!(decoded.contains(&("num".to_string(), 0)));
         assert!(decoded.contains(&("plus".to_string(), 0)));
         assert!(decoded.contains(&("comma".to_string(), 0)));
+        assert!(decoded.contains(&("minus".to_string(), 0))); // precedence-only symbol highlighted as terminal
         assert!(decoded.contains(&("error".to_string(), 0))); // reserved terminal
 
         // Non-terminals (type 1)

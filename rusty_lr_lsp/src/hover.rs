@@ -26,29 +26,60 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
     }
 
     let word = hover_word(content, offset)?;
-    let documentation = if word == "data" {
-        let mut userdata_type = "()".to_string();
-        let mut definition_info = "".to_string();
+    let mut documentation = None;
 
-        if let Some(args) = &parsed {
-            if let Some((_, ts)) = args.userdata_typename.first() {
-                userdata_type = ts.to_string();
-                definition_info = format!(
-                    "\n\nDefinition:\n```rustylr\n%userdata {};\n```",
-                    userdata_type
-                );
+    if let Some(args) = &parsed {
+        let mut assoc_type = "";
+        let mut declaration_items = Vec::new();
+        let mut found_prec = false;
+        for (_, assoc, items) in &args.precedences {
+            if items.iter().any(|item| item.to_string() == word) {
+                assoc_type = match assoc {
+                    Some(rusty_lr_core::production::Associativity::Left) => "%left",
+                    Some(rusty_lr_core::production::Associativity::Right) => "%right",
+                    None => "%precedence",
+                };
+                declaration_items = items.iter().map(|i| i.to_string()).collect();
+                found_prec = true;
+                break;
             }
         }
 
-        Some(format!(
-            "### `data: &mut {}`{}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({}#4-user-data-data)",
-            userdata_type,
-            definition_info,
-            SYNTAX_URL
-        ))
-    } else {
-        hover_word_documentation(&word)
-    };
+        if found_prec {
+            documentation = Some(format!(
+                "### Precedence Symbol `{}`\n\nDeclared via:\n```rustylr\n{} {};\n```",
+                word,
+                assoc_type,
+                declaration_items.join(" ")
+            ));
+        }
+    }
+
+    if documentation.is_none() {
+        if word == "data" {
+            let mut userdata_type = "()".to_string();
+            let mut definition_info = "".to_string();
+
+            if let Some(args) = &parsed {
+                if let Some((_, ts)) = args.userdata_typename.first() {
+                    userdata_type = ts.to_string();
+                    definition_info = format!(
+                        "\n\nDefinition:\n```rustylr\n%userdata {};\n```",
+                        userdata_type
+                    );
+                }
+            }
+
+            documentation = Some(format!(
+                "### `data: &mut {}`{}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({}#4-user-data-data)",
+                userdata_type,
+                definition_info,
+                SYNTAX_URL
+            ));
+        } else {
+            documentation = hover_word_documentation(&word);
+        }
+    }
 
     let documentation = documentation?;
     Some(markdown_hover(content, documentation, None))
@@ -756,5 +787,33 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
             panic!("expected markup hover");
         };
         assert!(markup2.value.contains("`@$` refers to a source-location"));
+    }
+
+    #[test]
+    fn hovers_precedence_symbol() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%userdata MyCoolData;
+%tokentype Token;
+%start Expr;
+%left plus minus;
+%token num Token::Num(_);
+Expr : Expr plus Expr
+     | num %prec minus
+     ;
+"#;
+        let offset = grammar.find("minus").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("Precedence Symbol `minus`"));
+        assert!(markup.value.contains("```rustylr\n%left plus minus;\n```"));
     }
 }
