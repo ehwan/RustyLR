@@ -9,6 +9,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::str::FromStr;
 
 use crate::lsp::diagnostics::split_stream;
+use crate::lsp::hover;
 use crate::lsp::position::{offset_to_position, position_to_offset};
 
 pub(crate) const DIRECTIVES: &[&str] = &[
@@ -62,6 +63,7 @@ pub(crate) const KEYWORDS: &[&str] = &[
     "data",
     "lookahead",
     "shift",
+    "Err",
 ];
 
 pub(crate) const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
@@ -129,48 +131,98 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                 );
             }
             for variable in &line_variables.value_names {
-                builder.variable(
-                    &format!("${variable}"),
-                    "current production binding",
-                    Some(format!(
-                        "Semantic value bound by the current production line.\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\nHere `$left` and `$right` can be used in RustCode substitution contexts.\n\n[Named variables]({SYNTAX_URL}#named-variables)"
-                    )),
-                );
+                let (detail, documentation) = if let Some(reference) =
+                    line_variables.value_references.get(variable)
+                {
+                    (
+                        format!("${variable}: {}", reference.ty),
+                        Some(hover::reduce_action_binding_reference_documentation(
+                            &format!("${variable}"),
+                            reference,
+                        )),
+                    )
+                } else {
+                    (
+                            "current production binding".to_string(),
+                            Some(format!(
+                                "Semantic value bound by the current production line.\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\nHere `$left` and `$right` can be used in RustCode substitution contexts.\n\n[Named variables]({SYNTAX_URL}#named-variables)"
+                            )),
+                        )
+                };
+                builder.variable(&format!("${variable}"), &detail, documentation);
             }
             for index in 1..=line_variables.value_count {
-                builder.variable(
-                    &format!("${index}"),
-                    "positional semantic value",
-                    Some(format!(
-                        "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
-                    )),
-                );
+                let (detail, documentation) = if let Some(reference) =
+                    line_variables.position_references.get(&index)
+                {
+                    (
+                        format!("${index}: {}", reference.ty),
+                        Some(hover::reduce_action_binding_reference_documentation(
+                            &format!("${index}"),
+                            reference,
+                        )),
+                    )
+                } else {
+                    (
+                            "positional semantic value".to_string(),
+                            Some(format!(
+                                "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
+                            )),
+                        )
+                };
+                builder.variable(&format!("${index}"), &detail, documentation);
             }
         }
         CompletionMode::Location => {
-            builder.variable(
-                "@$",
-                "current production location",
-                location_documentation("@$"),
-            );
-            builder.variable(
-                "@0",
-                "current production location",
-                location_documentation("@0"),
-            );
+            let (detail, documentation) = location_completion_info(parsed.as_ref(), "@$");
+            builder.variable("@$", &detail, documentation);
+            let (detail, documentation) = location_completion_info(parsed.as_ref(), "@0");
+            builder.variable("@0", &detail, documentation);
             for variable in &line_variables.value_names {
-                builder.variable(
-                    &format!("@{variable}"),
-                    "current production binding location",
-                    location_documentation(&format!("@{variable}")),
-                );
+                let label = format!("@{variable}");
+                let (detail, documentation) =
+                    if let Some(reference) = line_variables.value_references.get(variable) {
+                        (
+                            hover::reduce_action_location_reference_detail(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                            ),
+                            Some(hover::reduce_action_location_reference_documentation(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                                Some(reference),
+                            )),
+                        )
+                    } else {
+                        (
+                            "current production binding location".to_string(),
+                            location_documentation(&label),
+                        )
+                    };
+                builder.variable(&label, &detail, documentation);
             }
             for index in 1..=line_variables.value_count {
-                builder.variable(
-                    &format!("@{index}"),
-                    "positional location",
-                    location_documentation(&format!("@{index}")),
-                );
+                let label = format!("@{index}");
+                let (detail, documentation) =
+                    if let Some(reference) = line_variables.position_references.get(&index) {
+                        (
+                            hover::reduce_action_location_reference_detail(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                            ),
+                            Some(hover::reduce_action_location_reference_documentation(
+                                parsed.as_ref().unwrap(),
+                                &label,
+                                Some(reference),
+                            )),
+                        )
+                    } else {
+                        (
+                            "positional location".to_string(),
+                            location_documentation(&label),
+                        )
+                    };
+                builder.variable(&label, &detail, documentation);
             }
         }
         CompletionMode::AllowDiagnostic => {
@@ -184,9 +236,29 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             add_symbol_items(&mut builder, &names);
         }
         CompletionMode::Symbol => {
+            if line_variables.in_reduce_action {
+                for (name, ty) in &line_variables.value_types {
+                    if let Some(reference) = line_variables.value_references.get(name) {
+                        builder.variable(
+                            name,
+                            &hover::reduce_action_binding_detail(name, ty),
+                            Some(hover::reduce_action_binding_reference_documentation(
+                                name, reference,
+                            )),
+                        );
+                    } else {
+                        builder.variable(
+                            name,
+                            &hover::reduce_action_binding_detail(name, ty),
+                            Some(hover::reduce_action_binding_documentation(name, ty)),
+                        );
+                    }
+                }
+            }
             add_symbol_items(&mut builder, &names);
             for keyword in KEYWORDS {
-                builder.keyword(keyword, "RustyLR keyword", keyword_documentation(keyword));
+                let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
+                builder.keyword(keyword, &detail, documentation);
             }
             for directive in DIRECTIVES {
                 builder.keyword(
@@ -199,6 +271,36 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     }
 
     CompletionResponse::Array(builder.finish())
+}
+
+fn keyword_completion_info(args: Option<&GrammarArgs>, keyword: &str) -> (String, Option<String>) {
+    if let Some(args) = args {
+        if let Some(documentation) = hover::reduce_action_variable_documentation(args, keyword) {
+            let detail = hover::reduce_action_variable_detail(args, keyword)
+                .unwrap_or_else(|| "RustyLR keyword".to_string());
+            return (detail, Some(documentation));
+        }
+    }
+
+    (
+        "RustyLR keyword".to_string(),
+        keyword_documentation(keyword),
+    )
+}
+
+fn location_completion_info(args: Option<&GrammarArgs>, label: &str) -> (String, Option<String>) {
+    if let Some(args) = args {
+        if let Some(documentation) = hover::reduce_action_variable_documentation(args, label) {
+            let detail = hover::reduce_action_variable_detail(args, label)
+                .unwrap_or_else(|| "current production location".to_string());
+            return (detail, Some(documentation));
+        }
+    }
+
+    (
+        "current production location".to_string(),
+        location_documentation(label),
+    )
 }
 
 fn add_symbol_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
@@ -485,10 +587,23 @@ fn rule_line_tokens_text(
 #[derive(Default)]
 struct LineVariables {
     value_names: BTreeSet<String>,
+    value_types: BTreeMap<String, String>,
+    value_references: BTreeMap<String, ReduceActionReference>,
+    position_references: BTreeMap<usize, ReduceActionReference>,
     value_count: usize,
+    in_reduce_action: bool,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ReduceActionReference {
+    pub(crate) ty: String,
+    pub(crate) production: String,
+    pub(crate) marker: String,
+    pub(crate) index: usize,
 }
 
 fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> LineVariables {
+    let grammar = Grammar::from_grammar_args(args.clone()).ok();
     for rule in &args.rules {
         for (line_idx, line) in rule.rule_lines.iter().enumerate() {
             let start = args
@@ -498,12 +613,50 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
             let end = rule_line_end(args, content, rule, line_idx);
             if start <= offset && offset <= end {
                 let mut variables = LineVariables::default();
+                variables.in_reduce_action = reduce_action_contains_offset(line, offset);
+                let token_references = grammar
+                    .as_ref()
+                    .map(|grammar| {
+                        production_token_references(args, content, rule, line_idx, grammar)
+                    })
+                    .unwrap_or_default();
                 for (mapped_name, pattern) in &line.tokens {
                     variables.value_count += 1;
+                    if let Some(reference) = token_references.get(variables.value_count - 1) {
+                        variables
+                            .position_references
+                            .insert(variables.value_count, reference.clone());
+                    }
                     if let Some(name) = mapped_name {
                         variables.value_names.insert(name.value().clone());
+                        if let Some(grammar) = &grammar {
+                            variables.value_types.insert(
+                                name.value().clone(),
+                                hover::pattern_final_type(args, grammar, pattern),
+                            );
+                        }
+                        if let Some(reference) = token_references.get(variables.value_count - 1) {
+                            variables
+                                .value_references
+                                .insert(name.value().clone(), reference.clone());
+                        }
                     } else {
                         collect_default_bindings(pattern, &mut variables.value_names);
+                        if let (Some(grammar), Some(reference)) =
+                            (&grammar, token_references.get(variables.value_count - 1))
+                        {
+                            collect_default_binding_types(
+                                args,
+                                grammar,
+                                pattern,
+                                &mut variables.value_types,
+                            );
+                            collect_default_binding_references(
+                                pattern,
+                                reference,
+                                &mut variables.value_references,
+                            );
+                        }
                     }
                 }
                 return variables;
@@ -512,6 +665,93 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
     }
 
     LineVariables::default()
+}
+
+pub(crate) fn reduce_action_binding_reference_for_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+    name: &str,
+) -> Option<ReduceActionReference> {
+    let variables = variables_for_offset(args, content, offset);
+    if !variables.in_reduce_action {
+        return None;
+    }
+    variables.value_references.get(name).cloned()
+}
+
+pub(crate) fn reduce_action_positional_reference_for_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+    index: usize,
+) -> Option<ReduceActionReference> {
+    let variables = variables_for_offset(args, content, offset);
+    if !variables.in_reduce_action {
+        return None;
+    }
+    variables.position_references.get(&index).cloned()
+}
+
+fn reduce_action_contains_offset(line: &rusty_lr_parser::RuleLineArgs, offset: usize) -> bool {
+    line.reduce_action
+        .as_ref()
+        .and_then(token_stream_range)
+        .is_some_and(|range| range.contains(&offset))
+}
+
+fn production_token_references(
+    args: &GrammarArgs,
+    content: &str,
+    rule: &rusty_lr_parser::RuleDefArgs,
+    line_idx: usize,
+    grammar: &Grammar,
+) -> Vec<ReduceActionReference> {
+    let line = &rule.rule_lines[line_idx];
+    let separator = if line_idx == 0 { ':' } else { '|' };
+    let mut production = format!("{} {separator}", rule.name.value());
+    let mut token_spans = Vec::new();
+    for (mapped_name, pattern) in &line.tokens {
+        let token_text = mapped_pattern_text(args, content, mapped_name.as_ref(), pattern);
+        if token_text.is_empty() {
+            continue;
+        }
+        production.push(' ');
+        let start = production.chars().count();
+        production.push_str(&token_text);
+        let width = token_text.chars().count().max(1);
+        token_spans.push((
+            start,
+            width,
+            hover::pattern_final_type(args, grammar, pattern),
+        ));
+    }
+
+    token_spans
+        .into_iter()
+        .enumerate()
+        .map(|(idx, (start, width, ty))| ReduceActionReference {
+            ty,
+            production: production.clone(),
+            marker: format!("{}{}", " ".repeat(start), "^".repeat(width)),
+            index: idx + 1,
+        })
+        .collect()
+}
+
+fn mapped_pattern_text(
+    args: &GrammarArgs,
+    content: &str,
+    mapped_name: Option<&rusty_lr_parser::Located<String>>,
+    pattern: &PatternArgs,
+) -> String {
+    let start = mapped_name
+        .and_then(|name| args.span_manager.get_byterange(&name.location()))
+        .map_or_else(|| pattern_start(args, pattern), |range| range.start);
+    let end = pattern_end(args, pattern);
+    content[start.min(content.len())..end.min(content.len())]
+        .trim()
+        .to_string()
 }
 
 fn rule_line_end(
@@ -661,6 +901,35 @@ fn token_stream_end(stream: &TokenStream) -> usize {
         .unwrap_or(0)
 }
 
+fn token_stream_range(stream: &TokenStream) -> Option<std::ops::Range<usize>> {
+    let mut ranges = stream.clone().into_iter().filter_map(token_tree_range);
+    let first = ranges.next()?;
+    let range = ranges.fold(first, |acc, range| {
+        acc.start.min(range.start)..acc.end.max(range.end)
+    });
+    Some(range)
+}
+
+fn token_tree_range(token: TokenTree) -> Option<std::ops::Range<usize>> {
+    match token {
+        TokenTree::Group(group) => {
+            let stream_range = token_stream_range(&group.stream());
+            let open = group.span_open().byte_range();
+            let close = group.span_close().byte_range();
+            let delimiter_range = open.start.min(close.start)..open.end.max(close.end);
+            Some(if let Some(stream_range) = stream_range {
+                delimiter_range.start.min(stream_range.start)
+                    ..delimiter_range.end.max(stream_range.end)
+            } else {
+                delimiter_range
+            })
+        }
+        TokenTree::Ident(ident) => Some(ident.span().byte_range()),
+        TokenTree::Punct(punct) => Some(punct.span().byte_range()),
+        TokenTree::Literal(lit) => Some(lit.span().byte_range()),
+    }
+}
+
 fn token_tree_end(token: TokenTree) -> usize {
     match token {
         TokenTree::Group(group) => token_stream_end(&group.stream())
@@ -669,6 +938,72 @@ fn token_tree_end(token: TokenTree) -> usize {
         TokenTree::Ident(ident) => ident.span().byte_range().end,
         TokenTree::Punct(punct) => punct.span().byte_range().end,
         TokenTree::Literal(lit) => lit.span().byte_range().end,
+    }
+}
+
+fn collect_default_binding_types(
+    args: &GrammarArgs,
+    grammar: &Grammar,
+    pattern: &PatternArgs,
+    bindings: &mut BTreeMap<String, String>,
+) {
+    match pattern {
+        PatternArgs::Ident(ident) => {
+            bindings.insert(
+                ident.value().clone(),
+                hover::pattern_final_type(args, grammar, pattern),
+            );
+        }
+        PatternArgs::Plus { base, .. }
+        | PatternArgs::Star { base, .. }
+        | PatternArgs::Question { base, .. } => {
+            collect_default_binding_types(args, grammar, base, bindings);
+        }
+        PatternArgs::Minus { base, exclude } => {
+            collect_default_binding_types(args, grammar, base, bindings);
+            collect_default_binding_types(args, grammar, exclude, bindings);
+        }
+        PatternArgs::Sep { base, .. } => {
+            collect_default_binding_types(args, grammar, base, bindings);
+        }
+        PatternArgs::Exclamation { .. }
+        | PatternArgs::Group { .. }
+        | PatternArgs::TerminalSet(_)
+        | PatternArgs::Byte(_)
+        | PatternArgs::ByteString(_)
+        | PatternArgs::Char(_)
+        | PatternArgs::String(_) => {}
+    }
+}
+
+fn collect_default_binding_references(
+    pattern: &PatternArgs,
+    reference: &ReduceActionReference,
+    bindings: &mut BTreeMap<String, ReduceActionReference>,
+) {
+    match pattern {
+        PatternArgs::Ident(ident) => {
+            bindings.insert(ident.value().clone(), reference.clone());
+        }
+        PatternArgs::Plus { base, .. }
+        | PatternArgs::Star { base, .. }
+        | PatternArgs::Question { base, .. } => {
+            collect_default_binding_references(base, reference, bindings);
+        }
+        PatternArgs::Minus { base, exclude } => {
+            collect_default_binding_references(base, reference, bindings);
+            collect_default_binding_references(exclude, reference, bindings);
+        }
+        PatternArgs::Sep { base, .. } => {
+            collect_default_binding_references(base, reference, bindings);
+        }
+        PatternArgs::Exclamation { .. }
+        | PatternArgs::Group { .. }
+        | PatternArgs::TerminalSet(_)
+        | PatternArgs::Byte(_)
+        | PatternArgs::ByteString(_)
+        | PatternArgs::Char(_)
+        | PatternArgs::String(_) => {}
     }
 }
 
@@ -793,6 +1128,9 @@ pub(crate) fn keyword_documentation(label: &str) -> Option<String> {
         ),
         "shift" => format!(
             "GLR reduce-action control binding used to allow or prune a shift branch.\n\nExample:\n\n```rustylr\n*shift = false;\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+        ),
+        "Err" => format!(
+            "`Err` constructs the error variant returned from a reduce action's `Result<_, %error>`.\n\nExample:\n\n```rustylr\nExpr : num {{ Err(MyError::InvalidNumber)? }};\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
         ),
         "auto" => "Table layout mode selected automatically by RustyLR.".to_string(),
         "dense" => "Dense table layout mode.".to_string(),
@@ -1006,6 +1344,135 @@ Boxed(box $tokentype) : num { num };
         assert!(markup.contains("Rust type: `Token` (boxed)"));
         assert!(markup.contains("Boxed(box $tokentype)"));
         assert!(!markup.contains("{ num }"));
+    }
+
+    #[test]
+    fn completion_items_use_hover_reduce_action_documentation() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%moduleprefix ::my_prefix;
+%userdata $moduleprefix::UserData;
+%location $moduleprefix::Span;
+%error $userdata;
+%tokentype $moduleprefix::Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { let _ = ; let _ = @0; 0 };
+"#;
+        let action_offset = grammar.find("let _ = ;").unwrap() + "let _ = ".len();
+        let action_items = items(completions(
+            grammar,
+            offset_to_position(grammar, action_offset),
+        ));
+
+        let data = action_items
+            .iter()
+            .find(|item| item.label == "data")
+            .unwrap();
+        assert_eq!(
+            data.detail.as_deref(),
+            Some("data: &mut ::my_prefix::UserData")
+        );
+        assert!(markdown_value(data).contains("data: &mut ::my_prefix::UserData"));
+
+        let lookahead = action_items
+            .iter()
+            .find(|item| item.label == "lookahead")
+            .unwrap();
+        assert_eq!(
+            lookahead.detail.as_deref(),
+            Some("lookahead: &::my_prefix::Token")
+        );
+        assert!(markdown_value(lookahead).contains("lookahead: &::my_prefix::Token"));
+
+        let shift = action_items
+            .iter()
+            .find(|item| item.label == "shift")
+            .unwrap();
+        assert_eq!(shift.detail.as_deref(), Some("shift: &mut bool"));
+        assert!(markdown_value(shift).contains("shift: &mut bool"));
+
+        let err = action_items
+            .iter()
+            .find(|item| item.label == "Err")
+            .unwrap();
+        assert_eq!(
+            err.detail.as_deref(),
+            Some("Result::Err(::my_prefix::UserData)")
+        );
+        assert!(markdown_value(err).contains("Result::Err(::my_prefix::UserData)"));
+
+        let location_offset = grammar.find("@0").unwrap() + 1;
+        let location_items = items(completions(
+            grammar,
+            offset_to_position(grammar, location_offset),
+        ));
+        let at0 = location_items
+            .iter()
+            .find(|item| item.label == "@0")
+            .unwrap();
+        assert_eq!(at0.detail.as_deref(), Some("@0: &mut ::my_prefix::Span"));
+        assert!(markdown_value(at0).contains("@0: &mut ::my_prefix::Span"));
+    }
+
+    #[test]
+    fn completes_mapped_symbols_inside_reduce_action() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr(i32) : left=Expr plus right=Expr {  };
+"#;
+        let offset = grammar.find("{  }").unwrap() + 2;
+        let completion_items = items(completions(grammar, offset_to_position(grammar, offset)));
+
+        let left = completion_items
+            .iter()
+            .find(|item| item.label == "left")
+            .unwrap();
+        assert_eq!(left.detail.as_deref(), Some("left: i32"));
+        let left_markup = markdown_value(left);
+        assert!(left_markup.contains("left: i32"));
+        assert!(left_markup.contains("Expr : left=Expr plus right=Expr"));
+        assert!(left_markup.contains("       ^^^^^^^^^"));
+
+        let right = completion_items
+            .iter()
+            .find(|item| item.label == "right")
+            .unwrap();
+        assert_eq!(right.detail.as_deref(), Some("right: i32"));
+        let right_markup = markdown_value(right);
+        assert!(right_markup.contains("right: i32"));
+        assert!(right_markup.contains("Expr : left=Expr plus right=Expr"));
+        assert!(right_markup.contains("                      ^^^^^^^^^"));
+
+        let dollar_grammar = grammar.replacen("{  }", "{ $ }", 1);
+        let dollar_offset = dollar_grammar.find("{ $").unwrap() + 3;
+        let dollar_items = items(completions(
+            &dollar_grammar,
+            offset_to_position(&dollar_grammar, dollar_offset),
+        ));
+        let first = dollar_items.iter().find(|item| item.label == "$1").unwrap();
+        assert_eq!(first.detail.as_deref(), Some("$1: i32"));
+        assert!(markdown_value(first).contains("       ^^^^^^^^^"));
+
+        let location_grammar = grammar.replacen("{  }", "{ @ }", 1);
+        let location_offset = location_grammar.find("{ @").unwrap() + 3;
+        let location_items = items(completions(
+            &location_grammar,
+            offset_to_position(&location_grammar, location_offset),
+        ));
+        let first_location = location_items
+            .iter()
+            .find(|item| item.label == "@1")
+            .unwrap();
+        assert!(markdown_value(first_location).contains("       ^^^^^^^^^"));
     }
 
     fn markdown_value(item: &CompletionItem) -> &str {

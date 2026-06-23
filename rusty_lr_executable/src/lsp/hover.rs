@@ -1,10 +1,11 @@
 use lsp_types::{Hover, HoverContents, MarkupContent, MarkupKind, Position};
-use proc_macro2::TokenStream;
+use proc_macro2::{Group, TokenStream, TokenTree};
 use rusty_lr_parser::grammar::Grammar;
 use rusty_lr_parser::terminal_info::TerminalName;
-use rusty_lr_parser::{GrammarArgs, PatternArgs, TerminalSetItem};
+use rusty_lr_parser::{GrammarArgs, Location, PatternArgs, TerminalSetItem};
 use std::collections::BTreeSet;
 use std::ops::Range as ByteRange;
+use std::str::FromStr;
 
 use crate::lsp::completion::{
     self, ALLOW_DIAGNOSTICS, DIRECTIVES, KEYWORDS, SUBSTITUTION_VARIABLES, SYNTAX_URL,
@@ -60,29 +61,15 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
     }
 
     if documentation.is_none() {
-        if word == "data" {
-            let mut userdata_type = "()".to_string();
-            let mut definition_info = "".to_string();
-
-            if let Some(args) = &parsed {
-                if let Some((_, ts)) = args.userdata_typename.first() {
-                    userdata_type = ts.to_string();
-                    definition_info = format!(
-                        "\n\nDefinition:\n```rustylr\n%userdata {};\n```",
-                        userdata_type
-                    );
-                }
-            }
-
-            documentation = Some(format!(
-                "### `data: &mut {}`{}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({}#4-user-data-data)",
-                userdata_type,
-                definition_info,
-                SYNTAX_URL
-            ));
-        } else {
-            documentation = hover_word_documentation(&word);
+        if let Some(args) = &parsed {
+            documentation = reduce_action_variable_documentation(args, &word).or_else(|| {
+                reduce_action_reference_documentation_for_word(args, content, offset, &word)
+            });
         }
+    }
+
+    if documentation.is_none() {
+        documentation = hover_word_documentation(&word);
     }
 
     let documentation = documentation?;
@@ -161,6 +148,321 @@ fn reduce_action_documentation() -> String {
         "### Reduce Action\n\nA block of Rust code executed when this production rule is reduced.\n\n[Reduce Actions]({}#reduceaction-optional)",
         SYNTAX_URL
     )
+}
+
+pub(crate) fn reduce_action_variable_documentation(
+    args: &GrammarArgs,
+    word: &str,
+) -> Option<String> {
+    match word {
+        "data" => Some(data_documentation(args)),
+        "lookahead" => Some(lookahead_documentation(args)),
+        "shift" => Some(shift_documentation()),
+        "Err" => Some(err_variant_documentation(args)),
+        "@0" | "@$" => Some(current_location_documentation(args, word)),
+        _ => None,
+    }
+}
+
+pub(crate) fn reduce_action_variable_detail(args: &GrammarArgs, word: &str) -> Option<String> {
+    match word {
+        "data" => Some(format!("data: &mut {}", resolved_userdata_type_name(args))),
+        "lookahead" => Some(format!("lookahead: &{}", token_type_name(args))),
+        "shift" => Some("shift: &mut bool".to_string()),
+        "Err" => Some(format!("Result::Err({})", resolved_error_type_name(args))),
+        "@0" | "@$" => Some(format!(
+            "{word}: &mut {}",
+            resolved_location_type_name(args)
+        )),
+        _ => None,
+    }
+}
+
+pub(crate) fn reduce_action_binding_detail(name: &str, ty: &str) -> String {
+    format!("{name}: {ty}")
+}
+
+pub(crate) fn reduce_action_binding_documentation(name: &str, ty: &str) -> String {
+    reduce_action_binding_documentation_impl(name, ty, None)
+}
+
+pub(crate) fn reduce_action_binding_reference_documentation(
+    name: &str,
+    reference: &completion::ReduceActionReference,
+) -> String {
+    reduce_action_binding_documentation_impl(name, &reference.ty, Some(reference))
+}
+
+fn reduce_action_binding_documentation_impl(
+    name: &str,
+    ty: &str,
+    reference: Option<&completion::ReduceActionReference>,
+) -> String {
+    let reference_section = production_reference_section(reference);
+    format!(
+        "### `{}`\n\nSemantic value bound by the current production line.\n\nFinal type: `{}`{reference_section}\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\n[Named variables]({SYNTAX_URL}#named-variables)",
+        reduce_action_binding_detail(name, ty),
+        ty
+    )
+}
+
+pub(crate) fn reduce_action_location_reference_detail(args: &GrammarArgs, label: &str) -> String {
+    format!("{label}: {}", resolved_location_type_name(args))
+}
+
+pub(crate) fn reduce_action_location_reference_documentation(
+    args: &GrammarArgs,
+    label: &str,
+    reference: Option<&completion::ReduceActionReference>,
+) -> String {
+    let location_type = resolved_location_type_name(args);
+    let reference_section = production_reference_section(reference);
+    format!(
+        "### `{label}: {location_type}`\n\nSource-location value for a referenced production token.{reference_section}\n\nExamples:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ println!(\"{{:?}}\", @left); }};\nExpr : Expr plus Term {{ println!(\"{{:?}}\", @1); }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+    )
+}
+
+fn production_reference_section(reference: Option<&completion::ReduceActionReference>) -> String {
+    let Some(reference) = reference else {
+        return String::new();
+    };
+
+    format!(
+        "\n\nReferences RHS symbol #{}:\n\n```rustylr\n{}\n{}\n```",
+        reference.index, reference.production, reference.marker
+    )
+}
+
+fn reduce_action_reference_documentation_for_word(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+    word: &str,
+) -> Option<String> {
+    if let Some(name) = word.strip_prefix('@') {
+        if name == "0" || name == "$" {
+            return None;
+        }
+        if let Ok(index) = name.parse::<usize>() {
+            return completion::reduce_action_positional_reference_for_offset(
+                args, content, offset, index,
+            )
+            .map(|reference| {
+                reduce_action_location_reference_documentation(args, word, Some(&reference))
+            });
+        }
+        return completion::reduce_action_binding_reference_for_offset(args, content, offset, name)
+            .map(|reference| {
+                reduce_action_location_reference_documentation(args, word, Some(&reference))
+            });
+    }
+
+    if let Some(name) = word.strip_prefix('$') {
+        if let Ok(index) = name.parse::<usize>() {
+            return completion::reduce_action_positional_reference_for_offset(
+                args, content, offset, index,
+            )
+            .map(|reference| reduce_action_binding_reference_documentation(word, &reference));
+        }
+        return completion::reduce_action_binding_reference_for_offset(args, content, offset, name)
+            .map(|reference| reduce_action_binding_reference_documentation(word, &reference));
+    }
+
+    completion::reduce_action_binding_reference_for_offset(args, content, offset, word)
+        .map(|reference| reduce_action_binding_reference_documentation(word, &reference))
+}
+
+fn data_documentation(args: &GrammarArgs) -> String {
+    let userdata_type = resolved_userdata_type_name(args);
+    let definition_info = type_definition("userdata", &args.userdata_typename);
+
+    format!(
+        "### `data: &mut {userdata_type}`{definition_info}\n\nMutable user-data binding available inside reduce actions.\n\nExample:\n\n```rustylr\nExpr : num {{ data.count += 1; num }};\n```\n\n[User data]({SYNTAX_URL}#4-user-data-data)"
+    )
+}
+
+fn lookahead_documentation(args: &GrammarArgs) -> String {
+    let token_type = token_type_name(args);
+    let definition_info = type_definition("tokentype", &args.token_typename);
+
+    format!(
+        "### `lookahead: &{token_type}`{definition_info}\n\nGLR reduce-action control binding for inspecting the next terminal.\n\nExample:\n\n```rustylr\nif let Some(term) = lookahead.to_term() {{ /* ... */ }}\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+    )
+}
+
+fn shift_documentation() -> String {
+    format!(
+        "### `shift: &mut bool`\n\nGLR reduce-action control binding used to allow or prune a shift branch.\n\nExample:\n\n```rustylr\n*shift = false;\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
+    )
+}
+
+fn err_variant_documentation(args: &GrammarArgs) -> String {
+    let error_type = resolved_error_type_name(args);
+    let definition_info = type_definition("error", &args.error_typename);
+
+    format!(
+        "### `Result::Err({error_type})`{definition_info}\n\n`Err` constructs the error variant returned from a reduce action's `Result<_, {error_type}>`.\n\nExample:\n\n```rustylr\nExpr : num {{ Err(MyError::InvalidNumber)? }};\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
+    )
+}
+
+fn current_location_documentation(args: &GrammarArgs, label: &str) -> String {
+    let location_type = resolved_location_type_name(args);
+    let definition_info = type_definition("location", &args.location_typename);
+
+    format!(
+        "### `{label}: &mut {location_type}`{definition_info}\n\nCurrent production source-location binding available inside reduce actions.\n\nExamples:\n\n```rustylr\nExpr : Term {{ println!(\"{{:?}}\", @$); }};\nExpr : {{ println!(\"{{:?}}\", @0); }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+    )
+}
+
+fn grammar_type_name(items: &[(Location, TokenStream)], default: &str) -> String {
+    let name = items
+        .first()
+        .map(|(_, ty)| ty.to_string())
+        .filter(|ty| !ty.is_empty())
+        .unwrap_or_else(|| default.to_string());
+    normalize_path_spacing(&name)
+}
+
+fn normalize_path_spacing(name: &str) -> String {
+    name.replace(":: ", "::").replace(" ::", "::")
+}
+
+fn token_type_name(args: &GrammarArgs) -> String {
+    Grammar::from_grammar_args(args.clone())
+        .ok()
+        .map(|grammar| type_stream_name(grammar.token_type()))
+        .unwrap_or_else(|| {
+            resolve_provider_type_name(args, "tokentype")
+                .unwrap_or_else(|| grammar_type_name(&args.token_typename, "()"))
+        })
+}
+
+fn resolved_userdata_type_name(args: &GrammarArgs) -> String {
+    resolve_provider_type_name(args, "userdata")
+        .unwrap_or_else(|| grammar_type_name(&args.userdata_typename, "()"))
+}
+
+fn resolved_error_type_name(args: &GrammarArgs) -> String {
+    resolve_provider_type_name(args, "errortype").unwrap_or_else(|| {
+        grammar_type_name(
+            &args.error_typename,
+            &default_module_type(args, "DefaultReduceActionError"),
+        )
+    })
+}
+
+fn resolved_location_type_name(args: &GrammarArgs) -> String {
+    resolve_provider_type_name(args, "location").unwrap_or_else(|| {
+        grammar_type_name(
+            &args.location_typename,
+            &default_module_type(args, "DefaultLocation"),
+        )
+    })
+}
+
+fn default_module_type(args: &GrammarArgs, type_name: &str) -> String {
+    let module_prefix =
+        resolve_provider_type_name(args, "moduleprefix").unwrap_or_else(|| "::rusty_lr".into());
+    format!("{module_prefix}::{type_name}")
+}
+
+fn type_stream_name(ty: &TokenStream) -> String {
+    normalize_path_spacing(&ty.to_string())
+}
+
+fn resolve_provider_type_name(args: &GrammarArgs, name: &str) -> Option<String> {
+    resolve_provider_stream(args, name, &mut Vec::new()).map(|stream| type_stream_name(&stream))
+}
+
+fn resolve_provider_stream(
+    args: &GrammarArgs,
+    name: &str,
+    stack: &mut Vec<String>,
+) -> Option<TokenStream> {
+    let stream = provider_stream(args, name)?;
+    if stack.iter().any(|entry| entry == name) || stack.len() >= 100 {
+        return None;
+    }
+    stack.push(name.to_string());
+    let resolved = resolve_type_stream(args, stream, stack);
+    stack.pop();
+    Some(resolved)
+}
+
+fn provider_stream(args: &GrammarArgs, name: &str) -> Option<TokenStream> {
+    match name {
+        "moduleprefix" => args
+            .module_prefix
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("::rusty_lr")),
+        "userdata" => args
+            .userdata_typename
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("()")),
+        "errortype" | "error" => args
+            .error_typename
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("$moduleprefix::DefaultReduceActionError")),
+        "location" => args
+            .location_typename
+            .first()
+            .map(|(_, stream)| stream.clone())
+            .or_else(|| token_stream_from_str("$moduleprefix::DefaultLocation")),
+        "tokentype" => args
+            .token_typename
+            .first()
+            .map(|(_, stream)| stream.clone()),
+        _ => None,
+    }
+}
+
+fn resolve_type_stream(
+    args: &GrammarArgs,
+    stream: TokenStream,
+    stack: &mut Vec<String>,
+) -> TokenStream {
+    let mut resolved = TokenStream::new();
+    let mut tokens = stream.into_iter().peekable();
+    while let Some(token) = tokens.next() {
+        match token {
+            TokenTree::Punct(punct) if punct.as_char() == '$' => {
+                if let Some(TokenTree::Ident(ident)) = tokens.peek() {
+                    let ident_name = ident.to_string();
+                    if let Some(substitution) = resolve_provider_stream(args, &ident_name, stack) {
+                        resolved.extend(substitution);
+                        tokens.next();
+                        continue;
+                    }
+                }
+                resolved.extend([TokenTree::Punct(punct)]);
+            }
+            TokenTree::Group(group) => {
+                let delimiter = group.delimiter();
+                let stream = resolve_type_stream(args, group.stream(), stack);
+                resolved.extend([TokenTree::Group(Group::new(delimiter, stream))]);
+            }
+            token => resolved.extend([token]),
+        }
+    }
+    resolved
+}
+
+fn token_stream_from_str(value: &str) -> Option<TokenStream> {
+    TokenStream::from_str(value).ok()
+}
+
+fn type_definition(directive: &str, items: &[(Location, TokenStream)]) -> String {
+    let Some((location, ty)) = items.first() else {
+        return String::new();
+    };
+    if matches!(location, Location::CallSite) {
+        return String::new();
+    }
+
+    format!("\n\nDefinition:\n```rustylr\n%{directive} {};\n```", ty)
 }
 
 fn hover_word(content: &str, offset: usize) -> Option<String> {
@@ -826,11 +1128,12 @@ Expr : num { *data += 1; 0 };
 #[derive(Debug, Clone)]
 pub enum Token { Num(i32) }
 %%
+%location Span;
 %userdata MyCoolData;
 %tokentype Token;
 %start Expr;
 %token num Token::Num(_);
-Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
+Expr : num { println!("{:?}, {:?}, {:?}", @1, @0, @$); 0 };
 "#;
         // Hover on '@' of '@1'
         let offset = grammar.find("@1").unwrap();
@@ -842,10 +1145,12 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
         let HoverContents::Markup(markup1) = hover1.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup1.value.contains("`@1` refers to a source-location"));
+        assert!(markup1.value.contains("@1: Span"));
+        assert!(markup1.value.contains("Expr : num"));
+        assert!(markup1.value.contains("       ^^^"));
 
-        // Hover on '@' of '@$'
-        let offset = grammar.find("@$").unwrap();
+        // Hover on '@' of '@0'
+        let offset = grammar.find("@0").unwrap();
         let hover2 = hover(
             grammar,
             crate::lsp::position::offset_to_position(grammar, offset),
@@ -854,7 +1159,290 @@ Expr : num { println!("{:?}, {:?}", @1, @$); 0 };
         let HoverContents::Markup(markup2) = hover2.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup2.value.contains("`@$` refers to a source-location"));
+        assert!(markup2.value.contains("@0: &mut Span"));
+        assert!(markup2.value.contains("%location Span;"));
+
+        // Hover on '@' of '@$'
+        let offset = grammar.find("@$").unwrap();
+        let hover3 = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup3) = hover3.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup3.value.contains("@$: &mut Span"));
+        assert!(markup3.value.contains("%location Span;"));
+    }
+
+    #[test]
+    fn hovers_shift_with_mutable_bool_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%glr;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { *shift = false; 0 };
+"#;
+        let offset = grammar.find("shift").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("shift: &mut bool"));
+        assert!(markup.value.contains("GLR reduce-action control binding"));
+    }
+
+    #[test]
+    fn hovers_lookahead_with_token_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%glr;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { if let Some(_term) = lookahead.to_term() {} 0 };
+"#;
+        let offset = grammar.find("lookahead").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("lookahead: &Token"));
+        assert!(markup.value.contains("%tokentype Token;"));
+    }
+
+    #[test]
+    fn hovers_err_with_reduce_error_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+struct MyError;
+%%
+%error MyError;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { Err(MyError)?; 0 };
+"#;
+        let offset = grammar.find("Err(").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("Result::Err(MyError)"));
+        assert!(markup.value.contains("%error MyError;"));
+    }
+
+    #[test]
+    fn hovers_err_with_default_reduce_error_type() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { Err(Default::default())?; 0 };
+"#;
+        let offset = grammar.find("Err(").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup
+            .value
+            .contains("Result::Err(::rusty_lr::DefaultReduceActionError)"));
+        assert!(!markup.value.contains("moduleprefix"));
+    }
+
+    #[test]
+    fn hovers_err_with_default_reduce_error_type_and_module_prefix() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%moduleprefix ::my_prefix;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { Err(Default::default())?; 0 };
+"#;
+        let offset = grammar.find("Err(").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup
+            .value
+            .contains("Result::Err(::my_prefix::DefaultReduceActionError)"));
+        assert!(!markup.value.contains("moduleprefix"));
+    }
+
+    #[test]
+    fn hovers_reduce_action_types_after_substitution() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%moduleprefix ::my_prefix;
+%userdata $moduleprefix::UserData;
+%location $moduleprefix::Span;
+%error $userdata;
+%tokentype $moduleprefix::Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { let _ = data; let _ = @$; let _ = lookahead; Err(Default::default())?; 0 };
+"#;
+
+        let data_offset = grammar.find("let _ = data").unwrap() + "let _ = ".len();
+        let data_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, data_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(data_markup) = data_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(data_markup
+            .value
+            .contains("data: &mut ::my_prefix::UserData"));
+        assert!(!data_markup.value.contains("$moduleprefix"));
+
+        let location_offset = grammar.find("@$").unwrap();
+        let location_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, location_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(location_markup) = location_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(location_markup.value.contains("@$: &mut ::my_prefix::Span"));
+        assert!(!location_markup.value.contains("$location"));
+
+        let lookahead_offset = grammar.find("lookahead").unwrap();
+        let lookahead_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, lookahead_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(lookahead_markup) = lookahead_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(lookahead_markup
+            .value
+            .contains("lookahead: &::my_prefix::Token"));
+        assert!(!lookahead_markup.value.contains("$moduleprefix"));
+
+        let err_offset = grammar.find("Err(").unwrap();
+        let err_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, err_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(err_markup) = err_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(err_markup
+            .value
+            .contains("Result::Err(::my_prefix::UserData)"));
+        assert!(!err_markup.value.contains("$userdata"));
+    }
+
+    #[test]
+    fn hovers_mapped_symbols_inside_reduce_action() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr(i32) : left=Expr plus right=Expr { left + right };
+"#;
+        let offset = grammar.find("{ left").unwrap() + 2;
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("left: i32"));
+        assert!(markup.value.contains("Semantic value bound"));
+        assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
+        assert!(markup.value.contains("       ^^^^^^^^^"));
+
+        let positional_offset = grammar.find("+ right").unwrap() + 2;
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, positional_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("right: i32"));
+        assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
+        assert!(markup.value.contains("^^^^^^^^^"));
+
+        let dollar_grammar = grammar.replace(
+            "{ left + right }",
+            "{ let _ = $1; let _ = @2; left + right }",
+        );
+        let dollar_offset = dollar_grammar.find("$1").unwrap();
+        let hover_res = hover(
+            &dollar_grammar,
+            crate::lsp::position::offset_to_position(&dollar_grammar, dollar_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("$1: i32"));
+        assert!(markup.value.contains("       ^^^^^^^^^"));
+
+        let location_offset = dollar_grammar.find("@2").unwrap();
+        let hover_res = hover(
+            &dollar_grammar,
+            crate::lsp::position::offset_to_position(&dollar_grammar, location_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("@2:"));
+        assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
+        assert!(markup.value.contains("                 ^^^^"));
     }
 
     #[test]
