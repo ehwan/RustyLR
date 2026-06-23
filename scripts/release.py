@@ -91,7 +91,6 @@ def calculate_bumped_version(version_str):
 def update_vscode_extension_versions(root_dir, old_version, new_version):
     """Update the VSCode extension version, required rustylr server version, and matching docs."""
     package_json_path = os.path.join(root_dir, 'editors', 'vscode-rustylr', 'package.json')
-    readme_path = os.path.join(root_dir, 'editors', 'vscode-rustylr', 'README.md')
     
     if os.path.exists(package_json_path):
         with open(package_json_path, 'r', encoding='utf-8') as f:
@@ -132,27 +131,6 @@ def update_vscode_extension_versions(root_dir, old_version, new_version):
     else:
         print(f"Warning: {package_json_path} does not exist.")
         
-    if os.path.exists(readme_path):
-        with open(readme_path, 'r', encoding='utf-8') as f:
-            readme_content = f.read()
-            
-        pattern = r'(cargo install rustylr --version\s+)[^\s]+(\s+--force)'
-        if re.search(pattern, readme_content):
-            readme_content = re.sub(pattern, rf'\g<1>{new_version}\g<2>', readme_content)
-            with open(readme_path, 'w', encoding='utf-8') as f:
-                f.write(readme_content)
-            print(
-                f"Updated VSCode extension README server install command in "
-                f"{os.path.relpath(readme_path, root_dir)}: {old_version} -> {new_version}"
-            )
-        else:
-            print(
-                f"Warning: Could not find VSCode extension server install command in "
-                f"{os.path.relpath(readme_path, root_dir)}"
-            )
-    else:
-        print(f"Warning: {readme_path} does not exist.")
-
 def run_bump(root_dir):
     """Bumps all project versions and updates their inter-dependencies."""
     print("=== STARTING VERSION BUMP ===")

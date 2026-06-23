@@ -52,11 +52,7 @@ cargo install rustylr
 
 Ensure that your cargo binary directory (usually `~/.cargo/bin`) is in your system's `PATH`. The extension will automatically detect it.
 
-The extension checks the `rustylr` executable version before starting the language server. If the installed version is not compatible with this extension release, install the expected version:
-
-```bash
-cargo install rustylr --version 1.34.0 --force
-```
+The extension checks the `rustylr` executable version before starting the language server. If the installed version is not compatible with this extension release, it shows the exact versioned install command for the expected server version.
 
 If you use a custom path instead of automatic detection:
 

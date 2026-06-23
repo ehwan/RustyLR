@@ -276,7 +276,7 @@ The VSCode extension launches the language server from the `rustylr` executable.
 cargo install rustylr
 ```
 
-The extension checks the installed `rustylr` version before starting the server and suggests the matching `cargo install rustylr --version ... --force` command if the versions are incompatible.
+The extension checks the installed `rustylr` version before starting the server and suggests the exact versioned install command if the versions are incompatible.
 
 The extension source is available in [`editors/vscode-rustylr`](editors/vscode-rustylr).
 
