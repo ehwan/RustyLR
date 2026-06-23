@@ -50,7 +50,7 @@ You can install the RustyLR executable globally using Cargo:
 cargo install rustylr
 ```
 
-Ensure that your cargo binary directory (usually `~/.cargo/bin`) is in your system's `PATH`. The extension will automatically detect it.
+When installed this way, Cargo places the `rustylr` executable in Cargo's binary directory (commonly `~/.cargo/bin` on Unix-like systems). Make sure that directory is in your `PATH`; the extension looks for `rustylr` on `PATH` when `rustylr.server.command` is empty.
 
 The extension checks the `rustylr` executable version before starting the language server. If the installed version is not compatible with this extension release, it shows the exact versioned install command for the expected server version.
 
