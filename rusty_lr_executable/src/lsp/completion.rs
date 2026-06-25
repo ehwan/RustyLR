@@ -130,27 +130,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     )),
                 );
             }
-            for variable in &line_variables.value_names {
-                let (detail, documentation) = if let Some(reference) =
-                    line_variables.value_references.get(variable)
-                {
-                    (
-                        format!("${variable}: {}", reference.ty),
-                        Some(hover::reduce_action_binding_reference_documentation(
-                            &format!("${variable}"),
-                            reference,
-                        )),
-                    )
-                } else {
-                    (
-                            "current production binding".to_string(),
-                            Some(format!(
-                                "Semantic value bound by the current production line.\n\nExample:\n\n```rustylr\nExpr : left=Expr plus right=Term {{ left + right }};\n```\n\nHere `$left` and `$right` can be used in RustCode substitution contexts.\n\n[Named variables]({SYNTAX_URL}#named-variables)"
-                            )),
-                        )
-                };
-                builder.variable(&format!("${variable}"), &detail, documentation);
-            }
+
             for index in 1..=line_variables.value_count {
                 let (detail, documentation) = if let Some(reference) =
                     line_variables.position_references.get(&index)
@@ -1303,11 +1283,18 @@ Boxed(box $tokentype) : num { num };
             MOCK_GRAMMAR,
             offset_to_position(MOCK_GRAMMAR, offset),
         ));
+        // Built-in substitution variables.
         assert!(labels.contains("$tokentype"));
+        // Non-terminal production type substitution.
         assert!(labels.contains("$E"));
+        // Terminal pattern substitution (`%token num Token::Num(_)`).
         assert!(labels.contains("$num"));
-        assert!(labels.contains("$left"));
+        assert!(labels.contains("$plus"));
+        // Positional semantic value.
         assert!(labels.contains("$1"));
+        // `$left` is only a local named binding, NOT a %token or non-terminal,
+        // so it must NOT be offered as a substitution target.
+        assert!(!labels.contains("$left"));
     }
 
     #[test]
