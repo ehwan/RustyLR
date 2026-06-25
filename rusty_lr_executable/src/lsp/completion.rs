@@ -55,14 +55,7 @@ pub(crate) const ALLOW_DIAGNOSTICS: &[&str] = &[
     "reduce_reduce_conflict_glr",
 ];
 
-pub(crate) const KEYWORDS: &[&str] = &[
-    "error",
-    "$sep",
-    "data",
-    "lookahead",
-    "shift",
-    "Err",
-];
+pub(crate) const KEYWORDS: &[&str] = &["error", "$sep", "data", "lookahead", "shift", "Err"];
 
 /// Keywords that are only valid inside a ReduceAction block.
 const REDUCE_ACTION_KEYWORDS: &[&str] = &["data", "lookahead", "shift", "Err"];
@@ -103,14 +96,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             // Directives are only meaningful outside a ReduceAction block.
             // Inside a ReduceAction the user is writing Rust code, not grammar directives.
             if !line_variables.in_reduce_action {
-                for directive in DIRECTIVES {
-                    builder.keyword(
-                        directive,
-                        "RustyLR directive",
-                        keyword_documentation(directive),
-                    );
-                }
-                // %prec and %dprec are only valid inside a production rule line.
+                // inside of a production rule line, only valid directives are %prec and %dprec.
                 if line_variables.in_rule_line {
                     for directive in PRODUCTION_DIRECTIVES {
                         builder.keyword(
@@ -119,34 +105,49 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                             keyword_documentation(directive),
                         );
                     }
+                } else {
+                    for directive in DIRECTIVES {
+                        builder.keyword(
+                            directive,
+                            "RustyLR directive",
+                            keyword_documentation(directive),
+                        );
+                    }
                 }
             }
         }
         CompletionMode::Dollar => {
-            for variable in SUBSTITUTION_VARIABLES {
-                builder.variable(
-                    variable,
-                    "built-in RustCode substitution",
-                    substitution_documentation(variable),
-                );
-            }
-            for (name, documentation) in &names.nonterminals {
-                builder.variable(
+            if !line_variables.in_rule_line {
+                for variable in SUBSTITUTION_VARIABLES {
+                    builder.variable(
+                        variable,
+                        "built-in RustCode substitution",
+                        substitution_documentation(variable),
+                    );
+                }
+                for (name, documentation) in &names.nonterminals {
+                    builder.variable(
                     &format!("${name}"),
                     "non-terminal production type",
                     Some(format!(
                         "Substitutes to the production type of non-terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-                    )),
-                );
-            }
-            for (name, documentation) in &names.terminals {
-                builder.variable(
+                        )),
+                    );
+                }
+                for (name, documentation) in &names.terminals {
+                    builder.variable(
                     &format!("${name}"),
                     "terminal definition substitution",
                     Some(format!(
                         "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-                    )),
-                );
+                        )),
+                    );
+                }
+            } else {
+                for keyword in PATTERN_KEYWORDS {
+                    let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
+                    builder.keyword(keyword, &detail, documentation);
+                }
             }
 
             // Positional variables ($1, $2, …) are only valid inside a ReduceAction block.
@@ -260,24 +261,27 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     }
                 }
                 for keyword in REDUCE_ACTION_KEYWORDS {
-                    let (detail, documentation) =
-                        keyword_completion_info(parsed.as_ref(), keyword);
+                    let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
                     builder.keyword(keyword, &detail, documentation);
                 }
             } else {
                 // Outside a ReduceAction: suggest grammar symbols, pattern keywords, and directives.
-                add_symbol_items(&mut builder, &names);
-                for keyword in PATTERN_KEYWORDS {
-                    let (detail, documentation) =
-                        keyword_completion_info(parsed.as_ref(), keyword);
-                    builder.keyword(keyword, &detail, documentation);
-                }
-                for directive in DIRECTIVES {
-                    builder.keyword(
-                        directive,
-                        "RustyLR directive",
-                        keyword_documentation(directive),
-                    );
+
+                if line_variables.in_rule_line {
+                    add_symbol_items(&mut builder, &names);
+                    for keyword in PATTERN_KEYWORDS {
+                        let (detail, documentation) =
+                            keyword_completion_info(parsed.as_ref(), keyword);
+                        builder.keyword(keyword, &detail, documentation);
+                    }
+                } else {
+                    for directive in DIRECTIVES {
+                        builder.keyword(
+                            directive,
+                            "RustyLR directive",
+                            keyword_documentation(directive),
+                        );
+                    }
                 }
             }
         }
