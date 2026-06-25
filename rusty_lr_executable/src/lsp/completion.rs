@@ -56,9 +56,6 @@ pub(crate) const ALLOW_DIAGNOSTICS: &[&str] = &[
 
 pub(crate) const KEYWORDS: &[&str] = &[
     "error",
-    "auto",
-    "dense",
-    "sparse",
     "$sep",
     "data",
     "lookahead",
@@ -70,7 +67,7 @@ pub(crate) const KEYWORDS: &[&str] = &[
 const REDUCE_ACTION_KEYWORDS: &[&str] = &["data", "lookahead", "shift", "Err"];
 
 /// Keywords that are only valid outside a ReduceAction (production pattern / symbol list).
-const PATTERN_KEYWORDS: &[&str] = &["error", "$sep", "auto", "dense", "sparse"];
+const PATTERN_KEYWORDS: &[&str] = &["error", "$sep"];
 
 pub(crate) const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
 
@@ -1134,12 +1131,11 @@ pub(crate) fn keyword_documentation(label: &str) -> Option<String> {
         "shift" => format!(
             "GLR reduce-action control binding used to allow or prune a shift branch.\n\nExample:\n\n```rustylr\n*shift = false;\n```\n\n[Advanced GLR reduce controls]({SYNTAX_URL}#advanced-glr-reduce-controls)"
         ),
+        // `Err` is a Rust stdlib variant, but the LSP provides grammar-aware context by
+        // reflecting the `%error` type as `Result::Err(%error type)` in the detail string.
         "Err" => format!(
             "`Err` constructs the error variant returned from a reduce action's `Result<_, %error>`.\n\nExample:\n\n```rustylr\nExpr : num {{ Err(MyError::InvalidNumber)? }};\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
         ),
-        "auto" => "Table layout mode selected automatically by RustyLR.".to_string(),
-        "dense" => "Dense table layout mode.".to_string(),
-        "sparse" => "Sparse table layout mode.".to_string(),
         _ => return None,
     };
     Some(documentation)
