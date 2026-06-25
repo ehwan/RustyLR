@@ -23,14 +23,15 @@ pub(crate) const DIRECTIVES: &[&str] = &[
     "%left",
     "%right",
     "%precedence",
-    "%prec",
-    "%dprec",
     "%glr",
     "%lalr",
     "%nooptim",
     "%allow",
     "%moduleprefix",
 ];
+
+/// Directives only valid inside a production rule line (after the `:` or `|`).
+pub(crate) const PRODUCTION_DIRECTIVES: &[&str] = &["%prec", "%dprec"];
 
 pub(crate) const SUBSTITUTION_VARIABLES: &[&str] = &[
     "$tokentype",
@@ -108,6 +109,16 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                         "RustyLR directive",
                         keyword_documentation(directive),
                     );
+                }
+                // %prec and %dprec are only valid inside a production rule line.
+                if line_variables.in_rule_line {
+                    for directive in PRODUCTION_DIRECTIVES {
+                        builder.keyword(
+                            directive,
+                            "production rule directive",
+                            keyword_documentation(directive),
+                        );
+                    }
                 }
             }
         }
@@ -593,6 +604,10 @@ struct LineVariables {
     value_references: BTreeMap<String, ReduceActionReference>,
     position_references: BTreeMap<usize, ReduceActionReference>,
     value_count: usize,
+    /// True when the cursor is anywhere inside a production rule line
+    /// (either in the pattern/symbol list or inside the ReduceAction block).
+    in_rule_line: bool,
+    /// True when the cursor is inside the `{ … }` ReduceAction block of a production rule line.
     in_reduce_action: bool,
 }
 
@@ -615,6 +630,7 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
             let end = rule_line_end(args, content, rule, line_idx);
             if start <= offset && offset <= end {
                 let mut variables = LineVariables::default();
+                variables.in_rule_line = true;
                 variables.in_reduce_action = reduce_action_contains_offset(line, offset);
                 let token_references = grammar
                     .as_ref()
