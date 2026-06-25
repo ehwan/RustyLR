@@ -66,6 +66,12 @@ pub(crate) const KEYWORDS: &[&str] = &[
     "Err",
 ];
 
+/// Keywords that are only valid inside a ReduceAction block.
+const REDUCE_ACTION_KEYWORDS: &[&str] = &["data", "lookahead", "shift", "Err"];
+
+/// Keywords that are only valid outside a ReduceAction (production pattern / symbol list).
+const PATTERN_KEYWORDS: &[&str] = &["error", "$sep", "auto", "dense", "sparse"];
+
 pub(crate) const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md";
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -96,12 +102,16 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
 
     match mode {
         CompletionMode::Directive => {
-            for directive in DIRECTIVES {
-                builder.keyword(
-                    directive,
-                    "RustyLR directive",
-                    keyword_documentation(directive),
-                );
+            // Directives are only meaningful outside a ReduceAction block.
+            // Inside a ReduceAction the user is writing Rust code, not grammar directives.
+            if !line_variables.in_reduce_action {
+                for directive in DIRECTIVES {
+                    builder.keyword(
+                        directive,
+                        "RustyLR directive",
+                        keyword_documentation(directive),
+                    );
+                }
             }
         }
         CompletionMode::Dollar => {
@@ -131,81 +141,88 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                 );
             }
 
-            for index in 1..=line_variables.value_count {
-                let (detail, documentation) = if let Some(reference) =
-                    line_variables.position_references.get(&index)
-                {
-                    (
-                        format!("${index}: {}", reference.ty),
-                        Some(hover::reduce_action_binding_reference_documentation(
-                            &format!("${index}"),
-                            reference,
-                        )),
-                    )
-                } else {
-                    (
+            // Positional variables ($1, $2, …) are only valid inside a ReduceAction block.
+            if line_variables.in_reduce_action {
+                for index in 1..=line_variables.value_count {
+                    let (detail, documentation) = if let Some(reference) =
+                        line_variables.position_references.get(&index)
+                    {
+                        (
+                            format!("${index}: {}", reference.ty),
+                            Some(hover::reduce_action_binding_reference_documentation(
+                                &format!("${index}"),
+                                reference,
+                            )),
+                        )
+                    } else {
+                        (
                             "positional semantic value".to_string(),
                             Some(format!(
                                 "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
                             )),
                         )
-                };
-                builder.variable(&format!("${index}"), &detail, documentation);
+                    };
+                    builder.variable(&format!("${index}"), &detail, documentation);
+                }
             }
         }
         CompletionMode::Location => {
-            let (detail, documentation) = location_completion_info(parsed.as_ref(), "@$");
-            builder.variable("@$", &detail, documentation);
-            let (detail, documentation) = location_completion_info(parsed.as_ref(), "@0");
-            builder.variable("@0", &detail, documentation);
-            for variable in &line_variables.value_names {
-                let label = format!("@{variable}");
-                let (detail, documentation) =
-                    if let Some(reference) = line_variables.value_references.get(variable) {
-                        (
-                            hover::reduce_action_location_reference_detail(
-                                parsed.as_ref().unwrap(),
-                                &label,
-                            ),
-                            Some(hover::reduce_action_location_reference_documentation(
-                                parsed.as_ref().unwrap(),
-                                &label,
-                                Some(reference),
-                            )),
-                        )
-                    } else {
-                        (
-                            "current production binding location".to_string(),
-                            location_documentation(&label),
-                        )
-                    };
-                builder.variable(&label, &detail, documentation);
-            }
-            for index in 1..=line_variables.value_count {
-                let label = format!("@{index}");
-                let (detail, documentation) =
-                    if let Some(reference) = line_variables.position_references.get(&index) {
-                        (
-                            hover::reduce_action_location_reference_detail(
-                                parsed.as_ref().unwrap(),
-                                &label,
-                            ),
-                            Some(hover::reduce_action_location_reference_documentation(
-                                parsed.as_ref().unwrap(),
-                                &label,
-                                Some(reference),
-                            )),
-                        )
-                    } else {
-                        (
-                            "positional location".to_string(),
-                            location_documentation(&label),
-                        )
-                    };
-                builder.variable(&label, &detail, documentation);
+            // Location tracking (@name, @N, @$) is only valid inside a ReduceAction block.
+            if line_variables.in_reduce_action {
+                let (detail, documentation) = location_completion_info(parsed.as_ref(), "@$");
+                builder.variable("@$", &detail, documentation);
+                let (detail, documentation) = location_completion_info(parsed.as_ref(), "@0");
+                builder.variable("@0", &detail, documentation);
+                for variable in &line_variables.value_names {
+                    let label = format!("@{variable}");
+                    let (detail, documentation) =
+                        if let Some(reference) = line_variables.value_references.get(variable) {
+                            (
+                                hover::reduce_action_location_reference_detail(
+                                    parsed.as_ref().unwrap(),
+                                    &label,
+                                ),
+                                Some(hover::reduce_action_location_reference_documentation(
+                                    parsed.as_ref().unwrap(),
+                                    &label,
+                                    Some(reference),
+                                )),
+                            )
+                        } else {
+                            (
+                                "current production binding location".to_string(),
+                                location_documentation(&label),
+                            )
+                        };
+                    builder.variable(&label, &detail, documentation);
+                }
+                for index in 1..=line_variables.value_count {
+                    let label = format!("@{index}");
+                    let (detail, documentation) =
+                        if let Some(reference) = line_variables.position_references.get(&index) {
+                            (
+                                hover::reduce_action_location_reference_detail(
+                                    parsed.as_ref().unwrap(),
+                                    &label,
+                                ),
+                                Some(hover::reduce_action_location_reference_documentation(
+                                    parsed.as_ref().unwrap(),
+                                    &label,
+                                    Some(reference),
+                                )),
+                            )
+                        } else {
+                            (
+                                "positional location".to_string(),
+                                location_documentation(&label),
+                            )
+                        };
+                    builder.variable(&label, &detail, documentation);
+                }
             }
         }
         CompletionMode::AllowDiagnostic => {
+            // Only diagnostic names are valid after %allow.
             for diagnostic in ALLOW_DIAGNOSTICS {
                 builder.keyword(
                     diagnostic,
@@ -213,10 +230,10 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     allow_diagnostic_documentation(diagnostic),
                 );
             }
-            add_symbol_items(&mut builder, &names);
         }
         CompletionMode::Symbol => {
             if line_variables.in_reduce_action {
+                // Inside a ReduceAction: suggest named bindings and ReduceAction-specific keywords.
                 for (name, ty) in &line_variables.value_types {
                     if let Some(reference) = line_variables.value_references.get(name) {
                         builder.variable(
@@ -234,18 +251,26 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                         );
                     }
                 }
-            }
-            add_symbol_items(&mut builder, &names);
-            for keyword in KEYWORDS {
-                let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
-                builder.keyword(keyword, &detail, documentation);
-            }
-            for directive in DIRECTIVES {
-                builder.keyword(
-                    directive,
-                    "RustyLR directive",
-                    keyword_documentation(directive),
-                );
+                for keyword in REDUCE_ACTION_KEYWORDS {
+                    let (detail, documentation) =
+                        keyword_completion_info(parsed.as_ref(), keyword);
+                    builder.keyword(keyword, &detail, documentation);
+                }
+            } else {
+                // Outside a ReduceAction: suggest grammar symbols, pattern keywords, and directives.
+                add_symbol_items(&mut builder, &names);
+                for keyword in PATTERN_KEYWORDS {
+                    let (detail, documentation) =
+                        keyword_completion_info(parsed.as_ref(), keyword);
+                    builder.keyword(keyword, &detail, documentation);
+                }
+                for directive in DIRECTIVES {
+                    builder.keyword(
+                        directive,
+                        "RustyLR directive",
+                        keyword_documentation(directive),
+                    );
+                }
             }
         }
     }
