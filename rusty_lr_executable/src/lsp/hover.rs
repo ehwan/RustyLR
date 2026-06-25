@@ -220,8 +220,7 @@ pub(crate) fn dollar_name_substitution_documentation(
     let name = dollar_name.trim_start_matches('$');
 
     // Check %token definitions first (terminal substitution).
-    if let Some((terminal, token_stream)) = args.terminals.iter().find(|(t, _)| t.value() == name)
-    {
+    if let Some((terminal, token_stream)) = args.terminals.iter().find(|(t, _)| t.value() == name) {
         let definition_line =
             completion::line_text_for_location(args, content, &terminal.location());
         return Some(format!(
@@ -1504,10 +1503,8 @@ Expr(i32) : left=Expr plus right=Expr { $left + $right };
 "#;
         // `$num` refers to the %token definition: it substitutes to `Token::Num(_)`.
         // It is a global terminal-pattern substitution, unrelated to any named binding.
-        let dollar_num_grammar = grammar.replace(
-            "{ $left + $right }",
-            "{ let $num = left; $left + $right }",
-        );
+        let dollar_num_grammar =
+            grammar.replace("{ $left + $right }", "{ let $num = left; $left + $right }");
         let offset = dollar_num_grammar.find("$num").unwrap();
         let hover_res = hover(
             &dollar_num_grammar,
@@ -1535,9 +1532,7 @@ Expr(i32) : left=Expr plus right=Expr { $left + $right };
 
         // `$left` is NOT a %token definition — `left` is only a local named binding.
         // Therefore hovering over `$left` should return no documentation (or None).
-        let dollar_left_offset = dollar_num_grammar
-            .rfind("$left")
-            .unwrap();
+        let dollar_left_offset = dollar_num_grammar.rfind("$left").unwrap();
         let hover_res = hover(
             &dollar_num_grammar,
             crate::lsp::position::offset_to_position(&dollar_num_grammar, dollar_left_offset),

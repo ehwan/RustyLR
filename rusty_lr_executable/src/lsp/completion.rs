@@ -152,6 +152,32 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
 
             // Positional variables ($1, $2, …) are only valid inside a ReduceAction block.
             if line_variables.in_reduce_action {
+                for variable in SUBSTITUTION_VARIABLES {
+                    builder.variable(
+                        variable,
+                        "built-in RustCode substitution",
+                        substitution_documentation(variable),
+                    );
+                }
+                for (name, documentation) in &names.nonterminals {
+                    builder.variable(
+                    &format!("${name}"),
+                    "non-terminal production type",
+                    Some(format!(
+                        "Substitutes to the production type of non-terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+                        )),
+                    );
+                }
+                for (name, documentation) in &names.terminals {
+                    builder.variable(
+                    &format!("${name}"),
+                    "terminal definition substitution",
+                    Some(format!(
+                        "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+                        )),
+                    );
+                }
+
                 for index in 1..=line_variables.value_count {
                     let (detail, documentation) = if let Some(reference) =
                         line_variables.position_references.get(&index)
@@ -267,7 +293,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             } else {
                 // Outside a ReduceAction: suggest grammar symbols, pattern keywords, and directives.
 
-                if line_variables.in_rule_line {
+                if line_variables.in_rule_line && !line_variables.in_reduce_action {
                     add_symbol_items(&mut builder, &names);
                     for keyword in PATTERN_KEYWORDS {
                         let (detail, documentation) =
