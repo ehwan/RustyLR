@@ -206,6 +206,48 @@ fn reduce_action_binding_documentation_impl(
     )
 }
 
+/// Documentation for `$name` inside a grammar context (type substitution, token definition, etc.).
+///
+/// `$name` is a **global** substitution variable:
+/// - If `name` is defined via `%token name XXXX`, it substitutes to the token pattern `XXXX`.
+/// - If `name` is a non-terminal rule, it substitutes to the production type of that rule.
+/// This has nothing to do with named bindings (`left=Expr`) in the current production line.
+pub(crate) fn dollar_name_substitution_documentation(
+    args: &GrammarArgs,
+    content: &str,
+    dollar_name: &str,
+) -> Option<String> {
+    let name = dollar_name.trim_start_matches('$');
+
+    // Check %token definitions first (terminal substitution).
+    if let Some((terminal, token_stream)) = args.terminals.iter().find(|(t, _)| t.value() == name)
+    {
+        let definition_line =
+            completion::line_text_for_location(args, content, &terminal.location());
+        return Some(format!(
+            "### `{dollar_name}`\n\nSubstitutes to the `%token` match pattern for terminal `{name}`:\n\n```rustylr\n{definition_line}\n```\n\nExpands to: `{token_stream}`\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+        ));
+    }
+
+    // Check non-terminal rule definitions (production type substitution).
+    if let Some(rule) = args.rules.iter().find(|r| r.name.value() == name) {
+        let grammar = Grammar::from_grammar_args(args.clone()).ok();
+        let prod_type = grammar
+            .as_ref()
+            .and_then(|g| g.nonterminal_type(name))
+            .and_then(|(ts, _)| ts)
+            .map(|ts| ts.to_string())
+            .unwrap_or_else(|| "()".to_string());
+        let definition_line =
+            completion::line_text_for_location(args, content, &rule.name.location());
+        return Some(format!(
+            "### `{dollar_name}`\n\nSubstitutes to the production type of non-terminal `{name}`: `{prod_type}`\n\n```rustylr\n{definition_line}\n```\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+        ));
+    }
+
+    None
+}
+
 pub(crate) fn reduce_action_location_reference_detail(args: &GrammarArgs, label: &str) -> String {
     format!("{label}: {}", resolved_location_type_name(args))
 }
@@ -264,8 +306,11 @@ fn reduce_action_reference_documentation_for_word(
             )
             .map(|reference| reduce_action_binding_reference_documentation(word, &reference));
         }
-        return completion::reduce_action_binding_reference_for_offset(args, content, offset, name)
-            .map(|reference| reduce_action_binding_reference_documentation(word, &reference));
+        // `$name` (non-numeric) is a GLOBAL substitution variable that expands to:
+        // - the `%token name XXXX` pattern if `name` is a terminal, or
+        // - the production type if `name` is a non-terminal.
+        // It has no relation to local named bindings (`left=Expr`) in the current line.
+        return dollar_name_substitution_documentation(args, content, word);
     }
 
     completion::reduce_action_binding_reference_for_offset(args, content, offset, word)
@@ -1443,6 +1488,76 @@ Expr(i32) : left=Expr plus right=Expr { left + right };
         assert!(markup.value.contains("@2:"));
         assert!(markup.value.contains("Expr : left=Expr plus right=Expr"));
         assert!(markup.value.contains("                 ^^^^"));
+    }
+
+    #[test]
+    fn hovers_dollar_name_shows_terminal_pattern_substitution() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr(i32) : left=Expr plus right=Expr { $left + $right };
+"#;
+        // `$num` refers to the %token definition: it substitutes to `Token::Num(_)`.
+        // It is a global terminal-pattern substitution, unrelated to any named binding.
+        let dollar_num_grammar = grammar.replace(
+            "{ $left + $right }",
+            "{ let $num = left; $left + $right }",
+        );
+        let offset = dollar_num_grammar.find("$num").unwrap();
+        let hover_res = hover(
+            &dollar_num_grammar,
+            crate::lsp::position::offset_to_position(&dollar_num_grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(
+            markup.value.contains("$num"),
+            "hover should mention `$num`, got: {}",
+            markup.value
+        );
+        assert!(
+            markup.value.contains("Token::Num(_)"),
+            "`$num` hover should show the %token pattern `Token::Num(_)`, got: {}",
+            markup.value
+        );
+        assert!(
+            markup.value.contains("substitut"),
+            "`$num` hover should describe substitution semantics, got: {}",
+            markup.value
+        );
+
+        // `$left` is NOT a %token definition — `left` is only a local named binding.
+        // Therefore hovering over `$left` should return no documentation (or None).
+        let dollar_left_offset = dollar_num_grammar
+            .rfind("$left")
+            .unwrap();
+        let hover_res = hover(
+            &dollar_num_grammar,
+            crate::lsp::position::offset_to_position(&dollar_num_grammar, dollar_left_offset),
+        );
+        if let Some(hover_res) = hover_res {
+            let HoverContents::Markup(markup) = hover_res.contents else {
+                panic!("expected markup hover");
+            };
+            assert!(
+                !markup.value.contains("Token::"),
+                "`$left` (not a %%token) must not show a token pattern, got: {}",
+                markup.value
+            );
+            assert!(
+                !markup.value.contains("Semantic value bound"),
+                "`$left` must not show binding-declaration text, got: {}",
+                markup.value
+            );
+        }
+        // None is also acceptable: `$left` has no valid substitution target.
     }
 
     #[test]
