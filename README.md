@@ -258,6 +258,8 @@ context.can_feed(&token);  // Checks if a terminal can be fed next
 println!("{:?}", context); // Prints debugging state information
 ```
 
+`Debug` for a context reports parser-state data such as state stacks, semantic-value stacks, and user data. In GLR mode, this is grouped by active branch. With the `tree` feature enabled, syntax trees are available through the explicit `to_tree_list()` and `to_tree_lists()` inspection APIs.
+
 ---
 
 ## Editor Support
@@ -300,7 +302,7 @@ The extension source is available in [`editors/vscode-rustylr`](editors/vscode-r
 ## Cargo Features
 
 - **`build`**: Enables helper functions in `rusty_lr_buildscript` for compiling grammars inside `build.rs` scripts.
-- **`tree`**: Enables syntax tree inspection APIs such as `to_tree_list()` and `to_tree_lists()` for debugging.
+- **`tree`**: Enables explicit syntax tree inspection APIs such as `to_tree_list()` and `to_tree_lists()` for debugging.
 
 ---
 

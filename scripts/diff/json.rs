@@ -491,6 +491,13 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 pub enum JsonData {
     Empty,
 }
+impl ::std::fmt::Debug for JsonData {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::Empty => f.write_str("Empty"),
+        }
+    }
+}
 #[doc(hidden)]
 #[allow(non_camel_case_types, dead_code)]
 pub struct JsonExtracter;

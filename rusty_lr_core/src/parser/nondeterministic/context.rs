@@ -60,6 +60,30 @@ impl<
     }
 }
 
+struct BranchDebug<'a, Data: SemanticValue> {
+    index: usize,
+    state: usize,
+    state_stack: Vec<usize>,
+    data_stack: Vec<&'a Data>,
+    userdata: &'a Data::UserData,
+}
+
+impl<Data> std::fmt::Debug for BranchDebug<'_, Data>
+where
+    Data: SemanticValue + std::fmt::Debug,
+    Data::UserData: std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Branch")
+            .field("index", &self.index)
+            .field("state", &self.state)
+            .field("state_stack", &self.state_stack)
+            .field("data_stack", &self.data_stack)
+            .field("userdata", self.userdata)
+            .finish()
+    }
+}
+
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
 pub struct Context<
@@ -327,6 +351,10 @@ impl<
                 .copied()
                 .map(Index::into_usize)
         })
+    }
+    fn data_iter(&self, node: usize) -> impl Iterator<Item = &Data> + '_ {
+        self.node_iter(node)
+            .flat_map(|node| node.data_stack.iter().rev())
     }
     #[cfg(feature = "tree")]
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
@@ -1660,7 +1688,6 @@ where
     }
 }
 
-#[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
@@ -1669,14 +1696,36 @@ impl<
         const MAX_REDUCE_RULES: usize,
     > std::fmt::Debug for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
-    Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone,
+    Data: std::fmt::Debug,
+    Data::UserData: std::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (i, path) in self.to_tree_lists().enumerate() {
-            writeln!(f, "Path {}:", i)?;
-            writeln!(f, "{:?}", path)?;
-        }
-        Ok(())
+        let branches: Vec<_> = self
+            .current_nodes
+            .iter()
+            .copied()
+            .zip(&self.current_userdatas)
+            .enumerate()
+            .map(|(index, (node, userdata))| {
+                let mut state_stack: Vec<_> =
+                    self.state_iter(node).chain(std::iter::once(0)).collect();
+                state_stack.reverse();
+                let mut data_stack: Vec<_> = self.data_iter(node).collect();
+                data_stack.reverse();
+
+                BranchDebug {
+                    index,
+                    state: self.state(node),
+                    state_stack,
+                    data_stack,
+                    userdata,
+                }
+            })
+            .collect();
+
+        f.debug_struct("Context")
+            .field("branch_count", &self.current_nodes.len())
+            .field("branches", &branches)
+            .finish()
     }
 }

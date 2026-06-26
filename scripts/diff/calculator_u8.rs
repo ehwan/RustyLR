@@ -237,6 +237,17 @@ pub enum EData {
     __variant3(Vec<char>),
     Empty,
 }
+impl ::std::fmt::Debug for EData {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::__terminals(..) => f.write_str(stringify!(__terminals)),
+            Self::__variant1(..) => f.write_str(stringify!(__variant1)),
+            Self::__variant2(..) => f.write_str(stringify!(__variant2)),
+            Self::__variant3(..) => f.write_str(stringify!(__variant3)),
+            Self::Empty => f.write_str("Empty"),
+        }
+    }
+}
 #[doc(hidden)]
 #[allow(non_camel_case_types, dead_code)]
 pub struct EExtracter;

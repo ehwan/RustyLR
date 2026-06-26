@@ -149,6 +149,7 @@ impl<
     {
         self.feed_eof()?;
 
+        // pop eof
         self.data_stack.pop();
         let start = self.data_stack.pop().unwrap();
         let start = Start::extract(start).unwrap_or_else(|| {
@@ -706,7 +707,6 @@ where
     }
 }
 
-#[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
@@ -714,37 +714,16 @@ impl<
         StateIndex: Index + Copy,
     > std::fmt::Debug for Context<P, Data, Start, StateIndex>
 where
-    Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + NonTerminal,
+    Data: std::fmt::Debug,
+    Data::UserData: std::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.to_tree_list())
-    }
-}
-
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-    > std::ops::Deref for Context<P, Data, Start, StateIndex>
-{
-    type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
-    fn deref(&self) -> &Self::Target {
-        &self.tree_stack
-    }
-}
-
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-    > std::ops::DerefMut for Context<P, Data, Start, StateIndex>
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.tree_stack
+        let state_stack: Vec<_> = self.state_stack().collect();
+        f.debug_struct("Context")
+            .field("state", &self.state())
+            .field("state_stack", &state_stack)
+            .field("data_stack", &self.data_stack)
+            .field("userdata", &self.userdata)
+            .finish()
     }
 }

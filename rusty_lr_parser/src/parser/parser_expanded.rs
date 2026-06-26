@@ -617,6 +617,33 @@ pub enum GrammarData {
     __variant19(Vec<IdentOrLiteral>),
     Empty,
 }
+impl ::std::fmt::Debug for GrammarData {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::__terminals(..) => f.write_str(stringify!(__terminals)),
+            Self::__variant1(..) => f.write_str(stringify!(__variant1)),
+            Self::__variant2(..) => f.write_str(stringify!(__variant2)),
+            Self::__variant3(..) => f.write_str(stringify!(__variant3)),
+            Self::__variant4(..) => f.write_str(stringify!(__variant4)),
+            Self::__variant5(..) => f.write_str(stringify!(__variant5)),
+            Self::__variant6(..) => f.write_str(stringify!(__variant6)),
+            Self::__variant7(..) => f.write_str(stringify!(__variant7)),
+            Self::__variant8(..) => f.write_str(stringify!(__variant8)),
+            Self::__variant9(..) => f.write_str(stringify!(__variant9)),
+            Self::__variant10(..) => f.write_str(stringify!(__variant10)),
+            Self::__variant11(..) => f.write_str(stringify!(__variant11)),
+            Self::__variant12(..) => f.write_str(stringify!(__variant12)),
+            Self::__variant13(..) => f.write_str(stringify!(__variant13)),
+            Self::__variant14(..) => f.write_str(stringify!(__variant14)),
+            Self::__variant15(..) => f.write_str(stringify!(__variant15)),
+            Self::__variant16(..) => f.write_str(stringify!(__variant16)),
+            Self::__variant17(..) => f.write_str(stringify!(__variant17)),
+            Self::__variant18(..) => f.write_str(stringify!(__variant18)),
+            Self::__variant19(..) => f.write_str(stringify!(__variant19)),
+            Self::Empty => f.write_str("Empty"),
+        }
+    }
+}
 #[doc(hidden)]
 #[allow(non_camel_case_types, dead_code)]
 pub struct GrammarExtracter;

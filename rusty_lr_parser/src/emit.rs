@@ -1487,6 +1487,7 @@ impl Grammar {
 
         let data_enum_definition = {
             let mut variants = TokenStream::new();
+            let mut debug_arms = TokenStream::new();
             for (variant_name, typename, boxed) in &variant_names_in_order {
                 if *boxed {
                     variants.extend(quote! {
@@ -1497,9 +1498,15 @@ impl Grammar {
                         #variant_name(#typename),
                     });
                 }
+                debug_arms.extend(quote! {
+                    Self::#variant_name(..) => f.write_str(stringify!(#variant_name)),
+                });
             }
             variants.extend(quote! {
                 Empty,
+            });
+            debug_arms.extend(quote! {
+                Self::Empty => f.write_str("Empty"),
             });
             quote! {
                 /// enum for each non-terminal and terminal symbol, that actually hold data
@@ -1508,6 +1515,14 @@ impl Grammar {
                 #[derive(Clone)]
                 pub enum #data_enum_typename {
                     #variants
+                }
+
+                impl ::std::fmt::Debug for #data_enum_typename {
+                    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                        match self {
+                            #debug_arms
+                        }
+                    }
                 }
             }
         };
