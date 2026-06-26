@@ -1632,8 +1632,7 @@ impl<
     > Clone for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
 where
     Node<Data, StateIndex>: Clone,
-    Data::ReduceActionError: Clone,
-    Data::UserData: Clone + Default,
+    Data::UserData: Clone,
 {
     fn clone(&self) -> Self {
         Context {
@@ -1641,12 +1640,14 @@ where
             empty_node_indices: self.empty_node_indices.clone(),
             current_nodes: self.current_nodes.clone(),
             current_userdatas: self.current_userdatas.clone(),
-            // next_nodes: self.next_nodes.clone(),
-            // fallback_nodes: self.fallback_nodes.clone(),
-            // reduce_errors: self.reduce_errors.clone(),
-            // no_precedences: self.no_precedences.clone(),
+            next_nodes: Default::default(),
+            next_userdatas: Default::default(),
+            reduce_errors: Default::default(),
+            fallback_nodes: Default::default(),
+            fallback_userdatas: Default::default(),
+            no_precedences: Default::default(),
+            tables: self.tables,
             _phantom: std::marker::PhantomData,
-            ..Default::default()
         }
     }
 }

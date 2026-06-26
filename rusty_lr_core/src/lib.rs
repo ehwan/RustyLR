@@ -29,7 +29,7 @@ pub use symbol::Symbol;
 pub use symbol::TerminalSymbol;
 
 /// Default error type for reduce action
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct DefaultReduceActionError;
 impl std::fmt::Display for DefaultReduceActionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
