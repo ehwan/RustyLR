@@ -40,3 +40,13 @@ pub trait SemanticValue: Sized {
         location0: &mut Self::Location,
     ) -> Result<(), Self::ReduceActionError>;
 }
+
+/// Extracts the accepted start value from the generated semantic-value enum.
+#[doc(hidden)]
+pub trait StartExtractor<Data: SemanticValue>: Sized {
+    type StartType;
+
+    const BRANCH_INDEX: u32;
+
+    fn extract(value: Data) -> Option<Self::StartType>;
+}

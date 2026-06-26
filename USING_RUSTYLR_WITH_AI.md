@@ -114,7 +114,7 @@ Before implementing:
 - Identify the token type the user's lexer will produce.
 - Decide the start symbol and semantic return type.
 - Use the generated `<Start>Context` as the parser context; it handles initialization and returns the typed start value.
-- Ensure token values, semantic return values, and user data stored in the context implement `Clone`.
+- Ensure token values and semantic return values stored by the parser implement `Clone`; user data must also implement `Clone` when the context is cloned or when GLR branch-local user data is used.
 - Put Rust imports, token definitions, AST definitions, and helper types above `%%`.
 - Put `%tokentype`, `%start`, `%token`, precedence directives, and productions below `%%`.
 - Add `%location` if diagnostics need source spans.

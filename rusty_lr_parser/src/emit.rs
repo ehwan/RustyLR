@@ -78,227 +78,19 @@ impl Grammar {
         };
 
         let mut context_structs = TokenStream::new();
-        for (branch_idx, start_rule_name) in self.start_rule_names.iter().enumerate() {
+        for start_rule_name in &self.start_rule_names {
             let ctx_name = format_ident!("{}Context", start_rule_name.value());
-            let start_idx = *self
-                .nonterminals_index
-                .get(start_rule_name.value())
-                .unwrap();
-            let s_ruletype = self.nonterminals[start_idx]
-                .ruletype
-                .as_ref()
-                .unwrap_or(&quote! {()})
-                .clone();
-            let branch_idx_u32 = branch_idx as u32;
-            let start_extract_fn = format_ident!("__rustylr_into_start_{}", branch_idx);
+            let start_extracter_typename = format_ident!("{}Extracter", start_rule_name.value());
 
             if self.glr {
                 context_structs.extend(quote! {
                     #[allow(non_camel_case_types, dead_code)]
-                    pub struct #ctx_name {
-                        inner: #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #semantic_value_typename, #state_index_typename, #max_reduce_rules>,
-                    }
-                    #[allow(dead_code)]
-                    impl #ctx_name {
-                        pub fn new(userdata: <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData) -> Self {
-                            Self {
-                                inner: #module_prefix::parser::nondeterministic::Context::new_with_branch(userdata, #branch_idx_u32),
-                            }
-                        }
-                        pub fn with_default_userdata() -> Self
-                        where
-                            <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData: Default,
-                        {
-                            Self {
-                                inner: #module_prefix::parser::nondeterministic::Context::with_default_userdata_and_branch(#branch_idx_u32),
-                            }
-                        }
-                        pub fn feed(&mut self, term: #token_typename) -> Result<(), #parse_error_typename> {
-                            self.inner.feed(term)
-                        }
-                        pub fn feed_location(&mut self, term: #token_typename, location: #location_typename) -> Result<(), #parse_error_typename> {
-                            self.inner.feed_location(term, location)
-                        }
-                        pub fn can_feed(&self, term: &#token_typename) -> bool {
-                            self.inner.can_feed(term)
-                        }
-                        pub fn accept(mut self) -> Result<(#s_ruletype, <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData), #parse_error_typename> {
-                            self.inner.feed_eof()?;
-                            let mut __rustylr_iter = self.inner.into_data_stacks();
-                            let (mut __rustylr_data_stack, __rustylr_userdata) = __rustylr_iter.next().unwrap();
-                            __rustylr_data_stack.pop();
-                            let __rustylr_start = __rustylr_data_stack.pop().unwrap();
-                            let __rustylr_start = #semantic_value_typename::#start_extract_fn(__rustylr_start).unwrap();
-                            Ok((__rustylr_start, __rustylr_userdata))
-                        }
-                        pub fn accept_all(mut self) -> Result<impl Iterator<Item = (#s_ruletype, <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData)>, #parse_error_typename> {
-                            self.inner.feed_eof()?;
-                            Ok(self.inner.into_data_stacks().map(|(mut __rustylr_data_stack, __rustylr_userdata)| {
-                                __rustylr_data_stack.pop();
-                                let __rustylr_start = __rustylr_data_stack.pop().unwrap();
-                                let __rustylr_start = #semantic_value_typename::#start_extract_fn(__rustylr_start).unwrap();
-                                (__rustylr_start, __rustylr_userdata)
-                            }))
-                        }
-                        pub fn len_paths(&self) -> usize {
-                            self.inner.len_paths()
-                        }
-                        pub fn debug_check(&self) {
-                            self.inner.debug_check();
-                        }
-                        pub fn expected_token(&self) -> (::std::collections::BTreeSet<#termclass_typename>, ::std::collections::BTreeSet<#nonterm_typename>) {
-                            self.inner.expected_token()
-                        }
-                        pub fn expected_token_str(&self) -> (impl Iterator<Item = &'static str>, impl Iterator<Item = &'static str>) {
-                            self.inner.expected_token_str()
-                        }
-                        pub fn userdata(&self) -> &<#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData {
-                            self.inner.userdata()
-                        }
-                        pub fn userdata_mut(&mut self) -> &mut <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData {
-                            self.inner.userdata_mut()
-                        }
-                    }
-                    impl ::std::ops::Deref for #ctx_name {
-                        type Target = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #semantic_value_typename, #state_index_typename, #max_reduce_rules>;
-                        fn deref(&self) -> &Self::Target {
-                            &self.inner
-                        }
-                    }
-                    impl ::std::ops::DerefMut for #ctx_name {
-                        fn deref_mut(&mut self) -> &mut Self::Target {
-                            &mut self.inner
-                        }
-                    }
-                    impl Clone for #ctx_name
-                    where
-                        #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #semantic_value_typename, #state_index_typename, #max_reduce_rules>: Clone,
-                    {
-                        fn clone(&self) -> Self {
-                            Self {
-                                inner: self.inner.clone(),
-                            }
-                        }
-                    }
-                    impl Default for #ctx_name
-                    where
-                        <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData: Default,
-                    {
-                        fn default() -> Self {
-                            Self::with_default_userdata()
-                        }
-                    }
-                    impl std::fmt::Debug for #ctx_name {
-                        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                            let states: Vec<_> = self.inner.states().collect();
-                            f.debug_struct(stringify!(#ctx_name))
-                                .field("states", &states)
-                                .field("paths", &self.inner.len_paths())
-                                .finish()
-                        }
-                    }
+                    pub type #ctx_name = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #semantic_value_typename, #start_extracter_typename, #state_index_typename, #max_reduce_rules>;
                 });
             } else {
                 context_structs.extend(quote! {
                     #[allow(non_camel_case_types, dead_code)]
-                    pub struct #ctx_name {
-                        inner: #module_prefix::parser::deterministic::Context<#parser_struct_name, #semantic_value_typename, #state_index_typename>,
-                    }
-                    #[allow(dead_code)]
-                    impl #ctx_name {
-                        pub fn new(userdata: <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData) -> Self {
-                            Self {
-                                inner: #module_prefix::parser::deterministic::Context::new_with_branch(userdata, #branch_idx_u32),
-                            }
-                        }
-                        pub fn with_default_userdata() -> Self
-                        where
-                            <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData: Default,
-                        {
-                            Self {
-                                inner: #module_prefix::parser::deterministic::Context::with_default_userdata_and_branch(#branch_idx_u32),
-                            }
-                        }
-                        pub fn with_capacity(capacity: usize, userdata: <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData) -> Self {
-                            Self {
-                                inner: #module_prefix::parser::deterministic::Context::with_capacity_and_branch(capacity, userdata, #branch_idx_u32),
-                            }
-                        }
-                        pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
-                        where
-                            <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData: Default,
-                        {
-                            Self {
-                                inner: #module_prefix::parser::deterministic::Context::with_capacity_and_branch(capacity, Default::default(), #branch_idx_u32),
-                            }
-                        }
-                        pub fn feed(&mut self, term: #token_typename) -> Result<(), #parse_error_typename> {
-                            self.inner.feed(term)
-                        }
-                        pub fn feed_location(&mut self, term: #token_typename, location: #location_typename) -> Result<(), #parse_error_typename> {
-                            self.inner.feed_location(term, location)
-                        }
-                        pub fn can_feed(&self, term: &#token_typename) -> bool {
-                            self.inner.can_feed(term)
-                        }
-                        pub fn accept(mut self) -> Result<(#s_ruletype, <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData), #parse_error_typename> {
-                            self.inner.feed_eof()?;
-                            let (mut __rustylr_data_stack, __rustylr_userdata) = self.inner.into_data_stack();
-                            __rustylr_data_stack.pop();
-                            let __rustylr_start = __rustylr_data_stack.pop().unwrap();
-                            let __rustylr_start = #semantic_value_typename::#start_extract_fn(__rustylr_start).unwrap();
-                            Ok((__rustylr_start, __rustylr_userdata))
-                        }
-                        pub fn accept_all(self) -> Result<impl Iterator<Item = (#s_ruletype, <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData)>, #parse_error_typename> {
-                            Ok(::std::iter::once(self.accept()?))
-                        }
-                        pub fn expected_token(&self) -> (::std::collections::BTreeSet<#termclass_typename>, ::std::collections::BTreeSet<#nonterm_typename>) {
-                            self.inner.expected_token()
-                        }
-                        pub fn expected_token_str(&self) -> (impl Iterator<Item = &'static str>, impl Iterator<Item = &'static str>) {
-                            self.inner.expected_token_str()
-                        }
-                        pub fn userdata(&self) -> &<#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData {
-                            self.inner.userdata()
-                        }
-                        pub fn userdata_mut(&mut self) -> &mut <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData {
-                            self.inner.userdata_mut()
-                        }
-                    }
-                    impl ::std::ops::Deref for #ctx_name {
-                        type Target = #module_prefix::parser::deterministic::Context<#parser_struct_name, #semantic_value_typename, #state_index_typename>;
-                        fn deref(&self) -> &Self::Target {
-                            &self.inner
-                        }
-                    }
-                    impl ::std::ops::DerefMut for #ctx_name {
-                        fn deref_mut(&mut self) -> &mut Self::Target {
-                            &mut self.inner
-                        }
-                    }
-                    impl Clone for #ctx_name {
-                        fn clone(&self) -> Self {
-                            Self {
-                                inner: self.inner.clone(),
-                            }
-                        }
-                    }
-                    impl Default for #ctx_name
-                    where
-                        <#semantic_value_typename as #module_prefix::parser::semantic_value::SemanticValue>::UserData: Default,
-                    {
-                        fn default() -> Self {
-                            Self::with_default_userdata()
-                        }
-                    }
-                    impl std::fmt::Debug for #ctx_name {
-                        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                            let states: Vec<_> = self.inner.state_stack().collect();
-                            f.debug_struct(stringify!(#ctx_name))
-                                .field("states", &states)
-                                .finish()
-                        }
-                    }
+                    pub type #ctx_name = #module_prefix::parser::deterministic::Context<#parser_struct_name, #semantic_value_typename, #start_extracter_typename, #state_index_typename>;
                 });
             }
         }
@@ -1616,7 +1408,7 @@ impl Grammar {
             }
         }
 
-        let mut start_extract_methods = TokenStream::new();
+        let mut start_extracter_impls = TokenStream::new();
         for (branch_idx, start_rule_name) in self.start_rule_names.iter().enumerate() {
             let s_idx = *self
                 .nonterminals_index
@@ -1628,7 +1420,8 @@ impl Grammar {
                 .as_ref()
                 .unwrap_or(&quote! {()})
                 .clone();
-            let start_extract_fn = format_ident!("__rustylr_into_start_{}", branch_idx);
+            let branch_idx_u32 = branch_idx as u32;
+            let start_extracter_typename = format_ident!("{}Extracter", start_rule_name.value());
 
             if s_variant_name != &empty_variant_name {
                 let s_val_expr = if self.nonterminals[s_idx].ruletype_boxed {
@@ -1636,20 +1429,38 @@ impl Grammar {
                 } else {
                     quote! { val }
                 };
-                start_extract_methods.extend(quote! {
-                    fn #start_extract_fn(value: Self) -> Option<#s_ruletype> {
+                start_extracter_impls.extend(quote! {
+                    #[doc(hidden)]
+                    #[allow(non_camel_case_types, dead_code)]
+                    pub struct #start_extracter_typename;
+
+                    impl #module_prefix::parser::semantic_value::StartExtractor<#data_enum_typename> for #start_extracter_typename {
+                        type StartType = #s_ruletype;
+                        const BRANCH_INDEX: u32 = #branch_idx_u32;
+
+                        fn extract(value: #data_enum_typename) -> Option<Self::StartType> {
                         match value {
-                            Self::#s_variant_name(val) => Some(#s_val_expr),
+                                #data_enum_typename::#s_variant_name(val) => Some(#s_val_expr),
                             _ => None,
+                        }
                         }
                     }
                 });
             } else {
-                start_extract_methods.extend(quote! {
-                    fn #start_extract_fn(value: Self) -> Option<#s_ruletype> {
+                start_extracter_impls.extend(quote! {
+                    #[doc(hidden)]
+                    #[allow(non_camel_case_types, dead_code)]
+                    pub struct #start_extracter_typename;
+
+                    impl #module_prefix::parser::semantic_value::StartExtractor<#data_enum_typename> for #start_extracter_typename {
+                        type StartType = #s_ruletype;
+                        const BRANCH_INDEX: u32 = #branch_idx_u32;
+
+                        fn extract(value: #data_enum_typename) -> Option<Self::StartType> {
                         match value {
-                            Self::Empty => Some(()),
+                                #data_enum_typename::Empty => Some(()),
                             _ => None,
+                        }
                         }
                     }
                 });
@@ -1705,10 +1516,11 @@ impl Grammar {
 
         #data_enum_definition
 
+        #start_extracter_impls
+
         #[rustfmt::skip]
         #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code, unreachable_patterns)]
         impl #data_enum_typename {
-            #start_extract_methods
             #fn_reduce_for_each_rule_stream
         }
 

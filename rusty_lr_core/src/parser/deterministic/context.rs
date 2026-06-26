@@ -5,6 +5,7 @@ use crate::Location;
 
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::semantic_value::SemanticValue;
+use crate::parser::semantic_value::StartExtractor;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
@@ -16,6 +17,7 @@ use crate::TerminalSymbol;
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
     Data: SemanticValue,
+    Start: StartExtractor<Data>,
     StateIndex,
 > {
     /// stacks hold the values associated with each shifted symbol.
@@ -31,19 +33,20 @@ pub struct Context<
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
-    pub(crate) _phantom: std::marker::PhantomData<P>,
+    pub(crate) _phantom: std::marker::PhantomData<(P, Start)>,
 }
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > Context<P, Data, StateIndex>
+    > Context<P, Data, Start, StateIndex>
 {
     /// Create a new context.
-    /// `state_stack` is initialized with [0] (root state).
+    /// The state stack is initialized with the root state and the selected start state.
     pub fn new(userdata: Data::UserData) -> Self {
-        Context {
+        let mut ctx = Context {
             state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
             data_stack: Vec::new(),
@@ -54,7 +57,9 @@ impl<
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
             _phantom: std::marker::PhantomData,
-        }
+        };
+        ctx.init_start_branch(Start::BRANCH_INDEX);
+        ctx
     }
     /// Create a new context using `Default::default()` as user data.
     pub fn with_default_userdata() -> Self
@@ -63,49 +68,33 @@ impl<
     {
         Self::new(Default::default())
     }
-    /// Create a new context with a virtual start branch.
-    pub fn new_with_branch(userdata: Data::UserData, branch_idx: u32) -> Self
-    where
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        let mut ctx = Self::new(userdata);
+    fn init_start_branch(&mut self, branch_idx: u32) {
         let class = P::TermClass::from_virtual_start(branch_idx);
-        let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
+        let shift_to = self.tables.shift_goto_class(0, class).unwrap_or_else(|| {
             panic!(
                 "Failed to resolve shift for virtual start branch {}",
                 branch_idx
             )
         });
-        ctx.state_stack.push(shift_to.state);
-        ctx.data_stack.push(Data::new_empty());
-        ctx.location_stack
+        self.state_stack.push(shift_to.state);
+        self.data_stack.push(Data::new_empty());
+        self.location_stack
             .push(Data::Location::new(std::iter::empty(), 0));
         #[cfg(feature = "tree")]
         {
-            ctx.tree_stack.push(crate::tree::Tree::new_terminal(
+            self.tree_stack.push(crate::tree::Tree::new_terminal(
                 TerminalSymbol::VirtualStart(branch_idx),
             ));
         }
-        ctx
-    }
-    /// Create a new context with a virtual start branch using `Default::default()` as user data.
-    pub fn with_default_userdata_and_branch(branch_idx: u32) -> Self
-    where
-        Data::UserData: Default,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        Self::new_with_branch(Default::default(), branch_idx)
     }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
-    /// `state_stack` is initialized with [0] (root state).
+    /// The state stack is initialized with the root state and the selected start state.
     pub fn with_capacity(capacity: usize, userdata: Data::UserData) -> Self {
         let mut state_stack = Vec::with_capacity(capacity);
         state_stack.push(
             StateIndex::from_usize_unchecked(0), // root state
         );
-        Context {
+        let mut ctx = Context {
             state_stack,
 
             data_stack: Vec::with_capacity(capacity),
@@ -116,7 +105,9 @@ impl<
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
             _phantom: std::marker::PhantomData,
-        }
+        };
+        ctx.init_start_branch(Start::BRANCH_INDEX);
+        ctx
     }
     /// Create a new context with capacity using `Default::default()` as user data.
     pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
@@ -124,36 +115,6 @@ impl<
         Data::UserData: Default,
     {
         Self::with_capacity(capacity, Default::default())
-    }
-    /// Create a new context with capacity and a virtual start branch.
-    pub fn with_capacity_and_branch(
-        capacity: usize,
-        userdata: Data::UserData,
-        branch_idx: u32,
-    ) -> Self
-    where
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        let mut ctx = Self::with_capacity(capacity, userdata);
-        let class = P::TermClass::from_virtual_start(branch_idx);
-        let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
-            panic!(
-                "Failed to resolve shift for virtual start branch {}",
-                branch_idx
-            )
-        });
-        ctx.state_stack.push(shift_to.state);
-        ctx.data_stack.push(Data::new_empty());
-        ctx.location_stack
-            .push(Data::Location::new(std::iter::empty(), 0));
-        #[cfg(feature = "tree")]
-        {
-            ctx.tree_stack.push(crate::tree::Tree::new_terminal(
-                TerminalSymbol::VirtualStart(branch_idx),
-            ));
-        }
-        ctx
     }
     /// Borrow the user data owned by this context.
     pub fn userdata(&self) -> &Data::UserData {
@@ -175,16 +136,11 @@ impl<
         std::iter::once(&mut self.userdata)
     }
 
-    /// Consume this context and return the semantic value stack with final user data.
-    pub fn into_data_stack(self) -> (Vec<Data>, Data::UserData) {
-        (self.data_stack, self.userdata)
-    }
-
     /// End this context and pop the value of the start symbol from the data stack.
     pub fn accept(
         mut self,
     ) -> Result<
-        (Vec<Data>, Data::UserData),
+        (Start::StartType, Data::UserData),
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -193,14 +149,22 @@ impl<
     {
         self.feed_eof()?;
 
-        Ok(self.into_data_stack())
+        self.data_stack.pop();
+        let start = self.data_stack.pop().unwrap();
+        let start = Start::extract(start).unwrap_or_else(|| {
+            panic!(
+                "Failed to extract start value for branch {}",
+                Start::BRANCH_INDEX
+            )
+        });
+        Ok((start, self.userdata))
     }
 
     /// End this context and return an iterator with the start symbol and final user data.
     pub fn accept_all(
         self,
     ) -> Result<
-        impl Iterator<Item = (Vec<Data>, Data::UserData)>,
+        impl Iterator<Item = (Start::StartType, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -689,7 +653,7 @@ impl<
         Some(shift_to.is_some())
     }
 
-    pub fn feed_eof(
+    fn feed_eof(
         &mut self,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -704,8 +668,9 @@ impl<
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > Default for Context<P, Data, StateIndex>
+    > Default for Context<P, Data, Start, StateIndex>
 where
     Data::UserData: Default,
 {
@@ -717,8 +682,9 @@ where
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > Clone for Context<P, Data, StateIndex>
+    > Clone for Context<P, Data, Start, StateIndex>
 where
     Data: Clone,
     Data::Term: Clone,
@@ -744,8 +710,9 @@ where
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > std::fmt::Debug for Context<P, Data, StateIndex>
+    > std::fmt::Debug for Context<P, Data, Start, StateIndex>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone + NonTerminal,
@@ -759,8 +726,9 @@ where
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > std::ops::Deref for Context<P, Data, StateIndex>
+    > std::ops::Deref for Context<P, Data, Start, StateIndex>
 {
     type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
     fn deref(&self) -> &Self::Target {
@@ -772,8 +740,9 @@ impl<
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > std::ops::DerefMut for Context<P, Data, StateIndex>
+    > std::ops::DerefMut for Context<P, Data, Start, StateIndex>
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.tree_stack

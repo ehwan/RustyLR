@@ -115,150 +115,12 @@
 */
 // =============================Generated Codes Begin==============================
 #[allow(non_camel_case_types, dead_code)]
-pub struct JsonContext {
-    inner: ::rusty_lr::parser::deterministic::Context<JsonParser, JsonData, u8>,
-}
-#[allow(dead_code)]
-impl JsonContext {
-    pub fn new(
-        userdata: <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData,
-    ) -> Self {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::new_with_branch(
-                userdata,
-                0u32,
-            ),
-        }
-    }
-    pub fn with_default_userdata() -> Self
-    where
-        <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
-    {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::with_default_userdata_and_branch(
-                0u32,
-            ),
-        }
-    }
-    pub fn with_capacity(
-        capacity: usize,
-        userdata: <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData,
-    ) -> Self {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::with_capacity_and_branch(
-                capacity,
-                userdata,
-                0u32,
-            ),
-        }
-    }
-    pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
-    where
-        <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
-    {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::with_capacity_and_branch(
-                capacity,
-                Default::default(),
-                0u32,
-            ),
-        }
-    }
-    pub fn feed(&mut self, term: char) -> Result<(), JsonParseError> {
-        self.inner.feed(term)
-    }
-    pub fn feed_location(
-        &mut self,
-        term: char,
-        location: std::ops::Range<usize>,
-    ) -> Result<(), JsonParseError> {
-        self.inner.feed_location(term, location)
-    }
-    pub fn can_feed(&self, term: &char) -> bool {
-        self.inner.can_feed(term)
-    }
-    pub fn accept(
-        mut self,
-    ) -> Result<
-        ((), <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData),
-        JsonParseError,
-    > {
-        self.inner.feed_eof()?;
-        let (mut __rustylr_data_stack, __rustylr_userdata) = self
-            .inner
-            .into_data_stack();
-        __rustylr_data_stack.pop();
-        let __rustylr_start = __rustylr_data_stack.pop().unwrap();
-        let __rustylr_start = JsonData::__rustylr_into_start_0(__rustylr_start).unwrap();
-        Ok((__rustylr_start, __rustylr_userdata))
-    }
-    pub fn accept_all(
-        self,
-    ) -> Result<
-        impl Iterator<
-            Item = (
-                (),
-                <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData,
-            ),
-        >,
-        JsonParseError,
-    > {
-        Ok(::std::iter::once(self.accept()?))
-    }
-    pub fn expected_token(
-        &self,
-    ) -> (
-        ::std::collections::BTreeSet<JsonTerminalClasses>,
-        ::std::collections::BTreeSet<JsonNonTerminals>,
-    ) {
-        self.inner.expected_token()
-    }
-    pub fn expected_token_str(
-        &self,
-    ) -> (impl Iterator<Item = &'static str>, impl Iterator<Item = &'static str>) {
-        self.inner.expected_token_str()
-    }
-    pub fn userdata(
-        &self,
-    ) -> &<JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData {
-        self.inner.userdata()
-    }
-    pub fn userdata_mut(
-        &mut self,
-    ) -> &mut <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData {
-        self.inner.userdata_mut()
-    }
-}
-impl ::std::ops::Deref for JsonContext {
-    type Target = ::rusty_lr::parser::deterministic::Context<JsonParser, JsonData, u8>;
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-impl ::std::ops::DerefMut for JsonContext {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
-impl Clone for JsonContext {
-    fn clone(&self) -> Self {
-        Self { inner: self.inner.clone() }
-    }
-}
-impl Default for JsonContext
-where
-    <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
-{
-    fn default() -> Self {
-        Self::with_default_userdata()
-    }
-}
-impl std::fmt::Debug for JsonContext {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let states: Vec<_> = self.inner.state_stack().collect();
-        f.debug_struct(stringify!(JsonContext)).field("states", &states).finish()
-    }
-}
+pub type JsonContext = ::rusty_lr::parser::deterministic::Context<
+    JsonParser,
+    JsonData,
+    JsonExtracter,
+    u8,
+>;
 #[allow(non_camel_case_types, dead_code)]
 pub type JsonRule = ::rusty_lr::production::Production<
     JsonTerminalClasses,
@@ -629,6 +491,19 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 pub enum JsonData {
     Empty,
 }
+#[doc(hidden)]
+#[allow(non_camel_case_types, dead_code)]
+pub struct JsonExtracter;
+impl ::rusty_lr::parser::semantic_value::StartExtractor<JsonData> for JsonExtracter {
+    type StartType = ();
+    const BRANCH_INDEX: u32 = 0u32;
+    fn extract(value: JsonData) -> Option<Self::StartType> {
+        match value {
+            JsonData::Empty => Some(()),
+            _ => None,
+        }
+    }
+}
 #[rustfmt::skip]
 #[allow(
     unused_braces,
@@ -640,12 +515,6 @@ pub enum JsonData {
     unreachable_patterns
 )]
 impl JsonData {
-    fn __rustylr_into_start_0(value: Self) -> Option<()> {
-        match value {
-            Self::Empty => Some(()),
-            _ => None,
-        }
-    }
     ///Object -> '{' WS '}'
     #[inline]
     fn reduce_Object_0(

@@ -23,7 +23,7 @@ Default path:
 
 Generated `<Start>Context` types are the normal parser contexts downstream code should use. They initialize parsing for the selected start symbol and return the typed start value from `accept()` or `accept_all()`.
 
-Generated contexts implement `Clone`; choose token, semantic value, and user data types that implement `Clone`.
+Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone`; user data must also implement `Clone` when cloning contexts or using GLR branch-local user data.
 
 Important files:
 - `README.md`: Main quick start and examples.

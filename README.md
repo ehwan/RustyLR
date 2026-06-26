@@ -176,7 +176,7 @@ The generated parser module contains several generated components tailored to yo
 
 The generated module also includes internal state, production, non-terminal, and semantic-value types used by the runtime and debugging APIs. Contexts store parsed symbol values as a `Vec` of the generated semantic-value enum.
 
-Generated contexts implement `Clone`. The generated semantic-value enum also implements `Clone`, so terminal and non-terminal value types stored by the parser must implement `Clone`.
+Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. The generated semantic-value enum also implements `Clone`, so terminal and non-terminal value types stored by the parser must implement `Clone`.
 
 ### Feeding Tokens
 You can feed terminal symbols either with or without location information:

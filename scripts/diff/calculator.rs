@@ -32,150 +32,12 @@ pub enum Token {
 */
 // =============================Generated Codes Begin==============================
 #[allow(non_camel_case_types, dead_code)]
-pub struct EContext {
-    inner: ::rusty_lr::parser::deterministic::Context<EParser, EData, u8>,
-}
-#[allow(dead_code)]
-impl EContext {
-    pub fn new(
-        userdata: <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData,
-    ) -> Self {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::new_with_branch(
-                userdata,
-                0u32,
-            ),
-        }
-    }
-    pub fn with_default_userdata() -> Self
-    where
-        <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
-    {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::with_default_userdata_and_branch(
-                0u32,
-            ),
-        }
-    }
-    pub fn with_capacity(
-        capacity: usize,
-        userdata: <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData,
-    ) -> Self {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::with_capacity_and_branch(
-                capacity,
-                userdata,
-                0u32,
-            ),
-        }
-    }
-    pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
-    where
-        <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
-    {
-        Self {
-            inner: ::rusty_lr::parser::deterministic::Context::with_capacity_and_branch(
-                capacity,
-                Default::default(),
-                0u32,
-            ),
-        }
-    }
-    pub fn feed(&mut self, term: Token) -> Result<(), EParseError> {
-        self.inner.feed(term)
-    }
-    pub fn feed_location(
-        &mut self,
-        term: Token,
-        location: ::rusty_lr::DefaultLocation,
-    ) -> Result<(), EParseError> {
-        self.inner.feed_location(term, location)
-    }
-    pub fn can_feed(&self, term: &Token) -> bool {
-        self.inner.can_feed(term)
-    }
-    pub fn accept(
-        mut self,
-    ) -> Result<
-        (i32, <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData),
-        EParseError,
-    > {
-        self.inner.feed_eof()?;
-        let (mut __rustylr_data_stack, __rustylr_userdata) = self
-            .inner
-            .into_data_stack();
-        __rustylr_data_stack.pop();
-        let __rustylr_start = __rustylr_data_stack.pop().unwrap();
-        let __rustylr_start = EData::__rustylr_into_start_0(__rustylr_start).unwrap();
-        Ok((__rustylr_start, __rustylr_userdata))
-    }
-    pub fn accept_all(
-        self,
-    ) -> Result<
-        impl Iterator<
-            Item = (
-                i32,
-                <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData,
-            ),
-        >,
-        EParseError,
-    > {
-        Ok(::std::iter::once(self.accept()?))
-    }
-    pub fn expected_token(
-        &self,
-    ) -> (
-        ::std::collections::BTreeSet<ETerminalClasses>,
-        ::std::collections::BTreeSet<ENonTerminals>,
-    ) {
-        self.inner.expected_token()
-    }
-    pub fn expected_token_str(
-        &self,
-    ) -> (impl Iterator<Item = &'static str>, impl Iterator<Item = &'static str>) {
-        self.inner.expected_token_str()
-    }
-    pub fn userdata(
-        &self,
-    ) -> &<EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData {
-        self.inner.userdata()
-    }
-    pub fn userdata_mut(
-        &mut self,
-    ) -> &mut <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData {
-        self.inner.userdata_mut()
-    }
-}
-impl ::std::ops::Deref for EContext {
-    type Target = ::rusty_lr::parser::deterministic::Context<EParser, EData, u8>;
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-impl ::std::ops::DerefMut for EContext {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
-impl Clone for EContext {
-    fn clone(&self) -> Self {
-        Self { inner: self.inner.clone() }
-    }
-}
-impl Default for EContext
-where
-    <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
-{
-    fn default() -> Self {
-        Self::with_default_userdata()
-    }
-}
-impl std::fmt::Debug for EContext {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let states: Vec<_> = self.inner.state_stack().collect();
-        f.debug_struct(stringify!(EContext)).field("states", &states).finish()
-    }
-}
+pub type EContext = ::rusty_lr::parser::deterministic::Context<
+    EParser,
+    EData,
+    EExtracter,
+    u8,
+>;
 #[allow(non_camel_case_types, dead_code)]
 pub type ERule = ::rusty_lr::production::Production<ETerminalClasses, ENonTerminals>;
 #[allow(non_camel_case_types, dead_code)]
@@ -349,6 +211,19 @@ pub enum EData {
     __variant1(i32),
     Empty,
 }
+#[doc(hidden)]
+#[allow(non_camel_case_types, dead_code)]
+pub struct EExtracter;
+impl ::rusty_lr::parser::semantic_value::StartExtractor<EData> for EExtracter {
+    type StartType = i32;
+    const BRANCH_INDEX: u32 = 0u32;
+    fn extract(value: EData) -> Option<Self::StartType> {
+        match value {
+            EData::__variant1(val) => Some(val),
+            _ => None,
+        }
+    }
+}
 #[rustfmt::skip]
 #[allow(
     unused_braces,
@@ -360,12 +235,6 @@ pub enum EData {
     unreachable_patterns
 )]
 impl EData {
-    fn __rustylr_into_start_0(value: Self) -> Option<i32> {
-        match value {
-            Self::__variant1(val) => Some(val),
-            _ => None,
-        }
-    }
     fn custom_reduce_action_0(
         mut M: i32,
         data: &mut i32,

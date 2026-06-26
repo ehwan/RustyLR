@@ -196,155 +196,12 @@ use std::boxed::Box;
 */
 // =============================Generated Codes Begin==============================
 #[allow(non_camel_case_types, dead_code)]
-pub struct GrammarContext {
-    inner: ::rusty_lr_core::parser::deterministic::Context<GrammarParser, GrammarData, u8>,
-}
-#[allow(dead_code)]
-impl GrammarContext {
-    pub fn new(
-        userdata: <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
-    ) -> Self {
-        Self {
-            inner: ::rusty_lr_core::parser::deterministic::Context::new_with_branch(userdata, 0u32),
-        }
-    }
-    pub fn with_default_userdata() -> Self
-    where
-        <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData: Default,
-    {
-        Self {
-            inner:
-                ::rusty_lr_core::parser::deterministic::Context::with_default_userdata_and_branch(
-                    0u32,
-                ),
-        }
-    }
-    pub fn with_capacity(
-        capacity: usize,
-        userdata: <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
-    ) -> Self {
-        Self {
-            inner: ::rusty_lr_core::parser::deterministic::Context::with_capacity_and_branch(
-                capacity, userdata, 0u32,
-            ),
-        }
-    }
-    pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
-    where
-        <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData: Default,
-    {
-        Self {
-            inner: ::rusty_lr_core::parser::deterministic::Context::with_capacity_and_branch(
-                capacity,
-                Default::default(),
-                0u32,
-            ),
-        }
-    }
-    pub fn feed(&mut self, term: Lexed) -> Result<(), GrammarParseError> {
-        self.inner.feed(term)
-    }
-    pub fn feed_location(
-        &mut self,
-        term: Lexed,
-        location: Location,
-    ) -> Result<(), GrammarParseError> {
-        self.inner.feed_location(term, location)
-    }
-    pub fn can_feed(&self, term: &Lexed) -> bool {
-        self.inner.can_feed(term)
-    }
-    pub fn accept(
-        mut self,
-    ) -> Result<
-        (
-            (),
-            <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
-        ),
-        GrammarParseError,
-    > {
-        self.inner.feed_eof()?;
-        let (mut __rustylr_data_stack, __rustylr_userdata) = self.inner.into_data_stack();
-        __rustylr_data_stack.pop();
-        let __rustylr_start = __rustylr_data_stack.pop().unwrap();
-        let __rustylr_start = GrammarData::__rustylr_into_start_0(__rustylr_start).unwrap();
-        Ok((__rustylr_start, __rustylr_userdata))
-    }
-    pub fn accept_all(
-        self,
-    ) -> Result<
-        impl Iterator<
-            Item = (
-                (),
-                <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
-            ),
-        >,
-        GrammarParseError,
-    > {
-        Ok(::std::iter::once(self.accept()?))
-    }
-    pub fn expected_token(
-        &self,
-    ) -> (
-        ::std::collections::BTreeSet<GrammarTerminalClasses>,
-        ::std::collections::BTreeSet<GrammarNonTerminals>,
-    ) {
-        self.inner.expected_token()
-    }
-    pub fn expected_token_str(
-        &self,
-    ) -> (
-        impl Iterator<Item = &'static str>,
-        impl Iterator<Item = &'static str>,
-    ) {
-        self.inner.expected_token_str()
-    }
-    pub fn userdata(
-        &self,
-    ) -> &<GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData {
-        self.inner.userdata()
-    }
-    pub fn userdata_mut(
-        &mut self,
-    ) -> &mut <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData
-    {
-        self.inner.userdata_mut()
-    }
-}
-impl ::std::ops::Deref for GrammarContext {
-    type Target = ::rusty_lr_core::parser::deterministic::Context<GrammarParser, GrammarData, u8>;
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-impl ::std::ops::DerefMut for GrammarContext {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
-impl Clone for GrammarContext {
-    fn clone(&self) -> Self {
-        Self {
-            inner: self.inner.clone(),
-        }
-    }
-}
-impl Default for GrammarContext
-where
-    <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData: Default,
-{
-    fn default() -> Self {
-        Self::with_default_userdata()
-    }
-}
-impl std::fmt::Debug for GrammarContext {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let states: Vec<_> = self.inner.state_stack().collect();
-        f.debug_struct(stringify!(GrammarContext))
-            .field("states", &states)
-            .finish()
-    }
-}
+pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<
+    GrammarParser,
+    GrammarData,
+    GrammarExtracter,
+    u8,
+>;
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule =
     ::rusty_lr_core::production::Production<GrammarTerminalClasses, GrammarNonTerminals>;
@@ -760,6 +617,19 @@ pub enum GrammarData {
     __variant19(Vec<IdentOrLiteral>),
     Empty,
 }
+#[doc(hidden)]
+#[allow(non_camel_case_types, dead_code)]
+pub struct GrammarExtracter;
+impl ::rusty_lr_core::parser::semantic_value::StartExtractor<GrammarData> for GrammarExtracter {
+    type StartType = ();
+    const BRANCH_INDEX: u32 = 0u32;
+    fn extract(value: GrammarData) -> Option<Self::StartType> {
+        match value {
+            GrammarData::Empty => Some(()),
+            _ => None,
+        }
+    }
+}
 #[rustfmt::skip]
 #[allow(
     unused_braces,
@@ -771,12 +641,6 @@ pub enum GrammarData {
     unreachable_patterns
 )]
 impl GrammarData {
-    fn __rustylr_into_start_0(value: Self) -> Option<()> {
-        match value {
-            Self::Empty => Some(()),
-            _ => None,
-        }
-    }
     fn custom_reduce_action_0(
         mut t: Vec<Lexed>,
         data: &mut GrammarArgs,

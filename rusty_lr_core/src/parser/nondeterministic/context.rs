@@ -5,6 +5,7 @@ use super::ParseError;
 
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::semantic_value::SemanticValue;
+use crate::parser::semantic_value::StartExtractor;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
@@ -18,19 +19,21 @@ pub struct NodeRefIterator<
     'a,
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
     Data: SemanticValue,
+    Start: StartExtractor<Data>,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
 > {
-    context: &'a Context<P, Data, StateIndex, MAX_REDUCE_RULES>,
+    context: &'a Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
     node: Option<usize>,
 }
 impl<
         'a,
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex,
         const MAX_REDUCE_RULES: usize,
-    > Clone for NodeRefIterator<'a, P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Clone for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     fn clone(&self) -> Self {
         NodeRefIterator {
@@ -43,9 +46,10 @@ impl<
         'a,
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
         const MAX_REDUCE_RULES: usize,
-    > Iterator for NodeRefIterator<'a, P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Iterator for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     type Item = &'a Node<Data, StateIndex>;
 
@@ -61,6 +65,7 @@ impl<
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
     Data: SemanticValue,
+    Start: StartExtractor<Data>,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
 > {
@@ -90,15 +95,16 @@ pub struct Context<
     ///
     /// Branches clone stack/userdata state, but they all read the same immutable runtime tables.
     pub(crate) tables: &'static P::Tables,
-    pub(crate) _phantom: std::marker::PhantomData<P>,
+    pub(crate) _phantom: std::marker::PhantomData<(P, Start)>,
 }
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
@@ -120,6 +126,7 @@ impl<
         let root_node = context.new_node();
         context.current_nodes.push(root_node);
         context.current_userdatas.push(userdata);
+        context.init_start_branch(Start::BRANCH_INDEX);
         context
     }
 
@@ -130,24 +137,16 @@ impl<
         Self::new(Default::default())
     }
 
-    pub fn new_with_branch(userdata: Data::UserData, branch_idx: u32) -> Self
-    where
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        let mut context = Self::new(userdata);
+    fn init_start_branch(&mut self, branch_idx: u32) {
         let class = P::TermClass::from_virtual_start(branch_idx);
-        let shift_to = context
-            .tables
-            .shift_goto_class(0, class)
-            .unwrap_or_else(|| {
-                panic!(
-                    "Failed to resolve shift for virtual start branch {}",
-                    branch_idx
-                )
-            });
-        let root_node_idx = context.current_nodes[0];
-        let root_node = context.node_mut(root_node_idx);
+        let shift_to = self.tables.shift_goto_class(0, class).unwrap_or_else(|| {
+            panic!(
+                "Failed to resolve shift for virtual start branch {}",
+                branch_idx
+            )
+        });
+        let root_node_idx = self.current_nodes[0];
+        let root_node = self.node_mut(root_node_idx);
         root_node.state_stack.push(shift_to.state);
         root_node.data_stack.push(Data::new_empty());
         root_node
@@ -159,16 +158,6 @@ impl<
                 TerminalSymbol::VirtualStart(branch_idx),
             ));
         }
-        context
-    }
-
-    pub fn with_default_userdata_and_branch(branch_idx: u32) -> Self
-    where
-        Data::UserData: Default,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        Self::new_with_branch(Default::default(), branch_idx)
     }
 
     /// Borrow the user data for the first active path.
@@ -201,24 +190,6 @@ impl<
     /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
         self.current_userdatas.iter_mut()
-    }
-
-    /// Consume this context and return semantic value stacks with final user data
-    /// from every active GLR path.
-    pub fn into_data_stacks(self) -> impl Iterator<Item = (Vec<Data>, Data::UserData)>
-    where
-        Data: Clone,
-    {
-        let Context {
-            nodes_pool,
-            current_nodes,
-            current_userdatas,
-            ..
-        } = self;
-        current_nodes
-            .into_iter()
-            .zip(current_userdatas)
-            .map(move |(node, userdata)| (nodes_pool[node].data_stack.clone(), userdata))
     }
 
     pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
@@ -330,7 +301,10 @@ impl<
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, P, Data, StateIndex, MAX_REDUCE_RULES> {
+    fn node_iter(
+        &self,
+        node: usize,
+    ) -> NodeRefIterator<'_, P, Data, Start, StateIndex, MAX_REDUCE_RULES> {
         NodeRefIterator {
             context: self,
             node: Some(node),
@@ -636,7 +610,7 @@ impl<
     pub fn accept(
         self,
     ) -> Result<
-        (Vec<Data>, Data::UserData),
+        (Start::StartType, Data::UserData),
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -652,7 +626,7 @@ impl<
     pub fn accept_all(
         mut self,
     ) -> Result<
-        impl Iterator<Item = (Vec<Data>, Data::UserData)>,
+        impl Iterator<Item = (Start::StartType, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -665,7 +639,33 @@ impl<
         // since `eof` is feeded, every node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        Ok(self.into_data_stacks())
+        let Context {
+            mut nodes_pool,
+            current_nodes,
+            current_userdatas,
+            ..
+        } = self;
+
+        let mut accepted = Vec::with_capacity(current_nodes.len());
+        for (node, userdata) in current_nodes.into_iter().zip(current_userdatas) {
+            let mut data_stack = std::mem::take(&mut nodes_pool[node].data_stack);
+            data_stack.pop(); // eof
+            let start_value = data_stack.pop().unwrap_or_else(|| {
+                panic!(
+                    "Accepted GLR path for virtual start branch {} has no start value",
+                    Start::BRANCH_INDEX
+                )
+            });
+            let start_value = Start::extract(start_value).unwrap_or_else(|| {
+                panic!(
+                    "Accepted GLR path produced a value that does not match virtual start branch {}",
+                    Start::BRANCH_INDEX
+                )
+            });
+            accepted.push((start_value, userdata));
+        }
+
+        Ok(accepted.into_iter())
     }
 
     /// For debugging.
@@ -1533,7 +1533,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     }
 
     /// Feed eof symbol with default zero-length location from the end of stream.
-    pub fn feed_eof(
+    fn feed_eof(
         &mut self,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -1619,9 +1619,10 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > Default for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Default for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Data::UserData: Default,
 {
@@ -1633,9 +1634,10 @@ where
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > Clone for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Clone for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Node<Data, StateIndex>: Clone,
     Data::UserData: Clone,
@@ -1662,9 +1664,10 @@ where
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
         Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > std::fmt::Debug for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > std::fmt::Debug for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Data::Term: std::fmt::Debug + Clone,
     Data::NonTerm: std::fmt::Debug + Clone,
