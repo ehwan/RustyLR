@@ -227,6 +227,7 @@ impl ::rusty_lr::parser::semantic_value::StartExtractor<Data> for EExtracter {
     type StartType = i32;
     const BRANCH_INDEX: u32 = 0u32;
     fn extract(value: Data) -> Option<Self::StartType> {
+        #[allow(unreachable_patterns, unused_variables)]
         match value {
             Data::__variant1(val) => Some(val),
             _ => None,

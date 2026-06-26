@@ -1404,10 +1404,11 @@ impl Grammar {
                         const BRANCH_INDEX: u32 = #branch_idx_u32;
 
                         fn extract(value: #data_enum_typename) -> Option<Self::StartType> {
-                        match value {
+                            #[allow(unreachable_patterns, unused_variables)]
+                            match value {
                                 #data_enum_typename::#s_variant_name(val) => Some(#s_val_expr),
-                            _ => None,
-                        }
+                                _ => None,
+                            }
                         }
                     }
                 });
@@ -1422,10 +1423,11 @@ impl Grammar {
                         const BRANCH_INDEX: u32 = #branch_idx_u32;
 
                         fn extract(value: #data_enum_typename) -> Option<Self::StartType> {
-                        match value {
+                            #[allow(unreachable_patterns, unused_variables)]
+                            match value {
                                 #data_enum_typename::Empty => Some(()),
-                            _ => None,
-                        }
+                                _ => None,
+                            }
                         }
                     }
                 });
