@@ -334,7 +334,11 @@ Expr(i32) : '('! Expr ')'! ;
 %start NonTerminalName ;
 ```
 
-Defines the entry point of the grammar. RustyLR automatically creates an augmented rule `Augmented -> NonTerminalName eof`.
+Defines the entry point of the grammar. RustyLR automatically creates an augmented rule with an internal start marker, the selected start non-terminal, and `eof`.
+
+RustyLR generates a `<Start>Context` for every start symbol, including grammars with only one `%start`. Each context initializes parsing for its start symbol and returns that start symbol's typed value when parsing is accepted.
+
+Generated contexts implement `Clone`. Token values, non-terminal production values, and user data stored in a context must therefore implement `Clone`.
 
 ### Multiple Start Symbols
 
@@ -345,9 +349,9 @@ You can define multiple start symbols by writing multiple `%start` directives:
 %start Stmt;
 ```
 
-When multiple start symbols are defined, RustyLR generates individual wrapper structs for each start symbol (e.g., `ExprContext` and `StmtContext`).
+When multiple start symbols are defined, RustyLR generates an individual context for each start symbol (e.g., `ExprContext` and `StmtContext`).
 - Initializing the context (via `ExprContext::new(...)` or `StmtContext::new(...)`) automatically transitions the parser to the correct starting state for that symbol.
-- Calling `accept()` on a context wrapper returns the exact type of that start symbol.
+- Calling `accept()` or `accept_all()` on a context returns the exact type of that start symbol.
 
 ---
 

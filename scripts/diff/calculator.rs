@@ -157,6 +157,11 @@ impl ::std::ops::DerefMut for EContext {
         &mut self.inner
     }
 }
+impl Clone for EContext {
+    fn clone(&self) -> Self {
+        Self { inner: self.inner.clone() }
+    }
+}
 impl Default for EContext
 where
     <EData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
@@ -338,6 +343,7 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+#[derive(Clone)]
 pub enum EData {
     __terminals(Token),
     __variant1(i32),

@@ -27,7 +27,7 @@ use std::boxed::Box;
 ====================================Grammar=====================================
 
 # of terminal classes: 43
-# of states: 193
+# of states: 194
 
 0: Rule -> ident RuleType colon RuleLines semicolon
 1: Rule -> ident RuleType colon RuleLines error semicolon
@@ -191,19 +191,163 @@ use std::boxed::Box;
 159: IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
 160: GrammarLine+ -> GrammarLine
 161: GrammarLine+ -> GrammarLine GrammarLine+
-162: Augmented -> Grammar eof
+162: Augmented -> VirtualStart(0) Grammar eof
 
 */
 // =============================Generated Codes Begin==============================
-/// type alias for `Context`
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarContext =
-    ::rusty_lr_core::parser::deterministic::Context<GrammarParser, GrammarDataStack, u8>;
-/// type alias for CFG production rule
+pub struct GrammarContext {
+    inner: ::rusty_lr_core::parser::deterministic::Context<GrammarParser, GrammarData, u8>,
+}
+#[allow(dead_code)]
+impl GrammarContext {
+    pub fn new(
+        userdata: <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
+    ) -> Self {
+        Self {
+            inner: ::rusty_lr_core::parser::deterministic::Context::new_with_branch(userdata, 0u32),
+        }
+    }
+    pub fn with_default_userdata() -> Self
+    where
+        <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData: Default,
+    {
+        Self {
+            inner:
+                ::rusty_lr_core::parser::deterministic::Context::with_default_userdata_and_branch(
+                    0u32,
+                ),
+        }
+    }
+    pub fn with_capacity(
+        capacity: usize,
+        userdata: <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
+    ) -> Self {
+        Self {
+            inner: ::rusty_lr_core::parser::deterministic::Context::with_capacity_and_branch(
+                capacity, userdata, 0u32,
+            ),
+        }
+    }
+    pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
+    where
+        <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData: Default,
+    {
+        Self {
+            inner: ::rusty_lr_core::parser::deterministic::Context::with_capacity_and_branch(
+                capacity,
+                Default::default(),
+                0u32,
+            ),
+        }
+    }
+    pub fn feed(&mut self, term: Lexed) -> Result<(), GrammarParseError> {
+        self.inner.feed(term)
+    }
+    pub fn feed_location(
+        &mut self,
+        term: Lexed,
+        location: Location,
+    ) -> Result<(), GrammarParseError> {
+        self.inner.feed_location(term, location)
+    }
+    pub fn can_feed(&self, term: &Lexed) -> bool {
+        self.inner.can_feed(term)
+    }
+    pub fn accept(
+        mut self,
+    ) -> Result<
+        (
+            (),
+            <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
+        ),
+        GrammarParseError,
+    > {
+        self.inner.feed_eof()?;
+        let (mut __rustylr_data_stack, __rustylr_userdata) = self.inner.into_data_stack();
+        __rustylr_data_stack.pop();
+        let __rustylr_start = __rustylr_data_stack.pop().unwrap();
+        let __rustylr_start = GrammarData::__rustylr_into_start_0(__rustylr_start).unwrap();
+        Ok((__rustylr_start, __rustylr_userdata))
+    }
+    pub fn accept_all(
+        self,
+    ) -> Result<
+        impl Iterator<
+            Item = (
+                (),
+                <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData,
+            ),
+        >,
+        GrammarParseError,
+    > {
+        Ok(::std::iter::once(self.accept()?))
+    }
+    pub fn expected_token(
+        &self,
+    ) -> (
+        ::std::collections::BTreeSet<GrammarTerminalClasses>,
+        ::std::collections::BTreeSet<GrammarNonTerminals>,
+    ) {
+        self.inner.expected_token()
+    }
+    pub fn expected_token_str(
+        &self,
+    ) -> (
+        impl Iterator<Item = &'static str>,
+        impl Iterator<Item = &'static str>,
+    ) {
+        self.inner.expected_token_str()
+    }
+    pub fn userdata(
+        &self,
+    ) -> &<GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData {
+        self.inner.userdata()
+    }
+    pub fn userdata_mut(
+        &mut self,
+    ) -> &mut <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData
+    {
+        self.inner.userdata_mut()
+    }
+}
+impl ::std::ops::Deref for GrammarContext {
+    type Target = ::rusty_lr_core::parser::deterministic::Context<GrammarParser, GrammarData, u8>;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+impl ::std::ops::DerefMut for GrammarContext {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+impl Clone for GrammarContext {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+        }
+    }
+}
+impl Default for GrammarContext
+where
+    <GrammarData as ::rusty_lr_core::parser::semantic_value::SemanticValue>::UserData: Default,
+{
+    fn default() -> Self {
+        Self::with_default_userdata()
+    }
+}
+impl std::fmt::Debug for GrammarContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let states: Vec<_> = self.inner.state_stack().collect();
+        f.debug_struct(stringify!(GrammarContext))
+            .field("states", &states)
+            .finish()
+    }
+}
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarRule =
     ::rusty_lr_core::production::Production<GrammarTerminalClasses, GrammarNonTerminals>;
-/// type alias for runtime parser tables
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarTables = ::rusty_lr_core::parser::table::SparseFlatTables<
     GrammarTerminalClasses,
@@ -211,7 +355,6 @@ pub type GrammarTables = ::rusty_lr_core::parser::table::SparseFlatTables<
     u8,
     u8,
 >;
-/// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
 pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     Lexed,
@@ -276,15 +419,16 @@ pub enum GrammarTerminalClasses {
     minus,
     error,
     eof,
+    VirtualStart0,
 }
 impl GrammarTerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
-            value < 45usize,
+            value < 46usize,
             "Terminal class index {} is out of bounds (max {})",
             value,
-            45usize
+            46usize
         );
         unsafe { ::std::mem::transmute(value) }
     }
@@ -340,6 +484,7 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
             GrammarTerminalClasses::minus => "minus",
             GrammarTerminalClasses::error => "error",
             GrammarTerminalClasses::eof => "eof",
+            GrammarTerminalClasses::VirtualStart0 => "virtual_start",
         }
     }
     fn to_usize(&self) -> usize {
@@ -395,6 +540,7 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
     }
     fn from_virtual_start(branch_idx: u32) -> Self {
         match branch_idx {
+            0u32 => Self::VirtualStart0,
             _ => panic!("Invalid virtual start branch index: {}", branch_idx),
         }
     }
@@ -590,6 +736,7 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+#[derive(Clone)]
 pub enum GrammarData {
     __terminals(Lexed),
     __variant1(::std::boxed::Box<RuleDefArgs>),
@@ -613,21 +760,6 @@ pub enum GrammarData {
     __variant19(Vec<IdentOrLiteral>),
     Empty,
 }
-/// enum for each non-terminal and terminal symbol, that actually hold data
-#[rustfmt::skip]
-#[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub struct GrammarDataStack {
-    pub __stack: Vec<GrammarData>,
-    pub branch_idx: u32,
-}
-impl Default for GrammarDataStack {
-    fn default() -> Self {
-        Self {
-            __stack: Vec::new(),
-            branch_idx: 0,
-        }
-    }
-}
 #[rustfmt::skip]
 #[allow(
     unused_braces,
@@ -635,9 +767,16 @@ impl Default for GrammarDataStack {
     unused_variables,
     non_snake_case,
     unused_mut,
-    dead_code
+    dead_code,
+    unreachable_patterns
 )]
-impl GrammarDataStack {
+impl GrammarData {
+    fn __rustylr_into_start_0(value: Self) -> Option<()> {
+        match value {
+            Self::Empty => Some(()),
+            _ => None,
+        }
+    }
     fn custom_reduce_action_0(
         mut t: Vec<Lexed>,
         data: &mut GrammarArgs,
@@ -654,7 +793,7 @@ impl GrammarDataStack {
     ///Rule -> ident RuleType colon RuleLines semicolon
     #[inline]
     fn reduce_Rule_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -665,41 +804,41 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant3(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant3(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__variant2(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__variant2(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_colon = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop();
-        let mut RuleLines = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut RuleLines = match __data_stack.pop().unwrap() {
             GrammarData::__variant3(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut RuleType = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut RuleType = match __data_stack.pop().unwrap() {
             GrammarData::__variant2(val) => val,
             _ => unreachable!(),
         };
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -717,18 +856,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant1(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant1(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Rule -> ident RuleType colon RuleLines error semicolon
     #[inline]
     fn reduce_Rule_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -739,28 +876,28 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant3(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant3(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__variant2(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__variant2(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -769,17 +906,17 @@ impl GrammarDataStack {
         let mut __rustylr_location_colon = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        let mut RuleLines = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 2);
+        let mut RuleLines = match __data_stack.pop().unwrap() {
             GrammarData::__variant3(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut RuleType = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut RuleType = match __data_stack.pop().unwrap() {
             GrammarData::__variant2(val) => val,
             _ => unreachable!(),
         };
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -804,18 +941,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant1(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant1(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///RuleType -> parengroup
     #[inline]
     fn reduce_RuleType_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -826,12 +961,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
-        let mut parengroup = match __data_stack.__stack.pop().unwrap() {
+        let mut parengroup = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -842,16 +977,16 @@ impl GrammarDataStack {
             Some(parengroup)
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant2(__res));
+            __data_stack.push(Self::__variant2(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///RuleType ->
     #[inline]
     fn reduce_RuleType_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -862,16 +997,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { None };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant2(__res));
+            __data_stack.push(Self::__variant2(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///RuleLines -> RuleLines pipe RuleLine
     #[inline]
     fn reduce_RuleLines_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -882,27 +1017,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant4(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant4(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant3(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant3(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
         __location_stack.pop();
-        let mut RuleLine = match __data_stack.__stack.pop().unwrap() {
+        let mut RuleLine = match __data_stack.pop().unwrap() {
             GrammarData::__variant4(val) => *val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut RuleLines = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut RuleLines = match __data_stack.pop().unwrap() {
             GrammarData::__variant3(val) => val,
             _ => unreachable!(),
         };
@@ -912,16 +1047,16 @@ impl GrammarDataStack {
             RuleLines
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant3(__res));
+            __data_stack.push(Self::__variant3(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///RuleLines -> RuleLine
     #[inline]
     fn reduce_RuleLines_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -932,27 +1067,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant4(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant4(_)))
             );
         }
         __location_stack.pop();
-        let mut RuleLine = match __data_stack.__stack.pop().unwrap() {
+        let mut RuleLine = match __data_stack.pop().unwrap() {
             GrammarData::__variant4(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![RuleLine] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant3(__res));
+            __data_stack.push(Self::__variant3(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///RuleLine -> MappedSymbol* PrecDef* Action
     #[inline]
     fn reduce_RuleLine_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -963,28 +1098,28 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant2(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant2(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant13(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant13(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant12(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant12(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        let mut Action = match __data_stack.__stack.pop().unwrap() {
+        let mut Action = match __data_stack.pop().unwrap() {
             GrammarData::__variant2(val) => val,
             _ => unreachable!(),
         };
-        let mut PrecDef = match __data_stack.__stack.pop().unwrap() {
+        let mut PrecDef = match __data_stack.pop().unwrap() {
             GrammarData::__variant13(val) => val,
             _ => unreachable!(),
         };
-        let mut MappedSymbol = match __data_stack.__stack.pop().unwrap() {
+        let mut MappedSymbol = match __data_stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
         };
@@ -997,18 +1132,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant4(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant4(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef -> percent prec IdentOrLiteral
     #[inline]
     fn reduce_PrecDef_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1019,38 +1152,36 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant10(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant10(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
+        let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
             GrammarData::__variant10(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __res = { PrecDPrecArgs::Prec(IdentOrLiteral) };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant5(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef -> percent prec error
     #[inline]
     fn reduce_PrecDef_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1061,21 +1192,21 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1087,18 +1218,16 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant5(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef -> percent dprec int_literal
     #[inline]
     fn reduce_PrecDef_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1109,25 +1238,25 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_int_literal = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut int_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut int_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __res = {
             let Lexed::IntLiteral(i) = int_literal else {
                 unreachable!("PrecDPrecArgs-DPrec");
@@ -1135,18 +1264,16 @@ impl GrammarDataStack {
             PrecDPrecArgs::DPrec(Located::new(i, __rustylr_location_int_literal))
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant5(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef -> percent dprec error
     #[inline]
     fn reduce_PrecDef_3(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1157,21 +1284,21 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1183,18 +1310,16 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant5(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef -> percent error
     #[inline]
     fn reduce_PrecDef_4(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1205,17 +1330,17 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1227,18 +1352,16 @@ impl GrammarDataStack {
             PrecDPrecArgs::None
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant5(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant5(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///MappedSymbol -> Pattern
     #[inline]
     fn reduce_MappedSymbol_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1249,29 +1372,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         __location_stack.pop();
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = { (None, Pattern) };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant6(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant6(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///MappedSymbol -> ident equal Pattern
     #[inline]
     fn reduce_MappedSymbol_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1282,26 +1403,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1312,18 +1433,16 @@ impl GrammarDataStack {
             (Some(Located::new(ident.to_string(), __rustylr_location_ident)), Pattern)
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant6(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant6(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///MappedSymbol -> ident equal error
     #[inline]
     fn reduce_MappedSymbol_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1334,23 +1453,23 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 2);
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1371,18 +1490,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack
-                .__stack
-                .push(GrammarData::__variant6(::std::boxed::Box::new(__res)));
+            __data_stack.push(Self::__variant6(::std::boxed::Box::new(__res)));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> ident
     #[inline]
     fn reduce_TerminalSetItem_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1393,12 +1510,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1411,16 +1528,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> ident minus ident
     #[inline]
     fn reduce_TerminalSetItem_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1431,27 +1548,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
-        let mut last = match __data_stack.__stack.pop().unwrap() {
+        let mut last = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut first = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut first = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1468,16 +1585,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> ident minus error
     #[inline]
     fn reduce_TerminalSetItem_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1488,21 +1605,21 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1514,16 +1631,16 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(Default::default())
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> char_literal
     #[inline]
     fn reduce_TerminalSetItem_3(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1534,12 +1651,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
-        let mut char_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut char_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1552,16 +1669,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> char_literal minus char_literal
     #[inline]
     fn reduce_TerminalSetItem_4(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1572,27 +1689,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
-        let mut last = match __data_stack.__stack.pop().unwrap() {
+        let mut last = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut first = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut first = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1609,16 +1726,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> char_literal minus error
     #[inline]
     fn reduce_TerminalSetItem_5(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1629,21 +1746,21 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1655,16 +1772,16 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(Default::default())
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> byte_literal
     #[inline]
     fn reduce_TerminalSetItem_6(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1675,12 +1792,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
-        let mut byte_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut byte_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1693,16 +1810,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> byte_literal minus byte_literal
     #[inline]
     fn reduce_TerminalSetItem_7(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1713,27 +1830,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
-        let mut last = match __data_stack.__stack.pop().unwrap() {
+        let mut last = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut first = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut first = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1750,16 +1867,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem -> byte_literal minus error
     #[inline]
     fn reduce_TerminalSetItem_8(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1770,21 +1887,21 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1796,16 +1913,16 @@ impl GrammarDataStack {
             TerminalSetItem::Terminal(Default::default())
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant7(__res));
+            __data_stack.push(Self::__variant7(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSet -> lbracket caret? TerminalSetItem* rbracket
     #[inline]
     fn reduce_TerminalSet_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1816,35 +1933,35 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant15(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant15(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant14(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant14(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop();
-        let mut TerminalSetItem = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut TerminalSetItem = match __data_stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
         };
-        let mut caret = match __data_stack.__stack.pop().unwrap() {
+        let mut caret = match __data_stack.pop().unwrap() {
             GrammarData::__variant14(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             TerminalSet {
                 negate: caret.is_some(),
@@ -1854,16 +1971,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant8(__res));
+            __data_stack.push(Self::__variant8(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSet -> lbracket caret? error rbracket
     #[inline]
     fn reduce_TerminalSet_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1874,32 +1991,32 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant14(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant14(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        let mut caret = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 2);
+        let mut caret = match __data_stack.pop().unwrap() {
             GrammarData::__variant14(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -1916,16 +2033,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant8(__res));
+            __data_stack.push(Self::__variant8(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSet -> dot
     #[inline]
     fn reduce_TerminalSet_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1936,12 +2053,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_dot = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             let span = __rustylr_location_dot;
             TerminalSet {
@@ -1952,16 +2069,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant8(__res));
+            __data_stack.push(Self::__variant8(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> ident
     #[inline]
     fn reduce_Pattern_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -1972,12 +2089,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -1988,16 +2105,16 @@ impl GrammarDataStack {
             PatternArgs::Ident(Located::new(ident.to_string(), __rustylr_location_ident))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> Pattern plus
     #[inline]
     fn reduce_Pattern_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2008,21 +2125,21 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         let mut __rustylr_location_plus = __location_stack.pop().unwrap();
         __location_stack.pop();
-        let mut plus = match __data_stack.__stack.pop().unwrap() {
+        let mut plus = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
@@ -2036,16 +2153,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> Pattern star
     #[inline]
     fn reduce_Pattern_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2056,18 +2173,18 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         let mut __rustylr_location_star = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
@@ -2078,16 +2195,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> Pattern question
     #[inline]
     fn reduce_Pattern_3(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2098,18 +2215,18 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         let mut __rustylr_location_question = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
@@ -2120,16 +2237,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> Pattern exclamation
     #[inline]
     fn reduce_Pattern_4(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2140,18 +2257,18 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         let mut __rustylr_location_exclamation = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
@@ -2162,16 +2279,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> TerminalSet
     #[inline]
     fn reduce_Pattern_5(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2182,27 +2299,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant8(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant8(_)))
             );
         }
         __location_stack.pop();
-        let mut TerminalSet = match __data_stack.__stack.pop().unwrap() {
+        let mut TerminalSet = match __data_stack.pop().unwrap() {
             GrammarData::__variant8(val) => val,
             _ => unreachable!(),
         };
         let __res = { PatternArgs::TerminalSet(TerminalSet) };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> lparen $sep(Pattern*, pipe, +) rparen
     #[inline]
     fn reduce_Pattern_6(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2213,27 +2330,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant17(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant17(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_rparen = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_lparen = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop();
-        let mut Pattern = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut Pattern = match __data_stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             PatternArgs::Group {
                 alternatives: Pattern,
@@ -2242,16 +2359,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> lparen error rparen
     #[inline]
     fn reduce_Pattern_7(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2262,22 +2379,22 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -2289,16 +2406,16 @@ impl GrammarDataStack {
             PatternArgs::Ident(Default::default())
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> byte_literal
     #[inline]
     fn reduce_Pattern_8(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2309,12 +2426,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
-        let mut byte_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut byte_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -2325,16 +2442,16 @@ impl GrammarDataStack {
             PatternArgs::Byte(Located::new(b.value(), __rustylr_location_byte_literal))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> byte_str_literal
     #[inline]
     fn reduce_Pattern_9(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2345,12 +2462,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_str_literal = __location_stack.pop().unwrap();
-        let mut byte_str_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut byte_str_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -2363,16 +2480,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> char_literal
     #[inline]
     fn reduce_Pattern_10(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2383,12 +2500,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
-        let mut char_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut char_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -2399,16 +2516,16 @@ impl GrammarDataStack {
             PatternArgs::Char(Located::new(c.value(), __rustylr_location_char_literal))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> str_literal
     #[inline]
     fn reduce_Pattern_11(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2419,12 +2536,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_str_literal = __location_stack.pop().unwrap();
-        let mut str_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut str_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -2435,16 +2552,16 @@ impl GrammarDataStack {
             PatternArgs::String(Located::new(s.value(), __rustylr_location_str_literal))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> Pattern minus Pattern
     #[inline]
     fn reduce_Pattern_12(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2455,25 +2572,25 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        let mut p2 = match __data_stack.__stack.pop().unwrap() {
+        let mut p2 = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut p1 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut p1 = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
@@ -2484,16 +2601,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma? rparen
     #[inline]
     fn reduce_Pattern_13(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2504,57 +2621,57 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                7usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 6);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        let mut del = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 2);
+        let mut del = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut base = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut base = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2576,16 +2693,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma plus rparen
     #[inline]
     fn reduce_Pattern_14(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2596,61 +2713,61 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                7usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                8usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 8usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 7);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        let mut del = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 3);
+        let mut del = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut base = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut base = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2672,16 +2789,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma star rparen
     #[inline]
     fn reduce_Pattern_15(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2692,61 +2809,61 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                7usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                8usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 8usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 7);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        let mut del = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 3);
+        let mut del = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut base = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut base = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2768,16 +2885,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern error rparen
     #[inline]
     fn reduce_Pattern_16(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2788,36 +2905,36 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                7usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -2825,22 +2942,22 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 4);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        let mut del = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 2);
+        let mut del = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut base = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut base = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2869,16 +2986,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern -> dollar ident lparen Pattern comma Pattern comma error rparen
     #[inline]
     fn reduce_Pattern_17(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2889,40 +3006,40 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                7usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                8usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 8usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -2930,22 +3047,22 @@ impl GrammarDataStack {
         __location_stack.truncate(__location_stack.len() - 5);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        let mut del = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 3);
+        let mut del = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut base = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut base = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("Pattern-Sep-Ident");
@@ -2974,16 +3091,16 @@ impl GrammarDataStack {
             }
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant9(__res));
+            __data_stack.push(Self::__variant9(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Action -> bracegroup
     #[inline]
     fn reduce_Action_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -2994,12 +3111,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
-        let mut bracegroup = match __data_stack.__stack.pop().unwrap() {
+        let mut bracegroup = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3010,16 +3127,16 @@ impl GrammarDataStack {
             Some(bracegroup)
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant2(__res));
+            __data_stack.push(Self::__variant2(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Action -> error
     #[inline]
     fn reduce_Action_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3030,12 +3147,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         let __res = {
             data.error_recovered
                 .push(RecoveredError {
@@ -3048,16 +3165,16 @@ impl GrammarDataStack {
             None
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant2(__res));
+            __data_stack.push(Self::__variant2(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Action ->
     #[inline]
     fn reduce_Action_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3068,16 +3185,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { None };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant2(__res));
+            __data_stack.push(Self::__variant2(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///IdentOrLiteral -> ident
     #[inline]
     fn reduce_IdentOrLiteral_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3088,12 +3205,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3106,16 +3223,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant10(__res));
+            __data_stack.push(Self::__variant10(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///IdentOrLiteral -> byte_literal
     #[inline]
     fn reduce_IdentOrLiteral_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3126,12 +3243,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
-        let mut byte_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut byte_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3144,16 +3261,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant10(__res));
+            __data_stack.push(Self::__variant10(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///IdentOrLiteral -> char_literal
     #[inline]
     fn reduce_IdentOrLiteral_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3164,12 +3281,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
-        let mut char_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut char_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3182,16 +3299,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant10(__res));
+            __data_stack.push(Self::__variant10(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///AllowTarget -> ident
     #[inline]
     fn reduce_AllowTarget_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3202,12 +3319,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3218,16 +3335,16 @@ impl GrammarDataStack {
             AllowTarget::Ident(Located::new(ident.to_string(), __rustylr_location_ident))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant11(__res));
+            __data_stack.push(Self::__variant11(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///AllowTarget -> byte_literal
     #[inline]
     fn reduce_AllowTarget_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3238,12 +3355,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
-        let mut byte_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut byte_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3254,16 +3371,16 @@ impl GrammarDataStack {
             AllowTarget::Byte(Located::new(b.value(), __rustylr_location_byte_literal))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant11(__res));
+            __data_stack.push(Self::__variant11(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///AllowTarget -> char_literal
     #[inline]
     fn reduce_AllowTarget_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3274,12 +3391,12 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
-        let mut char_literal = match __data_stack.__stack.pop().unwrap() {
+        let mut char_literal = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3290,16 +3407,16 @@ impl GrammarDataStack {
             AllowTarget::Char(Located::new(c.value(), __rustylr_location_char_literal))
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant11(__res));
+            __data_stack.push(Self::__variant11(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///AllowTarget -> char_literal minus char_literal
     #[inline]
     fn reduce_AllowTarget_3(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3310,27 +3427,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
-        let mut last = match __data_stack.__stack.pop().unwrap() {
+        let mut last = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut first = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut first = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3347,16 +3464,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant11(__res));
+            __data_stack.push(Self::__variant11(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///AllowTarget -> byte_literal minus byte_literal
     #[inline]
     fn reduce_AllowTarget_4(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3367,27 +3484,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
-        let mut last = match __data_stack.__stack.pop().unwrap() {
+        let mut last = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut first = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut first = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
@@ -3404,16 +3521,16 @@ impl GrammarDataStack {
             )
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant11(__res));
+            __data_stack.push(Self::__variant11(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///AllowTarget -> TerminalSet
     #[inline]
     fn reduce_AllowTarget_5(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3424,27 +3541,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant8(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant8(_)))
             );
         }
         __location_stack.pop();
-        let mut TerminalSet = match __data_stack.__stack.pop().unwrap() {
+        let mut TerminalSet = match __data_stack.pop().unwrap() {
             GrammarData::__variant8(val) => val,
             _ => unreachable!(),
         };
         let __res = { AllowTarget::TerminalSet(TerminalSet) };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant11(__res));
+            __data_stack.push(Self::__variant11(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Directive -> percent token ident [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3455,39 +3572,39 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.pop();
-        let mut __rustylr_data_3 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __rustylr_data_3 = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __rustylr_data_3 = Self::custom_reduce_action_0(
             __rustylr_data_3,
             data,
@@ -3504,13 +3621,13 @@ impl GrammarDataStack {
                     RustCode,
                 ));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent token ident semicolon
     #[inline]
     fn reduce_Directive_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3521,26 +3638,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3550,13 +3667,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_ident,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent token error semicolon
     #[inline]
     fn reduce_Directive_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3567,26 +3684,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3596,13 +3713,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent start ident semicolon
     #[inline]
     fn reduce_Directive_3(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3613,31 +3730,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("StartDef-Ident");
@@ -3645,13 +3762,13 @@ impl GrammarDataStack {
             data.start_rule_name
                 .push(Located::new(ident.to_string(), __rustylr_location_ident));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent start error semicolon
     #[inline]
     fn reduce_Directive_4(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3662,26 +3779,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3691,13 +3808,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent tokentype [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_5(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3708,31 +3825,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -3742,13 +3859,13 @@ impl GrammarDataStack {
         {
             data.token_typename.push((__rustylr_location_tokentype, RustCode));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent tokentype semicolon
     #[inline]
     fn reduce_Directive_6(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3759,22 +3876,22 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_tokentype = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3784,13 +3901,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_tokentype,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent userdata [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_7(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3801,31 +3918,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -3835,13 +3952,13 @@ impl GrammarDataStack {
         {
             data.userdata_typename.push((__rustylr_location_userdata, RustCode));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent userdata semicolon
     #[inline]
     fn reduce_Directive_8(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3852,22 +3969,22 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_userdata = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3877,13 +3994,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_userdata,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent left IdentOrLiteral+ semicolon
     #[inline]
     fn reduce_Directive_9(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3894,31 +4011,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant19(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant19(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_left = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
             GrammarData::__variant19(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         {
             data.precedences
                 .push((
@@ -3927,13 +4044,13 @@ impl GrammarDataStack {
                     IdentOrLiteral,
                 ));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent left error semicolon
     #[inline]
     fn reduce_Directive_10(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3944,26 +4061,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -3973,13 +4090,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent right IdentOrLiteral+ semicolon
     #[inline]
     fn reduce_Directive_11(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -3990,31 +4107,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant19(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant19(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_right = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
             GrammarData::__variant19(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         {
             data.precedences
                 .push((
@@ -4023,13 +4140,13 @@ impl GrammarDataStack {
                     IdentOrLiteral,
                 ));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent right error semicolon
     #[inline]
     fn reduce_Directive_12(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4040,26 +4157,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4069,13 +4186,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent precedence IdentOrLiteral+ semicolon
     #[inline]
     fn reduce_Directive_13(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4086,41 +4203,41 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant19(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant19(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_precedence = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut IdentOrLiteral = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
             GrammarData::__variant19(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         {
             data.precedences.push((__rustylr_location_precedence, None, IdentOrLiteral));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent precedence error semicolon
     #[inline]
     fn reduce_Directive_14(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4131,26 +4248,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4160,13 +4277,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent errortype [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_15(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4177,31 +4294,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -4211,13 +4328,13 @@ impl GrammarDataStack {
         {
             data.error_typename.push((__rustylr_location_errortype, RustCode));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent errortype semicolon
     #[inline]
     fn reduce_Directive_16(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4228,22 +4345,22 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_errortype = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4253,13 +4370,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_errortype,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent moduleprefix [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_17(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4270,31 +4387,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -4304,13 +4421,13 @@ impl GrammarDataStack {
         {
             data.module_prefix.push((__rustylr_location_moduleprefix, RustCode));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent moduleprefix semicolon
     #[inline]
     fn reduce_Directive_18(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4321,22 +4438,22 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_moduleprefix = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4346,13 +4463,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_moduleprefix,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent glr semicolon
     #[inline]
     fn reduce_Directive_19(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4363,35 +4480,35 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.pop();
-        let mut glr = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut glr = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         {
             data.glr = true;
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent glr error semicolon
     #[inline]
     fn reduce_Directive_20(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4402,26 +4519,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4431,13 +4548,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent lalr semicolon
     #[inline]
     fn reduce_Directive_21(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4448,35 +4565,35 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.pop();
-        let mut lalr = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut lalr = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         {
             data.lalr = true;
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent lalr error semicolon
     #[inline]
     fn reduce_Directive_22(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4487,26 +4604,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4516,13 +4633,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent nooptim semicolon
     #[inline]
     fn reduce_Directive_23(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4533,30 +4650,30 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.no_optim = true;
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent nooptim error semicolon
     #[inline]
     fn reduce_Directive_24(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4567,26 +4684,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4596,13 +4713,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent location [^semicolon]+ semicolon
     #[inline]
     fn reduce_Directive_25(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4613,31 +4730,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_location = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut __rustylr_data_2 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         let __rustylr_data_2 = Self::custom_reduce_action_0(
             __rustylr_data_2,
             data,
@@ -4647,13 +4764,13 @@ impl GrammarDataStack {
         {
             data.location_typename.push((__rustylr_location_location, RustCode));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent location semicolon
     #[inline]
     fn reduce_Directive_26(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4664,27 +4781,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_location = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        let mut location = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut location = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
+        __data_stack.pop();
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4694,13 +4811,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_location,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent allow ident semicolon
     #[inline]
     fn reduce_Directive_27(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4711,31 +4828,31 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("AllowDef-Ident");
@@ -4743,13 +4860,13 @@ impl GrammarDataStack {
             data.allowed_diagnostics
                 .push((Located::new(ident.to_string(), __rustylr_location_ident), None));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent allow ident lparen AllowTarget rparen semicolon
     #[inline]
     fn reduce_Directive_28(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4760,48 +4877,48 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant11(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant11(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 4);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        let mut AllowTarget = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.truncate(__data_stack.len() - 2);
+        let mut AllowTarget = match __data_stack.pop().unwrap() {
             GrammarData::__variant11(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut ident = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut ident = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
+        __data_stack.truncate(__data_stack.len() - 2);
         {
             let Lexed::Ident(ident) = ident else {
                 unreachable!("AllowDef-Ident");
@@ -4812,13 +4929,13 @@ impl GrammarDataStack {
                     Some(AllowTarget),
                 ));
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent allow ident lparen error rparen semicolon
     #[inline]
     fn reduce_Directive_29(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4829,38 +4946,38 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                5usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                6usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 4);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 7);
+        __data_stack.truncate(__data_stack.len() - 7);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4870,13 +4987,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent allow error semicolon
     #[inline]
     fn reduce_Directive_30(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4887,26 +5004,26 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
+        __data_stack.truncate(__data_stack.len() - 4);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4916,13 +5033,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Directive -> percent error semicolon
     #[inline]
     fn reduce_Directive_31(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4933,22 +5050,22 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.error_recovered
                 .push(RecoveredError {
@@ -4958,13 +5075,13 @@ impl GrammarDataStack {
                     location: __rustylr_location_error,
                 });
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///GrammarLine -> Rule
     #[inline]
     fn reduce_GrammarLine_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -4975,25 +5092,25 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant1(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant1(_)))
             );
         }
         __location_stack.pop();
-        let mut Rule = match __data_stack.__stack.pop().unwrap() {
+        let mut Rule = match __data_stack.pop().unwrap() {
             GrammarData::__variant1(val) => *val,
             _ => unreachable!(),
         };
         {
             data.rules.push(Rule);
         };
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///MappedSymbol+ -> MappedSymbol
     #[inline]
     fn reduce__MappedSymbolPlus16_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5004,27 +5121,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant6(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant6(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant6(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant12(__res));
+            __data_stack.push(Self::__variant12(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///MappedSymbol+ -> MappedSymbol+ MappedSymbol
     #[inline]
     fn reduce__MappedSymbolPlus16_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5035,20 +5152,20 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant6(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant6(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant12(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant12(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant6(val) => *val,
             _ => unreachable!(),
         };
-        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+        let mut Ap = match __data_stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
         };
@@ -5057,16 +5174,16 @@ impl GrammarDataStack {
             Ap
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant12(__res));
+            __data_stack.push(Self::__variant12(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///MappedSymbol* -> MappedSymbol+
     #[inline]
     fn reduce__MappedSymbolStar17_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5077,27 +5194,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant12(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant12(_)))
             );
         }
         __location_stack.pop();
-        let mut __token0 = match __data_stack.__stack.pop().unwrap() {
+        let mut __token0 = match __data_stack.pop().unwrap() {
             GrammarData::__variant12(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant12(__res));
+            __data_stack.push(Self::__variant12(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///MappedSymbol* ->
     #[inline]
     fn reduce__MappedSymbolStar17_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5108,16 +5225,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { vec![] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant12(__res));
+            __data_stack.push(Self::__variant12(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef+ -> PrecDef
     #[inline]
     fn reduce__PrecDefPlus18_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5128,27 +5245,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant5(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant5(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant5(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant13(__res));
+            __data_stack.push(Self::__variant13(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef+ -> PrecDef+ PrecDef
     #[inline]
     fn reduce__PrecDefPlus18_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5159,20 +5276,20 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant5(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant5(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant13(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant13(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant5(val) => *val,
             _ => unreachable!(),
         };
-        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+        let mut Ap = match __data_stack.pop().unwrap() {
             GrammarData::__variant13(val) => val,
             _ => unreachable!(),
         };
@@ -5181,16 +5298,16 @@ impl GrammarDataStack {
             Ap
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant13(__res));
+            __data_stack.push(Self::__variant13(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef* -> PrecDef+
     #[inline]
     fn reduce__PrecDefStar19_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5201,27 +5318,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant13(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant13(_)))
             );
         }
         __location_stack.pop();
-        let mut __token0 = match __data_stack.__stack.pop().unwrap() {
+        let mut __token0 = match __data_stack.pop().unwrap() {
             GrammarData::__variant13(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant13(__res));
+            __data_stack.push(Self::__variant13(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///PrecDef* ->
     #[inline]
     fn reduce__PrecDefStar19_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5232,16 +5349,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { vec![] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant13(__res));
+            __data_stack.push(Self::__variant13(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///caret? -> caret
     #[inline]
     fn reduce__caretQuestion20_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5252,27 +5369,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = Some(A);
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant14(__res));
+            __data_stack.push(Self::__variant14(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///caret? ->
     #[inline]
     fn reduce__caretQuestion20_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5283,16 +5400,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { None };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant14(__res));
+            __data_stack.push(Self::__variant14(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem+ -> TerminalSetItem
     #[inline]
     fn reduce__TerminalSetItemPlus21_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5303,27 +5420,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant7(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant7(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant7(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant15(__res));
+            __data_stack.push(Self::__variant15(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem+ -> TerminalSetItem+ TerminalSetItem
     #[inline]
     fn reduce__TerminalSetItemPlus21_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5334,20 +5451,20 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant7(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant7(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant15(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant15(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant7(val) => val,
             _ => unreachable!(),
         };
-        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+        let mut Ap = match __data_stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
         };
@@ -5356,16 +5473,16 @@ impl GrammarDataStack {
             Ap
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant15(__res));
+            __data_stack.push(Self::__variant15(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem* -> TerminalSetItem+
     #[inline]
     fn reduce__TerminalSetItemStar22_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5376,27 +5493,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant15(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant15(_)))
             );
         }
         __location_stack.pop();
-        let mut __token0 = match __data_stack.__stack.pop().unwrap() {
+        let mut __token0 = match __data_stack.pop().unwrap() {
             GrammarData::__variant15(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant15(__res));
+            __data_stack.push(Self::__variant15(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///TerminalSetItem* ->
     #[inline]
     fn reduce__TerminalSetItemStar22_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5407,16 +5524,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { vec![] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant15(__res));
+            __data_stack.push(Self::__variant15(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern+ -> Pattern
     #[inline]
     fn reduce__PatternPlus23_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5427,27 +5544,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant9(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant16(__res));
+            __data_stack.push(Self::__variant16(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern+ -> Pattern+ Pattern
     #[inline]
     fn reduce__PatternPlus23_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5458,20 +5575,20 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant9(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant9(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant16(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant16(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant9(val) => val,
             _ => unreachable!(),
         };
-        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+        let mut Ap = match __data_stack.pop().unwrap() {
             GrammarData::__variant16(val) => val,
             _ => unreachable!(),
         };
@@ -5480,16 +5597,16 @@ impl GrammarDataStack {
             Ap
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant16(__res));
+            __data_stack.push(Self::__variant16(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern* -> Pattern+
     #[inline]
     fn reduce__PatternStar24_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5500,27 +5617,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant16(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant16(_)))
             );
         }
         __location_stack.pop();
-        let mut __token0 = match __data_stack.__stack.pop().unwrap() {
+        let mut __token0 = match __data_stack.pop().unwrap() {
             GrammarData::__variant16(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant16(__res));
+            __data_stack.push(Self::__variant16(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///Pattern* ->
     #[inline]
     fn reduce__PatternStar24_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5531,16 +5648,16 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)] {}
         let __res = { vec![] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant16(__res));
+            __data_stack.push(Self::__variant16(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///$sep(Pattern*, pipe, +) -> Pattern*
     #[inline]
     fn reduce___PatternStar24SepPlus25_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5551,27 +5668,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant16(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant16(_)))
             );
         }
         __location_stack.pop();
-        let mut __token0 = match __data_stack.__stack.pop().unwrap() {
+        let mut __token0 = match __data_stack.pop().unwrap() {
             GrammarData::__variant16(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![__token0] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant17(__res));
+            __data_stack.push(Self::__variant17(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///$sep(Pattern*, pipe, +) -> $sep(Pattern*, pipe, +) pipe Pattern*
     #[inline]
     fn reduce___PatternStar24SepPlus25_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5582,25 +5699,25 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant16(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant16(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& GrammarData::__variant17(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                GrammarData::__variant17(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        let mut __token1 = match __data_stack.__stack.pop().unwrap() {
+        let mut __token1 = match __data_stack.pop().unwrap() {
             GrammarData::__variant16(val) => val,
             _ => unreachable!(),
         };
-        __data_stack.__stack.pop();
-        let mut __token0 = match __data_stack.__stack.pop().unwrap() {
+        __data_stack.pop();
+        let mut __token0 = match __data_stack.pop().unwrap() {
             GrammarData::__variant17(val) => val,
             _ => unreachable!(),
         };
@@ -5609,16 +5726,16 @@ impl GrammarDataStack {
             __token0
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant17(__res));
+            __data_stack.push(Self::__variant17(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///comma? -> comma
     #[inline]
     fn reduce__commaQuestion26_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5629,19 +5746,19 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///comma? ->
     #[inline]
     fn reduce__commaQuestion26_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5650,13 +5767,13 @@ impl GrammarDataStack {
         __rustylr_location0: &mut Location,
     ) -> Result<(), ::rusty_lr_core::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///[^semicolon]+ -> [^semicolon]
     #[inline]
     fn reduce___TermSet27Plus28_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5667,27 +5784,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant18(__res));
+            __data_stack.push(Self::__variant18(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///[^semicolon]+ -> [^semicolon]+ [^semicolon]
     #[inline]
     fn reduce___TermSet27Plus28_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5698,20 +5815,20 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__terminals(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__terminals(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant18(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant18(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__terminals(val) => val,
             _ => unreachable!(),
         };
-        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+        let mut Ap = match __data_stack.pop().unwrap() {
             GrammarData::__variant18(val) => val,
             _ => unreachable!(),
         };
@@ -5720,16 +5837,16 @@ impl GrammarDataStack {
             Ap
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant18(__res));
+            __data_stack.push(Self::__variant18(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///IdentOrLiteral+ -> IdentOrLiteral
     #[inline]
     fn reduce__IdentOrLiteralPlus29_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5740,27 +5857,27 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant10(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant10(_)))
             );
         }
         __location_stack.pop();
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant10(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant19(__res));
+            __data_stack.push(Self::__variant19(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///IdentOrLiteral+ -> IdentOrLiteral+ IdentOrLiteral
     #[inline]
     fn reduce__IdentOrLiteralPlus29_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5771,20 +5888,20 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::__variant10(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::__variant10(_)))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::__variant19(_)))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::__variant19(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        let mut A = match __data_stack.__stack.pop().unwrap() {
+        let mut A = match __data_stack.pop().unwrap() {
             GrammarData::__variant10(val) => val,
             _ => unreachable!(),
         };
-        let mut Ap = match __data_stack.__stack.pop().unwrap() {
+        let mut Ap = match __data_stack.pop().unwrap() {
             GrammarData::__variant19(val) => val,
             _ => unreachable!(),
         };
@@ -5793,16 +5910,16 @@ impl GrammarDataStack {
             Ap
         };
         if __push_data {
-            __data_stack.__stack.push(GrammarData::__variant19(__res));
+            __data_stack.push(Self::__variant19(__res));
         } else {
-            __data_stack.__stack.push(GrammarData::Empty);
+            __data_stack.push(Self::Empty);
         }
         Ok(())
     }
     ///GrammarLine+ -> GrammarLine
     #[inline]
     fn reduce__GrammarLinePlus30_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5813,19 +5930,19 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///GrammarLine+ -> GrammarLine GrammarLine+
     #[inline]
     fn reduce__GrammarLinePlus30_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<Location>,
         __push_data: bool,
         shift: &mut bool,
@@ -5836,17 +5953,17 @@ impl GrammarDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                GrammarData::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& GrammarData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                GrammarData::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(GrammarData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
 }
@@ -5858,52 +5975,20 @@ impl GrammarDataStack {
     non_camel_case_types,
     unused_variables
 )]
-impl ::rusty_lr_core::parser::data_stack::DataStack for GrammarDataStack {
+impl ::rusty_lr_core::parser::semantic_value::SemanticValue for GrammarData {
     type Term = Lexed;
     type NonTerm = GrammarNonTerminals;
     type ReduceActionError = ::rusty_lr_core::DefaultReduceActionError;
     type UserData = GrammarArgs;
-    type StartType = ();
     type Location = Location;
-    fn pop_start(&mut self) -> Option<Self::StartType> {
-        self.__stack.pop();
-        match self.__stack.pop() {
-            Some(GrammarData::Empty) => Some(()),
-            _ => None,
-        }
+    fn new_empty() -> Self {
+        Self::Empty
     }
-    fn pop(&mut self) {
-        self.__stack.pop();
-    }
-    fn push_terminal(&mut self, term: Self::Term) {
-        self.__stack.push(GrammarData::__terminals(term));
-    }
-    fn push_empty(&mut self) {
-        self.__stack.push(GrammarData::Empty);
-    }
-    fn set_branch_idx(&mut self, branch_idx: u32) {
-        self.branch_idx = branch_idx;
-    }
-    fn clear(&mut self) {
-        self.__stack.clear();
-    }
-    fn reserve(&mut self, additional: usize) {
-        self.__stack.reserve(additional);
-    }
-    fn split_off(&mut self, at: usize) -> Self {
-        Self {
-            __stack: self.__stack.split_off(at),
-            branch_idx: self.branch_idx,
-        }
-    }
-    fn truncate(&mut self, at: usize) {
-        self.__stack.truncate(at);
-    }
-    fn append(&mut self, other: &mut Self) {
-        self.__stack.append(&mut other.__stack);
+    fn new_terminal(term: Self::Term) -> Self {
+        Self::__terminals(term)
     }
     fn reduce_action(
-        data_stack: &mut Self,
+        data_stack: &mut Vec<Self>,
         location_stack: &mut Vec<Location>,
         push_data: bool,
         rule_index: usize,
@@ -7264,198 +7349,198 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     1, 2, 1, 0, 1, 2, 1, 0, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 3, 1, 0, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1,
-                    2, 2,
+                    2, 3,
                 ];
                 static SHIFT_TERM_DATA: &[u32] = &[
-                    2147516416, 2150825988, 2147549199, 2147614722, 2147647488,
-                    2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
-                    2147975182, 2148007953, 2148040723, 2147680261, 2147713024,
-                    2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
-                    2147975182, 2148007953, 2148040723, 2149777451, 2147811328,
-                    2147844113, 2147713024, 2147745799, 2147778568, 2147876875,
-                    2147909644, 2147942413, 2147975182, 2148007953, 2148040723,
-                    2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2148859947,
-                    2148073478, 2148139008, 2148270091, 2148401165, 2148532267,
-                    2148171818, 2148204544, 2148237355, 2148302890, 2148335627,
-                    2148368427, 2148433962, 2148466701, 2148499499, 2148565012,
-                    2148139008, 2148270091, 2148401165, 2148728852, 2148827145,
-                    2148958246, 2148991015, 2149023784, 2149056553, 2149089322,
-                    2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2148892690,
-                    2148958246, 2148991015, 2149023784, 2149056553, 2149089322,
-                    2147713024, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2148958246,
-                    2148991015, 2149023784, 2149056553, 2147713024, 2147745799,
-                    2147778568, 2147876875, 2147909644, 2147942413, 2147975182,
-                    2148007953, 2148040723, 2148958246, 2148991015, 2149023784,
-                    2149056553, 2149089322, 2149285891, 2149351442, 2147713024,
-                    2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
-                    2147975182, 2148007953, 2148040723, 2149416969, 2148958246,
-                    2148991015, 2149023784, 2149056553, 2149089322, 2149646379,
-                    2149449766, 2149515303, 2149580843, 2149482514, 2149548050,
-                    2149613586, 2149679122, 2149744658, 2148958246, 2148991015,
-                    2149023784, 2149056553, 2149089322, 2149875715, 3211301, 2150727723,
-                    2147647488, 2147745799, 2147778568, 2147876875, 2147909644,
-                    2147942413, 2147975182, 2148007953, 2148040723, 2148958246,
-                    2148991015, 2149023784, 2149056553, 2149089322, 2147647488,
-                    2147745799, 2147778568, 2147876875, 2147909644, 2147942413,
-                    2147975182, 2148007953, 2148040723, 2150105092, 2150137887,
-                    2150334498, 2150432811, 2150170624, 2150203403, 2150236173,
-                    2150268971, 2150367242, 2150400043, 2150105092, 2150596624,
-                    2150629419, 3276837, 2150858773, 2151088150, 2151251991, 2151546904,
-                    2151710745, 2151841818, 2151972891, 2152103964, 2152235037,
-                    2152366110, 2152497184, 2152661025, 2152792099, 2152923172,
-                    2153578539, 2150170624, 2150203403, 2150236173, 2150891563, 3440677,
-                    2150170624, 2150203403, 2150236173, 3538981, 2150170624, 2150203403,
-                    2150236173, 2151120939, 3670053, 2150170624, 2150203403, 2150236173,
-                    3735589, 2151284736, 2151481387, 2151350272, 2151350273, 2151350274,
-                    2151350275, 2151350276, 2151350277, 2151350278, 2151350279,
-                    2151350280, 2151350281, 2151350282, 2151350283, 2151350284,
-                    2151350285, 2151350286, 2151350287, 2151350288, 2151350289,
-                    2151350290, 2151350291, 2151350292, 2151350293, 2151350294,
-                    2151350295, 2151350296, 2151350297, 2151350298, 2151350299,
-                    2151350300, 2151350301, 2151350302, 2151350303, 2151350304,
-                    2151350305, 2151350306, 2151350307, 2151350308, 3833893, 2151350310,
-                    2151350311, 2151350312, 2151350313, 2151350314, 2151448576,
-                    2151448577, 2151448578, 2151448579, 2151448580, 2151448581,
-                    2151448582, 2151448583, 2151448584, 2151448585, 2151448586,
-                    2151448587, 2151448588, 2151448589, 2151448590, 2151448591,
-                    2151448592, 2151448593, 2151448594, 2151448595, 2151448596,
-                    2151448597, 2151448598, 2151448599, 2151448600, 2151448601,
-                    2151448602, 2151448603, 2151448604, 2151448605, 2151448606,
-                    2151448607, 2151448608, 2151448609, 2151448610, 2151448611,
-                    2151448612, 3932197, 2151448614, 2151448615, 2151448616, 2151448617,
-                    2151448618, 4030501, 2151579648, 2151645227, 4128805, 4194341,
-                    2151350272, 2151350273, 2151350274, 2151350275, 2151350276,
-                    2151350277, 2151350278, 2151350279, 2151350280, 2151350281,
-                    2151350282, 2151350283, 2151350284, 2151350285, 2151350286,
-                    2151350287, 2151350288, 2151350289, 2151350290, 2151350291,
-                    2151350292, 2151350293, 2151350294, 2151350295, 2151350296,
-                    2151350297, 2151350298, 2151350299, 2151350300, 2151350301,
-                    2151350302, 2151350303, 2151350304, 2151350305, 2151350306,
-                    2151350307, 2151350308, 4259877, 2151350310, 2151350311, 2151350312,
-                    2151350313, 2151350314, 2151448576, 2151448577, 2151448578,
-                    2151448579, 2151448580, 2151448581, 2151448582, 2151448583,
-                    2151448584, 2151448585, 2151448586, 2151448587, 2151448588,
-                    2151448589, 2151448590, 2151448591, 2151448592, 2151448593,
-                    2151448594, 2151448595, 2151448596, 2151448597, 2151448598,
-                    2151448599, 2151448600, 2151448601, 2151448602, 2151448603,
-                    2151448604, 2151448605, 2151448606, 2151448607, 2151448608,
-                    2151448609, 2151448610, 2151448611, 2151448612, 4325413, 2151448614,
-                    2151448615, 2151448616, 2151448617, 2151448618, 2151350272,
-                    2151350273, 2151350274, 2151350275, 2151350276, 2151350277,
-                    2151350278, 2151350279, 2151350280, 2151350281, 2151350282,
-                    2151350283, 2151350284, 2151350285, 2151350286, 2151350287,
-                    2151350288, 2151350289, 2151350290, 2151350291, 2151350292,
-                    2151350293, 2151350294, 2151350295, 2151350296, 2151350297,
-                    2151350298, 2151350299, 2151350300, 2151350301, 2151350302,
-                    2151350303, 2151350304, 2151350305, 2151350306, 2151350307,
-                    2151350308, 4390949, 2151350310, 2151350311, 2151350312, 2151350313,
-                    2151350314, 2151448576, 2151448577, 2151448578, 2151448579,
-                    2151448580, 2151448581, 2151448582, 2151448583, 2151448584,
-                    2151448585, 2151448586, 2151448587, 2151448588, 2151448589,
-                    2151448590, 2151448591, 2151448592, 2151448593, 2151448594,
-                    2151448595, 2151448596, 2151448597, 2151448598, 2151448599,
-                    2151448600, 2151448601, 2151448602, 2151448603, 2151448604,
-                    2151448605, 2151448606, 2151448607, 2151448608, 2151448609,
-                    2151448610, 2151448611, 2151448612, 4456485, 2151448614, 2151448615,
-                    2151448616, 2151448617, 2151448618, 2151350272, 2151350273,
-                    2151350274, 2151350275, 2151350276, 2151350277, 2151350278,
-                    2151350279, 2151350280, 2151350281, 2151350282, 2151350283,
-                    2151350284, 2151350285, 2151350286, 2151350287, 2151350288,
-                    2151350289, 2151350290, 2151350291, 2151350292, 2151350293,
-                    2151350294, 2151350295, 2151350296, 2151350297, 2151350298,
-                    2151350299, 2151350300, 2151350301, 2151350302, 2151350303,
-                    2151350304, 2151350305, 2151350306, 2151350307, 2151350308, 4522021,
-                    2151350310, 2151350311, 2151350312, 2151350313, 2151350314,
-                    2151448576, 2151448577, 2151448578, 2151448579, 2151448580,
-                    2151448581, 2151448582, 2151448583, 2151448584, 2151448585,
-                    2151448586, 2151448587, 2151448588, 2151448589, 2151448590,
-                    2151448591, 2151448592, 2151448593, 2151448594, 2151448595,
-                    2151448596, 2151448597, 2151448598, 2151448599, 2151448600,
-                    2151448601, 2151448602, 2151448603, 2151448604, 2151448605,
-                    2151448606, 2151448607, 2151448608, 2151448609, 2151448610,
-                    2151448611, 2151448612, 4587557, 2151448614, 2151448615, 2151448616,
-                    2151448617, 2151448618, 2151350272, 2151350273, 2151350274,
-                    2151350275, 2151350276, 2151350277, 2151350278, 2151350279,
-                    2151350280, 2151350281, 2151350282, 2151350283, 2151350284,
-                    2151350285, 2151350286, 2151350287, 2151350288, 2151350289,
-                    2151350290, 2151350291, 2151350292, 2151350293, 2151350294,
-                    2151350295, 2151350296, 2151350297, 2151350298, 2151350299,
-                    2151350300, 2151350301, 2151350302, 2151350303, 2151350304,
-                    2151350305, 2151350306, 2151350307, 2151350308, 4653093, 2151350310,
-                    2151350311, 2151350312, 2151350313, 2151350314, 2151448576,
-                    2151448577, 2151448578, 2151448579, 2151448580, 2151448581,
-                    2151448582, 2151448583, 2151448584, 2151448585, 2151448586,
-                    2151448587, 2151448588, 2151448589, 2151448590, 2151448591,
-                    2151448592, 2151448593, 2151448594, 2151448595, 2151448596,
-                    2151448597, 2151448598, 2151448599, 2151448600, 2151448601,
-                    2151448602, 2151448603, 2151448604, 2151448605, 2151448606,
-                    2151448607, 2151448608, 2151448609, 2151448610, 2151448611,
-                    2151448612, 4718629, 2151448614, 2151448615, 2151448616, 2151448617,
-                    2151448618, 4784165, 2152300587, 4849701, 4915237, 2152431659,
-                    4980773, 2150170624, 2150203403, 2150236173, 2152529963, 5079077,
-                    2150170624, 2150203403, 2150236173, 5144613, 5210149, 2152726571,
-                    5275685, 2151350272, 2151350273, 2151350274, 2151350275, 2151350276,
-                    2151350277, 2151350278, 2151350279, 2151350280, 2151350281,
-                    2151350282, 2151350283, 2151350284, 2151350285, 2151350286,
-                    2151350287, 2151350288, 2151350289, 2151350290, 2151350291,
-                    2151350292, 2151350293, 2151350294, 2151350295, 2151350296,
-                    2151350297, 2151350298, 2151350299, 2151350300, 2151350301,
-                    2151350302, 2151350303, 2151350304, 2151350305, 2151350306,
-                    2151350307, 2151350308, 5341221, 2151350310, 2151350311, 2151350312,
-                    2151350313, 2151350314, 2151448576, 2151448577, 2151448578,
-                    2151448579, 2151448580, 2151448581, 2151448582, 2151448583,
-                    2151448584, 2151448585, 2151448586, 2151448587, 2151448588,
-                    2151448589, 2151448590, 2151448591, 2151448592, 2151448593,
-                    2151448594, 2151448595, 2151448596, 2151448597, 2151448598,
-                    2151448599, 2151448600, 2151448601, 2151448602, 2151448603,
-                    2151448604, 2151448605, 2151448606, 2151448607, 2151448608,
-                    2151448609, 2151448610, 2151448611, 2151448612, 5406757, 2151448614,
-                    2151448615, 2151448616, 2151448617, 2151448618, 2152955904,
-                    2153513003, 2152988689, 5996581, 2153021440, 2147745799, 2153054219,
-                    2153152525, 2148040723, 2153250859, 2153087018, 2153119755,
-                    2153185322, 2153218061, 2153283602, 5832741, 2153414674, 5963813,
-                    6062117, 6127653, 2147516416, 2150825988, 2153775148,
+                    2147516461, 2147549184, 2150858756, 2147581967, 2147647490,
+                    2147680256, 2147778567, 2147811336, 2147909643, 2147942412,
+                    2147975181, 2148007950, 2148040721, 2148073491, 2147713029,
+                    2147745792, 2147778567, 2147811336, 2147909643, 2147942412,
+                    2147975181, 2148007950, 2148040721, 2148073491, 2149810219,
+                    2147844096, 2147876881, 2147745792, 2147778567, 2147811336,
+                    2147909643, 2147942412, 2147975181, 2148007950, 2148040721,
+                    2148073491, 2147745792, 2147778567, 2147811336, 2147909643,
+                    2147942412, 2147975181, 2148007950, 2148040721, 2148073491,
+                    2148892715, 2148106246, 2148171776, 2148302859, 2148433933,
+                    2148565035, 2148204586, 2148237312, 2148270123, 2148335658,
+                    2148368395, 2148401195, 2148466730, 2148499469, 2148532267,
+                    2148597780, 2148171776, 2148302859, 2148433933, 2148761620,
+                    2148859913, 2148991014, 2149023783, 2149056552, 2149089321,
+                    2149122090, 2147745792, 2147778567, 2147811336, 2147909643,
+                    2147942412, 2147975181, 2148007950, 2148040721, 2148073491,
+                    2148925458, 2148991014, 2149023783, 2149056552, 2149089321,
+                    2149122090, 2147745792, 2147778567, 2147811336, 2147909643,
+                    2147942412, 2147975181, 2148007950, 2148040721, 2148073491,
+                    2148991014, 2149023783, 2149056552, 2149089321, 2147745792,
+                    2147778567, 2147811336, 2147909643, 2147942412, 2147975181,
+                    2148007950, 2148040721, 2148073491, 2148991014, 2149023783,
+                    2149056552, 2149089321, 2149122090, 2149318659, 2149384210,
+                    2147745792, 2147778567, 2147811336, 2147909643, 2147942412,
+                    2147975181, 2148007950, 2148040721, 2148073491, 2149449737,
+                    2148991014, 2149023783, 2149056552, 2149089321, 2149122090,
+                    2149679147, 2149482534, 2149548071, 2149613611, 2149515282,
+                    2149580818, 2149646354, 2149711890, 2149777426, 2148991014,
+                    2149023783, 2149056552, 2149089321, 2149122090, 2149908483, 3244069,
+                    2150760491, 2147680256, 2147778567, 2147811336, 2147909643,
+                    2147942412, 2147975181, 2148007950, 2148040721, 2148073491,
+                    2148991014, 2149023783, 2149056552, 2149089321, 2149122090,
+                    2147680256, 2147778567, 2147811336, 2147909643, 2147942412,
+                    2147975181, 2148007950, 2148040721, 2148073491, 2150137860,
+                    2150170655, 2150367266, 2150465579, 2150203392, 2150236171,
+                    2150268941, 2150301739, 2150400010, 2150432811, 2150137860,
+                    2150629392, 2150662187, 3309605, 2150891541, 2151120918, 2151284759,
+                    2151579672, 2151743513, 2151874586, 2152005659, 2152136732,
+                    2152267805, 2152398878, 2152529952, 2152693793, 2152824867,
+                    2152955940, 2153611307, 2150203392, 2150236171, 2150268941,
+                    2150924331, 3473445, 2150203392, 2150236171, 2150268941, 3571749,
+                    2150203392, 2150236171, 2150268941, 2151153707, 3702821, 2150203392,
+                    2150236171, 2150268941, 3768357, 2151317504, 2151514155, 2151383040,
+                    2151383041, 2151383042, 2151383043, 2151383044, 2151383045,
+                    2151383046, 2151383047, 2151383048, 2151383049, 2151383050,
+                    2151383051, 2151383052, 2151383053, 2151383054, 2151383055,
+                    2151383056, 2151383057, 2151383058, 2151383059, 2151383060,
+                    2151383061, 2151383062, 2151383063, 2151383064, 2151383065,
+                    2151383066, 2151383067, 2151383068, 2151383069, 2151383070,
+                    2151383071, 2151383072, 2151383073, 2151383074, 2151383075,
+                    2151383076, 3866661, 2151383078, 2151383079, 2151383080, 2151383081,
+                    2151383082, 2151481344, 2151481345, 2151481346, 2151481347,
+                    2151481348, 2151481349, 2151481350, 2151481351, 2151481352,
+                    2151481353, 2151481354, 2151481355, 2151481356, 2151481357,
+                    2151481358, 2151481359, 2151481360, 2151481361, 2151481362,
+                    2151481363, 2151481364, 2151481365, 2151481366, 2151481367,
+                    2151481368, 2151481369, 2151481370, 2151481371, 2151481372,
+                    2151481373, 2151481374, 2151481375, 2151481376, 2151481377,
+                    2151481378, 2151481379, 2151481380, 3964965, 2151481382, 2151481383,
+                    2151481384, 2151481385, 2151481386, 4063269, 2151612416, 2151677995,
+                    4161573, 4227109, 2151383040, 2151383041, 2151383042, 2151383043,
+                    2151383044, 2151383045, 2151383046, 2151383047, 2151383048,
+                    2151383049, 2151383050, 2151383051, 2151383052, 2151383053,
+                    2151383054, 2151383055, 2151383056, 2151383057, 2151383058,
+                    2151383059, 2151383060, 2151383061, 2151383062, 2151383063,
+                    2151383064, 2151383065, 2151383066, 2151383067, 2151383068,
+                    2151383069, 2151383070, 2151383071, 2151383072, 2151383073,
+                    2151383074, 2151383075, 2151383076, 4292645, 2151383078, 2151383079,
+                    2151383080, 2151383081, 2151383082, 2151481344, 2151481345,
+                    2151481346, 2151481347, 2151481348, 2151481349, 2151481350,
+                    2151481351, 2151481352, 2151481353, 2151481354, 2151481355,
+                    2151481356, 2151481357, 2151481358, 2151481359, 2151481360,
+                    2151481361, 2151481362, 2151481363, 2151481364, 2151481365,
+                    2151481366, 2151481367, 2151481368, 2151481369, 2151481370,
+                    2151481371, 2151481372, 2151481373, 2151481374, 2151481375,
+                    2151481376, 2151481377, 2151481378, 2151481379, 2151481380, 4358181,
+                    2151481382, 2151481383, 2151481384, 2151481385, 2151481386,
+                    2151383040, 2151383041, 2151383042, 2151383043, 2151383044,
+                    2151383045, 2151383046, 2151383047, 2151383048, 2151383049,
+                    2151383050, 2151383051, 2151383052, 2151383053, 2151383054,
+                    2151383055, 2151383056, 2151383057, 2151383058, 2151383059,
+                    2151383060, 2151383061, 2151383062, 2151383063, 2151383064,
+                    2151383065, 2151383066, 2151383067, 2151383068, 2151383069,
+                    2151383070, 2151383071, 2151383072, 2151383073, 2151383074,
+                    2151383075, 2151383076, 4423717, 2151383078, 2151383079, 2151383080,
+                    2151383081, 2151383082, 2151481344, 2151481345, 2151481346,
+                    2151481347, 2151481348, 2151481349, 2151481350, 2151481351,
+                    2151481352, 2151481353, 2151481354, 2151481355, 2151481356,
+                    2151481357, 2151481358, 2151481359, 2151481360, 2151481361,
+                    2151481362, 2151481363, 2151481364, 2151481365, 2151481366,
+                    2151481367, 2151481368, 2151481369, 2151481370, 2151481371,
+                    2151481372, 2151481373, 2151481374, 2151481375, 2151481376,
+                    2151481377, 2151481378, 2151481379, 2151481380, 4489253, 2151481382,
+                    2151481383, 2151481384, 2151481385, 2151481386, 2151383040,
+                    2151383041, 2151383042, 2151383043, 2151383044, 2151383045,
+                    2151383046, 2151383047, 2151383048, 2151383049, 2151383050,
+                    2151383051, 2151383052, 2151383053, 2151383054, 2151383055,
+                    2151383056, 2151383057, 2151383058, 2151383059, 2151383060,
+                    2151383061, 2151383062, 2151383063, 2151383064, 2151383065,
+                    2151383066, 2151383067, 2151383068, 2151383069, 2151383070,
+                    2151383071, 2151383072, 2151383073, 2151383074, 2151383075,
+                    2151383076, 4554789, 2151383078, 2151383079, 2151383080, 2151383081,
+                    2151383082, 2151481344, 2151481345, 2151481346, 2151481347,
+                    2151481348, 2151481349, 2151481350, 2151481351, 2151481352,
+                    2151481353, 2151481354, 2151481355, 2151481356, 2151481357,
+                    2151481358, 2151481359, 2151481360, 2151481361, 2151481362,
+                    2151481363, 2151481364, 2151481365, 2151481366, 2151481367,
+                    2151481368, 2151481369, 2151481370, 2151481371, 2151481372,
+                    2151481373, 2151481374, 2151481375, 2151481376, 2151481377,
+                    2151481378, 2151481379, 2151481380, 4620325, 2151481382, 2151481383,
+                    2151481384, 2151481385, 2151481386, 2151383040, 2151383041,
+                    2151383042, 2151383043, 2151383044, 2151383045, 2151383046,
+                    2151383047, 2151383048, 2151383049, 2151383050, 2151383051,
+                    2151383052, 2151383053, 2151383054, 2151383055, 2151383056,
+                    2151383057, 2151383058, 2151383059, 2151383060, 2151383061,
+                    2151383062, 2151383063, 2151383064, 2151383065, 2151383066,
+                    2151383067, 2151383068, 2151383069, 2151383070, 2151383071,
+                    2151383072, 2151383073, 2151383074, 2151383075, 2151383076, 4685861,
+                    2151383078, 2151383079, 2151383080, 2151383081, 2151383082,
+                    2151481344, 2151481345, 2151481346, 2151481347, 2151481348,
+                    2151481349, 2151481350, 2151481351, 2151481352, 2151481353,
+                    2151481354, 2151481355, 2151481356, 2151481357, 2151481358,
+                    2151481359, 2151481360, 2151481361, 2151481362, 2151481363,
+                    2151481364, 2151481365, 2151481366, 2151481367, 2151481368,
+                    2151481369, 2151481370, 2151481371, 2151481372, 2151481373,
+                    2151481374, 2151481375, 2151481376, 2151481377, 2151481378,
+                    2151481379, 2151481380, 4751397, 2151481382, 2151481383, 2151481384,
+                    2151481385, 2151481386, 4816933, 2152333355, 4882469, 4948005,
+                    2152464427, 5013541, 2150203392, 2150236171, 2150268941, 2152562731,
+                    5111845, 2150203392, 2150236171, 2150268941, 5177381, 5242917,
+                    2152759339, 5308453, 2151383040, 2151383041, 2151383042, 2151383043,
+                    2151383044, 2151383045, 2151383046, 2151383047, 2151383048,
+                    2151383049, 2151383050, 2151383051, 2151383052, 2151383053,
+                    2151383054, 2151383055, 2151383056, 2151383057, 2151383058,
+                    2151383059, 2151383060, 2151383061, 2151383062, 2151383063,
+                    2151383064, 2151383065, 2151383066, 2151383067, 2151383068,
+                    2151383069, 2151383070, 2151383071, 2151383072, 2151383073,
+                    2151383074, 2151383075, 2151383076, 5373989, 2151383078, 2151383079,
+                    2151383080, 2151383081, 2151383082, 2151481344, 2151481345,
+                    2151481346, 2151481347, 2151481348, 2151481349, 2151481350,
+                    2151481351, 2151481352, 2151481353, 2151481354, 2151481355,
+                    2151481356, 2151481357, 2151481358, 2151481359, 2151481360,
+                    2151481361, 2151481362, 2151481363, 2151481364, 2151481365,
+                    2151481366, 2151481367, 2151481368, 2151481369, 2151481370,
+                    2151481371, 2151481372, 2151481373, 2151481374, 2151481375,
+                    2151481376, 2151481377, 2151481378, 2151481379, 2151481380, 5439525,
+                    2151481382, 2151481383, 2151481384, 2151481385, 2151481386,
+                    2152988672, 2153545771, 2153021457, 6029349, 2153054208, 2147778567,
+                    2153086987, 2153185293, 2148073491, 2153283627, 2153119786,
+                    2153152523, 2153218090, 2153250829, 2153316370, 5865509, 2153447442,
+                    5996581, 6094885, 6160421, 2147549184, 2150858756, 2153807916,
                 ];
                 static SHIFT_TERM_OFFSETS: &[u32] = &[
-                    0, 2, 3, 3, 4, 13, 14, 24, 24, 24, 25, 26, 35, 35, 35, 35, 35, 45,
-                    46, 46, 50, 51, 53, 53, 53, 54, 56, 56, 56, 57, 59, 59, 59, 60, 60,
-                    60, 63, 63, 64, 64, 64, 70, 79, 80, 80, 85, 85, 85, 85, 85, 94, 98,
-                    107, 112, 112, 114, 123, 123, 123, 130, 133, 134, 134, 135, 135, 136,
-                    136, 137, 137, 138, 138, 138, 143, 146, 155, 155, 155, 160, 169, 169,
-                    170, 173, 177, 177, 177, 177, 177, 177, 179, 179, 179, 179, 179, 180,
-                    180, 182, 182, 182, 182, 182, 183, 183, 183, 198, 202, 203, 203, 203,
-                    207, 207, 207, 211, 212, 212, 216, 216, 218, 261, 261, 261, 304, 304,
-                    304, 305, 305, 307, 308, 308, 309, 309, 352, 352, 395, 395, 438, 438,
-                    481, 481, 524, 524, 567, 567, 610, 610, 653, 653, 655, 655, 656, 656,
-                    658, 658, 659, 659, 663, 664, 664, 668, 668, 670, 670, 671, 671, 714,
-                    714, 757, 757, 759, 761, 767, 767, 768, 769, 769, 770, 771, 771, 772,
-                    773, 773, 773, 774, 775, 775, 775, 776, 776, 777, 777, 777, 779, 779,
-                    780, 780,
+                    0, 1, 3, 4, 4, 5, 14, 15, 25, 25, 25, 26, 27, 36, 36, 36, 36, 36, 46,
+                    47, 47, 51, 52, 54, 54, 54, 55, 57, 57, 57, 58, 60, 60, 60, 61, 61,
+                    61, 64, 64, 65, 65, 65, 71, 80, 81, 81, 86, 86, 86, 86, 86, 95, 99,
+                    108, 113, 113, 115, 124, 124, 124, 131, 134, 135, 135, 136, 136, 137,
+                    137, 138, 138, 139, 139, 139, 144, 147, 156, 156, 156, 161, 170, 170,
+                    171, 174, 178, 178, 178, 178, 178, 178, 180, 180, 180, 180, 180, 181,
+                    181, 183, 183, 183, 183, 183, 184, 184, 184, 199, 203, 204, 204, 204,
+                    208, 208, 208, 212, 213, 213, 217, 217, 219, 262, 262, 262, 305, 305,
+                    305, 306, 306, 308, 309, 309, 310, 310, 353, 353, 396, 396, 439, 439,
+                    482, 482, 525, 525, 568, 568, 611, 611, 654, 654, 656, 656, 657, 657,
+                    659, 659, 660, 660, 664, 665, 665, 669, 669, 671, 671, 672, 672, 715,
+                    715, 758, 758, 760, 762, 768, 768, 769, 770, 770, 771, 772, 772, 773,
+                    774, 774, 774, 775, 776, 776, 776, 777, 777, 778, 778, 778, 780, 780,
+                    781, 781,
                 ];
                 static SHIFT_NONTERM_DATA: &[u32] = &[
-                    2153644032, 6193164, 2153676813, 2153742350, 6258717, 2147581953,
-                    2149842946, 2150793219, 2149941253, 2148761607, 2149974024,
-                    2150006799, 2150072336, 2148761607, 2149810184, 2148761607,
-                    2148794376, 2148761607, 2148925448, 2149154838, 2149220375,
-                    2149253144, 2148106259, 2148597766, 2148630548, 2148696085,
-                    2148663302, 2148761607, 2149384200, 2148761607, 2149122056,
-                    2148761607, 2149187592, 2148761607, 2148925448, 2149154838,
-                    2149318679, 2149711897, 2149908483, 2149941253, 2148761607,
-                    2149974024, 2150006799, 2150072336, 2150039557, 2148761607,
-                    2149974024, 2150465540, 2150498321, 2150563858, 2150301706,
-                    2150531076, 2150662153, 2150957066, 2150989852, 2151055370,
-                    2150957066, 2151186460, 2151055370, 2151350298, 2151383067,
-                    2151448602, 2151350298, 2151776283, 2151448602, 2151350298,
-                    2151907355, 2151448602, 2151350298, 2152038427, 2151448602,
-                    2151350298, 2152169499, 2151448602, 2150957066, 2152595484,
-                    2151055370, 2151350298, 2152857627, 2151448602, 2153349127,
-                    2153381899, 2153644032, 6193164, 2153676813, 2153709597,
+                    2153676800, 6225932, 2153709581, 2153775118, 6291485, 2147614721,
+                    2149875714, 2150825987, 2149974021, 2148794375, 2150006792,
+                    2150039567, 2150105104, 2148794375, 2149842952, 2148794375,
+                    2148827144, 2148794375, 2148958216, 2149187606, 2149253143,
+                    2149285912, 2148139027, 2148630534, 2148663316, 2148728853,
+                    2148696070, 2148794375, 2149416968, 2148794375, 2149154824,
+                    2148794375, 2149220360, 2148794375, 2148958216, 2149187606,
+                    2149351447, 2149744665, 2149941251, 2149974021, 2148794375,
+                    2150006792, 2150039567, 2150105104, 2150072325, 2148794375,
+                    2150006792, 2150498308, 2150531089, 2150596626, 2150334474,
+                    2150563844, 2150694921, 2150989834, 2151022620, 2151088138,
+                    2150989834, 2151219228, 2151088138, 2151383066, 2151415835,
+                    2151481370, 2151383066, 2151809051, 2151481370, 2151383066,
+                    2151940123, 2151481370, 2151383066, 2152071195, 2151481370,
+                    2151383066, 2152202267, 2151481370, 2150989834, 2152628252,
+                    2151088138, 2151383066, 2152890395, 2151481370, 2153381895,
+                    2153414667, 2153676800, 6225932, 2153709581, 2153742365,
                 ];
                 static SHIFT_NONTERM_OFFSETS: &[u32] = &[
-                    0, 5, 6, 6, 6, 13, 13, 15, 15, 15, 15, 15, 17, 17, 17, 17, 17, 22,
+                    0, 0, 5, 6, 6, 6, 13, 13, 15, 15, 15, 15, 15, 17, 17, 17, 17, 17, 22,
                     23, 23, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
                     26, 27, 27, 27, 27, 27, 27, 29, 29, 29, 29, 29, 29, 29, 29, 31, 31,
                     33, 33, 33, 33, 37, 37, 37, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38,
@@ -7617,7 +7702,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     161,
                 ];
                 static REDUCE_OFFSETS: &[u32] = &[
-                    0, 0, 3, 6, 6, 21, 78, 78, 141, 204, 204, 204, 204, 267, 330, 393,
+                    0, 0, 0, 3, 6, 6, 21, 78, 78, 141, 204, 204, 204, 204, 267, 330, 393,
                     456, 462, 477, 492, 495, 507, 507, 519, 531, 543, 543, 555, 567, 579,
                     579, 591, 603, 603, 666, 678, 681, 693, 693, 756, 819, 819, 819, 819,
                     882, 915, 978, 1041, 1104, 1167, 1167, 1218, 1224, 1257, 1263, 1263,
@@ -7636,15 +7721,15 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     2757, 2766, 2769, 2772, 2772, 2772,
                 ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
-                    0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1, 0, 1, 0,
-                    0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0, 2,
-                    2, 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0,
-                    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                    1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
-                    0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1, 0, 1,
+                    0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0,
+                    2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 2, 0, 2, 0, 2, 0, 2,
+                    0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ];
                 let num_rules = 163usize;
                 let mut rules = Vec::with_capacity(num_rules);
@@ -7656,7 +7741,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                             len: RULE_LENGTHS[i] as usize,
                         });
                 }
-                let num_states = 193usize;
+                let num_states = 194usize;
                 let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;

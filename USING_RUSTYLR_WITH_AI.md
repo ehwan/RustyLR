@@ -113,6 +113,8 @@ fn parse(tokens: impl IntoIterator<Item = parser::Token>) -> Result<i64, String>
 Before implementing:
 - Identify the token type the user's lexer will produce.
 - Decide the start symbol and semantic return type.
+- Use the generated `<Start>Context` as the parser context; it handles initialization and returns the typed start value.
+- Ensure token values, semantic return values, and user data stored in the context implement `Clone`.
 - Put Rust imports, token definitions, AST definitions, and helper types above `%%`.
 - Put `%tokentype`, `%start`, `%token`, precedence directives, and productions below `%%`.
 - Add `%location` if diagnostics need source spans.

@@ -3,8 +3,8 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::ParseError;
 
-use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
+use crate::parser::semantic_value::SemanticValue;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
@@ -17,7 +17,7 @@ use crate::TerminalSymbol;
 pub struct NodeRefIterator<
     'a,
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-    Data: DataStack,
+    Data: SemanticValue,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
 > {
@@ -27,7 +27,7 @@ pub struct NodeRefIterator<
 impl<
         'a,
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex,
         const MAX_REDUCE_RULES: usize,
     > Clone for NodeRefIterator<'a, P, Data, StateIndex, MAX_REDUCE_RULES>
@@ -42,7 +42,7 @@ impl<
 impl<
         'a,
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
         const MAX_REDUCE_RULES: usize,
     > Iterator for NodeRefIterator<'a, P, Data, StateIndex, MAX_REDUCE_RULES>
@@ -60,7 +60,7 @@ impl<
 /// This handles the divergence and merging of the parser.
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-    Data: DataStack,
+    Data: SemanticValue,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
 > {
@@ -95,7 +95,7 @@ pub struct Context<
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
     > Context<P, Data, StateIndex, MAX_REDUCE_RULES>
@@ -148,9 +148,8 @@ impl<
             });
         let root_node_idx = context.current_nodes[0];
         let root_node = context.node_mut(root_node_idx);
-        root_node.data_stack.set_branch_idx(branch_idx);
         root_node.state_stack.push(shift_to.state);
-        root_node.data_stack.push_empty();
+        root_node.data_stack.push(Data::new_empty());
         root_node
             .location_stack
             .push(Data::Location::new(std::iter::empty(), 0));
@@ -202,6 +201,24 @@ impl<
     /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
         self.current_userdatas.iter_mut()
+    }
+
+    /// Consume this context and return semantic value stacks with final user data
+    /// from every active GLR path.
+    pub fn into_data_stacks(self) -> impl Iterator<Item = (Vec<Data>, Data::UserData)>
+    where
+        Data: Clone,
+    {
+        let Context {
+            nodes_pool,
+            current_nodes,
+            current_userdatas,
+            ..
+        } = self;
+        current_nodes
+            .into_iter()
+            .zip(current_userdatas)
+            .map(move |(node, userdata)| (nodes_pool[node].data_stack.clone(), userdata))
     }
 
     pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
@@ -619,7 +636,7 @@ impl<
     pub fn accept(
         self,
     ) -> Result<
-        (Data::StartType, Data::UserData),
+        (Vec<Data>, Data::UserData),
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -635,7 +652,7 @@ impl<
     pub fn accept_all(
         mut self,
     ) -> Result<
-        impl Iterator<Item = (Data::StartType, Data::UserData)>,
+        impl Iterator<Item = (Vec<Data>, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -648,18 +665,7 @@ impl<
         // since `eof` is feeded, every node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        let nodes = std::mem::take(&mut self.current_nodes);
-        let userdatas = std::mem::take(&mut self.current_userdatas);
-        Ok(nodes
-            .into_iter()
-            .zip(userdatas)
-            .map(move |(node, userdata)| {
-                // let node = self.pop(eof_node).unwrap();
-                (
-                    self.nodes_pool[node].data_stack.pop_start().unwrap(),
-                    userdata,
-                )
-            }))
+        Ok(self.into_data_stacks())
     }
 
     /// For debugging.
@@ -956,12 +962,12 @@ impl<
                 if shift.push {
                     match term {
                         TerminalSymbol::Terminal(term) => {
-                            node_.data_stack.push_terminal(term);
+                            node_.data_stack.push(Data::new_terminal(term));
                         }
                         TerminalSymbol::Error
                         | TerminalSymbol::Eof
                         | TerminalSymbol::VirtualStart(_) => {
-                            node_.data_stack.push_empty();
+                            node_.data_stack.push(Data::new_empty());
                         }
                     }
                 } else {
@@ -970,7 +976,7 @@ impl<
                         | TerminalSymbol::Error
                         | TerminalSymbol::Eof
                         | TerminalSymbol::VirtualStart(_) => {
-                            node_.data_stack.push_empty();
+                            node_.data_stack.push(Data::new_empty());
                         }
                     }
                 }
@@ -995,12 +1001,12 @@ impl<
             if shift.push {
                 match term {
                     TerminalSymbol::Terminal(term) => {
-                        node_.data_stack.push_terminal(term);
+                        node_.data_stack.push(Data::new_terminal(term));
                     }
                     TerminalSymbol::Error
                     | TerminalSymbol::Eof
                     | TerminalSymbol::VirtualStart(_) => {
-                        node_.data_stack.push_empty();
+                        node_.data_stack.push(Data::new_empty());
                     }
                 }
             } else {
@@ -1009,7 +1015,7 @@ impl<
                     | TerminalSymbol::Error
                     | TerminalSymbol::Eof
                     | TerminalSymbol::VirtualStart(_) => {
-                        node_.data_stack.push_empty();
+                        node_.data_stack.push(Data::new_empty());
                     }
                 }
             }
@@ -1263,9 +1269,9 @@ impl<
                         ));
 
                         if next_state.push {
-                            node.data_stack.push_terminal(term.clone());
+                            node.data_stack.push(Data::new_terminal(term.clone()));
                         } else {
-                            node.data_stack.push_empty();
+                            node.data_stack.push(Data::new_empty());
                         }
 
                         self.current_nodes.push(error_node);
@@ -1527,7 +1533,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     }
 
     /// Feed eof symbol with default zero-length location from the end of stream.
-    fn feed_eof(
+    pub fn feed_eof(
         &mut self,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -1612,7 +1618,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
     > Default for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
@@ -1626,7 +1632,7 @@ where
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
     > Clone for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
@@ -1655,26 +1661,7 @@ where
 #[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
-        StateIndex: Index,
-        const MAX_REDUCE_RULES: usize,
-    > std::fmt::Display for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
-where
-    Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (i, path) in self.to_tree_lists().enumerate() {
-            writeln!(f, "Path {}:", i)?;
-            writeln!(f, "{}", path)?;
-        }
-        Ok(())
-    }
-}
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
     > std::fmt::Debug for Context<P, Data, StateIndex, MAX_REDUCE_RULES>

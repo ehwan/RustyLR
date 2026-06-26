@@ -21,6 +21,10 @@ Default path:
 4. Run `rustylr src/grammar.rustylr src/parser.rs`.
 5. Feed tokens into the generated `<Start>Context`; call `accept()` to get the result.
 
+Generated `<Start>Context` types are the normal parser contexts downstream code should use. They initialize parsing for the selected start symbol and return the typed start value from `accept()` or `accept_all()`.
+
+Generated contexts implement `Clone`; choose token, semantic value, and user data types that implement `Clone`.
+
 Important files:
 - `README.md`: Main quick start and examples.
 - `USING_RUSTYLR_WITH_AI.md`: Short implementation guide for AI coding agents using RustyLR in another Rust project.

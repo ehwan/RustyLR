@@ -4,7 +4,7 @@ pub mod deterministic;
 /// Core parser functionality for non-deterministic parsers
 pub mod nondeterministic;
 
-pub mod data_stack;
+pub mod semantic_value;
 
 /// module for auto-generated types of non-terminals representation
 pub mod nonterminal;

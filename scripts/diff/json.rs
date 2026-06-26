@@ -240,6 +240,11 @@ impl ::std::ops::DerefMut for JsonContext {
         &mut self.inner
     }
 }
+impl Clone for JsonContext {
+    fn clone(&self) -> Self {
+        Self { inner: self.inner.clone() }
+    }
+}
 impl Default for JsonContext
 where
     <JsonData as ::rusty_lr::parser::semantic_value::SemanticValue>::UserData: Default,
@@ -620,6 +625,7 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
+#[derive(Clone)]
 pub enum JsonData {
     Empty,
 }

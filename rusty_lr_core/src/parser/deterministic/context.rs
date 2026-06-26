@@ -3,8 +3,8 @@ use std::collections::BTreeSet;
 use super::ParseError;
 use crate::Location;
 
-use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
+use crate::parser::semantic_value::SemanticValue;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
@@ -15,12 +15,12 @@ use crate::TerminalSymbol;
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-    Data: DataStack,
+    Data: SemanticValue,
     StateIndex,
 > {
     /// stacks hold the values associated with each shifted symbol.
     pub state_stack: Vec<StateIndex>,
-    pub(crate) data_stack: Data,
+    pub(crate) data_stack: Vec<Data>,
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) userdata: Data::UserData,
     /// Decoded parser tables initialized when the context is created.
@@ -36,7 +36,7 @@ pub struct Context<
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
     > Context<P, Data, StateIndex>
 {
@@ -46,7 +46,7 @@ impl<
         Context {
             state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
-            data_stack: Default::default(),
+            data_stack: Vec::new(),
             location_stack: Vec::new(),
             userdata,
             tables: P::get_tables(),
@@ -70,7 +70,6 @@ impl<
         P::NonTerm: std::fmt::Debug,
     {
         let mut ctx = Self::new(userdata);
-        ctx.data_stack.set_branch_idx(branch_idx);
         let class = P::TermClass::from_virtual_start(branch_idx);
         let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
             panic!(
@@ -79,7 +78,7 @@ impl<
             )
         });
         ctx.state_stack.push(shift_to.state);
-        ctx.data_stack.push_empty();
+        ctx.data_stack.push(Data::new_empty());
         ctx.location_stack
             .push(Data::Location::new(std::iter::empty(), 0));
         #[cfg(feature = "tree")]
@@ -109,7 +108,7 @@ impl<
         Context {
             state_stack,
 
-            data_stack: Data::with_capacity(capacity),
+            data_stack: Vec::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             userdata,
             tables: P::get_tables(),
@@ -145,7 +144,7 @@ impl<
             )
         });
         ctx.state_stack.push(shift_to.state);
-        ctx.data_stack.push_empty();
+        ctx.data_stack.push(Data::new_empty());
         ctx.location_stack
             .push(Data::Location::new(std::iter::empty(), 0));
         #[cfg(feature = "tree")]
@@ -176,11 +175,16 @@ impl<
         std::iter::once(&mut self.userdata)
     }
 
+    /// Consume this context and return the semantic value stack with final user data.
+    pub fn into_data_stack(self) -> (Vec<Data>, Data::UserData) {
+        (self.data_stack, self.userdata)
+    }
+
     /// End this context and pop the value of the start symbol from the data stack.
     pub fn accept(
         mut self,
     ) -> Result<
-        (Data::StartType, Data::UserData),
+        (Vec<Data>, Data::UserData),
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -189,15 +193,14 @@ impl<
     {
         self.feed_eof()?;
 
-        // data_stack must be <Start> in this point
-        Ok((self.data_stack.pop_start().unwrap(), self.userdata))
+        Ok(self.into_data_stack())
     }
 
     /// End this context and return an iterator with the start symbol and final user data.
     pub fn accept_all(
         self,
     ) -> Result<
-        impl Iterator<Item = (Data::StartType, Data::UserData)>,
+        impl Iterator<Item = (Vec<Data>, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -430,9 +433,10 @@ impl<
 
                             // shift after `error` token
                             if next_state.push {
-                                self.data_stack.push_terminal(err.term.into_term().unwrap());
+                                self.data_stack
+                                    .push(Data::new_terminal(err.term.into_term().unwrap()));
                             } else {
-                                self.data_stack.push_empty();
+                                self.data_stack.push(Data::new_empty());
                             }
 
                             self.location_stack.push(err.location.clone());
@@ -561,17 +565,17 @@ impl<
 
             if next_state_id.push {
                 match term {
-                    TerminalSymbol::Terminal(t) => self.data_stack.push_terminal(t),
+                    TerminalSymbol::Terminal(t) => self.data_stack.push(Data::new_terminal(t)),
                     TerminalSymbol::Error
                     | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push_empty(),
+                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
                 }
             } else {
                 match term {
                     TerminalSymbol::Terminal(_)
                     | TerminalSymbol::Error
                     | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push_empty(),
+                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
                 }
             }
 
@@ -685,7 +689,7 @@ impl<
         Some(shift_to.is_some())
     }
 
-    fn feed_eof(
+    pub fn feed_eof(
         &mut self,
     ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
     where
@@ -699,7 +703,7 @@ impl<
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
     > Default for Context<P, Data, StateIndex>
 where
@@ -712,7 +716,7 @@ where
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
     > Clone for Context<P, Data, StateIndex>
 where
@@ -739,21 +743,7 @@ where
 #[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
-        StateIndex: Index + Copy,
-    > std::fmt::Display for Context<P, Data, StateIndex>
-where
-    Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + NonTerminal,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_tree_list())
-    }
-}
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
     > std::fmt::Debug for Context<P, Data, StateIndex>
 where
@@ -768,7 +758,7 @@ where
 #[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
     > std::ops::Deref for Context<P, Data, StateIndex>
 {
@@ -781,7 +771,7 @@ impl<
 #[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
         StateIndex: Index + Copy,
     > std::ops::DerefMut for Context<P, Data, StateIndex>
 {
