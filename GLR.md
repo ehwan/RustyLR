@@ -93,7 +93,7 @@ E(i32)
 
 ## Parsing with the GLR Parser
 
-Initialize the state context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your terminal symbols (tokens) to it. The GLR parser shares a similar interface to the deterministic parser: `accept()` returns the first successful `(parse_result, userdata)` pair, while `accept_all()` returns an iterator over all successful pairs. You can feed terminal symbols (tokens) using either `feed` (basic) or `feed_location` (location-aware).
+Initialize the generated context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your terminal symbols (tokens) to it. The GLR parser shares a similar interface to the deterministic parser: `accept()` returns the first successful `(parse_result, userdata)` pair, while `accept_all()` returns an iterator over all successful pairs with the start type already extracted. You can feed terminal symbols (tokens) using either `feed` (basic) or `feed_location` (location-aware).
 
 In GLR mode, user data is branch-local. When the parser forks because of a conflict, the current user data is cloned, and each resulting branch owns and mutates its own `UserData` value independently. Results returned from `accept_all()` therefore include the final user data for each successful branch.
 

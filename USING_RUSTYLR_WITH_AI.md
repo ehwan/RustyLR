@@ -113,6 +113,8 @@ fn parse(tokens: impl IntoIterator<Item = parser::Token>) -> Result<i64, String>
 Before implementing:
 - Identify the token type the user's lexer will produce.
 - Decide the start symbol and semantic return type.
+- Use the generated `<Start>Context` as the parser context; it handles initialization and returns the typed start value.
+- Ensure token values and semantic return values stored by the parser implement `Clone`; user data must also implement `Clone` when the context is cloned or when GLR branch-local user data is used.
 - Put Rust imports, token definitions, AST definitions, and helper types above `%%`.
 - Put `%tokentype`, `%start`, `%token`, precedence directives, and productions below `%%`.
 - Add `%location` if diagnostics need source spans.
@@ -130,6 +132,7 @@ When debugging:
 - Run `rustylr --state <grammar-file>` to inspect parser states.
 - Read conflict diagnostics before switching to GLR.
 - Check `context.expected_token()` and `context.can_feed(&token)` for interactive or editor-facing parsers.
+- Use `Debug` on a context for parser stack state and user data; in GLR mode, inspect the branch-grouped output. Use `to_tree_list()`/`to_tree_lists()` when syntax-tree inspection is needed.
 - Confirm the generated parser compiles with a compatible `rusty_lr` runtime version.
 
 ## Best Links for Agents

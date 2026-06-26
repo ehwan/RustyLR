@@ -1,10 +1,10 @@
-use crate::parser::data_stack::DataStack;
+use crate::parser::semantic_value::SemanticValue;
 
 /// To handle multiple paths in the non-deterministic GLR parsing,
 /// this node represents a subrange in stack of the parser.
 /// this constructs LinkedList tree of nodes, where parent node is the previous token in the parse tree.
 #[derive(Clone)]
-pub struct Node<Data: DataStack, StateIndex> {
+pub struct Node<Data: SemanticValue, StateIndex> {
     /// parent node
     pub parent: Option<usize>,
 
@@ -12,19 +12,19 @@ pub struct Node<Data: DataStack, StateIndex> {
 
     /// index of state in parser
     pub state_stack: Vec<StateIndex>,
-    pub data_stack: Data,
+    pub data_stack: Vec<Data>,
     pub location_stack: Vec<Data::Location>,
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
 
-impl<Data: DataStack, StateIndex> Default for Node<Data, StateIndex> {
+impl<Data: SemanticValue, StateIndex> Default for Node<Data, StateIndex> {
     fn default() -> Self {
         Node {
             parent: None,
             child_count: 0,
             state_stack: Vec::new(),
-            data_stack: Data::default(),
+            data_stack: Vec::new(),
             location_stack: Vec::new(),
             #[cfg(feature = "tree")]
             tree_stack: Vec::new(),
@@ -32,7 +32,7 @@ impl<Data: DataStack, StateIndex> Default for Node<Data, StateIndex> {
     }
 }
 
-impl<Data: DataStack, StateIndex> Node<Data, StateIndex> {
+impl<Data: SemanticValue, StateIndex> Node<Data, StateIndex> {
     /// Clear this node to `Default::default()`.
     pub fn clear(&mut self) {
         self.parent = None;
@@ -55,7 +55,7 @@ impl<Data: DataStack, StateIndex> Node<Data, StateIndex> {
             parent: None,
             child_count: 0,
             state_stack: Vec::with_capacity(capacity),
-            data_stack: Data::with_capacity(capacity),
+            data_stack: Vec::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             #[cfg(feature = "tree")]
             tree_stack: Vec::with_capacity(capacity),

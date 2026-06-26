@@ -3,8 +3,9 @@ use std::collections::BTreeSet;
 use super::ParseError;
 use crate::Location;
 
-use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
+use crate::parser::semantic_value::SemanticValue;
+use crate::parser::semantic_value::StartExtractor;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
@@ -15,12 +16,13 @@ use crate::TerminalSymbol;
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-    Data: DataStack,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
     StateIndex,
 > {
     /// stacks hold the values associated with each shifted symbol.
     pub state_stack: Vec<StateIndex>,
-    pub(crate) data_stack: Data,
+    pub(crate) data_stack: Vec<Data>,
     pub(crate) location_stack: Vec<Data::Location>,
     pub(crate) userdata: Data::UserData,
     /// Decoded parser tables initialized when the context is created.
@@ -31,22 +33,23 @@ pub struct Context<
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
-    pub(crate) _phantom: std::marker::PhantomData<P>,
+    pub(crate) _phantom: std::marker::PhantomData<(P, Start)>,
 }
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > Context<P, Data, StateIndex>
+    > Context<P, Data, Start, StateIndex>
 {
     /// Create a new context.
-    /// `state_stack` is initialized with [0] (root state).
+    /// The state stack is initialized with the root state and the selected start state.
     pub fn new(userdata: Data::UserData) -> Self {
-        Context {
+        let mut ctx = Context {
             state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
-            data_stack: Default::default(),
+            data_stack: Vec::new(),
             location_stack: Vec::new(),
             userdata,
             tables: P::get_tables(),
@@ -54,7 +57,9 @@ impl<
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
             _phantom: std::marker::PhantomData,
-        }
+        };
+        ctx.init_start_branch(Start::BRANCH_INDEX);
+        ctx
     }
     /// Create a new context using `Default::default()` as user data.
     pub fn with_default_userdata() -> Self
@@ -63,53 +68,36 @@ impl<
     {
         Self::new(Default::default())
     }
-    /// Create a new context with a virtual start branch.
-    pub fn new_with_branch(userdata: Data::UserData, branch_idx: u32) -> Self
-    where
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        let mut ctx = Self::new(userdata);
-        ctx.data_stack.set_branch_idx(branch_idx);
+    fn init_start_branch(&mut self, branch_idx: u32) {
         let class = P::TermClass::from_virtual_start(branch_idx);
-        let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
+        let shift_to = self.tables.shift_goto_class(0, class).unwrap_or_else(|| {
             panic!(
                 "Failed to resolve shift for virtual start branch {}",
                 branch_idx
             )
         });
-        ctx.state_stack.push(shift_to.state);
-        ctx.data_stack.push_empty();
-        ctx.location_stack
+        self.state_stack.push(shift_to.state);
+        self.data_stack.push(Data::new_empty());
+        self.location_stack
             .push(Data::Location::new(std::iter::empty(), 0));
         #[cfg(feature = "tree")]
         {
-            ctx.tree_stack.push(crate::tree::Tree::new_terminal(
+            self.tree_stack.push(crate::tree::Tree::new_terminal(
                 TerminalSymbol::VirtualStart(branch_idx),
             ));
         }
-        ctx
-    }
-    /// Create a new context with a virtual start branch using `Default::default()` as user data.
-    pub fn with_default_userdata_and_branch(branch_idx: u32) -> Self
-    where
-        Data::UserData: Default,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        Self::new_with_branch(Default::default(), branch_idx)
     }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
-    /// `state_stack` is initialized with [0] (root state).
+    /// The state stack is initialized with the root state and the selected start state.
     pub fn with_capacity(capacity: usize, userdata: Data::UserData) -> Self {
         let mut state_stack = Vec::with_capacity(capacity);
         state_stack.push(
             StateIndex::from_usize_unchecked(0), // root state
         );
-        Context {
+        let mut ctx = Context {
             state_stack,
 
-            data_stack: Data::with_capacity(capacity),
+            data_stack: Vec::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
             userdata,
             tables: P::get_tables(),
@@ -117,7 +105,9 @@ impl<
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
             _phantom: std::marker::PhantomData,
-        }
+        };
+        ctx.init_start_branch(Start::BRANCH_INDEX);
+        ctx
     }
     /// Create a new context with capacity using `Default::default()` as user data.
     pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
@@ -125,36 +115,6 @@ impl<
         Data::UserData: Default,
     {
         Self::with_capacity(capacity, Default::default())
-    }
-    /// Create a new context with capacity and a virtual start branch.
-    pub fn with_capacity_and_branch(
-        capacity: usize,
-        userdata: Data::UserData,
-        branch_idx: u32,
-    ) -> Self
-    where
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        let mut ctx = Self::with_capacity(capacity, userdata);
-        let class = P::TermClass::from_virtual_start(branch_idx);
-        let shift_to = ctx.tables.shift_goto_class(0, class).unwrap_or_else(|| {
-            panic!(
-                "Failed to resolve shift for virtual start branch {}",
-                branch_idx
-            )
-        });
-        ctx.state_stack.push(shift_to.state);
-        ctx.data_stack.push_empty();
-        ctx.location_stack
-            .push(Data::Location::new(std::iter::empty(), 0));
-        #[cfg(feature = "tree")]
-        {
-            ctx.tree_stack.push(crate::tree::Tree::new_terminal(
-                TerminalSymbol::VirtualStart(branch_idx),
-            ));
-        }
-        ctx
     }
     /// Borrow the user data owned by this context.
     pub fn userdata(&self) -> &Data::UserData {
@@ -180,7 +140,7 @@ impl<
     pub fn accept(
         mut self,
     ) -> Result<
-        (Data::StartType, Data::UserData),
+        (Start::StartType, Data::UserData),
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -189,15 +149,23 @@ impl<
     {
         self.feed_eof()?;
 
-        // data_stack must be <Start> in this point
-        Ok((self.data_stack.pop_start().unwrap(), self.userdata))
+        // pop eof
+        self.data_stack.pop();
+        let start = self.data_stack.pop().unwrap();
+        let start = Start::extract(start).unwrap_or_else(|| {
+            panic!(
+                "Failed to extract start value for branch {}",
+                Start::BRANCH_INDEX
+            )
+        });
+        Ok((start, self.userdata))
     }
 
     /// End this context and return an iterator with the start symbol and final user data.
     pub fn accept_all(
         self,
     ) -> Result<
-        impl Iterator<Item = (Data::StartType, Data::UserData)>,
+        impl Iterator<Item = (Start::StartType, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -430,9 +398,10 @@ impl<
 
                             // shift after `error` token
                             if next_state.push {
-                                self.data_stack.push_terminal(err.term.into_term().unwrap());
+                                self.data_stack
+                                    .push(Data::new_terminal(err.term.into_term().unwrap()));
                             } else {
-                                self.data_stack.push_empty();
+                                self.data_stack.push(Data::new_empty());
                             }
 
                             self.location_stack.push(err.location.clone());
@@ -561,17 +530,17 @@ impl<
 
             if next_state_id.push {
                 match term {
-                    TerminalSymbol::Terminal(t) => self.data_stack.push_terminal(t),
+                    TerminalSymbol::Terminal(t) => self.data_stack.push(Data::new_terminal(t)),
                     TerminalSymbol::Error
                     | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push_empty(),
+                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
                 }
             } else {
                 match term {
                     TerminalSymbol::Terminal(_)
                     | TerminalSymbol::Error
                     | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push_empty(),
+                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
                 }
             }
 
@@ -699,9 +668,10 @@ impl<
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > Default for Context<P, Data, StateIndex>
+    > Default for Context<P, Data, Start, StateIndex>
 where
     Data::UserData: Default,
 {
@@ -712,9 +682,10 @@ where
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > Clone for Context<P, Data, StateIndex>
+    > Clone for Context<P, Data, Start, StateIndex>
 where
     Data: Clone,
     Data::Term: Clone,
@@ -736,56 +707,23 @@ where
     }
 }
 
-#[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
-    > std::fmt::Display for Context<P, Data, StateIndex>
+    > std::fmt::Debug for Context<P, Data, Start, StateIndex>
 where
-    Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone + NonTerminal,
+    Data: std::fmt::Debug,
+    Data::UserData: std::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_tree_list())
-    }
-}
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
-        StateIndex: Index + Copy,
-    > std::fmt::Debug for Context<P, Data, StateIndex>
-where
-    Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone + NonTerminal,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.to_tree_list())
-    }
-}
-
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
-        StateIndex: Index + Copy,
-    > std::ops::Deref for Context<P, Data, StateIndex>
-{
-    type Target = crate::tree::TreeList<Data::Term, Data::NonTerm>;
-    fn deref(&self) -> &Self::Target {
-        &self.tree_stack
-    }
-}
-
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
-        StateIndex: Index + Copy,
-    > std::ops::DerefMut for Context<P, Data, StateIndex>
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.tree_stack
+        let state_stack: Vec<_> = self.state_stack().collect();
+        f.debug_struct("Context")
+            .field("state", &self.state())
+            .field("state_stack", &state_stack)
+            .field("data_stack", &self.data_stack)
+            .field("userdata", &self.userdata)
+            .finish()
     }
 }

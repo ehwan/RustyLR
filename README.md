@@ -171,10 +171,12 @@ fn main() {
 ## Generated Code Structure
 
 The generated parser module contains several generated components tailored to your start symbol:
-- **`<Start>Parser`**: A lightweight struct containing the static parsing tables. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/trait.Parser.html)
-- **`<Start>Context`**: A mutable state context that keeps track of the stack and parsed symbol values. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/deterministic/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nondeterministic/struct.Context.html)
+- **`Parser`**: A lightweight struct containing the static parsing tables. [(docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/trait.Parser.html)
+- **`<Start>Context`**: The parsing context for that start symbol. It initializes the correct start state, accepts input tokens, and returns the typed start value when `accept()` or `accept_all()` finalizes parsing. [(LR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/deterministic/struct.Context.html) [(GLR docs)](https://docs.rs/rusty_lr/latest/rusty_lr/parser/nondeterministic/struct.Context.html)
 
-The generated module also includes internal state, production, and non-terminal types used by the runtime and debugging APIs.
+The generated module also includes `Rule`, `Tables`, `ParseError`, `TerminalClasses`, `NonTerminals`, and `Data` types used by the runtime and debugging APIs. Contexts store parsed symbol values as a `Vec` of the generated semantic-value enum.
+
+Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. The generated semantic-value enum also implements `Clone`, so terminal and non-terminal value types stored by the parser must implement `Clone`.
 
 ### Feeding Tokens
 You can feed terminal symbols either with or without location information:
@@ -253,8 +255,10 @@ let mut context = ExprContext::with_default_userdata();
 
 context.expected_token();  // Returns the expected symbols for the current state
 context.can_feed(&token);  // Checks if a terminal can be fed next
-println!("{}", context);   // Formats the state tree (requires 'tree' feature)
+println!("{:?}", context); // Prints debugging state information
 ```
+
+`Debug` for a context reports parser-state data such as state stacks, semantic-value stacks, and user data. In GLR mode, this is grouped by active branch. With the `tree` feature enabled, syntax trees are available through the explicit `to_tree_list()` and `to_tree_lists()` inspection APIs.
 
 ---
 
@@ -298,7 +302,7 @@ The extension source is available in [`editors/vscode-rustylr`](editors/vscode-r
 ## Cargo Features
 
 - **`build`**: Enables helper functions in `rusty_lr_buildscript` for compiling grammars inside `build.rs` scripts.
-- **`tree`**: Enables automatic syntax tree rendering for debugging. Implementing `Display` for `Context` outputs a formatted parse tree.
+- **`tree`**: Enables explicit syntax tree inspection APIs such as `to_tree_list()` and `to_tree_lists()` for debugging.
 
 ---
 

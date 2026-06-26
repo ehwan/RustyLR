@@ -14,32 +14,13 @@ impl Grammar {
     /// write type alias Context, Rule, Tables, Error...
     fn emit_type_alises(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
-        let start_rule_span = self
-            .span_manager
-            .get_span_in_location(&self.start_rule_name.location());
-        let rule_typename = Ident::new(&format!("{}Rule", self.start_rule_name), start_rule_span);
-        let tables_typename =
-            Ident::new(&format!("{}Tables", self.start_rule_name), start_rule_span);
-        let nonterm_typename = Ident::new(
-            &format!("{}NonTerminals", self.start_rule_name),
-            start_rule_span,
-        );
-        let parse_error_typename = Ident::new(
-            &format!("{}ParseError", self.start_rule_name),
-            start_rule_span,
-        );
-        let parser_struct_name =
-            Ident::new(&format!("{}Parser", self.start_rule_name), start_rule_span);
-        let context_struct_name =
-            Ident::new(&format!("{}Context", self.start_rule_name), start_rule_span);
-        let data_stack_typename = Ident::new(
-            &format!("{}DataStack", self.start_rule_name),
-            start_rule_span,
-        );
-        let termclass_typename = Ident::new(
-            &format!("{}TerminalClasses", self.start_rule_name),
-            start_rule_span,
-        );
+        let rule_typename = Ident::new("Rule", Span::call_site());
+        let tables_typename = Ident::new("Tables", Span::call_site());
+        let nonterm_typename = Ident::new("NonTerminals", Span::call_site());
+        let parse_error_typename = Ident::new("ParseError", Span::call_site());
+        let parser_struct_name = Ident::new("Parser", Span::call_site());
+        let semantic_value_typename = Ident::new("Data", Span::call_site());
+        let termclass_typename = Ident::new("TerminalClasses", Span::call_site());
         let location_typename = &self.location_typename;
         let reduce_error_typename = &self.error_typename;
 
@@ -81,315 +62,48 @@ impl Grammar {
             rule_index_type.clone()
         };
 
-        let start_type_enum_name = format_ident!("{}StartType", &self.start_rule_name.value());
+        let mut context_structs = TokenStream::new();
+        for start_rule_name in &self.start_rule_names {
+            let ctx_name = format_ident!("{}Context", start_rule_name.value());
+            let start_extracter_typename = format_ident!("{}Extracter", start_rule_name.value());
 
-        if self.start_rule_names.len() > 1 {
-            let mut context_structs = TokenStream::new();
-            for (branch_idx, start_rule_name) in self.start_rule_names.iter().enumerate() {
-                let ctx_name = format_ident!("{}Context", start_rule_name.value());
-                let start_rule_ident = format_ident!("{}", start_rule_name.value());
-                let start_idx = *self
-                    .nonterminals_index
-                    .get(start_rule_name.value())
-                    .unwrap();
-                let s_ruletype = self.nonterminals[start_idx]
-                    .ruletype
-                    .as_ref()
-                    .unwrap_or(&quote! {()})
-                    .clone();
-                let branch_idx_u32 = branch_idx as u32;
-
-                if self.glr {
-                    context_structs.extend(quote! {
-                        #[allow(non_camel_case_types, dead_code)]
-                        pub struct #ctx_name {
-                            inner: #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>,
-                        }
-                        impl #ctx_name {
-                            pub fn new(userdata: <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData) -> Self {
-                                Self {
-                                    inner: #module_prefix::parser::nondeterministic::Context::new_with_branch(userdata, #branch_idx_u32),
-                                }
-                            }
-                            pub fn with_default_userdata() -> Self
-                            where
-                                <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Default,
-                            {
-                                Self {
-                                    inner: #module_prefix::parser::nondeterministic::Context::with_default_userdata_and_branch(#branch_idx_u32),
-                                }
-                            }
-                            pub fn feed(&mut self, term: #token_typename) -> Result<(), #parse_error_typename> {
-                                self.inner.feed(term)
-                            }
-                            pub fn feed_location(&mut self, term: #token_typename, location: #location_typename) -> Result<(), #parse_error_typename> {
-                                self.inner.feed_location(term, location)
-                            }
-                            pub fn can_feed(&self, term: &#token_typename) -> bool {
-                                self.inner.can_feed(term)
-                            }
-                            pub fn accept(self) -> Result<(#s_ruletype, <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData), #parse_error_typename> {
-                                match self.inner.accept() {
-                                    Ok((#start_type_enum_name::#start_rule_ident(val), userdata)) => Ok((val, userdata)),
-                                    _ => unreachable!(),
-                                }
-                            }
-                            pub fn accept_all(self) -> Result<impl Iterator<Item = (#s_ruletype, <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData)>, #parse_error_typename> {
-                                match self.inner.accept_all() {
-                                    Ok(iter) => Ok(iter.map(|(start_val, userdata)| match start_val {
-                                        #start_type_enum_name::#start_rule_ident(val) => (val, userdata),
-                                        _ => unreachable!(),
-                                    })),
-                                    Err(err) => Err(err),
-                                }
-                            }
-                            pub fn len_paths(&self) -> usize {
-                                self.inner.len_paths()
-                            }
-                            pub fn debug_check(&self) {
-                                self.inner.debug_check();
-                            }
-                            pub fn expected_token(&self) -> (::std::collections::BTreeSet<#termclass_typename>, ::std::collections::BTreeSet<#nonterm_typename>) {
-                                self.inner.expected_token()
-                            }
-                            pub fn expected_token_str(&self) -> (impl Iterator<Item = &'static str>, impl Iterator<Item = &'static str>) {
-                                self.inner.expected_token_str()
-                            }
-                            pub fn userdata(&self) -> &<#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData {
-                                self.inner.userdata()
-                            }
-                            pub fn userdata_mut(&mut self) -> &mut <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData {
-                                self.inner.userdata_mut()
-                            }
-                        }
-                        impl ::std::ops::Deref for #ctx_name {
-                            type Target = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>;
-                            fn deref(&self) -> &Self::Target {
-                                &self.inner
-                            }
-                        }
-                        impl ::std::ops::DerefMut for #ctx_name {
-                            fn deref_mut(&mut self) -> &mut Self::Target {
-                                &mut self.inner
-                            }
-                        }
-                        impl Clone for #ctx_name
-                        where
-                            #module_prefix::parser::nondeterministic::Node<#data_stack_typename, #state_index_typename>: Clone,
-                            #reduce_error_typename: Clone,
-                            <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Clone + Default,
-                        {
-                            fn clone(&self) -> Self {
-                                Self {
-                                    inner: self.inner.clone(),
-                                }
-                            }
-                        }
-                        impl Default for #ctx_name
-                        where
-                            <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Default,
-                        {
-                            fn default() -> Self {
-                                Self::with_default_userdata()
-                            }
-                        }
-                        impl std::fmt::Display for #ctx_name
-                        where
-                            #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>: std::fmt::Display,
-                        {
-                            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                                std::fmt::Display::fmt(&self.inner, f)
-                            }
-                        }
-                        impl std::fmt::Debug for #ctx_name
-                        where
-                            #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>: std::fmt::Debug,
-                        {
-                            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                                std::fmt::Debug::fmt(&self.inner, f)
-                            }
-                        }
-                    });
-                } else {
-                    context_structs.extend(quote! {
-                        #[allow(non_camel_case_types, dead_code)]
-                        pub struct #ctx_name {
-                            inner: #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>,
-                        }
-                        impl #ctx_name {
-                            pub fn new(userdata: <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData) -> Self {
-                                Self {
-                                    inner: #module_prefix::parser::deterministic::Context::new_with_branch(userdata, #branch_idx_u32),
-                                }
-                            }
-                            pub fn with_default_userdata() -> Self
-                            where
-                                <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Default,
-                            {
-                                Self {
-                                    inner: #module_prefix::parser::deterministic::Context::with_default_userdata_and_branch(#branch_idx_u32),
-                                }
-                            }
-                            pub fn with_capacity(capacity: usize, userdata: <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData) -> Self {
-                                Self {
-                                    inner: #module_prefix::parser::deterministic::Context::with_capacity_and_branch(capacity, userdata, #branch_idx_u32),
-                                }
-                            }
-                            pub fn with_capacity_and_default_userdata(capacity: usize) -> Self
-                            where
-                                <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Default,
-                            {
-                                Self {
-                                    inner: #module_prefix::parser::deterministic::Context::with_capacity_and_branch(capacity, Default::default(), #branch_idx_u32),
-                                }
-                            }
-                            pub fn feed(&mut self, term: #token_typename) -> Result<(), #parse_error_typename> {
-                                self.inner.feed(term)
-                            }
-                            pub fn feed_location(&mut self, term: #token_typename, location: #location_typename) -> Result<(), #parse_error_typename> {
-                                self.inner.feed_location(term, location)
-                            }
-                            pub fn can_feed(&self, term: &#token_typename) -> bool {
-                                self.inner.can_feed(term)
-                            }
-                            pub fn accept(self) -> Result<(#s_ruletype, <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData), #parse_error_typename> {
-                                match self.inner.accept() {
-                                    Ok((#start_type_enum_name::#start_rule_ident(val), userdata)) => Ok((val, userdata)),
-                                    _ => unreachable!(),
-                                }
-                            }
-                            pub fn expected_token(&self) -> (::std::collections::BTreeSet<#termclass_typename>, ::std::collections::BTreeSet<#nonterm_typename>) {
-                                self.inner.expected_token()
-                            }
-                            pub fn expected_token_str(&self) -> (impl Iterator<Item = &'static str>, impl Iterator<Item = &'static str>) {
-                                self.inner.expected_token_str()
-                            }
-                            pub fn userdata(&self) -> &<#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData {
-                                self.inner.userdata()
-                            }
-                            pub fn userdata_mut(&mut self) -> &mut <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData {
-                                self.inner.userdata_mut()
-                            }
-                        }
-                        impl ::std::ops::Deref for #ctx_name {
-                            type Target = #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>;
-                            fn deref(&self) -> &Self::Target {
-                                &self.inner
-                            }
-                        }
-                        impl ::std::ops::DerefMut for #ctx_name {
-                            fn deref_mut(&mut self) -> &mut Self::Target {
-                                &mut self.inner
-                            }
-                        }
-                        impl Clone for #ctx_name
-                        where
-                            <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Clone,
-                            #token_typename: Clone,
-                            #nonterm_typename: Clone,
-                        {
-                            fn clone(&self) -> Self {
-                                Self {
-                                    inner: self.inner.clone(),
-                                }
-                            }
-                        }
-                        impl Default for #ctx_name
-                        where
-                            <#data_stack_typename as #module_prefix::parser::data_stack::DataStack>::UserData: Default,
-                        {
-                            fn default() -> Self {
-                                Self::with_default_userdata()
-                            }
-                        }
-                        impl std::fmt::Display for #ctx_name
-                        where
-                            #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>: std::fmt::Display,
-                        {
-                            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                                std::fmt::Display::fmt(&self.inner, f)
-                            }
-                        }
-                        impl std::fmt::Debug for #ctx_name
-                        where
-                            #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>: std::fmt::Debug,
-                        {
-                            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                                std::fmt::Debug::fmt(&self.inner, f)
-                            }
-                        }
-                    });
-                }
-            }
-            stream.extend(context_structs);
-
-            // Also emit other aliases (excluding Context itself)
             if self.glr {
-                stream.extend(quote! {
-                    #[allow(non_camel_case_types,dead_code)]
-                    pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
-                    #[allow(non_camel_case_types,dead_code)]
-                    pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
-                    #[allow(non_camel_case_types,dead_code)]
-                    pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
+                context_structs.extend(quote! {
+                    #[allow(non_camel_case_types, dead_code)]
+                    pub type #ctx_name = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #semantic_value_typename, #start_extracter_typename, #state_index_typename, #max_reduce_rules>;
                 });
             } else {
-                stream.extend(quote! {
-                    #[allow(non_camel_case_types,dead_code)]
-                    pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
-                    #[allow(non_camel_case_types,dead_code)]
-                    pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
-                    #[allow(non_camel_case_types,dead_code)]
-                    pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
+                context_structs.extend(quote! {
+                    #[allow(non_camel_case_types, dead_code)]
+                    pub type #ctx_name = #module_prefix::parser::deterministic::Context<#parser_struct_name, #semantic_value_typename, #start_extracter_typename, #state_index_typename>;
                 });
             }
+        }
+        stream.extend(context_structs);
+
+        if self.glr {
+            stream.extend(quote! {
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
+            });
         } else {
-            if self.glr {
-                stream.extend(
-                quote! {
-                        /// type alias for `Context`
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #context_struct_name = #module_prefix::parser::nondeterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename, #max_reduce_rules>;
-                        /// type alias for CFG production rule
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
-                        /// type alias for runtime parser tables
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
-                        /// type alias for `InvalidTerminalError`
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
-                    }
-                );
-            } else {
-                stream.extend(
-                quote! {
-                        /// type alias for `Context`
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #context_struct_name = #module_prefix::parser::deterministic::Context<#parser_struct_name, #data_stack_typename, #state_index_typename>;
-                        /// type alias for CFG production rule
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
-                        /// type alias for runtime parser tables
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
-                        /// type alias for `ParseError`
-                        #[allow(non_camel_case_types,dead_code)]
-                        pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
-                    }
-                );
-            }
+            stream.extend(quote! {
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #rule_typename = #module_prefix::production::Production<#termclass_typename, #nonterm_typename>;
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
+                #[allow(non_camel_case_types,dead_code)]
+                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
+            });
         }
     }
 
     fn emit_termclass_enum(&self, stream: &mut TokenStream) {
-        let start_rule_span = self
-            .span_manager
-            .get_span_in_location(&self.start_rule_name.location());
-        let termclass_typename = Ident::new(
-            &format!("{}TerminalClasses", self.start_rule_name),
-            start_rule_span,
-        );
+        let termclass_typename = Ident::new("TerminalClasses", Span::call_site());
         let module_prefix = &self.module_prefix;
         let error_name = format_ident!("{}", utils::ERROR_NAME);
         let eof_name = format_ident!("{}", utils::EOF_NAME);
@@ -530,11 +244,9 @@ impl Grammar {
 
         let mut virtual_start_variants = Vec::new();
         let mut branch_indices = Vec::new();
-        if self.start_rule_names.len() > 1 {
-            for i in 0..self.start_rule_names.len() {
-                virtual_start_variants.push(format_ident!("VirtualStart{}", i));
-                branch_indices.push(i as u32);
-            }
+        for i in 0..self.start_rule_names.len() {
+            virtual_start_variants.push(format_ident!("VirtualStart{}", i));
+            branch_indices.push(i as u32);
         }
 
         let max_variants = self.terminal_classes.len() + 2 + virtual_start_variants.len();
@@ -615,11 +327,7 @@ impl Grammar {
         // =====================Writing NonTerminal Enum========================
         // =====================================================================
 
-        let start_rule_span = self
-            .span_manager
-            .get_span_in_location(&self.start_rule_name.location());
-        let start_rule_ident = Ident::new(&self.start_rule_name, start_rule_span);
-        let enum_typename = format_ident!("{}NonTerminals", start_rule_ident);
+        let enum_typename = format_ident!("NonTerminals");
         let module_prefix = &self.module_prefix;
 
         let mut comma_separated_variants = TokenStream::new();
@@ -711,16 +419,11 @@ impl Grammar {
 
     fn emit_parser(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
-        let start_rule_ident = Ident::new(
-            &self.start_rule_name,
-            self.span_manager
-                .get_span_in_location(&self.start_rule_name.location()),
-        );
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
-        let tables_typename = format_ident!("{}Tables", start_rule_ident);
-        let parser_struct_name = format_ident!("{}Parser", start_rule_ident);
+        let nonterminals_enum_name = format_ident!("NonTerminals");
+        let tables_typename = format_ident!("Tables");
+        let parser_struct_name = format_ident!("Parser");
         let token_typename = &self.token_typename;
-        let termclass_typename = format_ident!("{}TerminalClasses", &start_rule_ident);
+        let termclass_typename = format_ident!("TerminalClasses");
 
         let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
         for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
@@ -1065,15 +768,9 @@ impl Grammar {
         use rusty_lr_core::TerminalSymbol;
 
         let module_prefix = &self.module_prefix;
-        let start_rule_ident = Ident::new(
-            &self.start_rule_name,
-            self.span_manager
-                .get_span_in_location(&self.start_rule_name.location()),
-        );
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
+        let nonterminals_enum_name = format_ident!("NonTerminals");
         let reduce_error_typename = &self.error_typename;
-        let data_stack_typename = format_ident!("{}DataStack", start_rule_ident);
-        let data_enum_typename = format_ident!("{}Data", &start_rule_ident);
+        let data_enum_typename = format_ident!("Data");
         let token_typename = &self.token_typename;
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());
@@ -1245,8 +942,8 @@ impl Grammar {
                             debug_tag_check_stream.extend(quote! {
                                 debug_assert!(
                                     matches!(
-                                        __data_stack.__stack.get(
-                                            __data_stack.__stack.len()-1-#token_index_from_end
+                                            __data_stack.get(
+                                                __data_stack.len()-1-#token_index_from_end
                                         ),
                                         Some(&#data_enum_typename::Empty)
                                     )
@@ -1256,8 +953,8 @@ impl Grammar {
                             debug_tag_check_stream.extend(quote! {
                                 debug_assert!(
                                     matches!(
-                                        __data_stack.__stack.get(
-                                            __data_stack.__stack.len()-1-#token_index_from_end
+                                            __data_stack.get(
+                                                __data_stack.len()-1-#token_index_from_end
                                         ),
                                         Some(&#data_enum_typename::#variant_name(_))
                                     )
@@ -1420,13 +1117,13 @@ impl Grammar {
                                 if consecutive_unneeded > 0 {
                                     if consecutive_unneeded == 1 {
                                         extract_data_stream.extend(quote! {
-                                            __data_stack.__stack.pop();
+                                            __data_stack.pop();
                                         });
                                     } else {
                                         let consecutive_unneeded =
                                             syn::Index::from(consecutive_unneeded);
                                         extract_data_stream.extend(quote! {
-                                            __data_stack.__stack.truncate(__data_stack.__stack.len() - #consecutive_unneeded);
+                                            __data_stack.truncate(__data_stack.len() - #consecutive_unneeded);
                                         });
                                     }
                                     consecutive_unneeded = 0;
@@ -1437,7 +1134,7 @@ impl Grammar {
                                     quote! { val }
                                 };
                                 extract_data_stream.extend(quote! {
-                                    let mut #data_mapto = match __data_stack.__stack.pop().unwrap() {
+                                    let mut #data_mapto = match __data_stack.pop().unwrap() {
                                         #data_enum_typename::#variant_name(val) => #val_extracted,
                                         _ => unreachable!(),
                                     };
@@ -1449,12 +1146,12 @@ impl Grammar {
                         if consecutive_unneeded > 0 {
                             if consecutive_unneeded == 1 {
                                 extract_data_stream.extend(quote! {
-                                    __data_stack.__stack.pop();
+                                    __data_stack.pop();
                                 });
                             } else {
                                 let consecutive_unneeded = syn::Index::from(consecutive_unneeded);
                                 extract_data_stream.extend(quote! {
-                                    __data_stack.__stack.truncate(__data_stack.__stack.len() - #consecutive_unneeded);
+                                    __data_stack.truncate(__data_stack.len() - #consecutive_unneeded);
                                 });
                             }
                         }
@@ -1610,7 +1307,7 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __data_stack: &mut Self,
+                                __data_stack: &mut Vec<Self>,
                                 __location_stack: &mut Vec<#location_typename>,
                                 __push_data: bool,
                                 shift: &mut bool,
@@ -1629,9 +1326,9 @@ impl Grammar {
 
                                 let __res = #res_expr;
                                 if __push_data {
-                                    __data_stack.__stack.push(#data_enum_typename::#variant_name(#push_val));
+                                    __data_stack.push(Self::#variant_name(#push_val));
                                 } else {
-                                    __data_stack.__stack.push(#data_enum_typename::Empty);
+                                    __data_stack.push(Self::Empty);
                                 }
 
                                 Ok(())
@@ -1647,7 +1344,7 @@ impl Grammar {
                             #[doc = #rule_debug_str]
                             #[inline]
                             fn #reduce_fn_ident(
-                                __data_stack: &mut Self,
+                                __data_stack: &mut Vec<Self>,
                                 __location_stack: &mut Vec<#location_typename>,
                                 __push_data: bool,
                                 shift: &mut bool,
@@ -1665,7 +1362,7 @@ impl Grammar {
                                 #custom_reduce_action_stream
 
                                 #reduce_action_body #semicolon_or_empty
-                                __data_stack.__stack.push(#data_enum_typename::Empty);
+                                __data_stack.push(Self::Empty);
 
                                 Ok(())
                             }
@@ -1676,133 +1373,66 @@ impl Grammar {
             }
         }
 
-        let (start_typename, pop_start) = if self.start_rule_names.len() > 1 {
-            let start_type_enum_name = format_ident!("{}StartType", &self.start_rule_name.value());
-            let mut enum_variants = TokenStream::new();
-            let mut match_arms = TokenStream::new();
+        let mut start_extracter_impls = TokenStream::new();
+        for (branch_idx, start_rule_name) in self.start_rule_names.iter().enumerate() {
+            let s_idx = *self
+                .nonterminals_index
+                .get(start_rule_name.value())
+                .unwrap();
+            let s_variant_name = &variant_names_for_nonterm[s_idx];
+            let s_ruletype = self.nonterminals[s_idx]
+                .ruletype
+                .as_ref()
+                .unwrap_or(&quote! {()})
+                .clone();
+            let branch_idx_u32 = branch_idx as u32;
+            let start_extracter_typename = format_ident!("{}Extracter", start_rule_name.value());
 
-            for (branch_idx, start_rule_name) in self.start_rule_names.iter().enumerate() {
-                let s_idx = *self
-                    .nonterminals_index
-                    .get(start_rule_name.value())
-                    .unwrap();
-                let s_variant_name = &variant_names_for_nonterm[s_idx];
-                let s_ruletype = self.nonterminals[s_idx]
-                    .ruletype
-                    .as_ref()
-                    .unwrap_or(&quote! {()})
-                    .clone();
-                let s_variant_ident = format_ident!("{}", start_rule_name.value());
-                let branch_idx_u32 = branch_idx as u32;
-
-                enum_variants.extend(quote! {
-                    #s_variant_ident(#s_ruletype),
-                });
-
+            if s_variant_name != &empty_variant_name {
                 let s_val_expr = if self.nonterminals[s_idx].ruletype_boxed {
                     quote! { *val }
                 } else {
                     quote! { val }
                 };
+                start_extracter_impls.extend(quote! {
+                    #[doc(hidden)]
+                    #[allow(non_camel_case_types, dead_code)]
+                    pub struct #start_extracter_typename;
 
-                let arm_body = if s_variant_name != &empty_variant_name {
-                    quote! {
-                        Some(#data_enum_typename::#s_variant_name(val)) => {
-                            let res = Some(#start_type_enum_name::#s_variant_ident(#s_val_expr));
-                            self.__stack.pop(); // pop VirtualStart(i)
-                            res
-                        }
-                        _ => None,
-                    }
-                } else {
-                    quote! {
-                        Some(#data_enum_typename::Empty) => {
-                            let res = Some(#start_type_enum_name::#s_variant_ident(()));
-                            self.__stack.pop(); // pop VirtualStart(i)
-                            res
-                        }
-                        _ => None,
-                    }
-                };
+                    impl #module_prefix::parser::semantic_value::StartExtractor<#data_enum_typename> for #start_extracter_typename {
+                        type StartType = #s_ruletype;
+                        const BRANCH_INDEX: u32 = #branch_idx_u32;
 
-                match_arms.extend(quote! {
-                    #branch_idx_u32 => {
-                        match start_val {
-                            #arm_body
+                        fn extract(value: #data_enum_typename) -> Option<Self::StartType> {
+                            #[allow(unreachable_patterns, unused_variables)]
+                            match value {
+                                #data_enum_typename::#s_variant_name(val) => Some(#s_val_expr),
+                                _ => None,
+                            }
+                        }
+                    }
+                });
+            } else {
+                start_extracter_impls.extend(quote! {
+                    #[doc(hidden)]
+                    #[allow(non_camel_case_types, dead_code)]
+                    pub struct #start_extracter_typename;
+
+                    impl #module_prefix::parser::semantic_value::StartExtractor<#data_enum_typename> for #start_extracter_typename {
+                        type StartType = #s_ruletype;
+                        const BRANCH_INDEX: u32 = #branch_idx_u32;
+
+                        fn extract(value: #data_enum_typename) -> Option<Self::StartType> {
+                            #[allow(unreachable_patterns, unused_variables)]
+                            match value {
+                                #data_enum_typename::Empty => Some(()),
+                                _ => None,
+                            }
                         }
                     }
                 });
             }
-
-            stream.extend(quote! {
-                /// Sum-type for all start symbols returned by the parser
-                #[derive(Debug)]
-                #[allow(non_camel_case_types)]
-                pub enum #start_type_enum_name {
-                    #enum_variants
-                }
-            });
-
-            (
-                quote! { #start_type_enum_name },
-                quote! {
-                    self.__stack.pop(); // pop EOF
-                    let start_val = self.__stack.pop();
-                    match self.branch_idx {
-                        #match_arms
-                        _ => None,
-                    }
-                },
-            )
-        } else {
-            let start_idx = *self
-                .nonterminals_index
-                .get(self.start_rule_name.value())
-                .unwrap();
-            let start_variant_name = &variant_names_for_nonterm[start_idx];
-            if start_variant_name != &empty_variant_name {
-                let ruletype = self.nonterminals[start_idx]
-                    .ruletype
-                    .as_ref()
-                    .unwrap()
-                    .clone();
-
-                let is_start_boxed = self.nonterminals[start_idx].ruletype_boxed;
-                let val_expr = if is_start_boxed {
-                    quote! { *val }
-                } else {
-                    quote! { val }
-                };
-
-                (
-                    ruletype,
-                    quote! {
-                        self.__stack.pop();
-                        match self.__stack.pop() {
-                            Some(#data_enum_typename::#start_variant_name(val)) => Some(#val_expr),
-                            _ => None,
-                        }
-                    },
-                )
-            } else {
-                (
-                    quote! {()},
-                    quote! {
-                        self.__stack.pop();
-                        match self.__stack.pop() {
-                            Some(#data_enum_typename::Empty) => Some(()),
-                            _ => None,
-                        }
-                    },
-                )
-            }
-        };
-
-        let derive_clone_for_glr = if self.glr {
-            quote! {#[derive(Clone)]}
-        } else {
-            quote! {}
-        };
+        }
 
         let push_terminal_body_stream = if terminal_data_used {
             let push_val = if self.is_tokentype_boxed {
@@ -1811,19 +1441,20 @@ impl Grammar {
                 quote! { term }
             };
             quote! {
-                self.__stack.push(#data_enum_typename::#terminal_variant_name(#push_val));
+                Self::#terminal_variant_name(#push_val)
             }
         } else {
             quote! {
-                self.__stack.push(#data_enum_typename::Empty);
+                Self::Empty
             }
         };
         let push_empty_body_stream = quote! {
-            self.__stack.push(#data_enum_typename::Empty);
+            Self::Empty
         };
 
         let data_enum_definition = {
             let mut variants = TokenStream::new();
+            let mut debug_arms = TokenStream::new();
             for (variant_name, typename, boxed) in &variant_names_in_order {
                 if *boxed {
                     variants.extend(quote! {
@@ -1834,17 +1465,31 @@ impl Grammar {
                         #variant_name(#typename),
                     });
                 }
+                debug_arms.extend(quote! {
+                    Self::#variant_name(..) => f.write_str(stringify!(#variant_name)),
+                });
             }
             variants.extend(quote! {
                 Empty,
+            });
+            debug_arms.extend(quote! {
+                Self::Empty => f.write_str("Empty"),
             });
             quote! {
                 /// enum for each non-terminal and terminal symbol, that actually hold data
                 #[rustfmt::skip]
                 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-                #derive_clone_for_glr
+                #[derive(Clone)]
                 pub enum #data_enum_typename {
                     #variants
+                }
+
+                impl ::std::fmt::Debug for #data_enum_typename {
+                    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                        match self {
+                            #debug_arms
+                        }
+                    }
                 }
             }
         };
@@ -1853,81 +1498,33 @@ impl Grammar {
 
         #data_enum_definition
 
-        /// enum for each non-terminal and terminal symbol, that actually hold data
-        #[rustfmt::skip]
-        #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-        #derive_clone_for_glr
-        pub struct #data_stack_typename {
-            pub __stack: Vec<#data_enum_typename>,
-            pub branch_idx: u32,
-        }
-
-        impl Default for #data_stack_typename {
-            fn default() -> Self {
-                Self {
-                    __stack: Vec::new(),
-                    branch_idx: 0,
-                }
-            }
-        }
+        #start_extracter_impls
 
         #[rustfmt::skip]
-        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code)]
-        impl #data_stack_typename {
+        #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut, dead_code, unreachable_patterns)]
+        impl #data_enum_typename {
             #fn_reduce_for_each_rule_stream
         }
 
 
         #[rustfmt::skip]
         #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types, unused_variables)]
-        impl #module_prefix::parser::data_stack::DataStack for #data_stack_typename {
+        impl #module_prefix::parser::semantic_value::SemanticValue for #data_enum_typename {
             type Term = #token_typename;
             type NonTerm = #nonterminals_enum_name;
             type ReduceActionError = #reduce_error_typename;
             type UserData = #user_data_typename;
-            type StartType = #start_typename;
             type Location = #location_typename;
 
-            fn pop_start(&mut self) -> Option<Self::StartType> {
-                #pop_start
-            }
-            fn pop(&mut self) {
-                self.__stack.pop();
-            }
-            fn push_terminal(&mut self, term: Self::Term) {
-                #push_terminal_body_stream
-            }
-            fn push_empty(&mut self) {
+            fn new_empty() -> Self {
                 #push_empty_body_stream
             }
-            fn set_branch_idx(&mut self, branch_idx: u32) {
-                self.branch_idx = branch_idx;
-            }
-
-            // Trait operations like clear, split_off, truncate, and append are highly simplified
-            // and efficient because they only need to perform a single vector operation on the unified stack.
-            fn clear(&mut self) {
-                self.__stack.clear();
-            }
-            fn reserve(&mut self, additional: usize) {
-                self.__stack.reserve(additional);
-            }
-
-            fn split_off(&mut self, at: usize) -> Self {
-                Self {
-                    __stack: self.__stack.split_off(at),
-                    branch_idx: self.branch_idx,
-                }
-            }
-            fn truncate(&mut self, at: usize) {
-                self.__stack.truncate(at);
-            }
-            fn append(&mut self, other: &mut Self) {
-                self.__stack.append(&mut other.__stack);
+            fn new_terminal(term: Self::Term) -> Self {
+                #push_terminal_body_stream
             }
 
             fn reduce_action(
-                data_stack: &mut Self,
+                data_stack: &mut Vec<Self>,
                 location_stack: &mut Vec<#location_typename>,
                 push_data: bool,
                 rule_index: usize,

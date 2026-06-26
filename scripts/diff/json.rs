@@ -10,7 +10,7 @@
 ====================================Grammar=====================================
 
 # of terminal classes: 31
-# of states: 119
+# of states: 120
 
 0: Json -> Element
 1: Value -> Object
@@ -110,34 +110,28 @@
 95: ('.', Digits)? -> ('.', Digits)
 96: ('.', Digits)? -> 
 97: "" -> 
-98: Augmented -> Json eof
+98: Augmented -> VirtualStart(0) Json eof
 
 */
 // =============================Generated Codes Begin==============================
-/// type alias for `Context`
 #[allow(non_camel_case_types, dead_code)]
 pub type JsonContext = ::rusty_lr::parser::deterministic::Context<
-    JsonParser,
-    JsonDataStack,
+    Parser,
+    Data,
+    JsonExtracter,
     u8,
 >;
-/// type alias for CFG production rule
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonRule = ::rusty_lr::production::Production<
-    JsonTerminalClasses,
-    JsonNonTerminals,
->;
-/// type alias for runtime parser tables
+pub type Rule = ::rusty_lr::production::Production<TerminalClasses, NonTerminals>;
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonTables = ::rusty_lr::parser::table::DenseFlatTables<
-    JsonTerminalClasses,
-    JsonNonTerminals,
+pub type Tables = ::rusty_lr::parser::table::DenseFlatTables<
+    TerminalClasses,
+    NonTerminals,
     u8,
     u8,
 >;
-/// type alias for `ParseError`
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<
+pub type ParseError = ::rusty_lr::parser::deterministic::ParseError<
     char,
     std::ops::Range<usize>,
     ::rusty_lr::DefaultReduceActionError,
@@ -154,7 +148,7 @@ pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<
     std::cmp::Ord
 )]
 #[repr(usize)]
-pub enum JsonTerminalClasses {
+pub enum TerminalClasses {
     TermClass0,
     TermClass1,
     TermClass2,
@@ -188,56 +182,58 @@ pub enum JsonTerminalClasses {
     TermClass30,
     error,
     eof,
+    VirtualStart0,
 }
-impl JsonTerminalClasses {
+impl TerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
-            value < 33usize, "Terminal class index {} is out of bounds (max {})", value,
-            33usize
+            value < 34usize, "Terminal class index {} is out of bounds (max {})", value,
+            34usize
         );
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
+impl ::rusty_lr::parser::terminalclass::TerminalClass for TerminalClasses {
     type Term = char;
     const ERROR: Self = Self::error;
     const EOF: Self = Self::eof;
     fn as_str(&self) -> &'static str {
         match self {
-            JsonTerminalClasses::TermClass0 => "['\\t', '\\n', '\\r']",
-            JsonTerminalClasses::TermClass1 => "' '",
-            JsonTerminalClasses::TermClass2 => "<Others>",
-            JsonTerminalClasses::TermClass3 => "['!', '#'-'*', ..., '~'-'\\u{10ffff}']",
-            JsonTerminalClasses::TermClass4 => "'/'",
-            JsonTerminalClasses::TermClass5 => "'b'",
-            JsonTerminalClasses::TermClass6 => "'f'",
-            JsonTerminalClasses::TermClass7 => "'n'",
-            JsonTerminalClasses::TermClass8 => "'r'",
-            JsonTerminalClasses::TermClass9 => "'t'",
-            JsonTerminalClasses::TermClass10 => "'+'",
-            JsonTerminalClasses::TermClass11 => "'-'",
-            JsonTerminalClasses::TermClass12 => "','",
-            JsonTerminalClasses::TermClass13 => "'.'",
-            JsonTerminalClasses::TermClass14 => "'0'",
-            JsonTerminalClasses::TermClass15 => "['1'-'9']",
-            JsonTerminalClasses::TermClass16 => "':'",
-            JsonTerminalClasses::TermClass17 => "['A'-'D', 'F']",
-            JsonTerminalClasses::TermClass18 => "'E'",
-            JsonTerminalClasses::TermClass19 => "'e'",
-            JsonTerminalClasses::TermClass20 => "'['",
-            JsonTerminalClasses::TermClass21 => "']'",
-            JsonTerminalClasses::TermClass22 => "'a'",
-            JsonTerminalClasses::TermClass23 => "['c'-'d']",
-            JsonTerminalClasses::TermClass24 => "'l'",
-            JsonTerminalClasses::TermClass25 => "'s'",
-            JsonTerminalClasses::TermClass26 => "'u'",
-            JsonTerminalClasses::TermClass27 => "'{'",
-            JsonTerminalClasses::TermClass28 => "'}'",
-            JsonTerminalClasses::TermClass29 => "'\"'",
-            JsonTerminalClasses::TermClass30 => "'\\\\'",
-            JsonTerminalClasses::error => "error",
-            JsonTerminalClasses::eof => "eof",
+            TerminalClasses::TermClass0 => "['\\t', '\\n', '\\r']",
+            TerminalClasses::TermClass1 => "' '",
+            TerminalClasses::TermClass2 => "<Others>",
+            TerminalClasses::TermClass3 => "['!', '#'-'*', ..., '~'-'\\u{10ffff}']",
+            TerminalClasses::TermClass4 => "'/'",
+            TerminalClasses::TermClass5 => "'b'",
+            TerminalClasses::TermClass6 => "'f'",
+            TerminalClasses::TermClass7 => "'n'",
+            TerminalClasses::TermClass8 => "'r'",
+            TerminalClasses::TermClass9 => "'t'",
+            TerminalClasses::TermClass10 => "'+'",
+            TerminalClasses::TermClass11 => "'-'",
+            TerminalClasses::TermClass12 => "','",
+            TerminalClasses::TermClass13 => "'.'",
+            TerminalClasses::TermClass14 => "'0'",
+            TerminalClasses::TermClass15 => "['1'-'9']",
+            TerminalClasses::TermClass16 => "':'",
+            TerminalClasses::TermClass17 => "['A'-'D', 'F']",
+            TerminalClasses::TermClass18 => "'E'",
+            TerminalClasses::TermClass19 => "'e'",
+            TerminalClasses::TermClass20 => "'['",
+            TerminalClasses::TermClass21 => "']'",
+            TerminalClasses::TermClass22 => "'a'",
+            TerminalClasses::TermClass23 => "['c'-'d']",
+            TerminalClasses::TermClass24 => "'l'",
+            TerminalClasses::TermClass25 => "'s'",
+            TerminalClasses::TermClass26 => "'u'",
+            TerminalClasses::TermClass27 => "'{'",
+            TerminalClasses::TermClass28 => "'}'",
+            TerminalClasses::TermClass29 => "'\"'",
+            TerminalClasses::TermClass30 => "'\\\\'",
+            TerminalClasses::error => "error",
+            TerminalClasses::eof => "eof",
+            TerminalClasses::VirtualStart0 => "virtual_start",
         }
     }
     fn to_usize(&self) -> usize {
@@ -246,8 +242,8 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
-            '\t'..='\n' | '\r' => JsonTerminalClasses::TermClass0,
-            ' ' => JsonTerminalClasses::TermClass1,
+            '\t'..='\n' | '\r' => TerminalClasses::TermClass0,
+            ' ' => TerminalClasses::TermClass1,
             '!'
             | '#'..='*'
             | ';'..='@'
@@ -258,50 +254,51 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
             | 'o'..='q'
             | 'v'..='z'
             | '|'
-            | '~'..='\u{10ffff}' => JsonTerminalClasses::TermClass3,
-            '/' => JsonTerminalClasses::TermClass4,
-            'b' => JsonTerminalClasses::TermClass5,
-            'f' => JsonTerminalClasses::TermClass6,
-            'n' => JsonTerminalClasses::TermClass7,
-            'r' => JsonTerminalClasses::TermClass8,
-            't' => JsonTerminalClasses::TermClass9,
-            '+' => JsonTerminalClasses::TermClass10,
-            '-' => JsonTerminalClasses::TermClass11,
-            ',' => JsonTerminalClasses::TermClass12,
-            '.' => JsonTerminalClasses::TermClass13,
-            '0' => JsonTerminalClasses::TermClass14,
-            '1'..='9' => JsonTerminalClasses::TermClass15,
-            ':' => JsonTerminalClasses::TermClass16,
-            'A'..='D' | 'F' => JsonTerminalClasses::TermClass17,
-            'E' => JsonTerminalClasses::TermClass18,
-            'e' => JsonTerminalClasses::TermClass19,
-            '[' => JsonTerminalClasses::TermClass20,
-            ']' => JsonTerminalClasses::TermClass21,
-            'a' => JsonTerminalClasses::TermClass22,
-            'c'..='d' => JsonTerminalClasses::TermClass23,
-            'l' => JsonTerminalClasses::TermClass24,
-            's' => JsonTerminalClasses::TermClass25,
-            'u' => JsonTerminalClasses::TermClass26,
-            '{' => JsonTerminalClasses::TermClass27,
-            '}' => JsonTerminalClasses::TermClass28,
-            '"' => JsonTerminalClasses::TermClass29,
-            '\\' => JsonTerminalClasses::TermClass30,
-            _ => JsonTerminalClasses::TermClass2,
+            | '~'..='\u{10ffff}' => TerminalClasses::TermClass3,
+            '/' => TerminalClasses::TermClass4,
+            'b' => TerminalClasses::TermClass5,
+            'f' => TerminalClasses::TermClass6,
+            'n' => TerminalClasses::TermClass7,
+            'r' => TerminalClasses::TermClass8,
+            't' => TerminalClasses::TermClass9,
+            '+' => TerminalClasses::TermClass10,
+            '-' => TerminalClasses::TermClass11,
+            ',' => TerminalClasses::TermClass12,
+            '.' => TerminalClasses::TermClass13,
+            '0' => TerminalClasses::TermClass14,
+            '1'..='9' => TerminalClasses::TermClass15,
+            ':' => TerminalClasses::TermClass16,
+            'A'..='D' | 'F' => TerminalClasses::TermClass17,
+            'E' => TerminalClasses::TermClass18,
+            'e' => TerminalClasses::TermClass19,
+            '[' => TerminalClasses::TermClass20,
+            ']' => TerminalClasses::TermClass21,
+            'a' => TerminalClasses::TermClass22,
+            'c'..='d' => TerminalClasses::TermClass23,
+            'l' => TerminalClasses::TermClass24,
+            's' => TerminalClasses::TermClass25,
+            'u' => TerminalClasses::TermClass26,
+            '{' => TerminalClasses::TermClass27,
+            '}' => TerminalClasses::TermClass28,
+            '"' => TerminalClasses::TermClass29,
+            '\\' => TerminalClasses::TermClass30,
+            _ => TerminalClasses::TermClass2,
         }
     }
     fn from_virtual_start(branch_idx: u32) -> Self {
         match branch_idx {
+            0u32 => Self::VirtualStart0,
             _ => panic!("Invalid virtual start branch index: {}", branch_idx),
         }
     }
 }
-impl std::fmt::Display for JsonTerminalClasses {
+impl std::fmt::Display for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for JsonTerminalClasses {
+impl std::fmt::Debug for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
@@ -319,7 +316,7 @@ impl std::fmt::Debug for JsonTerminalClasses {
     std::cmp::Ord
 )]
 #[repr(usize)]
-pub enum JsonNonTerminals {
+pub enum NonTerminals {
     Json,
     Value,
     Object,
@@ -353,7 +350,7 @@ pub enum JsonNonTerminals {
     _LiteralString36,
     Augmented,
 }
-impl JsonNonTerminals {
+impl NonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -363,119 +360,119 @@ impl JsonNonTerminals {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl std::fmt::Display for JsonNonTerminals {
+impl std::fmt::Display for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for JsonNonTerminals {
+impl std::fmt::Debug for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
+impl ::rusty_lr::parser::nonterminal::NonTerminal for NonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
-            JsonNonTerminals::Json => "Json",
-            JsonNonTerminals::Value => "Value",
-            JsonNonTerminals::Object => "Object",
-            JsonNonTerminals::Members => "Members",
-            JsonNonTerminals::Member => "Member",
-            JsonNonTerminals::Array => "Array",
-            JsonNonTerminals::Element => "Element",
-            JsonNonTerminals::String => "String",
-            JsonNonTerminals::Character => "Character",
-            JsonNonTerminals::Escape => "Escape",
-            JsonNonTerminals::Hex => "Hex",
-            JsonNonTerminals::Number => "Number",
-            JsonNonTerminals::Integer => "Integer",
-            JsonNonTerminals::Exponent => "Exponent",
-            JsonNonTerminals::Sign => "Sign",
-            JsonNonTerminals::WS => "WS",
-            JsonNonTerminals::_LiteralString22 => "\"true\"",
-            JsonNonTerminals::_LiteralString23 => "\"false\"",
-            JsonNonTerminals::_LiteralString24 => "\"null\"",
-            JsonNonTerminals::_ElementSepPlus25 => "$sep(Element, ',', +)",
-            JsonNonTerminals::_ElementSepStar26 => "$sep(Element, ',', *)",
-            JsonNonTerminals::_CharacterPlus27 => "Character+",
-            JsonNonTerminals::_CharacterStar28 => "Character*",
-            JsonNonTerminals::_TermSet29 => "[' '-'\\u{10ffff}']-'\"'-'\\\\'",
-            JsonNonTerminals::_TermSet30 => "['A'-'F']",
-            JsonNonTerminals::_TermSet31 => "['a'-'f']",
-            JsonNonTerminals::_DigitPlus32 => "Digit+",
-            JsonNonTerminals::_TermSet33 => "['0'-'9']",
-            JsonNonTerminals::_Group34 => "('.', Digits)",
-            JsonNonTerminals::__Group34Question35 => "('.', Digits)?",
-            JsonNonTerminals::_LiteralString36 => "\"\"",
-            JsonNonTerminals::Augmented => "Augmented",
+            NonTerminals::Json => "Json",
+            NonTerminals::Value => "Value",
+            NonTerminals::Object => "Object",
+            NonTerminals::Members => "Members",
+            NonTerminals::Member => "Member",
+            NonTerminals::Array => "Array",
+            NonTerminals::Element => "Element",
+            NonTerminals::String => "String",
+            NonTerminals::Character => "Character",
+            NonTerminals::Escape => "Escape",
+            NonTerminals::Hex => "Hex",
+            NonTerminals::Number => "Number",
+            NonTerminals::Integer => "Integer",
+            NonTerminals::Exponent => "Exponent",
+            NonTerminals::Sign => "Sign",
+            NonTerminals::WS => "WS",
+            NonTerminals::_LiteralString22 => "\"true\"",
+            NonTerminals::_LiteralString23 => "\"false\"",
+            NonTerminals::_LiteralString24 => "\"null\"",
+            NonTerminals::_ElementSepPlus25 => "$sep(Element, ',', +)",
+            NonTerminals::_ElementSepStar26 => "$sep(Element, ',', *)",
+            NonTerminals::_CharacterPlus27 => "Character+",
+            NonTerminals::_CharacterStar28 => "Character*",
+            NonTerminals::_TermSet29 => "[' '-'\\u{10ffff}']-'\"'-'\\\\'",
+            NonTerminals::_TermSet30 => "['A'-'F']",
+            NonTerminals::_TermSet31 => "['a'-'f']",
+            NonTerminals::_DigitPlus32 => "Digit+",
+            NonTerminals::_TermSet33 => "['0'-'9']",
+            NonTerminals::_Group34 => "('.', Digits)",
+            NonTerminals::__Group34Question35 => "('.', Digits)?",
+            NonTerminals::_LiteralString36 => "\"\"",
+            NonTerminals::Augmented => "Augmented",
         }
     }
     fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
-            JsonNonTerminals::Json => None,
-            JsonNonTerminals::Value => None,
-            JsonNonTerminals::Object => None,
-            JsonNonTerminals::Members => None,
-            JsonNonTerminals::Member => None,
-            JsonNonTerminals::Array => None,
-            JsonNonTerminals::Element => None,
-            JsonNonTerminals::String => None,
-            JsonNonTerminals::Character => None,
-            JsonNonTerminals::Escape => None,
-            JsonNonTerminals::Hex => None,
-            JsonNonTerminals::Number => None,
-            JsonNonTerminals::Integer => None,
-            JsonNonTerminals::Exponent => None,
-            JsonNonTerminals::Sign => None,
-            JsonNonTerminals::WS => None,
-            JsonNonTerminals::_LiteralString22 => {
+            NonTerminals::Json => None,
+            NonTerminals::Value => None,
+            NonTerminals::Object => None,
+            NonTerminals::Members => None,
+            NonTerminals::Member => None,
+            NonTerminals::Array => None,
+            NonTerminals::Element => None,
+            NonTerminals::String => None,
+            NonTerminals::Character => None,
+            NonTerminals::Escape => None,
+            NonTerminals::Hex => None,
+            NonTerminals::Number => None,
+            NonTerminals::Integer => None,
+            NonTerminals::Exponent => None,
+            NonTerminals::Sign => None,
+            NonTerminals::WS => None,
+            NonTerminals::_LiteralString22 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::_LiteralString23 => {
+            NonTerminals::_LiteralString23 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::_LiteralString24 => {
+            NonTerminals::_LiteralString24 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::_ElementSepPlus25 => {
+            NonTerminals::_ElementSepPlus25 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            JsonNonTerminals::_ElementSepStar26 => {
+            NonTerminals::_ElementSepStar26 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
-            JsonNonTerminals::_CharacterPlus27 => {
+            NonTerminals::_CharacterPlus27 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            JsonNonTerminals::_CharacterStar28 => {
+            NonTerminals::_CharacterStar28 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
-            JsonNonTerminals::_TermSet29 => {
+            NonTerminals::_TermSet29 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_TermSet30 => {
+            NonTerminals::_TermSet30 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_TermSet31 => {
+            NonTerminals::_TermSet31 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_DigitPlus32 => {
+            NonTerminals::_DigitPlus32 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            JsonNonTerminals::_TermSet33 => {
+            NonTerminals::_TermSet33 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_Group34 => {
+            NonTerminals::_Group34 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Group)
             }
-            JsonNonTerminals::__Group34Question35 => {
+            NonTerminals::__Group34Question35 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Optional)
             }
-            JsonNonTerminals::_LiteralString36 => {
+            NonTerminals::_LiteralString36 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::Augmented => {
+            NonTerminals::Augmented => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
@@ -487,21 +484,28 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub enum JsonData {
+#[derive(Clone)]
+pub enum Data {
     Empty,
 }
-/// enum for each non-terminal and terminal symbol, that actually hold data
-#[rustfmt::skip]
-#[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub struct JsonDataStack {
-    pub __stack: Vec<JsonData>,
-    pub branch_idx: u32,
+impl ::std::fmt::Debug for Data {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::Empty => f.write_str("Empty"),
+        }
+    }
 }
-impl Default for JsonDataStack {
-    fn default() -> Self {
-        Self {
-            __stack: Vec::new(),
-            branch_idx: 0,
+#[doc(hidden)]
+#[allow(non_camel_case_types, dead_code)]
+pub struct JsonExtracter;
+impl ::rusty_lr::parser::semantic_value::StartExtractor<Data> for JsonExtracter {
+    type StartType = ();
+    const BRANCH_INDEX: u32 = 0u32;
+    fn extract(value: Data) -> Option<Self::StartType> {
+        #[allow(unreachable_patterns, unused_variables)]
+        match value {
+            Data::Empty => Some(()),
+            _ => None,
         }
     }
 }
@@ -512,13 +516,14 @@ impl Default for JsonDataStack {
     unused_variables,
     non_snake_case,
     unused_mut,
-    dead_code
+    dead_code,
+    unreachable_patterns
 )]
-impl JsonDataStack {
+impl Data {
     ///Object -> '{' WS '}'
     #[inline]
     fn reduce_Object_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -529,27 +534,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Object -> '{' Members '}'
     #[inline]
     fn reduce_Object_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -560,27 +565,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Object -> '{' error '}'
     #[inline]
     fn reduce_Object_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -591,32 +596,32 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
         __location_stack.pop();
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
+        __data_stack.truncate(__data_stack.len() - 3);
         {
             data.push(__rustylr_location_error.clone());
         };
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Members -> Member
     #[inline]
     fn reduce_Members_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -627,19 +632,19 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Members -> Member ',' Members
     #[inline]
     fn reduce_Members_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -650,27 +655,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Member -> WS String WS ':' Element
     #[inline]
     fn reduce_Member_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -681,35 +686,35 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 5);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 5);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 5);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Array -> '[' $sep(Element, ',', *) ']'
     #[inline]
     fn reduce_Array_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -720,27 +725,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Element -> WS Value WS
     #[inline]
     fn reduce_Element_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -751,27 +756,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///String -> '"' Character* '"'
     #[inline]
     fn reduce_String_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -782,27 +787,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Character -> '\\' Escape
     #[inline]
     fn reduce_Character_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -813,23 +818,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Escape -> 'u' Hex Hex Hex Hex
     #[inline]
     fn reduce_Escape_8(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -840,35 +845,35 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 5);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 5);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 5);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Number -> Integer ('.', Digits)? Exponent
     #[inline]
     fn reduce_Number_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -879,27 +884,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Integer -> ['1'-'9'] Digit+
     #[inline]
     fn reduce_Integer_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -910,23 +915,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Integer -> '-' ['0'-'9']
     #[inline]
     fn reduce_Integer_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -937,23 +942,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Integer -> '-' ['1'-'9'] Digit+
     #[inline]
     fn reduce_Integer_3(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -964,27 +969,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Exponent -> 'E' Sign Digit+
     #[inline]
     fn reduce_Exponent_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -995,27 +1000,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Exponent -> 'e' Sign Digit+
     #[inline]
     fn reduce_Exponent_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1026,27 +1031,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///WS -> ' ' WS
     #[inline]
     fn reduce_WS_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1057,23 +1062,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///WS -> ['\t', '\n', '\r'] WS
     #[inline]
     fn reduce_WS_2(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1084,23 +1089,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///"true" -> 't' 'r' 'u' 'e'
     #[inline]
     fn reduce__LiteralString22_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1111,31 +1116,31 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 4);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 4);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///"false" -> 'f' 'a' 'l' 's' 'e'
     #[inline]
     fn reduce__LiteralString23_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1146,35 +1151,35 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                4usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 5);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 5);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 5);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///"null" -> 'n' 'u' 'l' 'l'
     #[inline]
     fn reduce__LiteralString24_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1185,31 +1190,31 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                3usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 4);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 4);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 4);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///$sep(Element, ',', +) -> Element
     #[inline]
     fn reduce__ElementSepPlus25_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1220,19 +1225,19 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///$sep(Element, ',', +) -> Element ',' $sep(Element, ',', +)
     #[inline]
     fn reduce__ElementSepPlus25_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1243,27 +1248,27 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                2usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 3);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 3);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///$sep(Element, ',', *) ->
     #[inline]
     fn reduce__ElementSepStar26_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1272,13 +1277,13 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Character+ -> Character
     #[inline]
     fn reduce__CharacterPlus27_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1289,19 +1294,19 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Character+ -> Character Character+
     #[inline]
     fn reduce__CharacterPlus27_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1312,23 +1317,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Character* ->
     #[inline]
     fn reduce__CharacterStar28_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1337,13 +1342,13 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Digit+ -> ['0'-'9']
     #[inline]
     fn reduce__DigitPlus32_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1354,19 +1359,19 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///Digit+ -> ['0'-'9'] Digit+
     #[inline]
     fn reduce__DigitPlus32_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1377,23 +1382,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///['0'-'9'] -> ['1'-'9']
     #[inline]
     fn reduce__TermSet33_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1404,19 +1409,19 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.pop();
-        __data_stack.__stack.pop();
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.pop();
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///('.', Digits) -> '.' Digit+
     #[inline]
     fn reduce__Group34_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1427,23 +1432,23 @@ impl JsonDataStack {
         #[cfg(debug_assertions)]
         {
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                0usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
+                Data::Empty))
             );
             debug_assert!(
-                matches!(__data_stack.__stack.get(__data_stack.__stack.len() - 1 -
-                1usize), Some(& JsonData::Empty))
+                matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
-        __data_stack.__stack.truncate(__data_stack.__stack.len() - 2);
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.truncate(__data_stack.len() - 2);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///('.', Digits)? ->
     #[inline]
     fn reduce___Group34Question35_1(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1452,13 +1457,13 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
     ///"" ->
     #[inline]
     fn reduce__LiteralString36_0(
-        __data_stack: &mut Self,
+        __data_stack: &mut Vec<Self>,
         __location_stack: &mut Vec<std::ops::Range<usize>>,
         __push_data: bool,
         shift: &mut bool,
@@ -1467,7 +1472,7 @@ impl JsonDataStack {
         __rustylr_location0: &mut std::ops::Range<usize>,
     ) -> Result<(), ::rusty_lr::DefaultReduceActionError> {
         #[cfg(debug_assertions)] {}
-        __data_stack.__stack.push(JsonData::Empty);
+        __data_stack.push(Self::Empty);
         Ok(())
     }
 }
@@ -1479,52 +1484,20 @@ impl JsonDataStack {
     non_camel_case_types,
     unused_variables
 )]
-impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
+impl ::rusty_lr::parser::semantic_value::SemanticValue for Data {
     type Term = char;
-    type NonTerm = JsonNonTerminals;
+    type NonTerm = NonTerminals;
     type ReduceActionError = ::rusty_lr::DefaultReduceActionError;
     type UserData = Vec<std::ops::Range<usize>>;
-    type StartType = ();
     type Location = std::ops::Range<usize>;
-    fn pop_start(&mut self) -> Option<Self::StartType> {
-        self.__stack.pop();
-        match self.__stack.pop() {
-            Some(JsonData::Empty) => Some(()),
-            _ => None,
-        }
+    fn new_empty() -> Self {
+        Self::Empty
     }
-    fn pop(&mut self) {
-        self.__stack.pop();
-    }
-    fn push_terminal(&mut self, term: Self::Term) {
-        self.__stack.push(JsonData::Empty);
-    }
-    fn push_empty(&mut self) {
-        self.__stack.push(JsonData::Empty);
-    }
-    fn set_branch_idx(&mut self, branch_idx: u32) {
-        self.branch_idx = branch_idx;
-    }
-    fn clear(&mut self) {
-        self.__stack.clear();
-    }
-    fn reserve(&mut self, additional: usize) {
-        self.__stack.reserve(additional);
-    }
-    fn split_off(&mut self, at: usize) -> Self {
-        Self {
-            __stack: self.__stack.split_off(at),
-            branch_idx: self.branch_idx,
-        }
-    }
-    fn truncate(&mut self, at: usize) {
-        self.__stack.truncate(at);
-    }
-    fn append(&mut self, other: &mut Self) {
-        self.__stack.append(&mut other.__stack);
+    fn new_terminal(term: Self::Term) -> Self {
+        Self::Empty
     }
     fn reduce_action(
-        data_stack: &mut Self,
+        data_stack: &mut Vec<Self>,
         location_stack: &mut Vec<std::ops::Range<usize>>,
         push_data: bool,
         rule_index: usize,
@@ -1920,20 +1893,20 @@ impl ::rusty_lr::parser::data_stack::DataStack for JsonDataStack {
 /// it is extremely cheap to instantiate, copy, or clone, and takes very little space.
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 #[derive(Clone, Copy)]
-pub struct JsonParser;
-unsafe impl ::std::marker::Send for JsonParser {}
-unsafe impl ::std::marker::Sync for JsonParser {}
+pub struct Parser;
+unsafe impl ::std::marker::Send for Parser {}
+unsafe impl ::std::marker::Sync for Parser {}
 #[rustfmt::skip]
-impl ::rusty_lr::parser::Parser for JsonParser {
+impl ::rusty_lr::parser::Parser for Parser {
     type Term = char;
-    type TermClass = JsonTerminalClasses;
-    type NonTerm = JsonNonTerminals;
+    type TermClass = TerminalClasses;
+    type NonTerm = NonTerminals;
     type StateIndex = u8;
     type ReduceRules = u8;
-    type Tables = JsonTables;
+    type Tables = Tables;
     const ERROR_USED: bool = true;
-    fn get_tables() -> &'static JsonTables {
-        static TABLES: std::sync::OnceLock<JsonTables> = std::sync::OnceLock::new();
+    fn get_tables() -> &'static Tables {
+        static TABLES: std::sync::OnceLock<Tables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
@@ -1949,101 +1922,101 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     1, 1, 1, 1, 5, 1, 1, 1, 3, 1, 2, 2, 3, 1, 3, 3, 1, 1, 1, 1, 2, 2, 4,
                     5, 4, 1, 3, 1, 0, 1, 2, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-                    1, 1, 2, 1, 0, 0, 2,
+                    1, 1, 2, 1, 0, 0, 3,
                 ];
                 static SHIFT_TERM_DATA: &[u32] = &[
-                    32768, 65537, 32768, 65537, 32768, 65537, 2147680288, 262150, 425991,
-                    557065, 688139, 3604494, 884751, 950292, 1277979, 1703965, 294934,
-                    327704, 360473, 393235, 458778, 491544, 524312, 589832, 622618,
-                    655379, 851982, 720911, 786446, 786447, 786446, 786447, 786446,
-                    786447, 32768, 65537, 1015820, 32768, 65537, 262150, 425991, 557065,
-                    1081355, 3178510, 1179663, 950292, 1277979, 1703965, 851982, 1114127,
-                    1146894, 1146895, 1146894, 1146895, 1146894, 1146895, 1245205,
-                    1310720, 1343489, 2148859935, 1310720, 1343489, 1310720, 1343489,
-                    1409052, 1474588, 1540108, 1572864, 1605633, 1572864, 1605633,
-                    1572864, 1605633, 1703965, 1966081, 1966083, 1966084, 1966085,
-                    1966086, 1966087, 1966088, 1966089, 1966090, 1966091, 1966092,
-                    1966093, 1966094, 1966095, 1966096, 1966097, 1966098, 1966099,
-                    1966100, 1966101, 1966102, 1966103, 1966104, 1966105, 1966106,
-                    1966107, 1966108, 1736734, 1933316, 1933317, 1933318, 1933319,
-                    1933320, 1933321, 1769498, 1933341, 1933342, 1802245, 1802246,
-                    1802254, 1802255, 1802257, 1802258, 1802259, 1802262, 1802263,
+                    2147516449, 65536, 98305, 65536, 98305, 65536, 98305, 2147713056,
+                    294918, 458759, 589833, 720907, 3637262, 917519, 983060, 1310747,
+                    1736733, 327702, 360472, 393241, 426003, 491546, 524312, 557080,
+                    622600, 655386, 688147, 884750, 753679, 819214, 819215, 819214,
+                    819215, 819214, 819215, 65536, 98305, 1048588, 65536, 98305, 294918,
+                    458759, 589833, 1114123, 3211278, 1212431, 983060, 1310747, 1736733,
+                    884750, 1146895, 1179662, 1179663, 1179662, 1179663, 1179662,
+                    1179663, 1277973, 1343488, 1376257, 2148892703, 1343488, 1376257,
+                    1343488, 1376257, 1441820, 1507356, 1572876, 1605632, 1638401,
+                    1605632, 1638401, 1605632, 1638401, 1736733, 1998849, 1998851,
+                    1998852, 1998853, 1998854, 1998855, 1998856, 1998857, 1998858,
+                    1998859, 1998860, 1998861, 1998862, 1998863, 1998864, 1998865,
+                    1998866, 1998867, 1998868, 1998869, 1998870, 1998871, 1998872,
+                    1998873, 1998874, 1998875, 1998876, 1769502, 1966084, 1966085,
+                    1966086, 1966087, 1966088, 1966089, 1802266, 1966109, 1966110,
                     1835013, 1835014, 1835022, 1835023, 1835025, 1835026, 1835027,
                     1835030, 1835031, 1867781, 1867782, 1867790, 1867791, 1867793,
                     1867794, 1867795, 1867798, 1867799, 1900549, 1900550, 1900558,
-                    1900559, 1900561, 1900562, 1900563, 1900566, 1900567, 1966081,
-                    1966083, 1966084, 1966085, 1966086, 1966087, 1966088, 1966089,
-                    1966090, 1966091, 1966092, 1966093, 1966094, 1966095, 1966096,
-                    1966097, 1966098, 1966099, 1966100, 1966101, 1966102, 1966103,
-                    1966104, 1966105, 1966106, 1966107, 1966108, 1736734, 2064413,
-                    2129920, 2162689, 2129920, 2162689, 2129920, 2162689, 2228240, 32768,
-                    65537, 262150, 425991, 557065, 2326539, 2654222, 2424847, 950292,
-                    1277979, 1703965, 851982, 2359311, 2392078, 2392079, 2392078,
-                    2392079, 2392078, 2392079, 2490396, 1703965, 2555904, 2588673,
-                    2555904, 2588673, 2555904, 2588673, 2686989, 2752526, 2752527,
-                    2752526, 2752527, 2818066, 2949139, 2850826, 2850827, 2916366,
-                    2916367, 2916366, 2916367, 2981898, 2981899, 2916366, 2916367,
-                    3112960, 3145729, 3112960, 3145729, 3112960, 3145729, 3211277,
-                    3244046, 3244047, 3244046, 3244047, 3309586, 3407891, 3342346,
-                    3342347, 3375118, 3375119, 3375118, 3375119, 3440650, 3440651,
-                    3375118, 3375119, 3538944, 3571713, 3538944, 3571713, 3538944,
-                    3571713, 3637261, 3670030, 3670031, 3670030, 3670031, 3735570,
-                    3833875, 3768330, 3768331, 3801102, 3801103, 3801102, 3801103,
-                    3866634, 3866635, 3801102, 3801103,
+                    1900559, 1900561, 1900562, 1900563, 1900566, 1900567, 1933317,
+                    1933318, 1933326, 1933327, 1933329, 1933330, 1933331, 1933334,
+                    1933335, 1998849, 1998851, 1998852, 1998853, 1998854, 1998855,
+                    1998856, 1998857, 1998858, 1998859, 1998860, 1998861, 1998862,
+                    1998863, 1998864, 1998865, 1998866, 1998867, 1998868, 1998869,
+                    1998870, 1998871, 1998872, 1998873, 1998874, 1998875, 1998876,
+                    1769502, 2097181, 2162688, 2195457, 2162688, 2195457, 2162688,
+                    2195457, 2261008, 65536, 98305, 294918, 458759, 589833, 2359307,
+                    2686990, 2457615, 983060, 1310747, 1736733, 884750, 2392079, 2424846,
+                    2424847, 2424846, 2424847, 2424846, 2424847, 2523164, 1736733,
+                    2588672, 2621441, 2588672, 2621441, 2588672, 2621441, 2719757,
+                    2785294, 2785295, 2785294, 2785295, 2850834, 2981907, 2883594,
+                    2883595, 2949134, 2949135, 2949134, 2949135, 3014666, 3014667,
+                    2949134, 2949135, 3145728, 3178497, 3145728, 3178497, 3145728,
+                    3178497, 3244045, 3276814, 3276815, 3276814, 3276815, 3342354,
+                    3440659, 3375114, 3375115, 3407886, 3407887, 3407886, 3407887,
+                    3473418, 3473419, 3407886, 3407887, 3571712, 3604481, 3571712,
+                    3604481, 3571712, 3604481, 3670029, 3702798, 3702799, 3702798,
+                    3702799, 3768338, 3866643, 3801098, 3801099, 3833870, 3833871,
+                    3833870, 3833871, 3899402, 3899403, 3833870, 3833871,
                 ];
                 static SHIFT_TERM_OFFSETS: &[u32] = &[
-                    0, 2, 4, 6, 6, 6, 7, 7, 16, 17, 18, 19, 20, 20, 21, 22, 23, 23, 24,
-                    25, 26, 26, 28, 30, 30, 32, 32, 32, 34, 34, 36, 37, 39, 48, 50, 52,
-                    54, 56, 57, 57, 60, 62, 64, 65, 65, 66, 66, 67, 69, 71, 73, 73, 74,
-                    102, 111, 120, 129, 138, 147, 147, 147, 175, 175, 176, 176, 178, 180,
-                    182, 183, 185, 185, 194, 196, 198, 200, 202, 204, 204, 206, 208, 210,
-                    210, 211, 213, 213, 215, 217, 219, 221, 221, 223, 225, 227, 227, 227,
-                    229, 231, 233, 234, 236, 238, 240, 242, 244, 246, 248, 250, 250, 252,
-                    254, 256, 257, 259, 261, 263, 265, 267, 269, 271, 273,
+                    0, 1, 3, 5, 7, 7, 7, 8, 8, 17, 18, 19, 20, 21, 21, 22, 23, 24, 24,
+                    25, 26, 27, 27, 29, 31, 31, 33, 33, 33, 35, 35, 37, 38, 40, 49, 51,
+                    53, 55, 57, 58, 58, 61, 63, 65, 66, 66, 67, 67, 68, 70, 72, 74, 74,
+                    75, 103, 112, 121, 130, 139, 148, 148, 148, 176, 176, 177, 177, 179,
+                    181, 183, 184, 186, 186, 195, 197, 199, 201, 203, 205, 205, 207, 209,
+                    211, 211, 212, 214, 214, 216, 218, 220, 222, 222, 224, 226, 228, 228,
+                    228, 230, 232, 234, 235, 237, 239, 241, 243, 245, 247, 249, 251, 251,
+                    253, 255, 257, 258, 260, 262, 264, 266, 268, 270, 272, 274,
                 ];
                 static SHIFT_NONTERM_DATA: &[u32] = &[
-                    2147647488, 163846, 2147713039, 229406, 2147614735, 131102,
-                    2147581967, 98334, 2150989825, 3506178, 3506181, 3506183, 3506187,
-                    2151088140, 3506192, 3506193, 3506194, 3604507, 2148335643,
-                    2148237338, 2148270107, 2148302874, 2148270107, 2148401178,
-                    2148270107, 2148466694, 2148532239, 1212435, 2148696084, 1048606,
-                    2148466694, 2148532239, 2150957075, 1048606, 2150563841, 3080194,
-                    3080197, 3080199, 3080203, 2150662156, 3080208, 3080209, 3080210,
-                    3178523, 2148335643, 2148237338, 2148630555, 2148302874, 2148630555,
-                    2148401178, 2148630555, 2148925443, 2148990980, 2149941263, 2457630,
-                    2147614735, 131102, 2147581967, 98334, 2149122051, 2148990980,
-                    2149154831, 1671198, 2147614735, 131102, 2147581967, 98334,
-                    2149580807, 2149449736, 2031637, 2149515286, 1966103, 2149416969,
-                    2149285898, 1802264, 1802265, 1802267, 2149318666, 1835032, 1835033,
-                    1835035, 2149351434, 1867800, 1867801, 1867803, 2149384202, 1900568,
-                    1900569, 1900571, 2149449736, 2149482517, 1966103, 2149679119,
-                    2195486, 2147614735, 131102, 2147581967, 98334, 2149744646,
-                    2149777423, 2293790, 2150006785, 2523138, 2523141, 2523143, 2523147,
-                    2150137868, 2523152, 2523153, 2523154, 2654235, 2148335643,
-                    2148237338, 2149875739, 2148302874, 2149875739, 2148401178,
-                    2149875739, 2149580807, 2150105103, 2621470, 2147614735, 131102,
-                    2147581967, 98334, 2785308, 2150268957, 2150203418, 2150236187,
-                    2148302874, 2150236187, 2150531085, 3047454, 2150334478, 2850846,
-                    2150367258, 2150400027, 2148302874, 2150400027, 2150465550, 2981918,
-                    2150498330, 2150400027, 2150105103, 2621470, 2147614735, 131102,
-                    2147581967, 98334, 3276828, 2150760477, 2150203418, 2150727707,
-                    2148302874, 2150727707, 2150531085, 3047454, 2150825998, 3342366,
-                    2150367258, 2150858779, 2148302874, 2150858779, 2150924302, 3440670,
-                    2150498330, 2150858779, 2150105103, 2621470, 2147614735, 131102,
-                    2147581967, 98334, 3702812, 2151186461, 2150203418, 2151153691,
-                    2148302874, 2151153691, 2150531085, 3047454, 2151251982, 3768350,
-                    2150367258, 2151284763, 2148302874, 2151284763, 2151350286, 3866654,
-                    2150498330, 2151284763,
+                    2147680256, 196614, 2147745807, 262174, 2147647503, 163870,
+                    2147614735, 131102, 2151022593, 3538946, 3538949, 3538951, 3538955,
+                    2151120908, 3538960, 3538961, 3538962, 3637275, 2148368411,
+                    2148270106, 2148302875, 2148335642, 2148302875, 2148433946,
+                    2148302875, 2148499462, 2148565007, 1245203, 2148728852, 1081374,
+                    2148499462, 2148565007, 2150989843, 1081374, 2150596609, 3112962,
+                    3112965, 3112967, 3112971, 2150694924, 3112976, 3112977, 3112978,
+                    3211291, 2148368411, 2148270106, 2148663323, 2148335642, 2148663323,
+                    2148433946, 2148663323, 2148958211, 2149023748, 2149974031, 2490398,
+                    2147647503, 163870, 2147614735, 131102, 2149154819, 2149023748,
+                    2149187599, 1703966, 2147647503, 163870, 2147614735, 131102,
+                    2149613575, 2149482504, 2064405, 2149548054, 1998871, 2149449737,
+                    2149318666, 1835032, 1835033, 1835035, 2149351434, 1867800, 1867801,
+                    1867803, 2149384202, 1900568, 1900569, 1900571, 2149416970, 1933336,
+                    1933337, 1933339, 2149482504, 2149515285, 1998871, 2149711887,
+                    2228254, 2147647503, 163870, 2147614735, 131102, 2149777414,
+                    2149810191, 2326558, 2150039553, 2555906, 2555909, 2555911, 2555915,
+                    2150170636, 2555920, 2555921, 2555922, 2687003, 2148368411,
+                    2148270106, 2149908507, 2148335642, 2149908507, 2148433946,
+                    2149908507, 2149613575, 2150137871, 2654238, 2147647503, 163870,
+                    2147614735, 131102, 2818076, 2150301725, 2150236186, 2150268955,
+                    2148335642, 2150268955, 2150563853, 3080222, 2150367246, 2883614,
+                    2150400026, 2150432795, 2148335642, 2150432795, 2150498318, 3014686,
+                    2150531098, 2150432795, 2150137871, 2654238, 2147647503, 163870,
+                    2147614735, 131102, 3309596, 2150793245, 2150236186, 2150760475,
+                    2148335642, 2150760475, 2150563853, 3080222, 2150858766, 3375134,
+                    2150400026, 2150891547, 2148335642, 2150891547, 2150957070, 3473438,
+                    2150531098, 2150891547, 2150137871, 2654238, 2147647503, 163870,
+                    2147614735, 131102, 3735580, 2151219229, 2150236186, 2151186459,
+                    2148335642, 2151186459, 2150563853, 3080222, 2151284750, 3801118,
+                    2150400026, 2151317531, 2148335642, 2151317531, 2151383054, 3899422,
+                    2150531098, 2151317531,
                 ];
                 static SHIFT_NONTERM_OFFSETS: &[u32] = &[
-                    0, 4, 6, 8, 8, 8, 8, 8, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18,
-                    18, 18, 18, 19, 21, 21, 23, 23, 23, 25, 25, 30, 30, 34, 44, 45, 47,
-                    49, 51, 51, 51, 55, 57, 59, 59, 59, 59, 59, 59, 63, 65, 67, 67, 68,
-                    72, 73, 77, 81, 85, 89, 89, 89, 92, 92, 92, 92, 94, 96, 98, 98, 101,
-                    101, 111, 112, 114, 116, 118, 119, 119, 121, 123, 125, 125, 127, 129,
-                    129, 131, 133, 135, 137, 137, 139, 141, 143, 143, 143, 145, 147, 149,
-                    151, 153, 155, 157, 159, 161, 163, 165, 167, 167, 169, 171, 173, 175,
-                    177, 179, 181, 183, 185, 187, 189, 191,
+                    0, 0, 4, 6, 8, 8, 8, 8, 8, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18,
+                    18, 18, 18, 18, 19, 21, 21, 23, 23, 23, 25, 25, 30, 30, 34, 44, 45,
+                    47, 49, 51, 51, 51, 55, 57, 59, 59, 59, 59, 59, 59, 63, 65, 67, 67,
+                    68, 72, 73, 77, 81, 85, 89, 89, 89, 92, 92, 92, 92, 94, 96, 98, 98,
+                    101, 101, 111, 112, 114, 116, 118, 119, 119, 121, 123, 125, 125, 127,
+                    129, 129, 131, 133, 135, 137, 137, 139, 141, 143, 143, 143, 145, 147,
+                    149, 151, 153, 155, 157, 159, 161, 163, 165, 167, 167, 169, 171, 173,
+                    175, 177, 179, 181, 183, 185, 187, 189, 191,
                 ];
                 static REDUCE_DATA: &[u32] = &[
                     6, 1, 97, 7, 1, 97, 9, 1, 97, 11, 1, 97, 14, 1, 97, 15, 1, 97, 20, 1,
@@ -2114,36 +2087,36 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     0, 1, 90, 1, 1, 90, 32, 1, 90, 14, 1, 97, 15, 1, 97,
                 ];
                 static REDUCE_OFFSETS: &[u32] = &[
-                    0, 27, 54, 81, 123, 165, 165, 165, 165, 165, 165, 165, 165, 183, 183,
-                    183, 183, 201, 201, 201, 201, 219, 219, 237, 264, 282, 309, 336, 354,
-                    381, 411, 414, 441, 441, 441, 462, 483, 504, 504, 522, 528, 534, 540,
-                    540, 558, 558, 576, 579, 582, 585, 588, 591, 591, 594, 594, 594, 594,
-                    594, 594, 681, 768, 771, 774, 774, 795, 798, 801, 804, 804, 831, 837,
-                    837, 837, 858, 879, 900, 900, 918, 924, 930, 936, 948, 966, 966, 990,
-                    1008, 1020, 1026, 1026, 1044, 1056, 1062, 1062, 1080, 1098, 1104,
-                    1110, 1116, 1134, 1134, 1152, 1164, 1170, 1170, 1182, 1188, 1188,
-                    1191, 1194, 1197, 1200, 1215, 1215, 1230, 1239, 1245, 1245, 1254,
-                    1260, 1260,
+                    0, 0, 27, 54, 81, 123, 165, 165, 165, 165, 165, 165, 165, 165, 183,
+                    183, 183, 183, 201, 201, 201, 201, 219, 219, 237, 264, 282, 309, 336,
+                    354, 381, 411, 414, 441, 441, 441, 462, 483, 504, 504, 522, 528, 534,
+                    540, 540, 558, 558, 576, 579, 582, 585, 588, 591, 591, 594, 594, 594,
+                    594, 594, 594, 681, 768, 771, 774, 774, 795, 798, 801, 804, 804, 831,
+                    837, 837, 837, 858, 879, 900, 900, 918, 924, 930, 936, 948, 966, 966,
+                    990, 1008, 1020, 1026, 1026, 1044, 1056, 1062, 1062, 1080, 1098,
+                    1104, 1110, 1116, 1134, 1134, 1152, 1164, 1170, 1170, 1182, 1188,
+                    1188, 1191, 1194, 1197, 1200, 1215, 1215, 1230, 1239, 1245, 1245,
+                    1254, 1260, 1260,
                 ];
                 static CAN_ACCEPT_ERROR: &[u8] = &[
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0,
+                    0, 0, 0, 0, 0,
                 ];
                 let num_rules = 99usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let lhs = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = NonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
                             lhs,
                             len: RULE_LENGTHS[i] as usize,
                         });
                 }
-                let num_states = 119usize;
+                let num_states = 120usize;
                 let mut state_rows = Vec::with_capacity(num_states);
                 for i in 0..num_states {
                     let term_start = SHIFT_TERM_OFFSETS[i] as usize;
@@ -2153,7 +2126,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     );
                     for idx in term_start..term_end {
                         let val = SHIFT_TERM_DATA[idx];
-                        let term_class = JsonTerminalClasses::from_usize(
+                        let term_class = TerminalClasses::from_usize(
                             (val & 0x7fff) as usize,
                         );
                         let state = ((val >> 15) & 0xffff) as usize;
@@ -2171,9 +2144,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     );
                     for idx in nonterm_start..nonterm_end {
                         let val = SHIFT_NONTERM_DATA[idx];
-                        let nonterm = JsonNonTerminals::from_usize(
-                            (val & 0x7fff) as usize,
-                        );
+                        let nonterm = NonTerminals::from_usize((val & 0x7fff) as usize);
                         let state = ((val >> 15) & 0xffff) as usize;
                         let push = (val >> 31) != 0;
                         shift_goto_map_nonterm
@@ -2188,9 +2159,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     let mut idx = reduce_start;
                     while idx < reduce_end {
                         let term_val = REDUCE_DATA[idx];
-                        let term_class = JsonTerminalClasses::from_usize(
-                            term_val as usize,
-                        );
+                        let term_class = TerminalClasses::from_usize(term_val as usize);
                         let len = REDUCE_DATA[idx + 1] as usize;
                         let mut rules = Vec::with_capacity(len);
                         for r_idx in 0..len {

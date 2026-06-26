@@ -73,7 +73,6 @@ pub struct Grammar {
     pub(crate) error_typename: TokenStream,
 
     /// %start
-    pub(crate) start_rule_name: Located<String>,
     pub(crate) start_rule_names: Vec<Located<String>>,
 
     pub terminals: Vec<TerminalInfo>,
@@ -1123,7 +1122,6 @@ impl Grammar {
             userdata_typename: grammar_args.userdata_typename.into_iter().next().unwrap().1,
 
             error_typename,
-            start_rule_name: grammar_args.start_rule_name.first().unwrap().clone(),
             start_rule_names: grammar_args.start_rule_name.clone(),
 
             terminals: Default::default(),
@@ -1929,49 +1927,19 @@ impl Grammar {
                 Located::new(utils::AUGMENTED_NAME.to_string(), Location::CallSite);
             let mut augmented_rules = Vec::new();
 
-            if grammar.start_rule_names.len() > 1 {
-                for (i, start_rule_name) in grammar.start_rule_names.iter().enumerate() {
-                    let start_idx = grammar
-                        .nonterminals_index
-                        .get(start_rule_name.value())
-                        .unwrap();
-                    let rule = Rule {
-                        tokens: vec![
-                            MappedSymbol {
-                                symbol: Symbol::Terminal(TerminalSymbol::VirtualStart(i as u32)),
-                                mapto: None,
-                                location: Location::CallSite,
-                                reduce_action_chains: Vec::new(),
-                            },
-                            MappedSymbol {
-                                symbol: Symbol::NonTerminal(*start_idx),
-                                mapto: None,
-                                location: Location::CallSite,
-                                reduce_action_chains: Vec::new(),
-                            },
-                            MappedSymbol {
-                                symbol: Symbol::Terminal(TerminalSymbol::Eof),
-                                mapto: None,
-                                location: Location::CallSite,
-                                reduce_action_chains: Vec::new(),
-                            },
-                        ],
-                        reduce_action: None,
-                        separator_location: Location::CallSite,
-                        prec: None,
-                        dprec: None,
-                        is_used: true,
-                    };
-                    augmented_rules.push(rule);
-                    grammar.nonterminals[*start_idx].protected = true;
-                }
-            } else {
+            for (i, start_rule_name) in grammar.start_rule_names.iter().enumerate() {
                 let start_idx = grammar
                     .nonterminals_index
-                    .get(grammar.start_rule_name.value())
+                    .get(start_rule_name.value())
                     .unwrap();
-                let augmented_rule = Rule {
+                let rule = Rule {
                     tokens: vec![
+                        MappedSymbol {
+                            symbol: Symbol::Terminal(TerminalSymbol::VirtualStart(i as u32)),
+                            mapto: None,
+                            location: Location::CallSite,
+                            reduce_action_chains: Vec::new(),
+                        },
                         MappedSymbol {
                             symbol: Symbol::NonTerminal(*start_idx),
                             mapto: None,
@@ -1991,7 +1959,7 @@ impl Grammar {
                     dprec: None,
                     is_used: true,
                 };
-                augmented_rules.push(augmented_rule);
+                augmented_rules.push(rule);
                 grammar.nonterminals[*start_idx].protected = true;
             }
 

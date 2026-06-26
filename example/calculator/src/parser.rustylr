@@ -11,7 +11,7 @@ pub enum Token {
 
 %%
 
-// this define struct `EParser`
+// this defines `Parser` and `EContext`
 // where 'E' is the start symbol
 
 // lalr parser

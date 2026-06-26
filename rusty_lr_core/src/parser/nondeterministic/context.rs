@@ -3,8 +3,9 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::ParseError;
 
-use crate::parser::data_stack::DataStack;
 use crate::parser::nonterminal::NonTerminal;
+use crate::parser::semantic_value::SemanticValue;
+use crate::parser::semantic_value::StartExtractor;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
@@ -17,20 +18,22 @@ use crate::TerminalSymbol;
 pub struct NodeRefIterator<
     'a,
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-    Data: DataStack,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
 > {
-    context: &'a Context<P, Data, StateIndex, MAX_REDUCE_RULES>,
+    context: &'a Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
     node: Option<usize>,
 }
 impl<
         'a,
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex,
         const MAX_REDUCE_RULES: usize,
-    > Clone for NodeRefIterator<'a, P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Clone for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     fn clone(&self) -> Self {
         NodeRefIterator {
@@ -42,10 +45,11 @@ impl<
 impl<
         'a,
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index + Copy,
         const MAX_REDUCE_RULES: usize,
-    > Iterator for NodeRefIterator<'a, P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Iterator for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     type Item = &'a Node<Data, StateIndex>;
 
@@ -56,11 +60,36 @@ impl<
     }
 }
 
+struct BranchDebug<'a, Data: SemanticValue> {
+    index: usize,
+    state: usize,
+    state_stack: Vec<usize>,
+    data_stack: Vec<&'a Data>,
+    userdata: &'a Data::UserData,
+}
+
+impl<Data> std::fmt::Debug for BranchDebug<'_, Data>
+where
+    Data: SemanticValue + std::fmt::Debug,
+    Data::UserData: std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Branch")
+            .field("index", &self.index)
+            .field("state", &self.state)
+            .field("state_stack", &self.state_stack)
+            .field("data_stack", &self.data_stack)
+            .field("userdata", self.userdata)
+            .finish()
+    }
+}
+
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-    Data: DataStack,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
     StateIndex,
     const MAX_REDUCE_RULES: usize,
 > {
@@ -90,15 +119,16 @@ pub struct Context<
     ///
     /// Branches clone stack/userdata state, but they all read the same immutable runtime tables.
     pub(crate) tables: &'static P::Tables,
-    pub(crate) _phantom: std::marker::PhantomData<P>,
+    pub(crate) _phantom: std::marker::PhantomData<(P, Start)>,
 }
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
@@ -120,6 +150,7 @@ impl<
         let root_node = context.new_node();
         context.current_nodes.push(root_node);
         context.current_userdatas.push(userdata);
+        context.init_start_branch(Start::BRANCH_INDEX);
         context
     }
 
@@ -130,27 +161,18 @@ impl<
         Self::new(Default::default())
     }
 
-    pub fn new_with_branch(userdata: Data::UserData, branch_idx: u32) -> Self
-    where
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        let mut context = Self::new(userdata);
+    fn init_start_branch(&mut self, branch_idx: u32) {
         let class = P::TermClass::from_virtual_start(branch_idx);
-        let shift_to = context
-            .tables
-            .shift_goto_class(0, class)
-            .unwrap_or_else(|| {
-                panic!(
-                    "Failed to resolve shift for virtual start branch {}",
-                    branch_idx
-                )
-            });
-        let root_node_idx = context.current_nodes[0];
-        let root_node = context.node_mut(root_node_idx);
-        root_node.data_stack.set_branch_idx(branch_idx);
+        let shift_to = self.tables.shift_goto_class(0, class).unwrap_or_else(|| {
+            panic!(
+                "Failed to resolve shift for virtual start branch {}",
+                branch_idx
+            )
+        });
+        let root_node_idx = self.current_nodes[0];
+        let root_node = self.node_mut(root_node_idx);
         root_node.state_stack.push(shift_to.state);
-        root_node.data_stack.push_empty();
+        root_node.data_stack.push(Data::new_empty());
         root_node
             .location_stack
             .push(Data::Location::new(std::iter::empty(), 0));
@@ -160,16 +182,6 @@ impl<
                 TerminalSymbol::VirtualStart(branch_idx),
             ));
         }
-        context
-    }
-
-    pub fn with_default_userdata_and_branch(branch_idx: u32) -> Self
-    where
-        Data::UserData: Default,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        Self::new_with_branch(Default::default(), branch_idx)
     }
 
     /// Borrow the user data for the first active path.
@@ -313,7 +325,10 @@ impl<
     }
 
     /// Get iterator for all nodes in the current context.
-    fn node_iter(&self, node: usize) -> NodeRefIterator<'_, P, Data, StateIndex, MAX_REDUCE_RULES> {
+    fn node_iter(
+        &self,
+        node: usize,
+    ) -> NodeRefIterator<'_, P, Data, Start, StateIndex, MAX_REDUCE_RULES> {
         NodeRefIterator {
             context: self,
             node: Some(node),
@@ -336,6 +351,10 @@ impl<
                 .copied()
                 .map(Index::into_usize)
         })
+    }
+    fn data_iter(&self, node: usize) -> impl Iterator<Item = &Data> + '_ {
+        self.node_iter(node)
+            .flat_map(|node| node.data_stack.iter().rev())
     }
     #[cfg(feature = "tree")]
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
@@ -619,7 +638,7 @@ impl<
     pub fn accept(
         self,
     ) -> Result<
-        (Data::StartType, Data::UserData),
+        (Start::StartType, Data::UserData),
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -635,7 +654,7 @@ impl<
     pub fn accept_all(
         mut self,
     ) -> Result<
-        impl Iterator<Item = (Data::StartType, Data::UserData)>,
+        impl Iterator<Item = (Start::StartType, Data::UserData)>,
         ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
     >
     where
@@ -648,18 +667,33 @@ impl<
         // since `eof` is feeded, every node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        let nodes = std::mem::take(&mut self.current_nodes);
-        let userdatas = std::mem::take(&mut self.current_userdatas);
-        Ok(nodes
-            .into_iter()
-            .zip(userdatas)
-            .map(move |(node, userdata)| {
-                // let node = self.pop(eof_node).unwrap();
-                (
-                    self.nodes_pool[node].data_stack.pop_start().unwrap(),
-                    userdata,
+        let Context {
+            mut nodes_pool,
+            current_nodes,
+            current_userdatas,
+            ..
+        } = self;
+
+        let mut accepted = Vec::with_capacity(current_nodes.len());
+        for (node, userdata) in current_nodes.into_iter().zip(current_userdatas) {
+            let mut data_stack = std::mem::take(&mut nodes_pool[node].data_stack);
+            data_stack.pop(); // eof
+            let start_value = data_stack.pop().unwrap_or_else(|| {
+                panic!(
+                    "Accepted GLR path for virtual start branch {} has no start value",
+                    Start::BRANCH_INDEX
                 )
-            }))
+            });
+            let start_value = Start::extract(start_value).unwrap_or_else(|| {
+                panic!(
+                    "Accepted GLR path produced a value that does not match virtual start branch {}",
+                    Start::BRANCH_INDEX
+                )
+            });
+            accepted.push((start_value, userdata));
+        }
+
+        Ok(accepted.into_iter())
     }
 
     /// For debugging.
@@ -956,12 +990,12 @@ impl<
                 if shift.push {
                     match term {
                         TerminalSymbol::Terminal(term) => {
-                            node_.data_stack.push_terminal(term);
+                            node_.data_stack.push(Data::new_terminal(term));
                         }
                         TerminalSymbol::Error
                         | TerminalSymbol::Eof
                         | TerminalSymbol::VirtualStart(_) => {
-                            node_.data_stack.push_empty();
+                            node_.data_stack.push(Data::new_empty());
                         }
                     }
                 } else {
@@ -970,7 +1004,7 @@ impl<
                         | TerminalSymbol::Error
                         | TerminalSymbol::Eof
                         | TerminalSymbol::VirtualStart(_) => {
-                            node_.data_stack.push_empty();
+                            node_.data_stack.push(Data::new_empty());
                         }
                     }
                 }
@@ -995,12 +1029,12 @@ impl<
             if shift.push {
                 match term {
                     TerminalSymbol::Terminal(term) => {
-                        node_.data_stack.push_terminal(term);
+                        node_.data_stack.push(Data::new_terminal(term));
                     }
                     TerminalSymbol::Error
                     | TerminalSymbol::Eof
                     | TerminalSymbol::VirtualStart(_) => {
-                        node_.data_stack.push_empty();
+                        node_.data_stack.push(Data::new_empty());
                     }
                 }
             } else {
@@ -1009,7 +1043,7 @@ impl<
                     | TerminalSymbol::Error
                     | TerminalSymbol::Eof
                     | TerminalSymbol::VirtualStart(_) => {
-                        node_.data_stack.push_empty();
+                        node_.data_stack.push(Data::new_empty());
                     }
                 }
             }
@@ -1263,9 +1297,9 @@ impl<
                         ));
 
                         if next_state.push {
-                            node.data_stack.push_terminal(term.clone());
+                            node.data_stack.push(Data::new_terminal(term.clone()));
                         } else {
-                            node.data_stack.push_empty();
+                            node.data_stack.push(Data::new_empty());
                         }
 
                         self.current_nodes.push(error_node);
@@ -1612,10 +1646,11 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > Default for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Default for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Data::UserData: Default,
 {
@@ -1626,10 +1661,11 @@ where
 
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > Clone for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > Clone for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Node<Data, StateIndex>: Clone,
     Data::UserData: Clone,
@@ -1652,41 +1688,44 @@ where
     }
 }
 
-#[cfg(feature = "tree")]
 impl<
         P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
+        Data: SemanticValue,
+        Start: StartExtractor<Data>,
         StateIndex: Index,
         const MAX_REDUCE_RULES: usize,
-    > std::fmt::Display for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
+    > std::fmt::Debug for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
-    Data::Term: std::fmt::Display + Clone,
-    Data::NonTerm: std::fmt::Display + Clone,
+    Data: std::fmt::Debug,
+    Data::UserData: std::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (i, path) in self.to_tree_lists().enumerate() {
-            writeln!(f, "Path {}:", i)?;
-            writeln!(f, "{}", path)?;
-        }
-        Ok(())
-    }
-}
-#[cfg(feature = "tree")]
-impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: DataStack,
-        StateIndex: Index,
-        const MAX_REDUCE_RULES: usize,
-    > std::fmt::Debug for Context<P, Data, StateIndex, MAX_REDUCE_RULES>
-where
-    Data::Term: std::fmt::Debug + Clone,
-    Data::NonTerm: std::fmt::Debug + Clone,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (i, path) in self.to_tree_lists().enumerate() {
-            writeln!(f, "Path {}:", i)?;
-            writeln!(f, "{:?}", path)?;
-        }
-        Ok(())
+        let branches: Vec<_> = self
+            .current_nodes
+            .iter()
+            .copied()
+            .zip(&self.current_userdatas)
+            .enumerate()
+            .map(|(index, (node, userdata))| {
+                let mut state_stack: Vec<_> =
+                    self.state_iter(node).chain(std::iter::once(0)).collect();
+                state_stack.reverse();
+                let mut data_stack: Vec<_> = self.data_iter(node).collect();
+                data_stack.reverse();
+
+                BranchDebug {
+                    index,
+                    state: self.state(node),
+                    state_stack,
+                    data_stack,
+                    userdata,
+                }
+            })
+            .collect();
+
+        f.debug_struct("Context")
+            .field("branch_count", &self.current_nodes.len())
+            .field("branches", &branches)
+            .finish()
     }
 }
