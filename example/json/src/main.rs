@@ -46,11 +46,8 @@ const TEST_JSON: &'static str = r#"
 "#;
 
 fn main() {
-    println!("#rules: {}", parser::JsonParser::get_tables().rule_count());
-    println!(
-        "#states: {}",
-        parser::JsonParser::get_tables().state_count()
-    );
+    println!("#rules: {}", parser::Parser::get_tables().rule_count());
+    println!("#states: {}", parser::Parser::get_tables().state_count());
 
     fn try_once() {
         let mut context = parser::JsonContext::new(Vec::new());

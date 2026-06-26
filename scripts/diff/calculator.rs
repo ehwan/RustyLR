@@ -33,22 +33,22 @@ pub enum Token {
 // =============================Generated Codes Begin==============================
 #[allow(non_camel_case_types, dead_code)]
 pub type EContext = ::rusty_lr::parser::deterministic::Context<
-    EParser,
-    EData,
+    Parser,
+    Data,
     EExtracter,
     u8,
 >;
 #[allow(non_camel_case_types, dead_code)]
-pub type ERule = ::rusty_lr::production::Production<ETerminalClasses, ENonTerminals>;
+pub type Rule = ::rusty_lr::production::Production<TerminalClasses, NonTerminals>;
 #[allow(non_camel_case_types, dead_code)]
-pub type ETables = ::rusty_lr::parser::table::DenseFlatTables<
-    ETerminalClasses,
-    ENonTerminals,
+pub type Tables = ::rusty_lr::parser::table::DenseFlatTables<
+    TerminalClasses,
+    NonTerminals,
     u8,
     u8,
 >;
 #[allow(non_camel_case_types, dead_code)]
-pub type EParseError = ::rusty_lr::parser::deterministic::ParseError<
+pub type ParseError = ::rusty_lr::parser::deterministic::ParseError<
     Token,
     ::rusty_lr::DefaultLocation,
     String,
@@ -65,7 +65,7 @@ pub type EParseError = ::rusty_lr::parser::deterministic::ParseError<
     std::cmp::Ord
 )]
 #[repr(usize)]
-pub enum ETerminalClasses {
+pub enum TerminalClasses {
     num,
     plus,
     star,
@@ -76,7 +76,7 @@ pub enum ETerminalClasses {
     eof,
     VirtualStart0,
 }
-impl ETerminalClasses {
+impl TerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -86,21 +86,21 @@ impl ETerminalClasses {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
+impl ::rusty_lr::parser::terminalclass::TerminalClass for TerminalClasses {
     type Term = Token;
     const ERROR: Self = Self::error;
     const EOF: Self = Self::eof;
     fn as_str(&self) -> &'static str {
         match self {
-            ETerminalClasses::num => "num",
-            ETerminalClasses::plus => "plus",
-            ETerminalClasses::star => "star",
-            ETerminalClasses::lparen => "lparen",
-            ETerminalClasses::rparen => "rparen",
-            ETerminalClasses::__rustylr_other_terminals => "__rustylr_other_terminals",
-            ETerminalClasses::error => "error",
-            ETerminalClasses::eof => "eof",
-            ETerminalClasses::VirtualStart0 => "virtual_start",
+            TerminalClasses::num => "num",
+            TerminalClasses::plus => "plus",
+            TerminalClasses::star => "star",
+            TerminalClasses::lparen => "lparen",
+            TerminalClasses::rparen => "rparen",
+            TerminalClasses::__rustylr_other_terminals => "__rustylr_other_terminals",
+            TerminalClasses::error => "error",
+            TerminalClasses::eof => "eof",
+            TerminalClasses::VirtualStart0 => "virtual_start",
         }
     }
     fn to_usize(&self) -> usize {
@@ -109,12 +109,12 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
-            Token::Num(_) => ETerminalClasses::num,
-            Token::Plus => ETerminalClasses::plus,
-            Token::Star => ETerminalClasses::star,
-            Token::LParen => ETerminalClasses::lparen,
-            Token::RParen => ETerminalClasses::rparen,
-            _ => ETerminalClasses::__rustylr_other_terminals,
+            Token::Num(_) => TerminalClasses::num,
+            Token::Plus => TerminalClasses::plus,
+            Token::Star => TerminalClasses::star,
+            Token::LParen => TerminalClasses::lparen,
+            Token::RParen => TerminalClasses::rparen,
+            _ => TerminalClasses::__rustylr_other_terminals,
         }
     }
     fn from_virtual_start(branch_idx: u32) -> Self {
@@ -124,13 +124,13 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for ETerminalClasses {
         }
     }
 }
-impl std::fmt::Display for ETerminalClasses {
+impl std::fmt::Display for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for ETerminalClasses {
+impl std::fmt::Debug for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
@@ -148,14 +148,14 @@ impl std::fmt::Debug for ETerminalClasses {
     std::cmp::Ord
 )]
 #[repr(usize)]
-pub enum ENonTerminals {
+pub enum NonTerminals {
     A,
     M,
     P,
     E,
     Augmented,
 }
-impl ENonTerminals {
+impl NonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -165,35 +165,35 @@ impl ENonTerminals {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl std::fmt::Display for ENonTerminals {
+impl std::fmt::Display for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for ENonTerminals {
+impl std::fmt::Debug for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
+impl ::rusty_lr::parser::nonterminal::NonTerminal for NonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
-            ENonTerminals::A => "A",
-            ENonTerminals::M => "M",
-            ENonTerminals::P => "P",
-            ENonTerminals::E => "E",
-            ENonTerminals::Augmented => "Augmented",
+            NonTerminals::A => "A",
+            NonTerminals::M => "M",
+            NonTerminals::P => "P",
+            NonTerminals::E => "E",
+            NonTerminals::Augmented => "Augmented",
         }
     }
     fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
-            ENonTerminals::A => None,
-            ENonTerminals::M => None,
-            ENonTerminals::P => None,
-            ENonTerminals::E => None,
-            ENonTerminals::Augmented => {
+            NonTerminals::A => None,
+            NonTerminals::M => None,
+            NonTerminals::P => None,
+            NonTerminals::E => None,
+            NonTerminals::Augmented => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
@@ -206,12 +206,12 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for ENonTerminals {
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 #[derive(Clone)]
-pub enum EData {
+pub enum Data {
     __terminals(Token),
     __variant1(i32),
     Empty,
 }
-impl ::std::fmt::Debug for EData {
+impl ::std::fmt::Debug for Data {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
             Self::__terminals(..) => f.write_str(stringify!(__terminals)),
@@ -223,12 +223,12 @@ impl ::std::fmt::Debug for EData {
 #[doc(hidden)]
 #[allow(non_camel_case_types, dead_code)]
 pub struct EExtracter;
-impl ::rusty_lr::parser::semantic_value::StartExtractor<EData> for EExtracter {
+impl ::rusty_lr::parser::semantic_value::StartExtractor<Data> for EExtracter {
     type StartType = i32;
     const BRANCH_INDEX: u32 = 0u32;
-    fn extract(value: EData) -> Option<Self::StartType> {
+    fn extract(value: Data) -> Option<Self::StartType> {
         match value {
-            EData::__variant1(val) => Some(val),
+            Data::__variant1(val) => Some(val),
             _ => None,
         }
     }
@@ -243,7 +243,7 @@ impl ::rusty_lr::parser::semantic_value::StartExtractor<EData> for EExtracter {
     dead_code,
     unreachable_patterns
 )]
-impl EData {
+impl Data {
     fn custom_reduce_action_0(
         mut M: i32,
         data: &mut i32,
@@ -266,28 +266,28 @@ impl EData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                EData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         let mut a2 = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         let mut plus = match __data_stack.pop().unwrap() {
-            EData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let mut A = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -317,12 +317,12 @@ impl EData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
         }
         __location_stack.pop();
         let mut M = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         let __res = M;
@@ -348,25 +348,25 @@ impl EData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                EData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut __rustylr_data_0 = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         let __rustylr_data_0 = Self::custom_reduce_action_0(
@@ -404,12 +404,12 @@ impl EData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                EData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut num = match __data_stack.pop().unwrap() {
-            EData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -441,21 +441,21 @@ impl EData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                EData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                EData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         __data_stack.pop();
         let mut E = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -482,12 +482,12 @@ impl EData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                EData::__variant1(_)))
+                Data::__variant1(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            EData::__variant1(val) => val,
+            Data::__variant1(val) => val,
             _ => unreachable!(),
         };
         let __res = A;
@@ -507,9 +507,9 @@ impl EData {
     non_camel_case_types,
     unused_variables
 )]
-impl ::rusty_lr::parser::semantic_value::SemanticValue for EData {
+impl ::rusty_lr::parser::semantic_value::SemanticValue for Data {
     type Term = Token;
-    type NonTerm = ENonTerminals;
+    type NonTerm = NonTerminals;
     type ReduceActionError = String;
     type UserData = i32;
     type Location = ::rusty_lr::DefaultLocation;
@@ -608,20 +608,20 @@ impl ::rusty_lr::parser::semantic_value::SemanticValue for EData {
 /// it is extremely cheap to instantiate, copy, or clone, and takes very little space.
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 #[derive(Clone, Copy)]
-pub struct EParser;
-unsafe impl ::std::marker::Send for EParser {}
-unsafe impl ::std::marker::Sync for EParser {}
+pub struct Parser;
+unsafe impl ::std::marker::Send for Parser {}
+unsafe impl ::std::marker::Sync for Parser {}
 #[rustfmt::skip]
-impl ::rusty_lr::parser::Parser for EParser {
+impl ::rusty_lr::parser::Parser for Parser {
     type Term = Token;
-    type TermClass = ETerminalClasses;
-    type NonTerm = ENonTerminals;
+    type TermClass = TerminalClasses;
+    type NonTerm = NonTerminals;
     type StateIndex = u8;
     type ReduceRules = u8;
-    type Tables = ETables;
+    type Tables = Tables;
     const ERROR_USED: bool = false;
-    fn get_tables() -> &'static ETables {
-        static TABLES: std::sync::OnceLock<ETables> = std::sync::OnceLock::new();
+    fn get_tables() -> &'static Tables {
+        static TABLES: std::sync::OnceLock<Tables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[0, 0, 1, 1, 2, 2, 3, 4];
@@ -655,7 +655,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                 let num_rules = 8usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let lhs = ENonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = NonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
                             lhs,
@@ -672,7 +672,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                     );
                     for idx in term_start..term_end {
                         let val = SHIFT_TERM_DATA[idx];
-                        let term_class = ETerminalClasses::from_usize(
+                        let term_class = TerminalClasses::from_usize(
                             (val & 0x7fff) as usize,
                         );
                         let state = ((val >> 15) & 0xffff) as usize;
@@ -690,7 +690,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                     );
                     for idx in nonterm_start..nonterm_end {
                         let val = SHIFT_NONTERM_DATA[idx];
-                        let nonterm = ENonTerminals::from_usize((val & 0x7fff) as usize);
+                        let nonterm = NonTerminals::from_usize((val & 0x7fff) as usize);
                         let state = ((val >> 15) & 0xffff) as usize;
                         let push = (val >> 31) != 0;
                         shift_goto_map_nonterm
@@ -705,7 +705,7 @@ impl ::rusty_lr::parser::Parser for EParser {
                     let mut idx = reduce_start;
                     while idx < reduce_end {
                         let term_val = REDUCE_DATA[idx];
-                        let term_class = ETerminalClasses::from_usize(term_val as usize);
+                        let term_class = TerminalClasses::from_usize(term_val as usize);
                         let len = REDUCE_DATA[idx + 1] as usize;
                         let mut rules = Vec::with_capacity(len);
                         for r_idx in 0..len {

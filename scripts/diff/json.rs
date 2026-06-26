@@ -116,25 +116,22 @@
 // =============================Generated Codes Begin==============================
 #[allow(non_camel_case_types, dead_code)]
 pub type JsonContext = ::rusty_lr::parser::deterministic::Context<
-    JsonParser,
-    JsonData,
+    Parser,
+    Data,
     JsonExtracter,
     u8,
 >;
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonRule = ::rusty_lr::production::Production<
-    JsonTerminalClasses,
-    JsonNonTerminals,
->;
+pub type Rule = ::rusty_lr::production::Production<TerminalClasses, NonTerminals>;
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonTables = ::rusty_lr::parser::table::DenseFlatTables<
-    JsonTerminalClasses,
-    JsonNonTerminals,
+pub type Tables = ::rusty_lr::parser::table::DenseFlatTables<
+    TerminalClasses,
+    NonTerminals,
     u8,
     u8,
 >;
 #[allow(non_camel_case_types, dead_code)]
-pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<
+pub type ParseError = ::rusty_lr::parser::deterministic::ParseError<
     char,
     std::ops::Range<usize>,
     ::rusty_lr::DefaultReduceActionError,
@@ -151,7 +148,7 @@ pub type JsonParseError = ::rusty_lr::parser::deterministic::ParseError<
     std::cmp::Ord
 )]
 #[repr(usize)]
-pub enum JsonTerminalClasses {
+pub enum TerminalClasses {
     TermClass0,
     TermClass1,
     TermClass2,
@@ -187,7 +184,7 @@ pub enum JsonTerminalClasses {
     eof,
     VirtualStart0,
 }
-impl JsonTerminalClasses {
+impl TerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -197,46 +194,46 @@ impl JsonTerminalClasses {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
+impl ::rusty_lr::parser::terminalclass::TerminalClass for TerminalClasses {
     type Term = char;
     const ERROR: Self = Self::error;
     const EOF: Self = Self::eof;
     fn as_str(&self) -> &'static str {
         match self {
-            JsonTerminalClasses::TermClass0 => "['\\t', '\\n', '\\r']",
-            JsonTerminalClasses::TermClass1 => "' '",
-            JsonTerminalClasses::TermClass2 => "<Others>",
-            JsonTerminalClasses::TermClass3 => "['!', '#'-'*', ..., '~'-'\\u{10ffff}']",
-            JsonTerminalClasses::TermClass4 => "'/'",
-            JsonTerminalClasses::TermClass5 => "'b'",
-            JsonTerminalClasses::TermClass6 => "'f'",
-            JsonTerminalClasses::TermClass7 => "'n'",
-            JsonTerminalClasses::TermClass8 => "'r'",
-            JsonTerminalClasses::TermClass9 => "'t'",
-            JsonTerminalClasses::TermClass10 => "'+'",
-            JsonTerminalClasses::TermClass11 => "'-'",
-            JsonTerminalClasses::TermClass12 => "','",
-            JsonTerminalClasses::TermClass13 => "'.'",
-            JsonTerminalClasses::TermClass14 => "'0'",
-            JsonTerminalClasses::TermClass15 => "['1'-'9']",
-            JsonTerminalClasses::TermClass16 => "':'",
-            JsonTerminalClasses::TermClass17 => "['A'-'D', 'F']",
-            JsonTerminalClasses::TermClass18 => "'E'",
-            JsonTerminalClasses::TermClass19 => "'e'",
-            JsonTerminalClasses::TermClass20 => "'['",
-            JsonTerminalClasses::TermClass21 => "']'",
-            JsonTerminalClasses::TermClass22 => "'a'",
-            JsonTerminalClasses::TermClass23 => "['c'-'d']",
-            JsonTerminalClasses::TermClass24 => "'l'",
-            JsonTerminalClasses::TermClass25 => "'s'",
-            JsonTerminalClasses::TermClass26 => "'u'",
-            JsonTerminalClasses::TermClass27 => "'{'",
-            JsonTerminalClasses::TermClass28 => "'}'",
-            JsonTerminalClasses::TermClass29 => "'\"'",
-            JsonTerminalClasses::TermClass30 => "'\\\\'",
-            JsonTerminalClasses::error => "error",
-            JsonTerminalClasses::eof => "eof",
-            JsonTerminalClasses::VirtualStart0 => "virtual_start",
+            TerminalClasses::TermClass0 => "['\\t', '\\n', '\\r']",
+            TerminalClasses::TermClass1 => "' '",
+            TerminalClasses::TermClass2 => "<Others>",
+            TerminalClasses::TermClass3 => "['!', '#'-'*', ..., '~'-'\\u{10ffff}']",
+            TerminalClasses::TermClass4 => "'/'",
+            TerminalClasses::TermClass5 => "'b'",
+            TerminalClasses::TermClass6 => "'f'",
+            TerminalClasses::TermClass7 => "'n'",
+            TerminalClasses::TermClass8 => "'r'",
+            TerminalClasses::TermClass9 => "'t'",
+            TerminalClasses::TermClass10 => "'+'",
+            TerminalClasses::TermClass11 => "'-'",
+            TerminalClasses::TermClass12 => "','",
+            TerminalClasses::TermClass13 => "'.'",
+            TerminalClasses::TermClass14 => "'0'",
+            TerminalClasses::TermClass15 => "['1'-'9']",
+            TerminalClasses::TermClass16 => "':'",
+            TerminalClasses::TermClass17 => "['A'-'D', 'F']",
+            TerminalClasses::TermClass18 => "'E'",
+            TerminalClasses::TermClass19 => "'e'",
+            TerminalClasses::TermClass20 => "'['",
+            TerminalClasses::TermClass21 => "']'",
+            TerminalClasses::TermClass22 => "'a'",
+            TerminalClasses::TermClass23 => "['c'-'d']",
+            TerminalClasses::TermClass24 => "'l'",
+            TerminalClasses::TermClass25 => "'s'",
+            TerminalClasses::TermClass26 => "'u'",
+            TerminalClasses::TermClass27 => "'{'",
+            TerminalClasses::TermClass28 => "'}'",
+            TerminalClasses::TermClass29 => "'\"'",
+            TerminalClasses::TermClass30 => "'\\\\'",
+            TerminalClasses::error => "error",
+            TerminalClasses::eof => "eof",
+            TerminalClasses::VirtualStart0 => "virtual_start",
         }
     }
     fn to_usize(&self) -> usize {
@@ -245,8 +242,8 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
-            '\t'..='\n' | '\r' => JsonTerminalClasses::TermClass0,
-            ' ' => JsonTerminalClasses::TermClass1,
+            '\t'..='\n' | '\r' => TerminalClasses::TermClass0,
+            ' ' => TerminalClasses::TermClass1,
             '!'
             | '#'..='*'
             | ';'..='@'
@@ -257,35 +254,35 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
             | 'o'..='q'
             | 'v'..='z'
             | '|'
-            | '~'..='\u{10ffff}' => JsonTerminalClasses::TermClass3,
-            '/' => JsonTerminalClasses::TermClass4,
-            'b' => JsonTerminalClasses::TermClass5,
-            'f' => JsonTerminalClasses::TermClass6,
-            'n' => JsonTerminalClasses::TermClass7,
-            'r' => JsonTerminalClasses::TermClass8,
-            't' => JsonTerminalClasses::TermClass9,
-            '+' => JsonTerminalClasses::TermClass10,
-            '-' => JsonTerminalClasses::TermClass11,
-            ',' => JsonTerminalClasses::TermClass12,
-            '.' => JsonTerminalClasses::TermClass13,
-            '0' => JsonTerminalClasses::TermClass14,
-            '1'..='9' => JsonTerminalClasses::TermClass15,
-            ':' => JsonTerminalClasses::TermClass16,
-            'A'..='D' | 'F' => JsonTerminalClasses::TermClass17,
-            'E' => JsonTerminalClasses::TermClass18,
-            'e' => JsonTerminalClasses::TermClass19,
-            '[' => JsonTerminalClasses::TermClass20,
-            ']' => JsonTerminalClasses::TermClass21,
-            'a' => JsonTerminalClasses::TermClass22,
-            'c'..='d' => JsonTerminalClasses::TermClass23,
-            'l' => JsonTerminalClasses::TermClass24,
-            's' => JsonTerminalClasses::TermClass25,
-            'u' => JsonTerminalClasses::TermClass26,
-            '{' => JsonTerminalClasses::TermClass27,
-            '}' => JsonTerminalClasses::TermClass28,
-            '"' => JsonTerminalClasses::TermClass29,
-            '\\' => JsonTerminalClasses::TermClass30,
-            _ => JsonTerminalClasses::TermClass2,
+            | '~'..='\u{10ffff}' => TerminalClasses::TermClass3,
+            '/' => TerminalClasses::TermClass4,
+            'b' => TerminalClasses::TermClass5,
+            'f' => TerminalClasses::TermClass6,
+            'n' => TerminalClasses::TermClass7,
+            'r' => TerminalClasses::TermClass8,
+            't' => TerminalClasses::TermClass9,
+            '+' => TerminalClasses::TermClass10,
+            '-' => TerminalClasses::TermClass11,
+            ',' => TerminalClasses::TermClass12,
+            '.' => TerminalClasses::TermClass13,
+            '0' => TerminalClasses::TermClass14,
+            '1'..='9' => TerminalClasses::TermClass15,
+            ':' => TerminalClasses::TermClass16,
+            'A'..='D' | 'F' => TerminalClasses::TermClass17,
+            'E' => TerminalClasses::TermClass18,
+            'e' => TerminalClasses::TermClass19,
+            '[' => TerminalClasses::TermClass20,
+            ']' => TerminalClasses::TermClass21,
+            'a' => TerminalClasses::TermClass22,
+            'c'..='d' => TerminalClasses::TermClass23,
+            'l' => TerminalClasses::TermClass24,
+            's' => TerminalClasses::TermClass25,
+            'u' => TerminalClasses::TermClass26,
+            '{' => TerminalClasses::TermClass27,
+            '}' => TerminalClasses::TermClass28,
+            '"' => TerminalClasses::TermClass29,
+            '\\' => TerminalClasses::TermClass30,
+            _ => TerminalClasses::TermClass2,
         }
     }
     fn from_virtual_start(branch_idx: u32) -> Self {
@@ -295,13 +292,13 @@ impl ::rusty_lr::parser::terminalclass::TerminalClass for JsonTerminalClasses {
         }
     }
 }
-impl std::fmt::Display for JsonTerminalClasses {
+impl std::fmt::Display for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for JsonTerminalClasses {
+impl std::fmt::Debug for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
@@ -319,7 +316,7 @@ impl std::fmt::Debug for JsonTerminalClasses {
     std::cmp::Ord
 )]
 #[repr(usize)]
-pub enum JsonNonTerminals {
+pub enum NonTerminals {
     Json,
     Value,
     Object,
@@ -353,7 +350,7 @@ pub enum JsonNonTerminals {
     _LiteralString36,
     Augmented,
 }
-impl JsonNonTerminals {
+impl NonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -363,119 +360,119 @@ impl JsonNonTerminals {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl std::fmt::Display for JsonNonTerminals {
+impl std::fmt::Display for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for JsonNonTerminals {
+impl std::fmt::Debug for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
+impl ::rusty_lr::parser::nonterminal::NonTerminal for NonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
-            JsonNonTerminals::Json => "Json",
-            JsonNonTerminals::Value => "Value",
-            JsonNonTerminals::Object => "Object",
-            JsonNonTerminals::Members => "Members",
-            JsonNonTerminals::Member => "Member",
-            JsonNonTerminals::Array => "Array",
-            JsonNonTerminals::Element => "Element",
-            JsonNonTerminals::String => "String",
-            JsonNonTerminals::Character => "Character",
-            JsonNonTerminals::Escape => "Escape",
-            JsonNonTerminals::Hex => "Hex",
-            JsonNonTerminals::Number => "Number",
-            JsonNonTerminals::Integer => "Integer",
-            JsonNonTerminals::Exponent => "Exponent",
-            JsonNonTerminals::Sign => "Sign",
-            JsonNonTerminals::WS => "WS",
-            JsonNonTerminals::_LiteralString22 => "\"true\"",
-            JsonNonTerminals::_LiteralString23 => "\"false\"",
-            JsonNonTerminals::_LiteralString24 => "\"null\"",
-            JsonNonTerminals::_ElementSepPlus25 => "$sep(Element, ',', +)",
-            JsonNonTerminals::_ElementSepStar26 => "$sep(Element, ',', *)",
-            JsonNonTerminals::_CharacterPlus27 => "Character+",
-            JsonNonTerminals::_CharacterStar28 => "Character*",
-            JsonNonTerminals::_TermSet29 => "[' '-'\\u{10ffff}']-'\"'-'\\\\'",
-            JsonNonTerminals::_TermSet30 => "['A'-'F']",
-            JsonNonTerminals::_TermSet31 => "['a'-'f']",
-            JsonNonTerminals::_DigitPlus32 => "Digit+",
-            JsonNonTerminals::_TermSet33 => "['0'-'9']",
-            JsonNonTerminals::_Group34 => "('.', Digits)",
-            JsonNonTerminals::__Group34Question35 => "('.', Digits)?",
-            JsonNonTerminals::_LiteralString36 => "\"\"",
-            JsonNonTerminals::Augmented => "Augmented",
+            NonTerminals::Json => "Json",
+            NonTerminals::Value => "Value",
+            NonTerminals::Object => "Object",
+            NonTerminals::Members => "Members",
+            NonTerminals::Member => "Member",
+            NonTerminals::Array => "Array",
+            NonTerminals::Element => "Element",
+            NonTerminals::String => "String",
+            NonTerminals::Character => "Character",
+            NonTerminals::Escape => "Escape",
+            NonTerminals::Hex => "Hex",
+            NonTerminals::Number => "Number",
+            NonTerminals::Integer => "Integer",
+            NonTerminals::Exponent => "Exponent",
+            NonTerminals::Sign => "Sign",
+            NonTerminals::WS => "WS",
+            NonTerminals::_LiteralString22 => "\"true\"",
+            NonTerminals::_LiteralString23 => "\"false\"",
+            NonTerminals::_LiteralString24 => "\"null\"",
+            NonTerminals::_ElementSepPlus25 => "$sep(Element, ',', +)",
+            NonTerminals::_ElementSepStar26 => "$sep(Element, ',', *)",
+            NonTerminals::_CharacterPlus27 => "Character+",
+            NonTerminals::_CharacterStar28 => "Character*",
+            NonTerminals::_TermSet29 => "[' '-'\\u{10ffff}']-'\"'-'\\\\'",
+            NonTerminals::_TermSet30 => "['A'-'F']",
+            NonTerminals::_TermSet31 => "['a'-'f']",
+            NonTerminals::_DigitPlus32 => "Digit+",
+            NonTerminals::_TermSet33 => "['0'-'9']",
+            NonTerminals::_Group34 => "('.', Digits)",
+            NonTerminals::__Group34Question35 => "('.', Digits)?",
+            NonTerminals::_LiteralString36 => "\"\"",
+            NonTerminals::Augmented => "Augmented",
         }
     }
     fn nonterm_type(&self) -> Option<::rusty_lr::parser::nonterminal::NonTerminalType> {
         match self {
-            JsonNonTerminals::Json => None,
-            JsonNonTerminals::Value => None,
-            JsonNonTerminals::Object => None,
-            JsonNonTerminals::Members => None,
-            JsonNonTerminals::Member => None,
-            JsonNonTerminals::Array => None,
-            JsonNonTerminals::Element => None,
-            JsonNonTerminals::String => None,
-            JsonNonTerminals::Character => None,
-            JsonNonTerminals::Escape => None,
-            JsonNonTerminals::Hex => None,
-            JsonNonTerminals::Number => None,
-            JsonNonTerminals::Integer => None,
-            JsonNonTerminals::Exponent => None,
-            JsonNonTerminals::Sign => None,
-            JsonNonTerminals::WS => None,
-            JsonNonTerminals::_LiteralString22 => {
+            NonTerminals::Json => None,
+            NonTerminals::Value => None,
+            NonTerminals::Object => None,
+            NonTerminals::Members => None,
+            NonTerminals::Member => None,
+            NonTerminals::Array => None,
+            NonTerminals::Element => None,
+            NonTerminals::String => None,
+            NonTerminals::Character => None,
+            NonTerminals::Escape => None,
+            NonTerminals::Hex => None,
+            NonTerminals::Number => None,
+            NonTerminals::Integer => None,
+            NonTerminals::Exponent => None,
+            NonTerminals::Sign => None,
+            NonTerminals::WS => None,
+            NonTerminals::_LiteralString22 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::_LiteralString23 => {
+            NonTerminals::_LiteralString23 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::_LiteralString24 => {
+            NonTerminals::_LiteralString24 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::_ElementSepPlus25 => {
+            NonTerminals::_ElementSepPlus25 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            JsonNonTerminals::_ElementSepStar26 => {
+            NonTerminals::_ElementSepStar26 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
-            JsonNonTerminals::_CharacterPlus27 => {
+            NonTerminals::_CharacterPlus27 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            JsonNonTerminals::_CharacterStar28 => {
+            NonTerminals::_CharacterStar28 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Star)
             }
-            JsonNonTerminals::_TermSet29 => {
+            NonTerminals::_TermSet29 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_TermSet30 => {
+            NonTerminals::_TermSet30 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_TermSet31 => {
+            NonTerminals::_TermSet31 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_DigitPlus32 => {
+            NonTerminals::_DigitPlus32 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            JsonNonTerminals::_TermSet33 => {
+            NonTerminals::_TermSet33 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            JsonNonTerminals::_Group34 => {
+            NonTerminals::_Group34 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Group)
             }
-            JsonNonTerminals::__Group34Question35 => {
+            NonTerminals::__Group34Question35 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Optional)
             }
-            JsonNonTerminals::_LiteralString36 => {
+            NonTerminals::_LiteralString36 => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::LiteralString)
             }
-            JsonNonTerminals::Augmented => {
+            NonTerminals::Augmented => {
                 Some(::rusty_lr::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
@@ -488,10 +485,10 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for JsonNonTerminals {
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 #[derive(Clone)]
-pub enum JsonData {
+pub enum Data {
     Empty,
 }
-impl ::std::fmt::Debug for JsonData {
+impl ::std::fmt::Debug for Data {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
             Self::Empty => f.write_str("Empty"),
@@ -501,12 +498,12 @@ impl ::std::fmt::Debug for JsonData {
 #[doc(hidden)]
 #[allow(non_camel_case_types, dead_code)]
 pub struct JsonExtracter;
-impl ::rusty_lr::parser::semantic_value::StartExtractor<JsonData> for JsonExtracter {
+impl ::rusty_lr::parser::semantic_value::StartExtractor<Data> for JsonExtracter {
     type StartType = ();
     const BRANCH_INDEX: u32 = 0u32;
-    fn extract(value: JsonData) -> Option<Self::StartType> {
+    fn extract(value: Data) -> Option<Self::StartType> {
         match value {
-            JsonData::Empty => Some(()),
+            Data::Empty => Some(()),
             _ => None,
         }
     }
@@ -521,7 +518,7 @@ impl ::rusty_lr::parser::semantic_value::StartExtractor<JsonData> for JsonExtrac
     dead_code,
     unreachable_patterns
 )]
-impl JsonData {
+impl Data {
     ///Object -> '{' WS '}'
     #[inline]
     fn reduce_Object_0(
@@ -537,15 +534,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -568,15 +565,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -599,15 +596,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -635,7 +632,7 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -658,15 +655,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -689,23 +686,23 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 5);
@@ -728,15 +725,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -759,15 +756,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -790,15 +787,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -821,11 +818,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -848,23 +845,23 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 5);
@@ -887,15 +884,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -918,11 +915,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -945,11 +942,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -972,15 +969,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -1003,15 +1000,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -1034,15 +1031,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -1065,11 +1062,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -1092,11 +1089,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -1119,19 +1116,19 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 4);
@@ -1154,23 +1151,23 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 5);
@@ -1193,19 +1190,19 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 4);
@@ -1228,7 +1225,7 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -1251,15 +1248,15 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -1297,7 +1294,7 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -1320,11 +1317,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -1362,7 +1359,7 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -1385,11 +1382,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -1412,7 +1409,7 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -1435,11 +1432,11 @@ impl JsonData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                JsonData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -1486,9 +1483,9 @@ impl JsonData {
     non_camel_case_types,
     unused_variables
 )]
-impl ::rusty_lr::parser::semantic_value::SemanticValue for JsonData {
+impl ::rusty_lr::parser::semantic_value::SemanticValue for Data {
     type Term = char;
-    type NonTerm = JsonNonTerminals;
+    type NonTerm = NonTerminals;
     type ReduceActionError = ::rusty_lr::DefaultReduceActionError;
     type UserData = Vec<std::ops::Range<usize>>;
     type Location = std::ops::Range<usize>;
@@ -1895,20 +1892,20 @@ impl ::rusty_lr::parser::semantic_value::SemanticValue for JsonData {
 /// it is extremely cheap to instantiate, copy, or clone, and takes very little space.
 #[allow(unused_braces, unused_parens, unused_variables, non_snake_case, unused_mut)]
 #[derive(Clone, Copy)]
-pub struct JsonParser;
-unsafe impl ::std::marker::Send for JsonParser {}
-unsafe impl ::std::marker::Sync for JsonParser {}
+pub struct Parser;
+unsafe impl ::std::marker::Send for Parser {}
+unsafe impl ::std::marker::Sync for Parser {}
 #[rustfmt::skip]
-impl ::rusty_lr::parser::Parser for JsonParser {
+impl ::rusty_lr::parser::Parser for Parser {
     type Term = char;
-    type TermClass = JsonTerminalClasses;
-    type NonTerm = JsonNonTerminals;
+    type TermClass = TerminalClasses;
+    type NonTerm = NonTerminals;
     type StateIndex = u8;
     type ReduceRules = u8;
-    type Tables = JsonTables;
+    type Tables = Tables;
     const ERROR_USED: bool = true;
-    fn get_tables() -> &'static JsonTables {
-        static TABLES: std::sync::OnceLock<JsonTables> = std::sync::OnceLock::new();
+    fn get_tables() -> &'static Tables {
+        static TABLES: std::sync::OnceLock<Tables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
@@ -2111,7 +2108,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                 let num_rules = 99usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let lhs = JsonNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = NonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr::parser::table::RuleInfo {
                             lhs,
@@ -2128,7 +2125,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     );
                     for idx in term_start..term_end {
                         let val = SHIFT_TERM_DATA[idx];
-                        let term_class = JsonTerminalClasses::from_usize(
+                        let term_class = TerminalClasses::from_usize(
                             (val & 0x7fff) as usize,
                         );
                         let state = ((val >> 15) & 0xffff) as usize;
@@ -2146,9 +2143,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     );
                     for idx in nonterm_start..nonterm_end {
                         let val = SHIFT_NONTERM_DATA[idx];
-                        let nonterm = JsonNonTerminals::from_usize(
-                            (val & 0x7fff) as usize,
-                        );
+                        let nonterm = NonTerminals::from_usize((val & 0x7fff) as usize);
                         let state = ((val >> 15) & 0xffff) as usize;
                         let push = (val >> 31) != 0;
                         shift_goto_map_nonterm
@@ -2163,9 +2158,7 @@ impl ::rusty_lr::parser::Parser for JsonParser {
                     let mut idx = reduce_start;
                     while idx < reduce_end {
                         let term_val = REDUCE_DATA[idx];
-                        let term_class = JsonTerminalClasses::from_usize(
-                            term_val as usize,
-                        );
+                        let term_class = TerminalClasses::from_usize(term_val as usize);
                         let len = REDUCE_DATA[idx + 1] as usize;
                         let mut rules = Vec::with_capacity(len);
                         for r_idx in 0..len {

@@ -14,28 +14,13 @@ impl Grammar {
     /// write type alias Context, Rule, Tables, Error...
     fn emit_type_alises(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
-        let start_rule_span = self
-            .span_manager
-            .get_span_in_location(&self.start_rule_name.location());
-        let rule_typename = Ident::new(&format!("{}Rule", self.start_rule_name), start_rule_span);
-        let tables_typename =
-            Ident::new(&format!("{}Tables", self.start_rule_name), start_rule_span);
-        let nonterm_typename = Ident::new(
-            &format!("{}NonTerminals", self.start_rule_name),
-            start_rule_span,
-        );
-        let parse_error_typename = Ident::new(
-            &format!("{}ParseError", self.start_rule_name),
-            start_rule_span,
-        );
-        let parser_struct_name =
-            Ident::new(&format!("{}Parser", self.start_rule_name), start_rule_span);
-        let semantic_value_typename =
-            Ident::new(&format!("{}Data", self.start_rule_name), start_rule_span);
-        let termclass_typename = Ident::new(
-            &format!("{}TerminalClasses", self.start_rule_name),
-            start_rule_span,
-        );
+        let rule_typename = Ident::new("Rule", Span::call_site());
+        let tables_typename = Ident::new("Tables", Span::call_site());
+        let nonterm_typename = Ident::new("NonTerminals", Span::call_site());
+        let parse_error_typename = Ident::new("ParseError", Span::call_site());
+        let parser_struct_name = Ident::new("Parser", Span::call_site());
+        let semantic_value_typename = Ident::new("Data", Span::call_site());
+        let termclass_typename = Ident::new("TerminalClasses", Span::call_site());
         let location_typename = &self.location_typename;
         let reduce_error_typename = &self.error_typename;
 
@@ -118,13 +103,7 @@ impl Grammar {
     }
 
     fn emit_termclass_enum(&self, stream: &mut TokenStream) {
-        let start_rule_span = self
-            .span_manager
-            .get_span_in_location(&self.start_rule_name.location());
-        let termclass_typename = Ident::new(
-            &format!("{}TerminalClasses", self.start_rule_name),
-            start_rule_span,
-        );
+        let termclass_typename = Ident::new("TerminalClasses", Span::call_site());
         let module_prefix = &self.module_prefix;
         let error_name = format_ident!("{}", utils::ERROR_NAME);
         let eof_name = format_ident!("{}", utils::EOF_NAME);
@@ -348,11 +327,7 @@ impl Grammar {
         // =====================Writing NonTerminal Enum========================
         // =====================================================================
 
-        let start_rule_span = self
-            .span_manager
-            .get_span_in_location(&self.start_rule_name.location());
-        let start_rule_ident = Ident::new(&self.start_rule_name, start_rule_span);
-        let enum_typename = format_ident!("{}NonTerminals", start_rule_ident);
+        let enum_typename = format_ident!("NonTerminals");
         let module_prefix = &self.module_prefix;
 
         let mut comma_separated_variants = TokenStream::new();
@@ -444,16 +419,11 @@ impl Grammar {
 
     fn emit_parser(&self, stream: &mut TokenStream) {
         let module_prefix = &self.module_prefix;
-        let start_rule_ident = Ident::new(
-            &self.start_rule_name,
-            self.span_manager
-                .get_span_in_location(&self.start_rule_name.location()),
-        );
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
-        let tables_typename = format_ident!("{}Tables", start_rule_ident);
-        let parser_struct_name = format_ident!("{}Parser", start_rule_ident);
+        let nonterminals_enum_name = format_ident!("NonTerminals");
+        let tables_typename = format_ident!("Tables");
+        let parser_struct_name = format_ident!("Parser");
         let token_typename = &self.token_typename;
-        let termclass_typename = format_ident!("{}TerminalClasses", &start_rule_ident);
+        let termclass_typename = format_ident!("TerminalClasses");
 
         let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
         for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
@@ -798,14 +768,9 @@ impl Grammar {
         use rusty_lr_core::TerminalSymbol;
 
         let module_prefix = &self.module_prefix;
-        let start_rule_ident = Ident::new(
-            &self.start_rule_name,
-            self.span_manager
-                .get_span_in_location(&self.start_rule_name.location()),
-        );
-        let nonterminals_enum_name = format_ident!("{}NonTerminals", &start_rule_ident);
+        let nonterminals_enum_name = format_ident!("NonTerminals");
         let reduce_error_typename = &self.error_typename;
-        let data_enum_typename = format_ident!("{}Data", &start_rule_ident);
+        let data_enum_typename = format_ident!("Data");
         let token_typename = &self.token_typename;
         let user_data_parameter_name =
             Ident::new(utils::USER_DATA_PARAMETER_NAME, Span::call_site());

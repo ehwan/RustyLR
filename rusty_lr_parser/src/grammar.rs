@@ -73,7 +73,6 @@ pub struct Grammar {
     pub(crate) error_typename: TokenStream,
 
     /// %start
-    pub(crate) start_rule_name: Located<String>,
     pub(crate) start_rule_names: Vec<Located<String>>,
 
     pub terminals: Vec<TerminalInfo>,
@@ -1123,7 +1122,6 @@ impl Grammar {
             userdata_typename: grammar_args.userdata_typename.into_iter().next().unwrap().1,
 
             error_typename,
-            start_rule_name: grammar_args.start_rule_name.first().unwrap().clone(),
             start_rule_names: grammar_args.start_rule_name.clone(),
 
             terminals: Default::default(),

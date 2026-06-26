@@ -196,24 +196,15 @@ use std::boxed::Box;
 */
 // =============================Generated Codes Begin==============================
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarContext = ::rusty_lr_core::parser::deterministic::Context<
-    GrammarParser,
-    GrammarData,
-    GrammarExtracter,
-    u8,
->;
+pub type GrammarContext =
+    ::rusty_lr_core::parser::deterministic::Context<Parser, Data, GrammarExtracter, u8>;
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarRule =
-    ::rusty_lr_core::production::Production<GrammarTerminalClasses, GrammarNonTerminals>;
+pub type Rule = ::rusty_lr_core::production::Production<TerminalClasses, NonTerminals>;
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarTables = ::rusty_lr_core::parser::table::SparseFlatTables<
-    GrammarTerminalClasses,
-    GrammarNonTerminals,
-    u8,
-    u8,
->;
+pub type Tables =
+    ::rusty_lr_core::parser::table::SparseFlatTables<TerminalClasses, NonTerminals, u8, u8>;
 #[allow(non_camel_case_types, dead_code)]
-pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
+pub type ParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     Lexed,
     Location,
     ::rusty_lr_core::DefaultReduceActionError,
@@ -230,7 +221,7 @@ pub type GrammarParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     std::cmp::Ord,
 )]
 #[repr(usize)]
-pub enum GrammarTerminalClasses {
+pub enum TerminalClasses {
     ident,
     TermClass1,
     colon,
@@ -278,7 +269,7 @@ pub enum GrammarTerminalClasses {
     eof,
     VirtualStart0,
 }
-impl GrammarTerminalClasses {
+impl TerminalClasses {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -290,58 +281,58 @@ impl GrammarTerminalClasses {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalClasses {
+impl ::rusty_lr_core::parser::terminalclass::TerminalClass for TerminalClasses {
     type Term = Lexed;
     const ERROR: Self = Self::error;
     const EOF: Self = Self::eof;
     fn as_str(&self) -> &'static str {
         match self {
-            GrammarTerminalClasses::ident => "ident",
-            GrammarTerminalClasses::TermClass1 => "[other_literal, <Others>]",
-            GrammarTerminalClasses::colon => "colon",
-            GrammarTerminalClasses::pipe => "pipe",
-            GrammarTerminalClasses::percent => "percent",
-            GrammarTerminalClasses::equal => "equal",
-            GrammarTerminalClasses::caret => "caret",
-            GrammarTerminalClasses::dot => "dot",
-            GrammarTerminalClasses::dollar => "dollar",
-            GrammarTerminalClasses::comma => "comma",
-            GrammarTerminalClasses::int_literal => "int_literal",
-            GrammarTerminalClasses::byte_literal => "byte_literal",
-            GrammarTerminalClasses::byte_str_literal => "byte_str_literal",
-            GrammarTerminalClasses::char_literal => "char_literal",
-            GrammarTerminalClasses::str_literal => "str_literal",
-            GrammarTerminalClasses::parengroup => "parengroup",
-            GrammarTerminalClasses::bracegroup => "bracegroup",
-            GrammarTerminalClasses::lparen => "lparen",
-            GrammarTerminalClasses::rparen => "rparen",
-            GrammarTerminalClasses::lbracket => "lbracket",
-            GrammarTerminalClasses::rbracket => "rbracket",
-            GrammarTerminalClasses::left => "left",
-            GrammarTerminalClasses::right => "right",
-            GrammarTerminalClasses::token => "token",
-            GrammarTerminalClasses::start => "start",
-            GrammarTerminalClasses::tokentype => "tokentype",
-            GrammarTerminalClasses::userdata => "userdata",
-            GrammarTerminalClasses::errortype => "errortype",
-            GrammarTerminalClasses::moduleprefix => "moduleprefix",
-            GrammarTerminalClasses::lalr => "lalr",
-            GrammarTerminalClasses::glr => "glr",
-            GrammarTerminalClasses::prec => "prec",
-            GrammarTerminalClasses::precedence => "precedence",
-            GrammarTerminalClasses::nooptim => "nooptim",
-            GrammarTerminalClasses::dprec => "dprec",
-            GrammarTerminalClasses::location => "location",
-            GrammarTerminalClasses::allow => "allow",
-            GrammarTerminalClasses::semicolon => "semicolon",
-            GrammarTerminalClasses::plus => "plus",
-            GrammarTerminalClasses::star => "star",
-            GrammarTerminalClasses::question => "question",
-            GrammarTerminalClasses::exclamation => "exclamation",
-            GrammarTerminalClasses::minus => "minus",
-            GrammarTerminalClasses::error => "error",
-            GrammarTerminalClasses::eof => "eof",
-            GrammarTerminalClasses::VirtualStart0 => "virtual_start",
+            TerminalClasses::ident => "ident",
+            TerminalClasses::TermClass1 => "[other_literal, <Others>]",
+            TerminalClasses::colon => "colon",
+            TerminalClasses::pipe => "pipe",
+            TerminalClasses::percent => "percent",
+            TerminalClasses::equal => "equal",
+            TerminalClasses::caret => "caret",
+            TerminalClasses::dot => "dot",
+            TerminalClasses::dollar => "dollar",
+            TerminalClasses::comma => "comma",
+            TerminalClasses::int_literal => "int_literal",
+            TerminalClasses::byte_literal => "byte_literal",
+            TerminalClasses::byte_str_literal => "byte_str_literal",
+            TerminalClasses::char_literal => "char_literal",
+            TerminalClasses::str_literal => "str_literal",
+            TerminalClasses::parengroup => "parengroup",
+            TerminalClasses::bracegroup => "bracegroup",
+            TerminalClasses::lparen => "lparen",
+            TerminalClasses::rparen => "rparen",
+            TerminalClasses::lbracket => "lbracket",
+            TerminalClasses::rbracket => "rbracket",
+            TerminalClasses::left => "left",
+            TerminalClasses::right => "right",
+            TerminalClasses::token => "token",
+            TerminalClasses::start => "start",
+            TerminalClasses::tokentype => "tokentype",
+            TerminalClasses::userdata => "userdata",
+            TerminalClasses::errortype => "errortype",
+            TerminalClasses::moduleprefix => "moduleprefix",
+            TerminalClasses::lalr => "lalr",
+            TerminalClasses::glr => "glr",
+            TerminalClasses::prec => "prec",
+            TerminalClasses::precedence => "precedence",
+            TerminalClasses::nooptim => "nooptim",
+            TerminalClasses::dprec => "dprec",
+            TerminalClasses::location => "location",
+            TerminalClasses::allow => "allow",
+            TerminalClasses::semicolon => "semicolon",
+            TerminalClasses::plus => "plus",
+            TerminalClasses::star => "star",
+            TerminalClasses::question => "question",
+            TerminalClasses::exclamation => "exclamation",
+            TerminalClasses::minus => "minus",
+            TerminalClasses::error => "error",
+            TerminalClasses::eof => "eof",
+            TerminalClasses::VirtualStart0 => "virtual_start",
         }
     }
     fn to_usize(&self) -> usize {
@@ -350,49 +341,49 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
     fn from_term(terminal: &Self::Term) -> Self {
         #[allow(unreachable_patterns, unused_variables)]
         match terminal {
-            Lexed::Ident(ident) => GrammarTerminalClasses::ident,
-            Lexed::Colon(_) => GrammarTerminalClasses::colon,
-            Lexed::Pipe(_) => GrammarTerminalClasses::pipe,
-            Lexed::Percent(_) => GrammarTerminalClasses::percent,
-            Lexed::Equal(_) => GrammarTerminalClasses::equal,
-            Lexed::Caret(_) => GrammarTerminalClasses::caret,
-            Lexed::Dot(_) => GrammarTerminalClasses::dot,
-            Lexed::Dollar(_) => GrammarTerminalClasses::dollar,
-            Lexed::Comma(_) => GrammarTerminalClasses::comma,
-            Lexed::IntLiteral(_) => GrammarTerminalClasses::int_literal,
-            Lexed::ByteLiteral(_) => GrammarTerminalClasses::byte_literal,
-            Lexed::ByteStrLiteral(_) => GrammarTerminalClasses::byte_str_literal,
-            Lexed::CharLiteral(_) => GrammarTerminalClasses::char_literal,
-            Lexed::StrLiteral(_) => GrammarTerminalClasses::str_literal,
-            Lexed::ParenGroup(parengroup) => GrammarTerminalClasses::parengroup,
-            Lexed::BraceGroup(bracegroup) => GrammarTerminalClasses::bracegroup,
-            Lexed::LParen => GrammarTerminalClasses::lparen,
-            Lexed::RParen => GrammarTerminalClasses::rparen,
-            Lexed::LBracket => GrammarTerminalClasses::lbracket,
-            Lexed::RBracket => GrammarTerminalClasses::rbracket,
-            Lexed::Left(_) => GrammarTerminalClasses::left,
-            Lexed::Right(_) => GrammarTerminalClasses::right,
-            Lexed::Token(_) => GrammarTerminalClasses::token,
-            Lexed::Start(_) => GrammarTerminalClasses::start,
-            Lexed::TokenType(_) => GrammarTerminalClasses::tokentype,
-            Lexed::UserData(_) => GrammarTerminalClasses::userdata,
-            Lexed::ErrorType(_) => GrammarTerminalClasses::errortype,
-            Lexed::ModulePrefix(_) => GrammarTerminalClasses::moduleprefix,
-            Lexed::Lalr(_) => GrammarTerminalClasses::lalr,
-            Lexed::Glr(_) => GrammarTerminalClasses::glr,
-            Lexed::Prec(_) => GrammarTerminalClasses::prec,
-            Lexed::Precedence(_) => GrammarTerminalClasses::precedence,
-            Lexed::NoOptim(_) => GrammarTerminalClasses::nooptim,
-            Lexed::DPrec(_) => GrammarTerminalClasses::dprec,
-            Lexed::Location(_) => GrammarTerminalClasses::location,
-            Lexed::Allow(_) => GrammarTerminalClasses::allow,
-            Lexed::Semicolon(_) => GrammarTerminalClasses::semicolon,
-            Lexed::Plus(_) => GrammarTerminalClasses::plus,
-            Lexed::Star(_) => GrammarTerminalClasses::star,
-            Lexed::Question(_) => GrammarTerminalClasses::question,
-            Lexed::Exclamation(_) => GrammarTerminalClasses::exclamation,
-            Lexed::Minus(_) => GrammarTerminalClasses::minus,
-            _ => GrammarTerminalClasses::TermClass1,
+            Lexed::Ident(ident) => TerminalClasses::ident,
+            Lexed::Colon(_) => TerminalClasses::colon,
+            Lexed::Pipe(_) => TerminalClasses::pipe,
+            Lexed::Percent(_) => TerminalClasses::percent,
+            Lexed::Equal(_) => TerminalClasses::equal,
+            Lexed::Caret(_) => TerminalClasses::caret,
+            Lexed::Dot(_) => TerminalClasses::dot,
+            Lexed::Dollar(_) => TerminalClasses::dollar,
+            Lexed::Comma(_) => TerminalClasses::comma,
+            Lexed::IntLiteral(_) => TerminalClasses::int_literal,
+            Lexed::ByteLiteral(_) => TerminalClasses::byte_literal,
+            Lexed::ByteStrLiteral(_) => TerminalClasses::byte_str_literal,
+            Lexed::CharLiteral(_) => TerminalClasses::char_literal,
+            Lexed::StrLiteral(_) => TerminalClasses::str_literal,
+            Lexed::ParenGroup(parengroup) => TerminalClasses::parengroup,
+            Lexed::BraceGroup(bracegroup) => TerminalClasses::bracegroup,
+            Lexed::LParen => TerminalClasses::lparen,
+            Lexed::RParen => TerminalClasses::rparen,
+            Lexed::LBracket => TerminalClasses::lbracket,
+            Lexed::RBracket => TerminalClasses::rbracket,
+            Lexed::Left(_) => TerminalClasses::left,
+            Lexed::Right(_) => TerminalClasses::right,
+            Lexed::Token(_) => TerminalClasses::token,
+            Lexed::Start(_) => TerminalClasses::start,
+            Lexed::TokenType(_) => TerminalClasses::tokentype,
+            Lexed::UserData(_) => TerminalClasses::userdata,
+            Lexed::ErrorType(_) => TerminalClasses::errortype,
+            Lexed::ModulePrefix(_) => TerminalClasses::moduleprefix,
+            Lexed::Lalr(_) => TerminalClasses::lalr,
+            Lexed::Glr(_) => TerminalClasses::glr,
+            Lexed::Prec(_) => TerminalClasses::prec,
+            Lexed::Precedence(_) => TerminalClasses::precedence,
+            Lexed::NoOptim(_) => TerminalClasses::nooptim,
+            Lexed::DPrec(_) => TerminalClasses::dprec,
+            Lexed::Location(_) => TerminalClasses::location,
+            Lexed::Allow(_) => TerminalClasses::allow,
+            Lexed::Semicolon(_) => TerminalClasses::semicolon,
+            Lexed::Plus(_) => TerminalClasses::plus,
+            Lexed::Star(_) => TerminalClasses::star,
+            Lexed::Question(_) => TerminalClasses::question,
+            Lexed::Exclamation(_) => TerminalClasses::exclamation,
+            Lexed::Minus(_) => TerminalClasses::minus,
+            _ => TerminalClasses::TermClass1,
         }
     }
     fn from_virtual_start(branch_idx: u32) -> Self {
@@ -402,13 +393,13 @@ impl ::rusty_lr_core::parser::terminalclass::TerminalClass for GrammarTerminalCl
         }
     }
 }
-impl std::fmt::Display for GrammarTerminalClasses {
+impl std::fmt::Display for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr_core::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for GrammarTerminalClasses {
+impl std::fmt::Debug for TerminalClasses {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr_core::parser::terminalclass::TerminalClass;
         write!(f, "{}", self.as_str())
@@ -426,7 +417,7 @@ impl std::fmt::Debug for GrammarTerminalClasses {
     std::cmp::Ord,
 )]
 #[repr(usize)]
-pub enum GrammarNonTerminals {
+pub enum NonTerminals {
     Rule,
     RuleType,
     RuleLines,
@@ -459,7 +450,7 @@ pub enum GrammarNonTerminals {
     _GrammarLinePlus30,
     Augmented,
 }
-impl GrammarNonTerminals {
+impl NonTerminals {
     #[inline]
     pub fn from_usize(value: usize) -> Self {
         debug_assert!(
@@ -471,117 +462,117 @@ impl GrammarNonTerminals {
         unsafe { ::std::mem::transmute(value) }
     }
 }
-impl std::fmt::Display for GrammarNonTerminals {
+impl std::fmt::Display for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr_core::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl std::fmt::Debug for GrammarNonTerminals {
+impl std::fmt::Debug for NonTerminals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ::rusty_lr_core::parser::nonterminal::NonTerminal;
         write!(f, "{}", self.as_str())
     }
 }
-impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
+impl ::rusty_lr_core::parser::nonterminal::NonTerminal for NonTerminals {
     fn as_str(&self) -> &'static str {
         match self {
-            GrammarNonTerminals::Rule => "Rule",
-            GrammarNonTerminals::RuleType => "RuleType",
-            GrammarNonTerminals::RuleLines => "RuleLines",
-            GrammarNonTerminals::RuleLine => "RuleLine",
-            GrammarNonTerminals::PrecDef => "PrecDef",
-            GrammarNonTerminals::MappedSymbol => "MappedSymbol",
-            GrammarNonTerminals::TerminalSetItem => "TerminalSetItem",
-            GrammarNonTerminals::TerminalSet => "TerminalSet",
-            GrammarNonTerminals::Pattern => "Pattern",
-            GrammarNonTerminals::Action => "Action",
-            GrammarNonTerminals::IdentOrLiteral => "IdentOrLiteral",
-            GrammarNonTerminals::AllowTarget => "AllowTarget",
-            GrammarNonTerminals::Directive => "Directive",
-            GrammarNonTerminals::GrammarLine => "GrammarLine",
-            GrammarNonTerminals::Grammar => "Grammar",
-            GrammarNonTerminals::_MappedSymbolPlus16 => "MappedSymbol+",
-            GrammarNonTerminals::_MappedSymbolStar17 => "MappedSymbol*",
-            GrammarNonTerminals::_PrecDefPlus18 => "PrecDef+",
-            GrammarNonTerminals::_PrecDefStar19 => "PrecDef*",
-            GrammarNonTerminals::_caretQuestion20 => "caret?",
-            GrammarNonTerminals::_TerminalSetItemPlus21 => "TerminalSetItem+",
-            GrammarNonTerminals::_TerminalSetItemStar22 => "TerminalSetItem*",
-            GrammarNonTerminals::_PatternPlus23 => "Pattern+",
-            GrammarNonTerminals::_PatternStar24 => "Pattern*",
-            GrammarNonTerminals::__PatternStar24SepPlus25 => "$sep(Pattern*, pipe, +)",
-            GrammarNonTerminals::_commaQuestion26 => "comma?",
-            GrammarNonTerminals::_TermSet27 => "[^semicolon]",
-            GrammarNonTerminals::__TermSet27Plus28 => "[^semicolon]+",
-            GrammarNonTerminals::_IdentOrLiteralPlus29 => "IdentOrLiteral+",
-            GrammarNonTerminals::_GrammarLinePlus30 => "GrammarLine+",
-            GrammarNonTerminals::Augmented => "Augmented",
+            NonTerminals::Rule => "Rule",
+            NonTerminals::RuleType => "RuleType",
+            NonTerminals::RuleLines => "RuleLines",
+            NonTerminals::RuleLine => "RuleLine",
+            NonTerminals::PrecDef => "PrecDef",
+            NonTerminals::MappedSymbol => "MappedSymbol",
+            NonTerminals::TerminalSetItem => "TerminalSetItem",
+            NonTerminals::TerminalSet => "TerminalSet",
+            NonTerminals::Pattern => "Pattern",
+            NonTerminals::Action => "Action",
+            NonTerminals::IdentOrLiteral => "IdentOrLiteral",
+            NonTerminals::AllowTarget => "AllowTarget",
+            NonTerminals::Directive => "Directive",
+            NonTerminals::GrammarLine => "GrammarLine",
+            NonTerminals::Grammar => "Grammar",
+            NonTerminals::_MappedSymbolPlus16 => "MappedSymbol+",
+            NonTerminals::_MappedSymbolStar17 => "MappedSymbol*",
+            NonTerminals::_PrecDefPlus18 => "PrecDef+",
+            NonTerminals::_PrecDefStar19 => "PrecDef*",
+            NonTerminals::_caretQuestion20 => "caret?",
+            NonTerminals::_TerminalSetItemPlus21 => "TerminalSetItem+",
+            NonTerminals::_TerminalSetItemStar22 => "TerminalSetItem*",
+            NonTerminals::_PatternPlus23 => "Pattern+",
+            NonTerminals::_PatternStar24 => "Pattern*",
+            NonTerminals::__PatternStar24SepPlus25 => "$sep(Pattern*, pipe, +)",
+            NonTerminals::_commaQuestion26 => "comma?",
+            NonTerminals::_TermSet27 => "[^semicolon]",
+            NonTerminals::__TermSet27Plus28 => "[^semicolon]+",
+            NonTerminals::_IdentOrLiteralPlus29 => "IdentOrLiteral+",
+            NonTerminals::_GrammarLinePlus30 => "GrammarLine+",
+            NonTerminals::Augmented => "Augmented",
         }
     }
     fn nonterm_type(&self) -> Option<::rusty_lr_core::parser::nonterminal::NonTerminalType> {
         match self {
-            GrammarNonTerminals::Rule => None,
-            GrammarNonTerminals::RuleType => None,
-            GrammarNonTerminals::RuleLines => None,
-            GrammarNonTerminals::RuleLine => None,
-            GrammarNonTerminals::PrecDef => None,
-            GrammarNonTerminals::MappedSymbol => None,
-            GrammarNonTerminals::TerminalSetItem => None,
-            GrammarNonTerminals::TerminalSet => None,
-            GrammarNonTerminals::Pattern => None,
-            GrammarNonTerminals::Action => None,
-            GrammarNonTerminals::IdentOrLiteral => None,
-            GrammarNonTerminals::AllowTarget => None,
-            GrammarNonTerminals::Directive => None,
-            GrammarNonTerminals::GrammarLine => None,
-            GrammarNonTerminals::Grammar => None,
-            GrammarNonTerminals::_MappedSymbolPlus16 => {
+            NonTerminals::Rule => None,
+            NonTerminals::RuleType => None,
+            NonTerminals::RuleLines => None,
+            NonTerminals::RuleLine => None,
+            NonTerminals::PrecDef => None,
+            NonTerminals::MappedSymbol => None,
+            NonTerminals::TerminalSetItem => None,
+            NonTerminals::TerminalSet => None,
+            NonTerminals::Pattern => None,
+            NonTerminals::Action => None,
+            NonTerminals::IdentOrLiteral => None,
+            NonTerminals::AllowTarget => None,
+            NonTerminals::Directive => None,
+            NonTerminals::GrammarLine => None,
+            NonTerminals::Grammar => None,
+            NonTerminals::_MappedSymbolPlus16 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_MappedSymbolStar17 => {
+            NonTerminals::_MappedSymbolStar17 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_PrecDefPlus18 => {
+            NonTerminals::_PrecDefPlus18 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_PrecDefStar19 => {
+            NonTerminals::_PrecDefStar19 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_caretQuestion20 => {
+            NonTerminals::_caretQuestion20 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Optional)
             }
-            GrammarNonTerminals::_TerminalSetItemPlus21 => {
+            NonTerminals::_TerminalSetItemPlus21 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_TerminalSetItemStar22 => {
+            NonTerminals::_TerminalSetItemStar22 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::_PatternPlus23 => {
+            NonTerminals::_PatternPlus23 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_PatternStar24 => {
+            NonTerminals::_PatternStar24 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Star)
             }
-            GrammarNonTerminals::__PatternStar24SepPlus25 => {
+            NonTerminals::__PatternStar24SepPlus25 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_commaQuestion26 => {
+            NonTerminals::_commaQuestion26 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Optional)
             }
-            GrammarNonTerminals::_TermSet27 => {
+            NonTerminals::_TermSet27 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::TerminalSet)
             }
-            GrammarNonTerminals::__TermSet27Plus28 => {
+            NonTerminals::__TermSet27Plus28 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_IdentOrLiteralPlus29 => {
+            NonTerminals::_IdentOrLiteralPlus29 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusLeft)
             }
-            GrammarNonTerminals::_GrammarLinePlus30 => {
+            NonTerminals::_GrammarLinePlus30 => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::PlusRight)
             }
-            GrammarNonTerminals::Augmented => {
+            NonTerminals::Augmented => {
                 Some(::rusty_lr_core::parser::nonterminal::NonTerminalType::Augmented)
             }
         }
@@ -594,7 +585,7 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for GrammarNonTerminals {
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
 #[derive(Clone)]
-pub enum GrammarData {
+pub enum Data {
     __terminals(Lexed),
     __variant1(::std::boxed::Box<RuleDefArgs>),
     __variant2(Option<Group>),
@@ -617,7 +608,7 @@ pub enum GrammarData {
     __variant19(Vec<IdentOrLiteral>),
     Empty,
 }
-impl ::std::fmt::Debug for GrammarData {
+impl ::std::fmt::Debug for Data {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
             Self::__terminals(..) => f.write_str(stringify!(__terminals)),
@@ -647,12 +638,12 @@ impl ::std::fmt::Debug for GrammarData {
 #[doc(hidden)]
 #[allow(non_camel_case_types, dead_code)]
 pub struct GrammarExtracter;
-impl ::rusty_lr_core::parser::semantic_value::StartExtractor<GrammarData> for GrammarExtracter {
+impl ::rusty_lr_core::parser::semantic_value::StartExtractor<Data> for GrammarExtracter {
     type StartType = ();
     const BRANCH_INDEX: u32 = 0u32;
-    fn extract(value: GrammarData) -> Option<Self::StartType> {
+    fn extract(value: Data) -> Option<Self::StartType> {
         match value {
-            GrammarData::Empty => Some(()),
+            Data::Empty => Some(()),
             _ => None,
         }
     }
@@ -667,7 +658,7 @@ impl ::rusty_lr_core::parser::semantic_value::StartExtractor<GrammarData> for Gr
     dead_code,
     unreachable_patterns
 )]
-impl GrammarData {
+impl Data {
     fn custom_reduce_action_0(
         mut t: Vec<Lexed>,
         data: &mut GrammarArgs,
@@ -696,23 +687,23 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant3(_)))
+                Data::__variant3(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__variant2(_)))
+                Data::__variant2(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -721,16 +712,16 @@ impl GrammarData {
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __data_stack.pop();
         let mut RuleLines = match __data_stack.pop().unwrap() {
-            GrammarData::__variant3(val) => val,
+            Data::__variant3(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut RuleType = match __data_stack.pop().unwrap() {
-            GrammarData::__variant2(val) => val,
+            Data::__variant2(val) => val,
             _ => unreachable!(),
         };
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -768,27 +759,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant3(_)))
+                Data::__variant3(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__variant2(_)))
+                Data::__variant2(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -799,16 +790,16 @@ impl GrammarData {
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __data_stack.truncate(__data_stack.len() - 2);
         let mut RuleLines = match __data_stack.pop().unwrap() {
-            GrammarData::__variant3(val) => val,
+            Data::__variant3(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut RuleType = match __data_stack.pop().unwrap() {
-            GrammarData::__variant2(val) => val,
+            Data::__variant2(val) => val,
             _ => unreachable!(),
         };
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -853,12 +844,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut parengroup = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -909,27 +900,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant4(_)))
+                Data::__variant4(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant3(_)))
+                Data::__variant3(_)))
             );
         }
         __location_stack.pop();
         let mut __rustylr_location_pipe = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut RuleLine = match __data_stack.pop().unwrap() {
-            GrammarData::__variant4(val) => *val,
+            Data::__variant4(val) => *val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut RuleLines = match __data_stack.pop().unwrap() {
-            GrammarData::__variant3(val) => val,
+            Data::__variant3(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -959,12 +950,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant4(_)))
+                Data::__variant4(_)))
             );
         }
         __location_stack.pop();
         let mut RuleLine = match __data_stack.pop().unwrap() {
-            GrammarData::__variant4(val) => *val,
+            Data::__variant4(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![RuleLine] };
@@ -990,28 +981,28 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant2(_)))
+                Data::__variant2(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant13(_)))
+                Data::__variant13(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant12(_)))
+                Data::__variant12(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         let mut Action = match __data_stack.pop().unwrap() {
-            GrammarData::__variant2(val) => val,
+            Data::__variant2(val) => val,
             _ => unreachable!(),
         };
         let mut PrecDef = match __data_stack.pop().unwrap() {
-            GrammarData::__variant13(val) => val,
+            Data::__variant13(val) => val,
             _ => unreachable!(),
         };
         let mut MappedSymbol = match __data_stack.pop().unwrap() {
-            GrammarData::__variant12(val) => val,
+            Data::__variant12(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1044,20 +1035,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant10(_)))
+                Data::__variant10(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
-            GrammarData::__variant10(val) => val,
+            Data::__variant10(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -1084,15 +1075,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1130,21 +1121,21 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_int_literal = __location_stack.pop().unwrap();
         __location_stack.truncate(__location_stack.len() - 2);
         let mut int_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -1176,15 +1167,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1222,11 +1213,11 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1264,12 +1255,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         __location_stack.pop();
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = { (None, Pattern) };
@@ -1295,26 +1286,26 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1345,15 +1336,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1361,7 +1352,7 @@ impl GrammarData {
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         __data_stack.truncate(__data_stack.len() - 2);
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1402,12 +1393,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1440,27 +1431,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut first = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1497,15 +1488,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1543,12 +1534,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let mut char_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1581,27 +1572,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut first = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1638,15 +1629,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1684,12 +1675,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let mut byte_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1722,27 +1713,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut first = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -1779,15 +1770,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -1825,19 +1816,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant15(_)))
+                Data::__variant15(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant14(_)))
+                Data::__variant14(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
@@ -1845,11 +1836,11 @@ impl GrammarData {
         let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
         __data_stack.pop();
         let mut TerminalSetItem = match __data_stack.pop().unwrap() {
-            GrammarData::__variant15(val) => val,
+            Data::__variant15(val) => val,
             _ => unreachable!(),
         };
         let mut caret = match __data_stack.pop().unwrap() {
-            GrammarData::__variant14(val) => val,
+            Data::__variant14(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -1883,19 +1874,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant14(_)))
+                Data::__variant14(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_rbracket = __location_stack.pop().unwrap();
@@ -1904,7 +1895,7 @@ impl GrammarData {
         let mut __rustylr_location_lbracket = __location_stack.pop().unwrap();
         __data_stack.truncate(__data_stack.len() - 2);
         let mut caret = match __data_stack.pop().unwrap() {
-            GrammarData::__variant14(val) => val,
+            Data::__variant14(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -1945,7 +1936,7 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_dot = __location_stack.pop().unwrap();
@@ -1981,12 +1972,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2017,21 +2008,21 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         let mut __rustylr_location_plus = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut plus = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2065,18 +2056,18 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         let mut __rustylr_location_star = __location_stack.pop().unwrap();
         __location_stack.pop();
         __data_stack.pop();
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2107,18 +2098,18 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         let mut __rustylr_location_question = __location_stack.pop().unwrap();
         __location_stack.pop();
         __data_stack.pop();
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2149,18 +2140,18 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         let mut __rustylr_location_exclamation = __location_stack.pop().unwrap();
         __location_stack.pop();
         __data_stack.pop();
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2191,12 +2182,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant8(_)))
+                Data::__variant8(_)))
             );
         }
         __location_stack.pop();
         let mut TerminalSet = match __data_stack.pop().unwrap() {
-            GrammarData::__variant8(val) => val,
+            Data::__variant8(val) => val,
             _ => unreachable!(),
         };
         let __res = { PatternArgs::TerminalSet(TerminalSet) };
@@ -2222,15 +2213,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant17(_)))
+                Data::__variant17(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_rparen = __location_stack.pop().unwrap();
@@ -2238,7 +2229,7 @@ impl GrammarData {
         let mut __rustylr_location_lparen = __location_stack.pop().unwrap();
         __data_stack.pop();
         let mut Pattern = match __data_stack.pop().unwrap() {
-            GrammarData::__variant17(val) => val,
+            Data::__variant17(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -2271,15 +2262,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -2318,12 +2309,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let mut byte_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2354,12 +2345,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_str_literal = __location_stack.pop().unwrap();
         let mut byte_str_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2392,12 +2383,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let mut char_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2428,12 +2419,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_str_literal = __location_stack.pop().unwrap();
         let mut str_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2464,25 +2455,25 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         let mut p2 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut p1 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -2513,35 +2504,35 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 6);
@@ -2549,17 +2540,17 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.truncate(__data_stack.len() - 2);
         let mut del = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut base = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -2605,39 +2596,39 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 8usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 7);
@@ -2645,17 +2636,17 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.truncate(__data_stack.len() - 3);
         let mut del = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut base = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -2701,39 +2692,39 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 8usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 7);
@@ -2741,17 +2732,17 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.truncate(__data_stack.len() - 3);
         let mut del = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut base = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -2797,35 +2788,35 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -2835,17 +2826,17 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.truncate(__data_stack.len() - 2);
         let mut del = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut base = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -2898,39 +2889,39 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 7usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 8usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -2940,17 +2931,17 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.truncate(__data_stack.len() - 3);
         let mut del = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut base = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -3003,12 +2994,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut bracegroup = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3039,7 +3030,7 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
         }
         let mut __rustylr_location_error = __location_stack.pop().unwrap();
@@ -3097,12 +3088,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3135,12 +3126,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let mut byte_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3173,12 +3164,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let mut char_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3211,12 +3202,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_ident = __location_stack.pop().unwrap();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3247,12 +3238,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_byte_literal = __location_stack.pop().unwrap();
         let mut byte_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3283,12 +3274,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_char_literal = __location_stack.pop().unwrap();
         let mut char_literal = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3319,27 +3310,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut first = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3376,27 +3367,27 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         let mut __rustylr_location_last = __location_stack.pop().unwrap();
         __location_stack.pop();
         let mut __rustylr_location_first = __location_stack.pop().unwrap();
         let mut last = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut first = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -3433,12 +3424,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant8(_)))
+                Data::__variant8(_)))
             );
         }
         __location_stack.pop();
         let mut TerminalSet = match __data_stack.pop().unwrap() {
-            GrammarData::__variant8(val) => val,
+            Data::__variant8(val) => val,
             _ => unreachable!(),
         };
         let __res = { AllowTarget::TerminalSet(TerminalSet) };
@@ -3464,23 +3455,23 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -3488,11 +3479,11 @@ impl GrammarData {
         __location_stack.truncate(__location_stack.len() - 2);
         __data_stack.pop();
         let mut __rustylr_data_3 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -3530,19 +3521,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3576,19 +3567,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3622,19 +3613,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3642,7 +3633,7 @@ impl GrammarData {
         __location_stack.truncate(__location_stack.len() - 2);
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -3671,19 +3662,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3717,19 +3708,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -3737,7 +3728,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -3768,15 +3759,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3810,19 +3801,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -3830,7 +3821,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -3861,15 +3852,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3903,19 +3894,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant19(_)))
+                Data::__variant19(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -3923,7 +3914,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
-            GrammarData::__variant19(val) => val,
+            Data::__variant19(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -3953,19 +3944,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -3999,19 +3990,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant19(_)))
+                Data::__variant19(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -4019,7 +4010,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
-            GrammarData::__variant19(val) => val,
+            Data::__variant19(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4049,19 +4040,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4095,19 +4086,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant19(_)))
+                Data::__variant19(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -4115,7 +4106,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut IdentOrLiteral = match __data_stack.pop().unwrap() {
-            GrammarData::__variant19(val) => val,
+            Data::__variant19(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4140,19 +4131,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4186,19 +4177,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -4206,7 +4197,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4237,15 +4228,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4279,19 +4270,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -4299,7 +4290,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4330,15 +4321,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4372,21 +4363,21 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         __data_stack.pop();
         let mut glr = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -4411,19 +4402,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4457,21 +4448,21 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         __data_stack.pop();
         let mut lalr = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -4496,19 +4487,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4542,15 +4533,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
@@ -4576,19 +4567,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4622,19 +4613,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -4642,7 +4633,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut __rustylr_data_2 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4673,15 +4664,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4689,7 +4680,7 @@ impl GrammarData {
         __location_stack.pop();
         __data_stack.pop();
         let mut location = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
@@ -4720,19 +4711,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4740,7 +4731,7 @@ impl GrammarData {
         __location_stack.truncate(__location_stack.len() - 2);
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4769,31 +4760,31 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant11(_)))
+                Data::__variant11(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 4);
@@ -4801,12 +4792,12 @@ impl GrammarData {
         __location_stack.truncate(__location_stack.len() - 2);
         __data_stack.truncate(__data_stack.len() - 2);
         let mut AllowTarget = match __data_stack.pop().unwrap() {
-            GrammarData::__variant11(val) => val,
+            Data::__variant11(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut ident = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         __data_stack.truncate(__data_stack.len() - 2);
@@ -4838,31 +4829,31 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 4usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 5usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 6usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -4896,19 +4887,19 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 3usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4942,15 +4933,15 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -4984,12 +4975,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant1(_)))
+                Data::__variant1(_)))
             );
         }
         __location_stack.pop();
         let mut Rule = match __data_stack.pop().unwrap() {
-            GrammarData::__variant1(val) => *val,
+            Data::__variant1(val) => *val,
             _ => unreachable!(),
         };
         {
@@ -5013,12 +5004,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant6(_)))
+                Data::__variant6(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant6(val) => *val,
+            Data::__variant6(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -5044,20 +5035,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant6(_)))
+                Data::__variant6(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant12(_)))
+                Data::__variant12(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant6(val) => *val,
+            Data::__variant6(val) => *val,
             _ => unreachable!(),
         };
         let mut Ap = match __data_stack.pop().unwrap() {
-            GrammarData::__variant12(val) => val,
+            Data::__variant12(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5086,12 +5077,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant12(_)))
+                Data::__variant12(_)))
             );
         }
         __location_stack.pop();
         let mut __token0 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant12(val) => val,
+            Data::__variant12(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
@@ -5137,12 +5128,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant5(_)))
+                Data::__variant5(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant5(val) => *val,
+            Data::__variant5(val) => *val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -5168,20 +5159,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant5(_)))
+                Data::__variant5(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant13(_)))
+                Data::__variant13(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant5(val) => *val,
+            Data::__variant5(val) => *val,
             _ => unreachable!(),
         };
         let mut Ap = match __data_stack.pop().unwrap() {
-            GrammarData::__variant13(val) => val,
+            Data::__variant13(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5210,12 +5201,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant13(_)))
+                Data::__variant13(_)))
             );
         }
         __location_stack.pop();
         let mut __token0 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant13(val) => val,
+            Data::__variant13(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
@@ -5261,12 +5252,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = Some(A);
@@ -5312,12 +5303,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant7(_)))
+                Data::__variant7(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant7(val) => val,
+            Data::__variant7(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -5343,20 +5334,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant7(_)))
+                Data::__variant7(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant15(_)))
+                Data::__variant15(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant7(val) => val,
+            Data::__variant7(val) => val,
             _ => unreachable!(),
         };
         let mut Ap = match __data_stack.pop().unwrap() {
-            GrammarData::__variant15(val) => val,
+            Data::__variant15(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5385,12 +5376,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant15(_)))
+                Data::__variant15(_)))
             );
         }
         __location_stack.pop();
         let mut __token0 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant15(val) => val,
+            Data::__variant15(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
@@ -5436,12 +5427,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -5467,20 +5458,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant9(_)))
+                Data::__variant9(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant16(_)))
+                Data::__variant16(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant9(val) => val,
+            Data::__variant9(val) => val,
             _ => unreachable!(),
         };
         let mut Ap = match __data_stack.pop().unwrap() {
-            GrammarData::__variant16(val) => val,
+            Data::__variant16(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5509,12 +5500,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant16(_)))
+                Data::__variant16(_)))
             );
         }
         __location_stack.pop();
         let mut __token0 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant16(val) => val,
+            Data::__variant16(val) => val,
             _ => unreachable!(),
         };
         let __res = __token0;
@@ -5560,12 +5551,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant16(_)))
+                Data::__variant16(_)))
             );
         }
         __location_stack.pop();
         let mut __token0 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant16(val) => val,
+            Data::__variant16(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![__token0] };
@@ -5591,25 +5582,25 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant16(_)))
+                Data::__variant16(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 2usize), Some(&
-                GrammarData::__variant17(_)))
+                Data::__variant17(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 3);
         let mut __token1 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant16(val) => val,
+            Data::__variant16(val) => val,
             _ => unreachable!(),
         };
         __data_stack.pop();
         let mut __token0 = match __data_stack.pop().unwrap() {
-            GrammarData::__variant17(val) => val,
+            Data::__variant17(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5638,7 +5629,7 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
@@ -5676,12 +5667,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -5707,20 +5698,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__terminals(_)))
+                Data::__terminals(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant18(_)))
+                Data::__variant18(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__terminals(val) => val,
+            Data::__terminals(val) => val,
             _ => unreachable!(),
         };
         let mut Ap = match __data_stack.pop().unwrap() {
-            GrammarData::__variant18(val) => val,
+            Data::__variant18(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5749,12 +5740,12 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant10(_)))
+                Data::__variant10(_)))
             );
         }
         __location_stack.pop();
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant10(val) => val,
+            Data::__variant10(val) => val,
             _ => unreachable!(),
         };
         let __res = { vec![A] };
@@ -5780,20 +5771,20 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::__variant10(_)))
+                Data::__variant10(_)))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::__variant19(_)))
+                Data::__variant19(_)))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
         let mut A = match __data_stack.pop().unwrap() {
-            GrammarData::__variant10(val) => val,
+            Data::__variant10(val) => val,
             _ => unreachable!(),
         };
         let mut Ap = match __data_stack.pop().unwrap() {
-            GrammarData::__variant19(val) => val,
+            Data::__variant19(val) => val,
             _ => unreachable!(),
         };
         let __res = {
@@ -5822,7 +5813,7 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.pop();
@@ -5845,11 +5836,11 @@ impl GrammarData {
         {
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 0usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
             debug_assert!(
                 matches!(__data_stack.get(__data_stack.len() - 1 - 1usize), Some(&
-                GrammarData::Empty))
+                Data::Empty))
             );
         }
         __location_stack.truncate(__location_stack.len() - 2);
@@ -5866,9 +5857,9 @@ impl GrammarData {
     non_camel_case_types,
     unused_variables
 )]
-impl ::rusty_lr_core::parser::semantic_value::SemanticValue for GrammarData {
+impl ::rusty_lr_core::parser::semantic_value::SemanticValue for Data {
     type Term = Lexed;
-    type NonTerm = GrammarNonTerminals;
+    type NonTerm = NonTerminals;
     type ReduceActionError = ::rusty_lr_core::DefaultReduceActionError;
     type UserData = GrammarArgs;
     type Location = Location;
@@ -7205,20 +7196,20 @@ impl ::rusty_lr_core::parser::semantic_value::SemanticValue for GrammarData {
     unused_mut
 )]
 #[derive(Clone, Copy)]
-pub struct GrammarParser;
-unsafe impl ::std::marker::Send for GrammarParser {}
-unsafe impl ::std::marker::Sync for GrammarParser {}
+pub struct Parser;
+unsafe impl ::std::marker::Send for Parser {}
+unsafe impl ::std::marker::Sync for Parser {}
 #[rustfmt::skip]
-impl ::rusty_lr_core::parser::Parser for GrammarParser {
+impl ::rusty_lr_core::parser::Parser for Parser {
     type Term = Lexed;
-    type TermClass = GrammarTerminalClasses;
-    type NonTerm = GrammarNonTerminals;
+    type TermClass = TerminalClasses;
+    type NonTerm = NonTerminals;
     type StateIndex = u8;
     type ReduceRules = u8;
-    type Tables = GrammarTables;
+    type Tables = Tables;
     const ERROR_USED: bool = true;
-    fn get_tables() -> &'static GrammarTables {
-        static TABLES: std::sync::OnceLock<GrammarTables> = std::sync::OnceLock::new();
+    fn get_tables() -> &'static Tables {
+        static TABLES: std::sync::OnceLock<Tables> = std::sync::OnceLock::new();
         TABLES
             .get_or_init(|| {
                 static RULE_NAMES: &[u32] = &[
@@ -7625,7 +7616,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                 let num_rules = 163usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
-                    let lhs = GrammarNonTerminals::from_usize(RULE_NAMES[i] as usize);
+                    let lhs = NonTerminals::from_usize(RULE_NAMES[i] as usize);
                     rules
                         .push(::rusty_lr_core::parser::table::RuleInfo {
                             lhs,
@@ -7642,7 +7633,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     );
                     for idx in term_start..term_end {
                         let val = SHIFT_TERM_DATA[idx];
-                        let term_class = GrammarTerminalClasses::from_usize(
+                        let term_class = TerminalClasses::from_usize(
                             (val & 0x7fff) as usize,
                         );
                         let state = ((val >> 15) & 0xffff) as usize;
@@ -7663,9 +7654,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     );
                     for idx in nonterm_start..nonterm_end {
                         let val = SHIFT_NONTERM_DATA[idx];
-                        let nonterm = GrammarNonTerminals::from_usize(
-                            (val & 0x7fff) as usize,
-                        );
+                        let nonterm = NonTerminals::from_usize((val & 0x7fff) as usize);
                         let state = ((val >> 15) & 0xffff) as usize;
                         let push = (val >> 31) != 0;
                         shift_goto_map_nonterm
@@ -7683,9 +7672,7 @@ impl ::rusty_lr_core::parser::Parser for GrammarParser {
                     let mut idx = reduce_start;
                     while idx < reduce_end {
                         let term_val = REDUCE_DATA[idx];
-                        let term_class = GrammarTerminalClasses::from_usize(
-                            term_val as usize,
-                        );
+                        let term_class = TerminalClasses::from_usize(term_val as usize);
                         let len = REDUCE_DATA[idx + 1] as usize;
                         let mut rules = Vec::with_capacity(len);
                         for r_idx in 0..len {

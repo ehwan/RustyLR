@@ -10,7 +10,7 @@ use quote::TokenStreamExt;
 
 use super::location::Location;
 use super::parser_expanded::GrammarContext;
-use super::parser_expanded::GrammarParseError;
+use super::parser_expanded::ParseError;
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
@@ -240,10 +240,7 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
 /// For '%' directives and 'Group' variants,
 /// First tries to feed the Compound token
 /// if it failed, then feed the internal splitted tokens recursively
-pub fn feed_recursive(
-    input: TokenStream,
-    context: &mut GrammarContext,
-) -> Result<(), GrammarParseError> {
+pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Result<(), ParseError> {
     let mut input = input.into_iter().peekable();
 
     while let Some(next) = input.next() {
