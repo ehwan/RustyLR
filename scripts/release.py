@@ -88,8 +88,8 @@ def calculate_bumped_version(version_str):
         return f"{major}.{minor + 1}.0"
     return version_str
 
-def update_vscode_extension_versions(root_dir, old_version, new_version):
-    """Update the VSCode extension version, required rustylr server version, and matching docs."""
+def update_vscode_extension_server_version(root_dir, old_version, new_version):
+    """Update the VSCode extension required rustylr server version."""
     package_json_path = os.path.join(root_dir, 'editors', 'vscode-rustylr', 'package.json')
     
     if os.path.exists(package_json_path):
@@ -97,20 +97,6 @@ def update_vscode_extension_versions(root_dir, old_version, new_version):
             package_content = f.read()
             
         updated_package = False
-        version_pattern = r'("version"\s*:\s*")[^"]+(")'
-        if re.search(version_pattern, package_content):
-            package_content = re.sub(version_pattern, rf'\g<1>{new_version}\g<2>', package_content, count=1)
-            updated_package = True
-            print(
-                f"Updated VSCode extension package version in "
-                f"{os.path.relpath(package_json_path, root_dir)}: {old_version} -> {new_version}"
-            )
-        else:
-            print(
-                f"Warning: Could not find extension version in "
-                f"{os.path.relpath(package_json_path, root_dir)}"
-            )
-            
         server_pattern = r'("requiredServerVersion"\s*:\s*")[^"]+(")'
         if re.search(server_pattern, package_content):
             package_content = re.sub(server_pattern, rf'\g<1>{new_version}\g<2>', package_content)
@@ -141,15 +127,15 @@ def update_named_tuple(content, name, new_tuple):
     """Update a version tuple assigned to a constant or returned from a zero-argument function."""
     tuple_pattern = r'\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'
     const_pattern = (
-        rf'(const\s+{re.escape(name)}\s*:\s*'
-        rf'\(usize,\s*usize,\s*usize\)\s*=\s*){tuple_pattern}'
+        rf'((?:pub(?:\s*\([^)]*\))?\s+)?const\s+{re.escape(name)}\s*:\s*'
+        rf'(?:Version|\(\s*usize\s*,\s*usize\s*,\s*usize\s*\))\s*=\s*){tuple_pattern}'
     )
     if re.search(const_pattern, content):
         return re.sub(const_pattern, rf'\g<1>{new_tuple}', content, count=1), True
 
     fn_pattern = (
-        rf'(pub\s+fn\s+{re.escape(name)}\s*\(\)\s*->\s*'
-        rf'\(usize,\s*usize,\s*usize\)\s*\{{\s*){tuple_pattern}'
+        rf'((?:pub(?:\s*\([^)]*\))?\s+)?fn\s+{re.escape(name)}\s*\(\)\s*->\s*'
+        rf'\(\s*usize\s*,\s*usize\s*,\s*usize\s*\)\s*\{{\s*){tuple_pattern}'
     )
     if re.search(fn_pattern, content):
         return re.sub(fn_pattern, rf'\g<1>{new_tuple}', content, count=1), True
@@ -177,6 +163,26 @@ def update_named_version_tuple(root_dir, relative_path, name, new_version, label
         print(f"Updated {label} in {relative_path} to {new_tuple}")
     else:
         print(f"Warning: Could not find {label} tuple in {relative_path}")
+
+def update_generated_parser_version_tuples(root_dir, relative_path, package_map):
+    """Keep checked-in generated parser version accessors synchronized during bump."""
+    version_bindings = [
+        ('rusty_lr_parser', '__rusty_lr_parser_version'),
+        ('rustylr', '__rustylr_version'),
+        ('rusty_lr', '__rusty_lr_version'),
+    ]
+
+    for package_name, function_name in version_bindings:
+        package_info = package_map.get(package_name)
+        if not package_info:
+            continue
+        update_named_version_tuple(
+            root_dir,
+            relative_path,
+            function_name,
+            package_info['new_version'],
+            function_name,
+        )
         
 def run_bump(root_dir):
     """Bumps all project versions and updates their inter-dependencies."""
@@ -291,10 +297,23 @@ def run_bump(root_dir):
             rustylr_info['new_version'],
             'COMPATIBLE_RUSTYLR_VERSION',
         )
-        update_vscode_extension_versions(
+        update_vscode_extension_server_version(
             root_dir,
             rustylr_info['old_version'],
             rustylr_info['new_version']
+        )
+
+    generated_parser_paths = [
+        os.path.join('rusty_lr_parser', 'src', 'parser', 'parser_expanded.rs'),
+        os.path.join('scripts', 'diff', 'calculator.rs'),
+        os.path.join('scripts', 'diff', 'calculator_u8.rs'),
+        os.path.join('scripts', 'diff', 'json.rs'),
+    ]
+    for generated_parser_path in generated_parser_paths:
+        update_generated_parser_version_tuples(
+            root_dir,
+            generated_parser_path,
+            package_map,
         )
                 
     print("\n=== SUMMARY OF VERSION CHANGES ===")
