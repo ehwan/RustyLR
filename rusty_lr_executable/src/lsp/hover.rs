@@ -8,13 +8,18 @@ use std::ops::Range as ByteRange;
 use std::str::FromStr;
 
 use crate::lsp::completion::{
-    self, ALLOW_DIAGNOSTICS, DIRECTIVES, KEYWORDS, SUBSTITUTION_VARIABLES, SYNTAX_URL,
+    self, LocationType, ALLOW_DIAGNOSTICS, DIRECTIVES, PRODUCTION_DIRECTIVES,
+    SUBSTITUTION_VARIABLES, SYNTAX_URL,
 };
 use crate::lsp::position::position_to_offset;
 
 pub fn hover(content: &str, position: Position) -> Option<Hover> {
     let offset = position_to_offset(content, position);
     let parsed = completion::parse_args(content).ok();
+    let location_type = parsed
+        .as_ref()
+        .map(|args| completion::location_type_for_offset(args, content, offset))
+        .unwrap_or_default();
 
     if let Some(args) = &parsed {
         if let Some((brace_range, doc)) = reduce_action_brace_at_offset(args, content, offset) {
@@ -37,16 +42,21 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
         let mut assoc_type = "";
         let mut declaration_items = Vec::new();
         let mut found_prec = false;
-        for (_, assoc, items) in &args.precedences {
-            if items.iter().any(|item| item.to_string() == word) {
-                assoc_type = match assoc {
-                    Some(rusty_lr_core::production::Associativity::Left) => "%left",
-                    Some(rusty_lr_core::production::Associativity::Right) => "%right",
-                    None => "%precedence",
-                };
-                declaration_items = items.iter().map(|i| i.to_string()).collect();
-                found_prec = true;
-                break;
+        match location_type {
+            LocationType::ReduceAction => {}
+            LocationType::Outside | LocationType::ProductionLine => {
+                for (_, assoc, items) in &args.precedences {
+                    if items.iter().any(|item| item.to_string() == word) {
+                        assoc_type = match assoc {
+                            Some(rusty_lr_core::production::Associativity::Left) => "%left",
+                            Some(rusty_lr_core::production::Associativity::Right) => "%right",
+                            None => "%precedence",
+                        };
+                        declaration_items = items.iter().map(|i| i.to_string()).collect();
+                        found_prec = true;
+                        break;
+                    }
+                }
             }
         }
 
@@ -62,14 +72,18 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
 
     if documentation.is_none() {
         if let Some(args) = &parsed {
-            documentation = reduce_action_variable_documentation(args, &word).or_else(|| {
-                reduce_action_reference_documentation_for_word(args, content, offset, &word)
-            });
+            documentation = match location_type {
+                LocationType::ReduceAction => reduce_action_variable_documentation(args, &word)
+                    .or_else(|| {
+                        reduce_action_reference_documentation_for_word(args, content, offset, &word)
+                    }),
+                LocationType::Outside | LocationType::ProductionLine => None,
+            };
         }
     }
 
     if documentation.is_none() {
-        documentation = hover_word_documentation(&word);
+        documentation = hover_word_documentation(&word, location_type);
     }
 
     let documentation = documentation?;
@@ -540,18 +554,32 @@ fn hover_word(content: &str, offset: usize) -> Option<String> {
     Some(content[start..end].to_string())
 }
 
-fn hover_word_documentation(word: &str) -> Option<String> {
-    if DIRECTIVES.contains(&word) || KEYWORDS.contains(&word) {
-        return completion::keyword_documentation(word);
-    }
-    if SUBSTITUTION_VARIABLES.contains(&word) {
-        return completion::substitution_documentation(word);
-    }
-    if word.starts_with('@') {
-        return completion::location_documentation(word);
-    }
-    if ALLOW_DIAGNOSTICS.contains(&word) {
-        return completion::allow_diagnostic_documentation(word);
+fn hover_word_documentation(word: &str, location_type: LocationType) -> Option<String> {
+    match location_type {
+        LocationType::Outside => {
+            if DIRECTIVES.contains(&word) {
+                return completion::keyword_documentation(word);
+            }
+            if SUBSTITUTION_VARIABLES.contains(&word) {
+                return completion::substitution_documentation(word);
+            }
+            if ALLOW_DIAGNOSTICS.contains(&word) {
+                return completion::allow_diagnostic_documentation(word);
+            }
+        }
+        LocationType::ProductionLine => {
+            if PRODUCTION_DIRECTIVES.contains(&word) || matches!(word, "error" | "$sep") {
+                return completion::keyword_documentation(word);
+            }
+        }
+        LocationType::ReduceAction => {
+            if matches!(word, "data" | "lookahead" | "shift" | "Err") {
+                return completion::keyword_documentation(word);
+            }
+            if word.starts_with('@') {
+                return completion::location_documentation(word);
+            }
+        }
     }
     None
 }
@@ -1164,6 +1192,46 @@ Expr : num { *data += 1; 0 };
         };
         assert!(markup.value.contains("data: &mut MyCoolData"));
         assert!(markup.value.contains("%userdata MyCoolData;"));
+    }
+
+    #[test]
+    fn does_not_hover_reduce_action_only_words_outside_reduce_actions() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+const data: i32 = 0;
+%%
+%error MyError;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num %prec num { let _ = $error; 0 };
+"#;
+
+        let data_offset = grammar.find("data:").unwrap();
+        assert!(hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, data_offset)
+        )
+        .is_none());
+
+        let error_offset = grammar.find("$error").unwrap();
+        assert!(hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, error_offset)
+        )
+        .is_none());
+
+        let prec_offset = grammar.find("%prec").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, prec_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup.value.contains("Overrides the precedence"));
     }
 
     #[test]

@@ -55,8 +55,6 @@ pub(crate) const ALLOW_DIAGNOSTICS: &[&str] = &[
     "reduce_reduce_conflict_glr",
 ];
 
-pub(crate) const KEYWORDS: &[&str] = &["error", "$sep", "data", "lookahead", "shift", "Err"];
-
 /// Keywords that are only valid inside a ReduceAction block.
 const REDUCE_ACTION_KEYWORDS: &[&str] = &["data", "lookahead", "shift", "Err"];
 
@@ -92,118 +90,31 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     let mut builder = CompletionBuilder::new(replace_range);
 
     match mode {
-        CompletionMode::Directive => {
-            // Directives are only meaningful outside a ReduceAction block.
-            // Inside a ReduceAction the user is writing Rust code, not grammar directives.
-            if !line_variables.in_reduce_action {
-                // inside of a production rule line, only valid directives are %prec and %dprec.
-                if line_variables.in_rule_line {
-                    for directive in PRODUCTION_DIRECTIVES {
-                        builder.keyword(
-                            directive,
-                            "production rule directive",
-                            keyword_documentation(directive),
-                        );
-                    }
-                } else {
-                    for directive in DIRECTIVES {
-                        builder.keyword(
-                            directive,
-                            "RustyLR directive",
-                            keyword_documentation(directive),
-                        );
-                    }
+        CompletionMode::Directive => match line_variables.location_type {
+            LocationType::Outside => add_directive_items(&mut builder),
+            LocationType::ProductionLine => {
+                for directive in PRODUCTION_DIRECTIVES {
+                    builder.keyword(
+                        directive,
+                        "production rule directive",
+                        keyword_documentation(directive),
+                    );
                 }
             }
-        }
-        CompletionMode::Dollar => {
-            if !line_variables.in_rule_line {
-                for variable in SUBSTITUTION_VARIABLES {
-                    builder.variable(
-                        variable,
-                        "built-in RustCode substitution",
-                        substitution_documentation(variable),
-                    );
-                }
-                for (name, documentation) in &names.nonterminals {
-                    builder.variable(
-                    &format!("${name}"),
-                    "non-terminal production type",
-                    Some(format!(
-                        "Substitutes to the production type of non-terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-                        )),
-                    );
-                }
-                for (name, documentation) in &names.terminals {
-                    builder.variable(
-                    &format!("${name}"),
-                    "terminal definition substitution",
-                    Some(format!(
-                        "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-                        )),
-                    );
-                }
-            } else {
-                for keyword in PATTERN_KEYWORDS {
-                    let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
-                    builder.keyword(keyword, &detail, documentation);
-                }
+            LocationType::ReduceAction => {}
+        },
+        CompletionMode::Dollar => match line_variables.location_type {
+            LocationType::Outside => add_substitution_items(&mut builder, &names),
+            LocationType::ProductionLine => {
+                add_pattern_dollar_items(&mut builder);
             }
-
-            // Positional variables ($1, $2, …) are only valid inside a ReduceAction block.
-            if line_variables.in_reduce_action {
-                for variable in SUBSTITUTION_VARIABLES {
-                    builder.variable(
-                        variable,
-                        "built-in RustCode substitution",
-                        substitution_documentation(variable),
-                    );
-                }
-                for (name, documentation) in &names.nonterminals {
-                    builder.variable(
-                    &format!("${name}"),
-                    "non-terminal production type",
-                    Some(format!(
-                        "Substitutes to the production type of non-terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-                        )),
-                    );
-                }
-                for (name, documentation) in &names.terminals {
-                    builder.variable(
-                    &format!("${name}"),
-                    "terminal definition substitution",
-                    Some(format!(
-                        "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-                        )),
-                    );
-                }
-
-                for index in 1..=line_variables.value_count {
-                    let (detail, documentation) = if let Some(reference) =
-                        line_variables.position_references.get(&index)
-                    {
-                        (
-                            format!("${index}: {}", reference.ty),
-                            Some(hover::reduce_action_binding_reference_documentation(
-                                &format!("${index}"),
-                                reference,
-                            )),
-                        )
-                    } else {
-                        (
-                            "positional semantic value".to_string(),
-                            Some(format!(
-                                "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
-                            )),
-                        )
-                    };
-                    builder.variable(&format!("${index}"), &detail, documentation);
-                }
+            LocationType::ReduceAction => {
+                add_reduce_action_substitution_items(&mut builder, &names);
+                add_positional_value_items(&mut builder, &line_variables);
             }
-        }
-        CompletionMode::Location => {
-            // Location tracking (@name, @N, @$) is only valid inside a ReduceAction block.
-            if line_variables.in_reduce_action {
+        },
+        CompletionMode::Location => match line_variables.location_type {
+            LocationType::ReduceAction => {
                 let (detail, documentation) = location_completion_info(parsed.as_ref(), "@$");
                 builder.variable("@$", &detail, documentation);
                 let (detail, documentation) = location_completion_info(parsed.as_ref(), "@0");
@@ -255,19 +166,23 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     builder.variable(&label, &detail, documentation);
                 }
             }
-        }
-        CompletionMode::AllowDiagnostic => {
-            // Only diagnostic names are valid after %allow.
-            for diagnostic in ALLOW_DIAGNOSTICS {
-                builder.keyword(
-                    diagnostic,
-                    "diagnostic suppression name",
-                    allow_diagnostic_documentation(diagnostic),
-                );
+            LocationType::Outside | LocationType::ProductionLine => {}
+        },
+        CompletionMode::AllowDiagnostic => match line_variables.location_type {
+            LocationType::Outside => {
+                // Only diagnostic names are valid after a top-level %allow directive.
+                for diagnostic in ALLOW_DIAGNOSTICS {
+                    builder.keyword(
+                        diagnostic,
+                        "diagnostic suppression name",
+                        allow_diagnostic_documentation(diagnostic),
+                    );
+                }
             }
-        }
-        CompletionMode::Symbol => {
-            if line_variables.in_reduce_action {
+            LocationType::ProductionLine | LocationType::ReduceAction => {}
+        },
+        CompletionMode::Symbol => match line_variables.location_type {
+            LocationType::ReduceAction => {
                 // Inside a ReduceAction: suggest named bindings and ReduceAction-specific keywords.
                 for (name, ty) in &line_variables.value_types {
                     if let Some(reference) = line_variables.value_references.get(name) {
@@ -290,27 +205,13 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     let (detail, documentation) = keyword_completion_info(parsed.as_ref(), keyword);
                     builder.keyword(keyword, &detail, documentation);
                 }
-            } else {
-                // Outside a ReduceAction: suggest grammar symbols, pattern keywords, and directives.
-
-                if line_variables.in_rule_line && !line_variables.in_reduce_action {
-                    add_symbol_items(&mut builder, &names);
-                    for keyword in PATTERN_KEYWORDS {
-                        let (detail, documentation) =
-                            keyword_completion_info(parsed.as_ref(), keyword);
-                        builder.keyword(keyword, &detail, documentation);
-                    }
-                } else {
-                    for directive in DIRECTIVES {
-                        builder.keyword(
-                            directive,
-                            "RustyLR directive",
-                            keyword_documentation(directive),
-                        );
-                    }
-                }
             }
-        }
+            LocationType::ProductionLine => {
+                add_symbol_items(&mut builder, &names);
+                add_pattern_keyword_items(&mut builder, parsed.as_ref());
+            }
+            LocationType::Outside => add_directive_items(&mut builder),
+        },
     }
 
     CompletionResponse::Array(builder.finish())
@@ -352,6 +253,95 @@ fn add_symbol_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
     }
     for (name, documentation) in &names.terminals {
         builder.terminal(name, documentation.clone());
+    }
+}
+
+fn add_directive_items(builder: &mut CompletionBuilder) {
+    for directive in DIRECTIVES {
+        builder.keyword(
+            directive,
+            "RustyLR directive",
+            keyword_documentation(directive),
+        );
+    }
+}
+
+fn add_pattern_keyword_items(builder: &mut CompletionBuilder, args: Option<&GrammarArgs>) {
+    for keyword in PATTERN_KEYWORDS {
+        let (detail, documentation) = keyword_completion_info(args, keyword);
+        builder.keyword(keyword, &detail, documentation);
+    }
+}
+
+fn add_pattern_dollar_items(builder: &mut CompletionBuilder) {
+    builder.keyword(
+        "$sep",
+        "RustyLR pattern helper",
+        keyword_documentation("$sep"),
+    );
+}
+
+fn add_substitution_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
+    for variable in SUBSTITUTION_VARIABLES {
+        builder.variable(
+            variable,
+            "built-in RustCode substitution",
+            substitution_documentation(variable),
+        );
+    }
+    for (name, documentation) in &names.nonterminals {
+        builder.variable(
+            &format!("${name}"),
+            "non-terminal production type",
+            Some(format!(
+                "Substitutes to the production type of non-terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+            )),
+        );
+    }
+    for (name, documentation) in &names.terminals {
+        builder.variable(
+            &format!("${name}"),
+            "terminal definition substitution",
+            Some(format!(
+                "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+            )),
+        );
+    }
+}
+
+fn add_reduce_action_substitution_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
+    for (name, documentation) in &names.terminals {
+        builder.variable(
+            &format!("${name}"),
+            "terminal definition substitution",
+            Some(format!(
+                "Substitutes to the `%token` definition for terminal `{name}`. This is useful in reduce actions for terminal-value extraction sugar.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
+            )),
+        );
+    }
+}
+
+fn add_positional_value_items(builder: &mut CompletionBuilder, line_variables: &LineVariables) {
+    for index in 1..=line_variables.value_count {
+        let (detail, documentation) = if let Some(reference) =
+            line_variables.position_references.get(&index)
+        {
+            (
+                format!("${index}: {}", reference.ty),
+                Some(hover::reduce_action_binding_reference_documentation(
+                    &format!("${index}"),
+                    reference,
+                )),
+            )
+        } else {
+            (
+                "positional semantic value".to_string(),
+                Some(format!(
+                    "Semantic value of RHS symbol #{index} in the current production line.\n\nExample:\n\n```rustylr\nExpr : Expr plus Term {{ $1 }};\n```\n\n[Bison-style positional variables]({SYNTAX_URL}#3-bison-style-positional-variables)"
+                )),
+            )
+        };
+        builder.variable(&format!("${index}"), &detail, documentation);
     }
 }
 
@@ -634,11 +624,22 @@ struct LineVariables {
     value_references: BTreeMap<String, ReduceActionReference>,
     position_references: BTreeMap<usize, ReduceActionReference>,
     value_count: usize,
-    /// True when the cursor is anywhere inside a production rule line
-    /// (either in the pattern/symbol list or inside the ReduceAction block).
-    in_rule_line: bool,
-    /// True when the cursor is inside the `{ … }` ReduceAction block of a production rule line.
-    in_reduce_action: bool,
+    location_type: LocationType,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum LocationType {
+    Outside,
+    /// Cursor is after the `:` or `|` separator and before the ReduceAction block.
+    ProductionLine,
+    /// Cursor is inside the `{ … }` ReduceAction block of a production rule line.
+    ReduceAction,
+}
+
+impl Default for LocationType {
+    fn default() -> Self {
+        LocationType::Outside
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -653,66 +654,84 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
     let grammar = Grammar::from_grammar_args(args.clone()).ok();
     for rule in &args.rules {
         for (line_idx, line) in rule.rule_lines.iter().enumerate() {
-            let start = args
-                .span_manager
-                .get_byterange(&line.separator_location)
-                .map_or(0, |range| range.start);
-            let end = rule_line_end(args, content, rule, line_idx);
-            if start <= offset && offset <= end {
-                let mut variables = LineVariables::default();
-                variables.in_rule_line = true;
-                variables.in_reduce_action = reduce_action_contains_offset(line, offset);
-                let token_references = grammar
-                    .as_ref()
-                    .map(|grammar| {
-                        production_token_references(args, content, rule, line_idx, grammar)
-                    })
-                    .unwrap_or_default();
-                for (mapped_name, pattern) in &line.tokens {
-                    variables.value_count += 1;
-                    if let Some(reference) = token_references.get(variables.value_count - 1) {
-                        variables
-                            .position_references
-                            .insert(variables.value_count, reference.clone());
-                    }
-                    if let Some(name) = mapped_name {
-                        variables.value_names.insert(name.value().clone());
-                        if let Some(grammar) = &grammar {
-                            variables.value_types.insert(
-                                name.value().clone(),
-                                hover::pattern_final_type(args, grammar, pattern),
-                            );
-                        }
+            let location_type = location_type_for_rule_line(args, content, rule, line_idx, offset);
+            match location_type {
+                LocationType::Outside => continue,
+                LocationType::ProductionLine | LocationType::ReduceAction => {
+                    let mut variables = LineVariables {
+                        location_type,
+                        ..LineVariables::default()
+                    };
+                    let token_references = grammar
+                        .as_ref()
+                        .map(|grammar| {
+                            production_token_references(args, content, rule, line_idx, grammar)
+                        })
+                        .unwrap_or_default();
+                    for (mapped_name, pattern) in &line.tokens {
+                        variables.value_count += 1;
                         if let Some(reference) = token_references.get(variables.value_count - 1) {
                             variables
-                                .value_references
-                                .insert(name.value().clone(), reference.clone());
+                                .position_references
+                                .insert(variables.value_count, reference.clone());
                         }
-                    } else {
-                        collect_default_bindings(pattern, &mut variables.value_names);
-                        if let (Some(grammar), Some(reference)) =
-                            (&grammar, token_references.get(variables.value_count - 1))
-                        {
-                            collect_default_binding_types(
-                                args,
-                                grammar,
-                                pattern,
-                                &mut variables.value_types,
-                            );
-                            collect_default_binding_references(
-                                pattern,
-                                reference,
-                                &mut variables.value_references,
-                            );
+                        if let Some(name) = mapped_name {
+                            variables.value_names.insert(name.value().clone());
+                            if let Some(grammar) = &grammar {
+                                variables.value_types.insert(
+                                    name.value().clone(),
+                                    hover::pattern_final_type(args, grammar, pattern),
+                                );
+                            }
+                            if let Some(reference) = token_references.get(variables.value_count - 1)
+                            {
+                                variables
+                                    .value_references
+                                    .insert(name.value().clone(), reference.clone());
+                            }
+                        } else {
+                            collect_default_bindings(pattern, &mut variables.value_names);
+                            if let (Some(grammar), Some(reference)) =
+                                (&grammar, token_references.get(variables.value_count - 1))
+                            {
+                                collect_default_binding_types(
+                                    args,
+                                    grammar,
+                                    pattern,
+                                    &mut variables.value_types,
+                                );
+                                collect_default_binding_references(
+                                    pattern,
+                                    reference,
+                                    &mut variables.value_references,
+                                );
+                            }
                         }
                     }
+                    return variables;
                 }
-                return variables;
             }
         }
     }
 
     LineVariables::default()
+}
+
+pub(crate) fn location_type_for_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+) -> LocationType {
+    for rule in &args.rules {
+        for line_idx in 0..rule.rule_lines.len() {
+            match location_type_for_rule_line(args, content, rule, line_idx, offset) {
+                LocationType::Outside => {}
+                location_type => return location_type,
+            }
+        }
+    }
+
+    LocationType::Outside
 }
 
 pub(crate) fn reduce_action_binding_reference_for_offset(
@@ -722,10 +741,10 @@ pub(crate) fn reduce_action_binding_reference_for_offset(
     name: &str,
 ) -> Option<ReduceActionReference> {
     let variables = variables_for_offset(args, content, offset);
-    if !variables.in_reduce_action {
-        return None;
+    match variables.location_type {
+        LocationType::ReduceAction => variables.value_references.get(name).cloned(),
+        LocationType::Outside | LocationType::ProductionLine => None,
     }
-    variables.value_references.get(name).cloned()
 }
 
 pub(crate) fn reduce_action_positional_reference_for_offset(
@@ -735,17 +754,41 @@ pub(crate) fn reduce_action_positional_reference_for_offset(
     index: usize,
 ) -> Option<ReduceActionReference> {
     let variables = variables_for_offset(args, content, offset);
-    if !variables.in_reduce_action {
-        return None;
+    match variables.location_type {
+        LocationType::ReduceAction => variables.position_references.get(&index).cloned(),
+        LocationType::Outside | LocationType::ProductionLine => None,
     }
-    variables.position_references.get(&index).cloned()
 }
 
-fn reduce_action_contains_offset(line: &rusty_lr_parser::RuleLineArgs, offset: usize) -> bool {
-    line.reduce_action
+fn location_type_for_rule_line(
+    args: &GrammarArgs,
+    content: &str,
+    rule: &rusty_lr_parser::RuleDefArgs,
+    line_idx: usize,
+    offset: usize,
+) -> LocationType {
+    let line = &rule.rule_lines[line_idx];
+    let reduce_action_range = line.reduce_action.as_ref().and_then(token_stream_range);
+    if reduce_action_range
         .as_ref()
-        .and_then(token_stream_range)
         .is_some_and(|range| range.contains(&offset))
+    {
+        return LocationType::ReduceAction;
+    }
+
+    let production_start = args
+        .span_manager
+        .get_byterange(&line.separator_location)
+        .map_or(0, |range| range.start);
+    let production_end = reduce_action_range.as_ref().map_or_else(
+        || rule_line_end(args, content, rule, line_idx),
+        |range| range.start,
+    );
+    if production_start <= offset && offset < production_end {
+        LocationType::ProductionLine
+    } else {
+        LocationType::Outside
+    }
 }
 
 fn production_token_references(
@@ -1344,24 +1387,105 @@ Boxed(box $tokentype) : num { num };
     }
 
     #[test]
-    fn completes_dollar_variables() {
+    fn classifies_production_line_and_reduce_action_without_overlap() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr : num { 0 }
+     | plus
+     ;
+"#;
+        let args = parse_args(grammar).unwrap();
+        let rule = &args.rules[0];
+
+        let colon = grammar.find("Expr :").unwrap() + "Expr ".len();
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 0, colon),
+            LocationType::ProductionLine
+        );
+
+        let action_start = grammar.find("{ 0 }").unwrap();
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 0, action_start - 1),
+            LocationType::ProductionLine
+        );
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 0, action_start),
+            LocationType::ReduceAction
+        );
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 0, grammar.find('0').unwrap()),
+            LocationType::ReduceAction
+        );
+
+        let action_end = action_start + grammar[action_start..].find('}').unwrap() + 1;
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 0, action_end),
+            LocationType::Outside
+        );
+
+        let pipe = grammar.find('|').unwrap();
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 1, pipe),
+            LocationType::ProductionLine
+        );
+
+        let semi = grammar.rfind(';').unwrap();
+        assert_eq!(
+            location_type_for_rule_line(&args, grammar, rule, 1, semi),
+            LocationType::Outside
+        );
+    }
+
+    #[test]
+    fn completes_meaningful_dollar_items_inside_reduce_actions() {
         let offset = MOCK_GRAMMAR.find("$ }").unwrap() + 1;
         let labels = labels(completions(
             MOCK_GRAMMAR,
             offset_to_position(MOCK_GRAMMAR, offset),
         ));
-        // Built-in substitution variables.
-        assert!(labels.contains("$tokentype"));
-        // Non-terminal production type substitution.
-        assert!(labels.contains("$E"));
         // Terminal pattern substitution (`%token num Token::Num(_)`).
         assert!(labels.contains("$num"));
         assert!(labels.contains("$plus"));
         // Positional semantic value.
         assert!(labels.contains("$1"));
+        // Type substitutions belong to type/RustCode definition contexts, not
+        // ordinary reduce-action value completion.
+        assert!(!labels.contains("$error"));
+        assert!(!labels.contains("$errortype"));
+        assert!(!labels.contains("$tokentype"));
+        assert!(!labels.contains("$E"));
         // `$left` is only a local named binding, NOT a %token or non-terminal,
         // so it must NOT be offered as a substitution target.
         assert!(!labels.contains("$left"));
+        // Production-line pattern helpers are not reduce-action values.
+        assert!(!labels.contains("$sep"));
+        assert!(!labels.contains("error"));
+    }
+
+    #[test]
+    fn completes_only_dollar_pattern_helpers_in_production_lines() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Comma }
+%%
+%tokentype Token;
+%start List;
+%token num Token::Num(_);
+%token comma Token::Comma;
+List(Vec<i32>) : $sep(num, comma, +) { num };
+"#;
+        let offset = grammar.find("$sep").unwrap() + 1;
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+        assert!(labels.contains("$sep"));
+        assert!(!labels.contains("error"));
+        assert!(!labels.contains("$tokentype"));
+        assert!(!labels.contains("$1"));
     }
 
     #[test]
