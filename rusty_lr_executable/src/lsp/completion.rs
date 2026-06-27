@@ -109,7 +109,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                 add_pattern_dollar_items(&mut builder);
             }
             LocationType::ReduceAction => {
-                add_reduce_action_substitution_items(&mut builder, &names);
+                add_substitution_items(&mut builder, &names);
                 add_positional_value_items(&mut builder, &line_variables);
             }
         },
@@ -304,18 +304,6 @@ fn add_substitution_items(builder: &mut CompletionBuilder, names: &CompletionNam
             "terminal definition substitution",
             Some(format!(
                 "Substitutes to the `%token` definition for terminal `{name}`.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
-            )),
-        );
-    }
-}
-
-fn add_reduce_action_substitution_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
-    for (name, documentation) in &names.terminals {
-        builder.variable(
-            &format!("${name}"),
-            "terminal definition substitution",
-            Some(format!(
-                "Substitutes to the `%token` definition for terminal `{name}`. This is useful in reduce actions for terminal-value extraction sugar.\n\n{documentation}\n\n[Variable substitution]({SYNTAX_URL}#variable-substitution)"
             )),
         );
     }
@@ -1454,12 +1442,11 @@ Expr : num { 0 }
         assert!(labels.contains("$plus"));
         // Positional semantic value.
         assert!(labels.contains("$1"));
-        // Type substitutions belong to type/RustCode definition contexts, not
-        // ordinary reduce-action value completion.
-        assert!(!labels.contains("$error"));
-        assert!(!labels.contains("$errortype"));
-        assert!(!labels.contains("$tokentype"));
-        assert!(!labels.contains("$E"));
+        // Reduce actions are RustCode, so RustCode substitution variables are meaningful.
+        assert!(labels.contains("$error"));
+        assert!(labels.contains("$errortype"));
+        assert!(labels.contains("$tokentype"));
+        assert!(labels.contains("$E"));
         // `$left` is only a local named binding, NOT a %token or non-terminal,
         // so it must NOT be offered as a substitution target.
         assert!(!labels.contains("$left"));

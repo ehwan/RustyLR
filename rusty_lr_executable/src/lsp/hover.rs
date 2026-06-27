@@ -576,6 +576,9 @@ fn hover_word_documentation(word: &str, location_type: LocationType) -> Option<S
             if matches!(word, "data" | "lookahead" | "shift" | "Err") {
                 return completion::keyword_documentation(word);
             }
+            if SUBSTITUTION_VARIABLES.contains(&word) {
+                return completion::substitution_documentation(word);
+            }
             if word.starts_with('@') {
                 return completion::location_documentation(word);
             }
@@ -1205,7 +1208,7 @@ const data: i32 = 0;
 %tokentype Token;
 %start Expr;
 %token num Token::Num(_);
-Expr : num %prec num { let _ = $error; 0 };
+Expr : num %prec num { let _ = $errortype; let _ = $sep; 0 };
 "#;
 
         let data_offset = grammar.find("data:").unwrap();
@@ -1215,10 +1218,23 @@ Expr : num %prec num { let _ = $error; 0 };
         )
         .is_none());
 
-        let error_offset = grammar.find("$error").unwrap();
+        let error_offset = grammar.find("$errortype").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, error_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup
+            .value
+            .contains("alias for the configured reduce-action error type"));
+
+        let sep_offset = grammar.find("$sep").unwrap();
         assert!(hover(
             grammar,
-            crate::lsp::position::offset_to_position(grammar, error_offset)
+            crate::lsp::position::offset_to_position(grammar, sep_offset)
         )
         .is_none());
 
