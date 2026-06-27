@@ -92,6 +92,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     match mode {
         CompletionMode::Directive => match line_variables.location_type {
             LocationType::Outside => add_directive_items(&mut builder),
+            LocationType::NonTerminalDefinition => {}
             LocationType::ProductionLine => {
                 for directive in PRODUCTION_DIRECTIVES {
                     builder.keyword(
@@ -104,7 +105,9 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             LocationType::ReduceAction => {}
         },
         CompletionMode::Dollar => match line_variables.location_type {
-            LocationType::Outside => add_substitution_items(&mut builder, &names),
+            LocationType::Outside | LocationType::NonTerminalDefinition => {
+                add_substitution_items(&mut builder, &names);
+            }
             LocationType::ProductionLine => {
                 add_pattern_dollar_items(&mut builder);
             }
@@ -166,7 +169,9 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     builder.variable(&label, &detail, documentation);
                 }
             }
-            LocationType::Outside | LocationType::ProductionLine => {}
+            LocationType::Outside
+            | LocationType::NonTerminalDefinition
+            | LocationType::ProductionLine => {}
         },
         CompletionMode::AllowDiagnostic => match line_variables.location_type {
             LocationType::Outside => {
@@ -179,7 +184,9 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                     );
                 }
             }
-            LocationType::ProductionLine | LocationType::ReduceAction => {}
+            LocationType::NonTerminalDefinition
+            | LocationType::ProductionLine
+            | LocationType::ReduceAction => {}
         },
         CompletionMode::Symbol => match line_variables.location_type {
             LocationType::ReduceAction => {
@@ -210,6 +217,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                 add_symbol_items(&mut builder, &names);
                 add_pattern_keyword_items(&mut builder, parsed.as_ref());
             }
+            LocationType::NonTerminalDefinition => {}
             LocationType::Outside => add_directive_items(&mut builder),
         },
     }
@@ -618,6 +626,8 @@ struct LineVariables {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum LocationType {
     Outside,
+    /// Cursor is in the non-terminal definition header before the first `:`.
+    NonTerminalDefinition,
     /// Cursor is after the `:` or `|` separator and before the ReduceAction block.
     ProductionLine,
     /// Cursor is inside the `{ … }` ReduceAction block of a production rule line.
@@ -641,6 +651,17 @@ pub(crate) struct ReduceActionReference {
 fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> LineVariables {
     let grammar = Grammar::from_grammar_args(args.clone()).ok();
     for rule in &args.rules {
+        match location_type_for_rule_header(args, rule, offset) {
+            LocationType::NonTerminalDefinition => {
+                return LineVariables {
+                    location_type: LocationType::NonTerminalDefinition,
+                    ..LineVariables::default()
+                };
+            }
+            LocationType::Outside => {}
+            LocationType::ProductionLine | LocationType::ReduceAction => unreachable!(),
+        }
+
         for (line_idx, line) in rule.rule_lines.iter().enumerate() {
             let location_type = location_type_for_rule_line(args, content, rule, line_idx, offset);
             match location_type {
@@ -698,6 +719,7 @@ fn variables_for_offset(args: &GrammarArgs, content: &str, offset: usize) -> Lin
                     }
                     return variables;
                 }
+                LocationType::NonTerminalDefinition => unreachable!(),
             }
         }
     }
@@ -711,6 +733,11 @@ pub(crate) fn location_type_for_offset(
     offset: usize,
 ) -> LocationType {
     for rule in &args.rules {
+        match location_type_for_rule_header(args, rule, offset) {
+            LocationType::Outside => {}
+            location_type => return location_type,
+        }
+
         for line_idx in 0..rule.rule_lines.len() {
             match location_type_for_rule_line(args, content, rule, line_idx, offset) {
                 LocationType::Outside => {}
@@ -731,7 +758,9 @@ pub(crate) fn reduce_action_binding_reference_for_offset(
     let variables = variables_for_offset(args, content, offset);
     match variables.location_type {
         LocationType::ReduceAction => variables.value_references.get(name).cloned(),
-        LocationType::Outside | LocationType::ProductionLine => None,
+        LocationType::Outside
+        | LocationType::NonTerminalDefinition
+        | LocationType::ProductionLine => None,
     }
 }
 
@@ -744,7 +773,31 @@ pub(crate) fn reduce_action_positional_reference_for_offset(
     let variables = variables_for_offset(args, content, offset);
     match variables.location_type {
         LocationType::ReduceAction => variables.position_references.get(&index).cloned(),
-        LocationType::Outside | LocationType::ProductionLine => None,
+        LocationType::Outside
+        | LocationType::NonTerminalDefinition
+        | LocationType::ProductionLine => None,
+    }
+}
+
+fn location_type_for_rule_header(
+    args: &GrammarArgs,
+    rule: &rusty_lr_parser::RuleDefArgs,
+    offset: usize,
+) -> LocationType {
+    let start = args
+        .span_manager
+        .get_byterange(&rule.name.location())
+        .map_or(0, |range| range.start);
+    let end = rule
+        .rule_lines
+        .first()
+        .and_then(|line| args.span_manager.get_byterange(&line.separator_location))
+        .map_or(start, |range| range.start);
+
+    if start <= offset && offset < end {
+        LocationType::NonTerminalDefinition
+    } else {
+        LocationType::Outside
     }
 }
 
@@ -1428,6 +1481,44 @@ Expr : num { 0 }
             location_type_for_rule_line(&args, grammar, rule, 1, semi),
             LocationType::Outside
         );
+    }
+
+    #[test]
+    fn classifies_nonterminal_definition_header_without_directive_completion() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr($tokentype) : num { num };
+Bad(%) : num { num };
+"#;
+        let args = parse_args(grammar).unwrap();
+
+        let type_offset = grammar.find("$tokentype").unwrap() + 1;
+        assert_eq!(
+            location_type_for_offset(&args, grammar, type_offset),
+            LocationType::NonTerminalDefinition
+        );
+
+        let type_labels = labels(completions(
+            grammar,
+            offset_to_position(grammar, type_offset),
+        ));
+        assert!(type_labels.contains("$tokentype"));
+        assert!(type_labels.contains("$Expr"));
+        assert!(type_labels.contains("$num"));
+
+        let percent_offset = grammar.find("Bad(%").unwrap() + "Bad(".len() + 1;
+        let percent_labels = labels(completions(
+            grammar,
+            offset_to_position(grammar, percent_offset),
+        ));
+        assert!(!percent_labels.contains("%token"));
+        assert!(!percent_labels.contains("%start"));
+        assert!(!percent_labels.contains("%prec"));
     }
 
     #[test]

@@ -44,7 +44,9 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
         let mut found_prec = false;
         match location_type {
             LocationType::ReduceAction => {}
-            LocationType::Outside | LocationType::ProductionLine => {
+            LocationType::Outside
+            | LocationType::NonTerminalDefinition
+            | LocationType::ProductionLine => {
                 for (_, assoc, items) in &args.precedences {
                     if items.iter().any(|item| item.to_string() == word) {
                         assoc_type = match assoc {
@@ -77,7 +79,9 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
                     .or_else(|| {
                         reduce_action_reference_documentation_for_word(args, content, offset, &word)
                     }),
-                LocationType::Outside | LocationType::ProductionLine => None,
+                LocationType::Outside
+                | LocationType::NonTerminalDefinition
+                | LocationType::ProductionLine => None,
             };
         }
     }
@@ -565,6 +569,11 @@ fn hover_word_documentation(word: &str, location_type: LocationType) -> Option<S
             }
             if ALLOW_DIAGNOSTICS.contains(&word) {
                 return completion::allow_diagnostic_documentation(word);
+            }
+        }
+        LocationType::NonTerminalDefinition => {
+            if SUBSTITUTION_VARIABLES.contains(&word) {
+                return completion::substitution_documentation(word);
             }
         }
         LocationType::ProductionLine => {
