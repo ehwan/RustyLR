@@ -18,4 +18,4 @@ All notable changes to the "RustyLR LSP" extension will be documented in this fi
   - **Auto-Completion:** Intelligent suggestions for symbols, directives, variables, and locations.
 
 ## 0.1.1
- - Bug fixes: Do not match for the patch number in the version string when checking for rustylr version compatibility.
+ - Bug fixes: Check only the major number when checking for rustylr version compatibility.

@@ -22899,19 +22899,19 @@ async function ensureCompatibleServerVersion(server, cwd, context) {
   if (!expectedVersionInfo) {
     throw new Error(`Could not parse required RustyLR language server version '${expectedVersion}'.`);
   }
-  if (sameMajorMinor(actualVersion, expectedVersionInfo)) {
+  if (sameMajor(actualVersion, expectedVersionInfo)) {
     outputChannel.appendLine(
-      `RustyLR LSP version check passed: expected ${formatMajorMinor(expectedVersionInfo)}.x, found ${actualVersion.raw}.`
+      `RustyLR LSP version check passed: expected ${formatMajor(expectedVersionInfo)}.x, found ${actualVersion.raw}.`
     );
     return;
   }
   const installCommand = `cargo install rustylr --version ${expectedVersion} --force`;
   outputChannel.appendLine(
-    `RustyLR LSP version mismatch: expected ${formatMajorMinor(expectedVersionInfo)}.x, found ${actualVersion.raw}.`
+    `RustyLR LSP version mismatch: expected ${formatMajor(expectedVersionInfo)}.x, found ${actualVersion.raw}.`
   );
   outputChannel.appendLine(`Install the compatible server with: ${installCommand}`);
   const selection = await vscode.window.showErrorMessage(
-    `RustyLR extension expects rustylr ${formatMajorMinor(expectedVersionInfo)}.x, but found ${actualVersion.raw}. Install a compatible rustylr version before using the language server.`,
+    `RustyLR extension expects rustylr ${formatMajor(expectedVersionInfo)}.x, but found ${actualVersion.raw}. Install a compatible rustylr version before using the language server.`,
     "Copy Install Command",
     "Continue Anyway"
   );
@@ -22923,7 +22923,7 @@ async function ensureCompatibleServerVersion(server, cwd, context) {
     return;
   }
   throw new Error(
-    `RustyLR language server version mismatch. Expected ${formatMajorMinor(expectedVersionInfo)}.x, found ${actualVersion.raw}. Run: ${installCommand}`
+    `RustyLR language server version mismatch. Expected ${formatMajor(expectedVersionInfo)}.x, found ${actualVersion.raw}. Run: ${installCommand}`
   );
 }
 function getRequiredServerVersion(context) {
@@ -22966,11 +22966,11 @@ function parseVersion(version) {
     patch: Number(match[3])
   } : void 0;
 }
-function sameMajorMinor(left, right) {
-  return left.major === right.major && left.minor === right.minor;
+function sameMajor(left, right) {
+  return left.major === right.major;
 }
-function formatMajorMinor(version) {
-  return `${version.major}.${version.minor}`;
+function formatMajor(version) {
+  return `${version.major}`;
 }
 function findRustyLrRoot(startPath) {
   if (!startPath) {

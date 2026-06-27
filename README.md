@@ -282,7 +282,7 @@ cargo install rustylr
 
 When installed this way, Cargo places the `rustylr` executable in Cargo's binary directory (commonly `~/.cargo/bin` on Unix-like systems). Make sure that directory is in your `PATH`; the extension looks for `rustylr` on `PATH` when no custom server command is configured.
 
-The extension checks the installed `rustylr` major/minor version before starting the server, ignores patch-version differences, and suggests the exact versioned install command if the versions are incompatible.
+The extension checks the installed `rustylr` major version before starting the server, ignores minor and patch differences, and suggests the exact versioned install command if the versions are incompatible.
 
 The extension source is available in [`editors/vscode-rustylr`](editors/vscode-rustylr).
 
