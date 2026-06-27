@@ -43,7 +43,7 @@ rusty_lr = "<version>"
 cargo install rustylr
 ```
 
-The `rustylr` CLI and `rusty_lr` runtime must be from compatible releases. Avoid mixing arbitrary generator/runtime versions.
+The `rustylr` CLI and `rusty_lr` runtime must be from compatible releases. Generated parsers embed an internal generator version, and the runtime accepts compatible major/minor versions while ignoring patch differences. Avoid mixing arbitrary generator/runtime versions.
 
 3. Create `src/grammar.rustylr`:
 
@@ -133,7 +133,7 @@ When debugging:
 - Read conflict diagnostics before switching to GLR.
 - Check `context.expected_token()` and `context.can_feed(&token)` for interactive or editor-facing parsers.
 - Use `Debug` on a context for parser stack state and user data; in GLR mode, inspect the branch-grouped output. Use `to_tree_list()`/`to_tree_lists()` when syntax-tree inspection is needed.
-- Confirm the generated parser compiles with a compatible `rusty_lr` runtime version.
+- Confirm the generated parser compiles and creates contexts with a compatible `rusty_lr` runtime version. Major/minor generator/runtime mismatches panic during context creation.
 
 ## Best Links for Agents
 

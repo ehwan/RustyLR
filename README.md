@@ -164,7 +164,7 @@ fn main() {
 ```
 
 > [!IMPORTANT]
-> The `rustylr` CLI executable and the `rusty_lr` library in your `Cargo.toml` must be from compatible releases. Incompatible generator/runtime combinations may result in build failures.
+> The `rustylr` CLI executable and the `rusty_lr` library in your `Cargo.toml` must be from compatible releases. Generated parsers record an internal generator version, and `rusty_lr` checks that it is compatible when a parser context is created. If they do not match, the runtime panics with a message that tells you which `rusty_lr` version to use or which `rustylr` version to re-emit with.
 
 ---
 
@@ -371,6 +371,8 @@ RustyLR separates its components into two parts:
 2. The runtime library (`rusty_lr`)
 
 To maintain Cargo compatibility, patch versions are incremented when changes are backwards-compatible (meaning previously generated parser files compile without errors with the new library version). If a change to the code generator requires updates to the runtime library API that break older generated code, a minor version bump is performed.
+
+Generated parser files embed an internal generator version used during emission. At runtime, `rusty_lr` accepts generated code with the same compatible major and minor generator version and ignores patch differences. When the major or minor version differs, context creation panics and instructs the user to either use a compatible `rusty_lr` version or re-emit the parser with a compatible `rustylr` version.
 
 ---
 

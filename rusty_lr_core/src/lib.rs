@@ -21,6 +21,10 @@ pub mod builder;
 /// module for core parser functionality
 pub mod parser;
 
+/// centralized compatibility versions
+#[doc(hidden)]
+pub mod versions;
+
 /// module for production rules representation
 pub mod production;
 

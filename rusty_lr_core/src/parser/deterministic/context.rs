@@ -46,6 +46,7 @@ impl<
     /// Create a new context.
     /// The state stack is initialized with the root state and the selected start state.
     pub fn new(userdata: Data::UserData) -> Self {
+        P::__assert_rusty_lr_parser_version_compatible();
         let mut ctx = Context {
             state_stack: vec![StateIndex::from_usize_unchecked(0)],
 
@@ -90,6 +91,7 @@ impl<
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
     /// The state stack is initialized with the root state and the selected start state.
     pub fn with_capacity(capacity: usize, userdata: Data::UserData) -> Self {
+        P::__assert_rusty_lr_parser_version_compatible();
         let mut state_stack = Vec::with_capacity(capacity);
         state_stack.push(
             StateIndex::from_usize_unchecked(0), // root state

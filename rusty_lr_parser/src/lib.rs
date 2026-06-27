@@ -22,10 +22,32 @@ pub use parser::args::{
 pub use parser::location::{Located, Location};
 pub use terminalset::{TerminalSet, TerminalSetItem};
 
+fn parse_package_version(version: &str) -> (usize, usize, usize) {
+    let mut parts = version
+        .split(['.', '-', '+'])
+        .take(3)
+        .map(|part| part.parse::<usize>().unwrap());
+    (
+        parts.next().unwrap(),
+        parts.next().unwrap(),
+        parts.next().unwrap(),
+    )
+}
+
+/// Gets the version of the current `rusty_lr_parser` crate.
+pub fn current_rusty_lr_parser_version() -> (usize, usize, usize) {
+    parse_package_version(env!("CARGO_PKG_VERSION"))
+}
+
+/// Gets the `rustylr` version compatible with generated output from this crate.
+pub fn compatible_rustylr_version() -> (usize, usize, usize) {
+    rusty_lr_core::versions::COMPATIBLE_RUSTYLR_VERSION
+}
+
 /// This, `rusty_lr_parser` is designed to generate a code, that will be relied on `rusty_lr`.
 ///
 /// Gets the version of the rusty_lr_core crate that current crate is targeting.
 /// If the version is not matched, there will be a compile-time error.
 pub fn target_rusty_lr_version() -> (usize, usize, usize) {
-    (4, 3, 0)
+    rusty_lr_core::versions::TARGET_RUSTY_LR_VERSION
 }

@@ -424,6 +424,21 @@ impl Grammar {
         let parser_struct_name = format_ident!("Parser");
         let token_typename = &self.token_typename;
         let termclass_typename = format_ident!("TerminalClasses");
+        let (parser_version_major, parser_version_minor, parser_version_patch) =
+            crate::current_rusty_lr_parser_version();
+        let parser_version_major = proc_macro2::Literal::usize_unsuffixed(parser_version_major);
+        let parser_version_minor = proc_macro2::Literal::usize_unsuffixed(parser_version_minor);
+        let parser_version_patch = proc_macro2::Literal::usize_unsuffixed(parser_version_patch);
+        let (rustylr_version_major, rustylr_version_minor, rustylr_version_patch) =
+            crate::compatible_rustylr_version();
+        let rustylr_version_major = proc_macro2::Literal::usize_unsuffixed(rustylr_version_major);
+        let rustylr_version_minor = proc_macro2::Literal::usize_unsuffixed(rustylr_version_minor);
+        let rustylr_version_patch = proc_macro2::Literal::usize_unsuffixed(rustylr_version_patch);
+        let (rusty_lr_version_major, rusty_lr_version_minor, rusty_lr_version_patch) =
+            crate::target_rusty_lr_version();
+        let rusty_lr_version_major = proc_macro2::Literal::usize_unsuffixed(rusty_lr_version_major);
+        let rusty_lr_version_minor = proc_macro2::Literal::usize_unsuffixed(rusty_lr_version_minor);
+        let rusty_lr_version_patch = proc_macro2::Literal::usize_unsuffixed(rusty_lr_version_patch);
 
         let mut class_variants = Vec::with_capacity(self.terminal_classes.len());
         for (class_id, class_def) in self.terminal_classes.iter().enumerate() {
@@ -758,6 +773,21 @@ impl Grammar {
                             rules,
                         }.into()
                     })
+                }
+
+                #[doc(hidden)]
+                fn __rusty_lr_parser_version() -> (usize, usize, usize) {
+                    (#parser_version_major, #parser_version_minor, #parser_version_patch)
+                }
+
+                #[doc(hidden)]
+                fn __rustylr_version() -> (usize, usize, usize) {
+                    (#rustylr_version_major, #rustylr_version_minor, #rustylr_version_patch)
+                }
+
+                #[doc(hidden)]
+                fn __rusty_lr_version() -> (usize, usize, usize) {
+                    (#rusty_lr_version_major, #rusty_lr_version_minor, #rusty_lr_version_patch)
                 }
             }
         });

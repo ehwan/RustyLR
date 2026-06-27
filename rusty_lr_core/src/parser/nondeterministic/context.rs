@@ -133,6 +133,7 @@ impl<
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
     pub fn new(userdata: Data::UserData) -> Self {
+        P::__assert_rusty_lr_parser_version_compatible();
         let mut context = Context {
             nodes_pool: Default::default(),
             empty_node_indices: Default::default(),

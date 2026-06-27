@@ -46,4 +46,4 @@ Editor support:
 - RustyLR LSP for VSCode is published at https://marketplace.visualstudio.com/items?itemName=ehwan.rustylr-lsp.
 - The extension requires a compatible `rustylr` executable, starts the server with `rustylr lsp`, and treats matching major versions as compatible.
 
-The `rustylr` CLI and `rusty_lr` runtime must use compatible releases. Follow the README's versioning guidance.
+The `rustylr` CLI and `rusty_lr` runtime must use compatible releases. Generated parsers embed an internal generator version; `rusty_lr` accepts compatible major/minor versions and panics on mismatches during context creation. Follow the README's versioning guidance.

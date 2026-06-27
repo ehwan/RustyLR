@@ -130,6 +130,53 @@ def update_vscode_extension_versions(root_dir, old_version, new_version):
                 f.write(package_content)
     else:
         print(f"Warning: {package_json_path} does not exist.")
+
+def version_to_tuple(version):
+    parts = version.split('.')
+    if len(parts) < 3:
+        return None
+    return f"({parts[0]}, {parts[1]}, {parts[2]})"
+
+def update_named_tuple(content, name, new_tuple):
+    """Update a version tuple assigned to a constant or returned from a zero-argument function."""
+    tuple_pattern = r'\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)'
+    const_pattern = (
+        rf'(const\s+{re.escape(name)}\s*:\s*'
+        rf'\(usize,\s*usize,\s*usize\)\s*=\s*){tuple_pattern}'
+    )
+    if re.search(const_pattern, content):
+        return re.sub(const_pattern, rf'\g<1>{new_tuple}', content, count=1), True
+
+    fn_pattern = (
+        rf'(pub\s+fn\s+{re.escape(name)}\s*\(\)\s*->\s*'
+        rf'\(usize,\s*usize,\s*usize\)\s*\{{\s*){tuple_pattern}'
+    )
+    if re.search(fn_pattern, content):
+        return re.sub(fn_pattern, rf'\g<1>{new_tuple}', content, count=1), True
+
+    return content, False
+
+def update_named_version_tuple(root_dir, relative_path, name, new_version, label):
+    new_tuple = version_to_tuple(new_version)
+    if new_tuple is None:
+        print(f"Warning: Could not parse version {new_version} for {label}")
+        return
+
+    file_path = os.path.join(root_dir, relative_path)
+    if not os.path.exists(file_path):
+        print(f"Warning: {file_path} does not exist.")
+        return
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    content, updated = update_named_tuple(content, name, new_tuple)
+    if updated:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"Updated {label} in {relative_path} to {new_tuple}")
+    else:
+        print(f"Warning: Could not find {label} tuple in {relative_path}")
         
 def run_bump(root_dir):
     """Bumps all project versions and updates their inter-dependencies."""
@@ -211,37 +258,39 @@ def run_bump(root_dir):
             
         print(f"Updated package version in {os.path.relpath(file_path, root_dir)}")
         
-    # Also update target_rusty_lr_version() inside rusty_lr_parser/src/lib.rs
-    # to maintain consistency with the new version of rusty_lr.
+    versions_rs_path = os.path.join('rusty_lr_core', 'src', 'versions.rs')
+
+    # Also update hard-coded compatibility tuples used by generated parser output
+    # and runtime version checks.
     rusty_lr_info = package_map.get('rusty_lr')
     if rusty_lr_info:
-        old_ver = rusty_lr_info['old_version']
-        new_ver = rusty_lr_info['new_version']
-        
-        old_parts = old_ver.split('.')
-        new_parts = new_ver.split('.')
-        if len(old_parts) >= 3 and len(new_parts) >= 3:
-            old_tuple = f"({old_parts[0]}, {old_parts[1]}, {old_parts[2]})"
-            new_tuple = f"({new_parts[0]}, {new_parts[1]}, {new_parts[2]})"
-            
-            lib_rs_path = os.path.join(root_dir, 'rusty_lr_parser', 'src', 'lib.rs')
-            if os.path.exists(lib_rs_path):
-                with open(lib_rs_path, 'r', encoding='utf-8') as f:
-                    lib_content = f.read()
-                    
-                pattern = r'\(\s*' + re.escape(old_parts[0]) + r'\s*,\s*' + re.escape(old_parts[1]) + r'\s*,\s*' + re.escape(old_parts[2]) + r'\s*\)'
-                if re.search(pattern, lib_content):
-                    lib_content = re.sub(pattern, new_tuple, lib_content)
-                    with open(lib_rs_path, 'w', encoding='utf-8') as f:
-                        f.write(lib_content)
-                    print(f"Updated target_rusty_lr_version in {os.path.relpath(lib_rs_path, root_dir)} to {new_tuple}")
-                else:
-                    print(f"Warning: Could not find matching version tuple {old_tuple} in {lib_rs_path}")
-            else:
-                print(f"Warning: {lib_rs_path} does not exist.")
+        update_named_version_tuple(
+            root_dir,
+            versions_rs_path,
+            'COMPATIBLE_RUSTY_LR_VERSION',
+            rusty_lr_info['new_version'],
+            'COMPATIBLE_RUSTY_LR_VERSION',
+        )
+
+    rusty_lr_parser_info = package_map.get('rusty_lr_parser')
+    if rusty_lr_parser_info:
+        update_named_version_tuple(
+            root_dir,
+            versions_rs_path,
+            'EXPECTED_RUSTY_LR_PARSER_VERSION',
+            rusty_lr_parser_info['new_version'],
+            'EXPECTED_RUSTY_LR_PARSER_VERSION',
+        )
                 
     rustylr_info = package_map.get('rustylr')
     if rustylr_info:
+        update_named_version_tuple(
+            root_dir,
+            versions_rs_path,
+            'COMPATIBLE_RUSTYLR_VERSION',
+            rustylr_info['new_version'],
+            'COMPATIBLE_RUSTYLR_VERSION',
+        )
         update_vscode_extension_versions(
             root_dir,
             rustylr_info['old_version'],
