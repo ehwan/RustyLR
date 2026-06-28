@@ -980,7 +980,21 @@ impl<
                 }
             }
             if let Some(shift) = shift {
-                let node_ = self.node_mut(node);
+                // If `node` acquired children during the reduce loop (e.g. an
+                // empty rule created a child via `prepare_reduce_node`), it is
+                // no longer a leaf.  Pushing it directly to `next_nodes` would
+                // violate the `is_leaf()` precondition of the next
+                // `feed_location_impl` call.  Instead, create a fresh leaf
+                // child that carries only the shift result.
+                let shift_node = if self.node(node).is_leaf() {
+                    node
+                } else {
+                    let new_node_idx = self.new_node_with_capacity(1);
+                    self.add_child(node, new_node_idx);
+                    new_node_idx
+                };
+
+                let node_ = self.node_mut(shift_node);
                 node_.state_stack.push(shift.state);
                 node_.location_stack.push(location.clone());
                 #[cfg(feature = "tree")]
@@ -1010,7 +1024,7 @@ impl<
                     }
                 }
 
-                self.next_nodes.push(node);
+                self.next_nodes.push(shift_node);
                 self.next_userdatas.push(userdata);
                 Ok(())
             } else if shifted {
