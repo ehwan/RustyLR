@@ -176,7 +176,7 @@ mod issue_89_optional_empty_branch {
     }
 
     #[test]
-    fn refselt_no_panic() {
+    fn refself_no_panic() {
         // `amp self_kw` — previously caused a panic inside feed_location_impl
         // due to a non-leaf node being pushed to next_nodes after an empty
         // reduce produced a child of the original node.
