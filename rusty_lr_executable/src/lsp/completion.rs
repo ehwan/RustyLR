@@ -65,16 +65,20 @@ pub(crate) const SYNTAX_URL: &str = "https://github.com/ehwan/RustyLR/blob/main/
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum CompletionMode {
+    None,
     Directive,
     Dollar,
     Location,
     AllowDiagnostic,
+    AllowTarget,
+    StartNonTerminal,
     Symbol,
 }
 
 pub fn completions(content: &str, position: Position) -> CompletionResponse {
     let offset = position_to_offset(content, position);
     let mode = completion_mode(content, offset);
+    let whitespace_trigger = previous_char(content, offset).is_some_and(char::is_whitespace);
     let replace_range = replacement_range(content, offset, mode);
 
     let parsed = parse_args(content).ok();
@@ -90,6 +94,7 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
     let mut builder = CompletionBuilder::new(replace_range);
 
     match mode {
+        CompletionMode::None => {}
         CompletionMode::Directive => match line_variables.location_type {
             LocationType::Outside => add_directive_items(&mut builder),
             LocationType::NonTerminalDefinition => {}
@@ -188,6 +193,22 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
             | LocationType::ProductionLine
             | LocationType::ReduceAction => {}
         },
+        CompletionMode::AllowTarget => match line_variables.location_type {
+            LocationType::Outside => {
+                if let Some(diagnostic) = allow_target_diagnostic(line_prefix(content, offset)) {
+                    add_allow_target_items(&mut builder, &names, diagnostic);
+                }
+            }
+            LocationType::NonTerminalDefinition
+            | LocationType::ProductionLine
+            | LocationType::ReduceAction => {}
+        },
+        CompletionMode::StartNonTerminal => match line_variables.location_type {
+            LocationType::Outside => add_nonterminal_items(&mut builder, &names),
+            LocationType::NonTerminalDefinition
+            | LocationType::ProductionLine
+            | LocationType::ReduceAction => {}
+        },
         CompletionMode::Symbol => match line_variables.location_type {
             LocationType::ReduceAction => {
                 // Inside a ReduceAction: suggest named bindings and ReduceAction-specific keywords.
@@ -218,7 +239,11 @@ pub fn completions(content: &str, position: Position) -> CompletionResponse {
                 add_pattern_keyword_items(&mut builder, parsed.as_ref());
             }
             LocationType::NonTerminalDefinition => {}
-            LocationType::Outside => add_directive_items(&mut builder),
+            LocationType::Outside => {
+                if !whitespace_trigger {
+                    add_directive_items(&mut builder);
+                }
+            }
         },
     }
 
@@ -261,6 +286,12 @@ fn add_symbol_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
     }
     for (name, documentation) in &names.terminals {
         builder.terminal(name, documentation.clone());
+    }
+}
+
+fn add_nonterminal_items(builder: &mut CompletionBuilder, names: &CompletionNames) {
+    for (name, documentation) in &names.nonterminals {
+        builder.nonterminal(name, documentation.clone());
     }
 }
 
@@ -317,6 +348,79 @@ fn add_substitution_items(builder: &mut CompletionBuilder, names: &CompletionNam
     }
 }
 
+fn add_allow_target_items(
+    builder: &mut CompletionBuilder,
+    names: &CompletionNames,
+    diagnostic: &str,
+) {
+    let target_kind = allow_target_kind(diagnostic);
+    if target_kind.includes_nonterminals() {
+        for (name, documentation) in &names.nonterminals {
+            builder.nonterminal(name, documentation.clone());
+        }
+    }
+    if target_kind.includes_terminals() {
+        for (name, documentation) in &names.terminals {
+            builder.terminal(name, documentation.clone());
+        }
+    }
+    if target_kind.includes_builtin_symbols() {
+        builder.keyword(
+            "error",
+            "reserved error-recovery terminal",
+            keyword_documentation("error"),
+        );
+        builder.keyword(
+            "$",
+            "end-of-input terminal",
+            Some(format!(
+                "End-of-input terminal target for `%allow {diagnostic}($);`.\n\n[Diagnostic suppression]({SYNTAX_URL}#diagnostic-suppression)"
+            )),
+        );
+    }
+}
+
+#[derive(Clone, Copy)]
+enum AllowTargetKind {
+    NonTerminal,
+    Terminal,
+    Symbol,
+    Any,
+}
+
+impl AllowTargetKind {
+    fn includes_nonterminals(self) -> bool {
+        matches!(self, AllowTargetKind::NonTerminal | AllowTargetKind::Any)
+    }
+
+    fn includes_terminals(self) -> bool {
+        matches!(
+            self,
+            AllowTargetKind::Terminal | AllowTargetKind::Symbol | AllowTargetKind::Any
+        )
+    }
+
+    fn includes_builtin_symbols(self) -> bool {
+        matches!(self, AllowTargetKind::Symbol | AllowTargetKind::Any)
+    }
+}
+
+fn allow_target_kind(diagnostic: &str) -> AllowTargetKind {
+    match diagnostic {
+        "nonterm_unreachable"
+        | "nonterm_unproductive"
+        | "unused_nonterm_data"
+        | "unit_production_eliminated"
+        | "redundant_rule_removed"
+        | "reduce_reduce_conflict_resolved" => AllowTargetKind::NonTerminal,
+        "unused_terminals" | "terminals_merged" => AllowTargetKind::Terminal,
+        "shift_reduce_conflict_resolved"
+        | "shift_reduce_conflict_glr"
+        | "reduce_reduce_conflict_glr" => AllowTargetKind::Symbol,
+        _ => AllowTargetKind::Any,
+    }
+}
+
 fn add_positional_value_items(builder: &mut CompletionBuilder, line_variables: &LineVariables) {
     for index in 1..=line_variables.value_count {
         let (detail, documentation) = if let Some(reference) =
@@ -348,6 +452,11 @@ pub(crate) fn parse_args(content: &str) -> Result<GrammarArgs, ()> {
 }
 
 fn completion_mode(content: &str, offset: usize) -> CompletionMode {
+    let line_prefix = line_prefix(content, offset);
+    if allow_target_diagnostic(line_prefix).is_some() {
+        return CompletionMode::AllowTarget;
+    }
+
     let prefix_start = current_prefix_start(content, offset, true);
     if prefix_start < offset {
         match content.as_bytes()[prefix_start] {
@@ -358,10 +467,15 @@ fn completion_mode(content: &str, offset: usize) -> CompletionMode {
         }
     }
 
-    let line_prefix = line_prefix(content, offset);
     let trimmed = line_prefix.trim_start();
-    if trimmed.starts_with("%allow") {
+    if is_directive_operand_context(trimmed, "%allow") {
         return CompletionMode::AllowDiagnostic;
+    }
+    if is_directive_operand_context(trimmed, "%start") {
+        return CompletionMode::StartNonTerminal;
+    }
+    if previous_char(content, offset).is_some_and(char::is_whitespace) && trimmed.starts_with('%') {
+        return CompletionMode::None;
     }
     if trimmed.ends_with('%') {
         return CompletionMode::Directive;
@@ -376,10 +490,44 @@ fn completion_mode(content: &str, offset: usize) -> CompletionMode {
     CompletionMode::Symbol
 }
 
+fn allow_target_diagnostic(line_prefix: &str) -> Option<&str> {
+    let rest = line_prefix.trim_start().strip_prefix("%allow")?;
+    let rest = rest.trim_start();
+    let diagnostic_end = rest.find(|ch: char| !is_ident_continue(ch))?;
+    let diagnostic = &rest[..diagnostic_end];
+    if diagnostic.is_empty() {
+        return None;
+    }
+
+    let after_diagnostic = rest[diagnostic_end..].trim_start();
+    let target_prefix = after_diagnostic.strip_prefix('(')?;
+    if target_prefix.contains(')') {
+        return None;
+    }
+
+    Some(diagnostic)
+}
+
+fn is_directive_operand_context(line_prefix: &str, directive: &str) -> bool {
+    let Some(rest) = line_prefix.strip_prefix(directive) else {
+        return false;
+    };
+    rest.chars()
+        .next()
+        .is_some_and(|ch| ch.is_whitespace() || ch == ';')
+}
+
+fn previous_char(content: &str, offset: usize) -> Option<char> {
+    content[..offset.min(content.len())].chars().next_back()
+}
+
 fn replacement_range(content: &str, offset: usize, mode: CompletionMode) -> Range {
     let include_sigils = matches!(
         mode,
-        CompletionMode::Directive | CompletionMode::Dollar | CompletionMode::Location
+        CompletionMode::Directive
+            | CompletionMode::Dollar
+            | CompletionMode::Location
+            | CompletionMode::AllowTarget
     );
     let start = current_prefix_start(content, offset, include_sigils);
     Range::new(
@@ -1208,13 +1356,13 @@ pub(crate) fn keyword_documentation(label: &str) -> Option<String> {
             "Sets the Rust type used as the parser's input terminal token type.\n\nExample:\n\n```rustylr\n%tokentype Token;\n```\n\n[Token type]({SYNTAX_URL}#token-type-must-defined)"
         ),
         "%userdata" => format!(
-            "Sets the mutable user-data type threaded through parser contexts and reduce actions.\n\nExample:\n\n```rustylr\n%userdata ParserState;\n```\n\n[Userdata type]({SYNTAX_URL}#userdata-type-optional)"
+            "Sets the mutable user-data type threaded through parser contexts and reduce actions.\n\nExamples:\n\n```rustylr\n%userdata ParserState;\nExpr : num {{ data.seen_numbers += 1; num }};\n```\n\n[Userdata type]({SYNTAX_URL}#userdata-type-optional)"
         ),
         "%error" | "%errortype" => format!(
             "Sets the custom error type returned by reduce actions.\n\nExample:\n\n```rustylr\n%error String;\n```\n\n[Error type]({SYNTAX_URL}#error-type-optional)"
         ),
         "%location" => format!(
-            "Sets the source-location type used by `@...` location bindings.\n\nExample:\n\n```rustylr\n%location Span;\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
+            "Sets the source-location type used by `@...` location bindings.\n\nExamples:\n\n```rustylr\n%location Span;\nExpr : left=Expr plus right=Term {{ report_span(@left, @right); left + right }};\n```\n\n[Location tracking]({SYNTAX_URL}#location-tracking)"
         ),
         "%left" => format!(
             "Declares left-associative operator precedence for one or more terminals.\n\nExample:\n\n```rustylr\n%left plus minus;\n```\n\n[Operator precedence]({SYNTAX_URL}#operator-precedence)"
@@ -1572,6 +1720,149 @@ List(Vec<i32>) : $sep(num, comma, +) { num };
         let labels = labels(completions(content, Position::new(1, 1)));
         assert!(labels.contains("%token"));
         assert!(labels.contains("%start"));
+    }
+
+    #[test]
+    fn completes_only_nonterminals_after_start_directive() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%tokentype Token;
+%start ;
+%token num Token::Num(_);
+Expr : num { num };
+Term : num { num };
+"#;
+        let offset = grammar.find("%start ").unwrap() + "%start ".len();
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+
+        assert!(labels.contains("Expr"));
+        assert!(labels.contains("Term"));
+        assert!(!labels.contains("num"));
+        assert!(!labels.contains("%token"));
+        assert!(!labels.contains("error"));
+    }
+
+    #[test]
+    fn completes_allow_diagnostics_after_directive_space() {
+        let grammar = "%%\n%allow ";
+        let offset = grammar.len();
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+
+        assert!(labels.contains("unused_terminals"));
+        assert!(labels.contains("nonterm_unreachable"));
+        assert!(!labels.contains("%token"));
+    }
+
+    #[test]
+    fn completes_allow_terminal_targets_after_open_paren() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%allow unused_terminals(
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr : num { num };
+"#;
+        let offset =
+            grammar.find("%allow unused_terminals(").unwrap() + "%allow unused_terminals(".len();
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+
+        assert!(labels.contains("num"));
+        assert!(labels.contains("plus"));
+        assert!(!labels.contains("Expr"));
+        assert!(!labels.contains("error"));
+        assert!(!labels.contains("$"));
+    }
+
+    #[test]
+    fn completes_allow_nonterminal_targets_after_open_paren() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%allow nonterm_unreachable(
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { num };
+Term : num { num };
+"#;
+        let offset = grammar.find("%allow nonterm_unreachable(").unwrap()
+            + "%allow nonterm_unreachable(".len();
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+
+        assert!(labels.contains("Expr"));
+        assert!(labels.contains("Term"));
+        assert!(!labels.contains("num"));
+        assert!(!labels.contains("error"));
+        assert!(!labels.contains("$"));
+    }
+
+    #[test]
+    fn completes_allow_symbol_targets_for_conflict_diagnostics() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%allow shift_reduce_conflict_glr(
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr : num { num };
+"#;
+        let offset = grammar.find("%allow shift_reduce_conflict_glr(").unwrap()
+            + "%allow shift_reduce_conflict_glr(".len();
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+
+        assert!(labels.contains("num"));
+        assert!(labels.contains("plus"));
+        assert!(labels.contains("error"));
+        assert!(labels.contains("$"));
+        assert!(!labels.contains("Expr"));
+    }
+
+    #[test]
+    fn completes_allow_target_prefix_inside_parens() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32), Plus }
+%%
+%allow unused_terminals(pl
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+%token plus Token::Plus;
+Expr : num { num };
+"#;
+        let offset = grammar.find("%allow unused_terminals(pl").unwrap()
+            + "%allow unused_terminals(pl".len();
+        let completion_items = items(completions(grammar, offset_to_position(grammar, offset)));
+        let plus = completion_items
+            .iter()
+            .find(|item| item.label == "plus")
+            .unwrap();
+        let Some(CompletionTextEdit::Edit(edit)) = &plus.text_edit else {
+            panic!("expected text edit");
+        };
+        let start = position_to_offset(grammar, edit.range.start);
+        let end = position_to_offset(grammar, edit.range.end);
+
+        assert_eq!(&grammar[start..end], "pl");
+    }
+
+    #[test]
+    fn does_not_show_directives_after_unhandled_directive_space() {
+        let grammar = "%%\n%token ";
+        let offset = grammar.len();
+        let labels = labels(completions(grammar, offset_to_position(grammar, offset)));
+
+        assert!(labels.is_empty());
     }
 
     #[test]

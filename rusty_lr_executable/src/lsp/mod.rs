@@ -404,10 +404,22 @@ pub fn run() -> Result<(), Box<dyn Error + Send + Sync>> {
 }
 
 fn completion_trigger_characters() -> Vec<String> {
-    "%@$_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "%@$_( abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         .chars()
         .map(|ch| ch.to_string())
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn completion_triggers_include_directive_operand_space() {
+        let triggers = completion_trigger_characters();
+        assert!(triggers.contains(&" ".to_string()));
+        assert!(triggers.contains(&"(".to_string()));
+    }
 }
 
 fn publish_diagnostics(connection: &Connection, uri: Uri, content: &str) {

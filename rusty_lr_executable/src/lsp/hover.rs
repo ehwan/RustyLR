@@ -33,6 +33,10 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
                 Some(range),
             ));
         }
+
+        if let Some((range, doc)) = definition_at_offset(args, content, offset) {
+            return Some(markdown_hover(content, doc, Some(range)));
+        }
     }
 
     let word = hover_word(content, offset)?;
@@ -88,6 +92,10 @@ pub fn hover(content: &str, position: Position) -> Option<Hover> {
 
     if documentation.is_none() {
         documentation = hover_word_documentation(&word, location_type);
+    }
+
+    if documentation.is_none() {
+        documentation = directive_operand_documentation(content, offset, location_type);
     }
 
     let documentation = documentation?;
@@ -166,6 +174,124 @@ fn reduce_action_documentation() -> String {
         "### Reduce Action\n\nA block of Rust code executed when this production rule is reduced.\n\n[Reduce Actions]({}#reduceaction-optional)",
         SYNTAX_URL
     )
+}
+
+fn definition_at_offset(
+    args: &GrammarArgs,
+    content: &str,
+    offset: usize,
+) -> Option<(ByteRange<usize>, String)> {
+    let grammar = Grammar::from_grammar_args(args.clone()).ok();
+
+    for (terminal, _) in &args.terminals {
+        if let Some(range) = args.span_manager.get_byterange(&terminal.location()) {
+            if range.contains(&offset) {
+                return Some((
+                    range,
+                    terminal_definition_documentation(args, grammar.as_ref(), content, terminal),
+                ));
+            }
+        }
+    }
+
+    for start_name in &args.start_rule_name {
+        if let Some(range) = args.span_manager.get_byterange(&start_name.location()) {
+            if range.contains(&offset) {
+                return Some((
+                    range,
+                    start_symbol_documentation(args, grammar.as_ref(), content, start_name),
+                ));
+            }
+        }
+    }
+
+    for rule in &args.rules {
+        if let Some(range) = args.span_manager.get_byterange(&rule.name.location()) {
+            if range.contains(&offset) {
+                return Some((
+                    range,
+                    nonterminal_definition_documentation(args, grammar.as_ref(), content, rule),
+                ));
+            }
+        }
+    }
+
+    None
+}
+
+fn terminal_definition_documentation(
+    args: &GrammarArgs,
+    grammar: Option<&Grammar>,
+    content: &str,
+    terminal: &rusty_lr_parser::Located<String>,
+) -> String {
+    let name = terminal.value();
+    let type_line = grammar
+        .map(token_type)
+        .map(|ty| hover_type_line(Some(&ty)))
+        .unwrap_or_else(unavailable_type_line);
+    let definition = completion::line_text_for_location(args, content, &terminal.location());
+    format!(
+        "**Terminal `{name}`**\n\n{type_line}\n\nDefined by `%token`:\n\n{}\n\n[Token definition]({SYNTAX_URL}#token-definition-must-defined)",
+        definition_code_block(&definition)
+    )
+}
+
+fn nonterminal_definition_documentation(
+    args: &GrammarArgs,
+    grammar: Option<&Grammar>,
+    content: &str,
+    rule: &rusty_lr_parser::RuleDefArgs,
+) -> String {
+    let name = rule.name.value();
+    let type_line = grammar
+        .and_then(|grammar| grammar.nonterminal_type(name))
+        .and_then(|(ty, boxed)| rust_type(ty, boxed))
+        .as_ref()
+        .map(|ty| hover_type_line(Some(ty)))
+        .unwrap_or_else(unavailable_type_line);
+    let definition = completion::rule_definition_text(args, content, rule);
+    format!(
+        "**Non-terminal `{name}`**\n\n{type_line}\n\nDefined by production rule:\n\n{}\n\n[Production rules]({SYNTAX_URL}#production-rules)",
+        definition_code_block(&definition)
+    )
+}
+
+fn start_symbol_documentation(
+    args: &GrammarArgs,
+    grammar: Option<&Grammar>,
+    content: &str,
+    start_name: &rusty_lr_parser::Located<String>,
+) -> String {
+    let name = start_name.value();
+    let start_definition =
+        completion::line_text_for_location(args, content, &start_name.location());
+    let type_line = grammar
+        .and_then(|grammar| grammar.nonterminal_type(name))
+        .and_then(|(ty, boxed)| rust_type(ty, boxed))
+        .as_ref()
+        .map(|ty| hover_type_line(Some(ty)))
+        .unwrap_or_else(unavailable_type_line);
+    let nonterminal_definition = args
+        .rules
+        .iter()
+        .find(|rule| rule.name.value() == name)
+        .map(|rule| completion::rule_definition_text(args, content, rule));
+    let nonterminal_section = nonterminal_definition.map_or_else(String::new, |definition| {
+        format!(
+            "\n\nNon-terminal definition:\n\n{}",
+            definition_code_block(&definition)
+        )
+    });
+
+    format!(
+        "**Start symbol `{name}`**\n\n`%start` declares `{name}` as a start non-terminal for parser generation.\n\n{type_line}\n\nDefinition:\n\n{}{nonterminal_section}\n\n[Start symbol]({SYNTAX_URL}#start-symbol-must-defined)",
+        definition_code_block(&start_definition)
+    )
+}
+
+fn unavailable_type_line() -> String {
+    "Final type: unavailable until the grammar parses successfully.".to_string()
 }
 
 pub(crate) fn reduce_action_variable_documentation(
@@ -594,6 +720,50 @@ fn hover_word_documentation(word: &str, location_type: LocationType) -> Option<S
         }
     }
     None
+}
+
+fn directive_operand_documentation(
+    content: &str,
+    offset: usize,
+    location_type: LocationType,
+) -> Option<String> {
+    if matches!(location_type, LocationType::ReduceAction) {
+        return None;
+    }
+
+    let offset = offset.min(content.len());
+    let statement_start = directive_statement_start(content, offset);
+    let statement_prefix = content[statement_start..offset].trim_start();
+
+    let directives = if matches!(location_type, LocationType::ProductionLine) {
+        PRODUCTION_DIRECTIVES
+    } else {
+        DIRECTIVES
+    };
+
+    for directive in directives {
+        if is_directive_operand_prefix(statement_prefix, directive) {
+            return completion::keyword_documentation(directive);
+        }
+    }
+
+    None
+}
+
+fn directive_statement_start(content: &str, offset: usize) -> usize {
+    let offset = offset.min(content.len());
+    let previous_semicolon = content[..offset].rfind(';').map_or(0, |idx| idx + 1);
+    let grammar_start = content[..offset].rfind("%%").map_or(0, |idx| idx + 2);
+    previous_semicolon.max(grammar_start)
+}
+
+fn is_directive_operand_prefix(statement_prefix: &str, directive: &str) -> bool {
+    let Some(rest) = statement_prefix.strip_prefix(directive) else {
+        return false;
+    };
+    rest.chars()
+        .next()
+        .is_some_and(|ch| ch.is_whitespace() || ch == ';')
 }
 
 fn pattern_at_offset(
@@ -1104,6 +1274,139 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
             panic!("expected markup hover");
         };
         assert!(markup.value.contains("Defines a terminal symbol"));
+    }
+
+    #[test]
+    fn hovers_terminal_nonterminal_and_start_definitions() {
+        let token_offset = MOCK_GRAMMAR.find("%token num").unwrap() + "%token ".len();
+        let token_hover = hover(
+            MOCK_GRAMMAR,
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, token_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(token_markup) = token_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(token_markup.value.contains("**Terminal `num`**"));
+        assert!(token_markup.value.contains("Defined by `%token`"));
+        assert!(token_markup
+            .value
+            .contains("```rustylr\n%token num Token::Num(_);\n```"));
+
+        let start_offset = MOCK_GRAMMAR.find("%start List").unwrap() + "%start ".len();
+        let start_hover = hover(
+            MOCK_GRAMMAR,
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, start_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(start_markup) = start_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(start_markup.value.contains("**Start symbol `List`**"));
+        assert!(start_markup.value.contains("Definition:"));
+        assert!(start_markup.value.contains("```rustylr\n%start List;\n```"));
+        assert!(start_markup.value.contains("Non-terminal definition:"));
+        assert!(start_markup.value.contains("List(Vec<i32>)"));
+
+        let nonterminal_offset = MOCK_GRAMMAR.find("List(Vec<i32>)").unwrap();
+        let nonterminal_hover = hover(
+            MOCK_GRAMMAR,
+            crate::lsp::position::offset_to_position(MOCK_GRAMMAR, nonterminal_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(nonterminal_markup) = nonterminal_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(nonterminal_markup.value.contains("**Non-terminal `List`**"));
+        assert!(nonterminal_markup
+            .value
+            .contains("Defined by production rule"));
+        assert!(nonterminal_markup.value.contains("Final type: `Vec"));
+    }
+
+    #[test]
+    fn hovers_directive_documentation_on_plain_operands() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+struct ParserState;
+struct Span;
+%%
+%userdata ParserState;
+%location Span;
+%tokentype Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { num };
+"#;
+
+        let userdata_offset = grammar.find("%userdata ParserState").unwrap() + "%userdata ".len();
+        let userdata_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, userdata_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(userdata_markup) = userdata_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(userdata_markup
+            .value
+            .contains("Sets the mutable user-data type"));
+        assert!(userdata_markup.value.contains("data.seen_numbers += 1"));
+
+        let location_offset = grammar.find("%location Span").unwrap() + "%location ".len();
+        let location_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, location_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(location_markup) = location_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(location_markup
+            .value
+            .contains("Sets the source-location type"));
+        assert!(location_markup.value.contains("report_span(@left, @right)"));
+
+        let tokentype_offset = grammar.find("%tokentype Token").unwrap() + "%tokentype ".len();
+        let tokentype_hover = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, tokentype_offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(tokentype_markup) = tokentype_hover.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(tokentype_markup
+            .value
+            .contains("Sets the Rust type used as the parser's input terminal token type"));
+    }
+
+    #[test]
+    fn hovers_directive_documentation_on_multiline_operand() {
+        let grammar = r#"
+#[derive(Debug, Clone)]
+pub enum Token { Num(i32) }
+%%
+%tokentype
+    Token;
+%start Expr;
+%token num Token::Num(_);
+Expr : num { num };
+"#;
+
+        let offset = grammar.find("Token;").unwrap();
+        let hover_res = hover(
+            grammar,
+            crate::lsp::position::offset_to_position(grammar, offset),
+        )
+        .unwrap();
+        let HoverContents::Markup(markup) = hover_res.contents else {
+            panic!("expected markup hover");
+        };
+        assert!(markup
+            .value
+            .contains("Sets the Rust type used as the parser's input terminal token type"));
     }
 
     #[test]
