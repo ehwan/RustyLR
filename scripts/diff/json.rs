@@ -480,7 +480,6 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for NonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-#[derive(Clone)]
 pub enum Data {
     Empty,
 }

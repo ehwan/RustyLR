@@ -17,7 +17,7 @@ rusty_lr_core = { version = "4.3.0", path = "../rusty_lr_core", features = [
     "builder",
 ] }
 rusty_lr_parser = { version = "4.3.0", path = "../rusty_lr_parser" }
-lsp-server = "0.7.6"
+lsp-server = "0.8.0"
 lsp-types = "0.97.0"
 prettyplease = "0.2"
 proc-macro2 = { version = "1.0.86", features = ["span-locations"] }
