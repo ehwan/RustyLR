@@ -1,31 +1,28 @@
-error[E0599]: the method `clone` exists for struct `rusty_lr::parser::deterministic::Context<Parser, __RustyLRData<NotClone>, SExtracter, u8>`, but its trait bounds were not satisfied
-  --> tests/ui/context_clone_non_clone_storage_fails.rs:14:27
+error[E0277]: the trait bound `NotClone: Clone` is not satisfied
+  --> tests/ui/context_clone_non_clone_storage_fails.rs:15:20
+   |
+15 |     assert_clone::<SContext>();
+   |                    ^^^^^^^^ the trait `Clone` is not implemented for `NotClone`
+   |
+note: required for `__RustyLRData<NotClone>` to implement `Clone`
+  --> tests/ui/context_clone_non_clone_storage_fails.rs:5:1
    |
  5 | / lr1! {
  6 | |     %tokentype char;
  7 | |     %start S;
 ...  |
 10 | | }
-   | |_- doesn't satisfy `__RustyLRData<NotClone>: Clone`
-...
-14 |       let _cloned = context.clone();
-   |                             ^^^^^ method cannot be called due to unsatisfied trait bounds
+   | |_^ type parameter would need to implement `Clone`
+   = help: consider manually implementing `Clone` to avoid undesired bounds
+   = note: 1 redundant requirement hidden
+   = note: required for `rusty_lr::parser::deterministic::Context<Parser, __RustyLRData<NotClone>, SExtracter, u8>` to implement `Clone`
+note: required by a bound in `assert_clone`
+  --> tests/ui/context_clone_non_clone_storage_fails.rs:12:20
    |
-  ::: $WORKSPACE/rusty_lr_core/src/parser/deterministic/context.rs
+12 | fn assert_clone<T: Clone>() {}
+   |                    ^^^^^ required by this bound in `assert_clone`
+help: consider annotating `NotClone` with `#[derive(Clone)]`
    |
-   | / pub struct Context<
-   | |     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-   | |     Data: SemanticValue,
-   | |     Start: StartExtractor<Data>,
-   | |     StateIndex,
-   | | > {
-   | |_- doesn't satisfy `_: Clone`
+ 3 + #[derive(Clone)]
+ 4 | struct NotClone;
    |
-   = note: the following trait bounds were not satisfied:
-           `__RustyLRData<NotClone>: Clone`
-           which is required by `rusty_lr::parser::deterministic::Context<Parser, __RustyLRData<NotClone>, SExtracter, u8>: Clone`
-note: the trait `Clone` must be implemented
-  --> $RUST/core/src/clone.rs
-   |
-   | pub const trait Clone: Sized {
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
