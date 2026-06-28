@@ -1,6 +1,6 @@
 [package]
 name = "rustylr"
-version = "1.34.4"
+version = "1.35.0"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
@@ -12,11 +12,11 @@ categories = ["parsing"]
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-rusty_lr_buildscript = { version = "0.68.0", path = "../rusty_lr_buildscript" }
-rusty_lr_core = { version = "4.3.0", path = "../rusty_lr_core", features = [
+rusty_lr_buildscript = { version = "0.69.0", path = "../rusty_lr_buildscript" }
+rusty_lr_core = { version = "4.4.0", path = "../rusty_lr_core", features = [
     "builder",
 ] }
-rusty_lr_parser = { version = "4.3.0", path = "../rusty_lr_parser" }
+rusty_lr_parser = { version = "4.4.0", path = "../rusty_lr_parser" }
 lsp-server = "0.8.0"
 lsp-types = "0.97.0"
 prettyplease = "0.2"

@@ -7701,15 +7701,15 @@ impl ::rusty_lr_core::parser::Parser for Parser {
     }
     #[doc(hidden)]
     fn __rusty_lr_parser_version() -> (usize, usize, usize) {
-        (4, 3, 0)
+        (4, 4, 0)
     }
     #[doc(hidden)]
     fn __rustylr_version() -> (usize, usize, usize) {
-        (1, 34, 4)
+        (1, 35, 0)
     }
     #[doc(hidden)]
     fn __rusty_lr_version() -> (usize, usize, usize) {
-        (4, 3, 0)
+        (4, 4, 0)
     }
 }
 
