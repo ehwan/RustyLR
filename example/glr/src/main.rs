@@ -135,3 +135,78 @@ mod userdata_branch_tests {
         assert_eq!(results[1], (2, vec!["right"]));
     }
 }
+
+/// Regression test for <https://github.com/ehwan/RustyLR/issues/89>:
+/// GLR parser panicked on an optional branch `(A B)?` when the shift and the
+/// empty-reduce were both active for the same lookahead token.
+#[cfg(test)]
+mod issue_89_optional_empty_branch {
+    use rusty_lr::lr1;
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum Token {
+        Amp,
+        SelfKw,
+        Bool,
+        Ident,
+        Colon,
+    }
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    pub enum Param {
+        RefSelf,
+        RefBool,
+    }
+
+    lr1! {
+        %glr;
+        %tokentype Token;
+        %start Param;
+
+        %token amp   Token::Amp;
+        %token self_kw Token::SelfKw;
+        %token bool_kw Token::Bool;
+        %token ident Token::Ident;
+        %token colon Token::Colon;
+
+        Param(Param)
+            : amp self_kw { Param::RefSelf }
+            | (ident colon)? amp bool_kw { Param::RefBool }
+            ;
+    }
+
+    #[test]
+    fn refselt_no_panic() {
+        // `amp self_kw` — previously caused a panic inside feed_location_impl
+        // due to a non-leaf node being pushed to next_nodes after an empty
+        // reduce produced a child of the original node.
+        let mut ctx = ParamContext::with_default_userdata();
+        ctx.feed(Token::Amp).unwrap();
+        ctx.feed(Token::SelfKw).unwrap();
+        let mut results: Vec<_> = ctx.accept_all().unwrap().collect();
+        results.sort_by_key(|(p, _)| matches!(p, Param::RefBool) as u8);
+        assert_eq!(results, vec![(Param::RefSelf, ())]);
+    }
+
+    #[test]
+    fn refbool_without_optional() {
+        // `amp bool_kw` — optional part is absent
+        let mut ctx = ParamContext::with_default_userdata();
+        ctx.feed(Token::Amp).unwrap();
+        ctx.feed(Token::Bool).unwrap();
+        let results: Vec<_> = ctx.accept_all().unwrap().collect();
+        assert_eq!(results, vec![(Param::RefBool, ())]);
+    }
+
+    #[test]
+    fn refbool_with_optional() {
+        // `ident colon amp bool_kw` — optional part is present
+        let mut ctx = ParamContext::with_default_userdata();
+        ctx.feed(Token::Ident).unwrap();
+        ctx.feed(Token::Colon).unwrap();
+        ctx.feed(Token::Amp).unwrap();
+        ctx.feed(Token::Bool).unwrap();
+        let results: Vec<_> = ctx.accept_all().unwrap().collect();
+        assert_eq!(results, vec![(Param::RefBool, ())]);
+    }
+}
