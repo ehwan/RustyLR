@@ -1,6 +1,6 @@
 use lsp_types::{Diagnostic, DiagnosticSeverity, Range};
 use proc_macro2::{Spacing, TokenStream, TokenTree};
-use rusty_lr_core::{production::LR0ItemRef, TerminalSymbol};
+use rusty_lr_core::{TerminalSymbol, production::LR0ItemRef};
 use rusty_lr_parser::grammar::Grammar;
 use serde_json::json;
 use std::collections::{BTreeMap, BTreeSet};

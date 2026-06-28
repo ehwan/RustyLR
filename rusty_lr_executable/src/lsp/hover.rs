@@ -8,7 +8,7 @@ use std::ops::Range as ByteRange;
 use std::str::FromStr;
 
 use crate::lsp::completion::{
-    self, LocationType, ALLOW_DIAGNOSTICS, DIRECTIVES, PRODUCTION_DIRECTIVES,
+    self, ALLOW_DIAGNOSTICS, DIRECTIVES, LocationType, PRODUCTION_DIRECTIVES,
     SUBSTITUTION_VARIABLES, SYNTAX_URL,
 };
 use crate::lsp::position::position_to_offset;
@@ -1289,9 +1289,11 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
         };
         assert!(token_markup.value.contains("**Terminal `num`**"));
         assert!(token_markup.value.contains("Defined by `%token`"));
-        assert!(token_markup
-            .value
-            .contains("```rustylr\n%token num Token::Num(_);\n```"));
+        assert!(
+            token_markup
+                .value
+                .contains("```rustylr\n%token num Token::Num(_);\n```")
+        );
 
         let start_offset = MOCK_GRAMMAR.find("%start List").unwrap() + "%start ".len();
         let start_hover = hover(
@@ -1318,9 +1320,11 @@ List(Vec<i32>) : $sep(E, comma, +) { E };
             panic!("expected markup hover");
         };
         assert!(nonterminal_markup.value.contains("**Non-terminal `List`**"));
-        assert!(nonterminal_markup
-            .value
-            .contains("Defined by production rule"));
+        assert!(
+            nonterminal_markup
+                .value
+                .contains("Defined by production rule")
+        );
         assert!(nonterminal_markup.value.contains("Final type: `Vec"));
     }
 
@@ -1349,9 +1353,11 @@ Expr : num { num };
         let HoverContents::Markup(userdata_markup) = userdata_hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(userdata_markup
-            .value
-            .contains("Sets the mutable user-data type"));
+        assert!(
+            userdata_markup
+                .value
+                .contains("Sets the mutable user-data type")
+        );
         assert!(userdata_markup.value.contains("data.seen_numbers += 1"));
 
         let location_offset = grammar.find("%location Span").unwrap() + "%location ".len();
@@ -1363,9 +1369,11 @@ Expr : num { num };
         let HoverContents::Markup(location_markup) = location_hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(location_markup
-            .value
-            .contains("Sets the source-location type"));
+        assert!(
+            location_markup
+                .value
+                .contains("Sets the source-location type")
+        );
         assert!(location_markup.value.contains("report_span(@left, @right)"));
 
         let tokentype_offset = grammar.find("%tokentype Token").unwrap() + "%tokentype ".len();
@@ -1377,9 +1385,11 @@ Expr : num { num };
         let HoverContents::Markup(tokentype_markup) = tokentype_hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(tokentype_markup
-            .value
-            .contains("Sets the Rust type used as the parser's input terminal token type"));
+        assert!(
+            tokentype_markup
+                .value
+                .contains("Sets the Rust type used as the parser's input terminal token type")
+        );
     }
 
     #[test]
@@ -1404,9 +1414,11 @@ Expr : num { num };
         let HoverContents::Markup(markup) = hover_res.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup
-            .value
-            .contains("Sets the Rust type used as the parser's input terminal token type"));
+        assert!(
+            markup
+                .value
+                .contains("Sets the Rust type used as the parser's input terminal token type")
+        );
     }
 
     #[test]
@@ -1423,9 +1435,11 @@ Expr : num { num };
         };
         assert!(markup.value.contains("Final type: `Token`"));
         assert!(markup.value.contains("**Terminal `num`**"));
-        assert!(markup
-            .value
-            .contains("```rustylr\n%token num Token::Num(_);\n```"));
+        assert!(
+            markup
+                .value
+                .contains("```rustylr\n%token num Token::Num(_);\n```")
+        );
         assert!(!markup.value.contains("Pattern `num`"));
         assert!(!markup.value.contains("Identifiers:"));
         assert!(!markup.value.contains("Identifier pattern"));
@@ -1449,16 +1463,20 @@ Expr : num { num };
         assert!(markup.value.contains("```rustylr\nE(i32)\n : num\n ;\n```"));
         assert!(!markup.value.contains("value=num"));
         assert!(markup.value.contains("**Terminal `comma`**"));
-        assert!(markup
-            .value
-            .contains("```rustylr\n%token comma Token::Comma;\n```"));
+        assert!(
+            markup
+                .value
+                .contains("```rustylr\n%token comma Token::Comma;\n```")
+        );
         assert!(markup.value.contains("Pattern syntax:"));
         assert!(markup.value.contains("- `$sep(A, Sep, ...)`:"));
         assert_eq!(markup.value.matches("**Non-terminal `E`**").count(), 1);
         assert_eq!(markup.value.matches("**Terminal `comma`**").count(), 1);
-        assert!(markup
-            .value
-            .contains("Pattern helper for separated repetition"));
+        assert!(
+            markup
+                .value
+                .contains("Pattern helper for separated repetition")
+        );
     }
 
     #[test]
@@ -1479,9 +1497,11 @@ Expr : num { num };
         assert!(markup.value.contains("**Non-terminal `E`**"));
         assert!(markup.value.contains("**Terminal `comma`**"));
         assert!(markup.value.contains("Pattern syntax:"));
-        assert!(markup
-            .value
-            .contains("Pattern helper for separated repetition"));
+        assert!(
+            markup
+                .value
+                .contains("Pattern helper for separated repetition")
+        );
     }
 
     #[test]
@@ -1524,11 +1544,13 @@ Expr : num %prec num { let _ = $errortype; let _ = $sep; 0 };
 "#;
 
         let data_offset = grammar.find("data:").unwrap();
-        assert!(hover(
-            grammar,
-            crate::lsp::position::offset_to_position(grammar, data_offset)
-        )
-        .is_none());
+        assert!(
+            hover(
+                grammar,
+                crate::lsp::position::offset_to_position(grammar, data_offset)
+            )
+            .is_none()
+        );
 
         let error_offset = grammar.find("$errortype").unwrap();
         let hover_res = hover(
@@ -1539,16 +1561,20 @@ Expr : num %prec num { let _ = $errortype; let _ = $sep; 0 };
         let HoverContents::Markup(markup) = hover_res.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup
-            .value
-            .contains("alias for the configured reduce-action error type"));
+        assert!(
+            markup
+                .value
+                .contains("alias for the configured reduce-action error type")
+        );
 
         let sep_offset = grammar.find("$sep").unwrap();
-        assert!(hover(
-            grammar,
-            crate::lsp::position::offset_to_position(grammar, sep_offset)
-        )
-        .is_none());
+        assert!(
+            hover(
+                grammar,
+                crate::lsp::position::offset_to_position(grammar, sep_offset)
+            )
+            .is_none()
+        );
 
         let prec_offset = grammar.find("%prec").unwrap();
         let hover_res = hover(
@@ -1712,9 +1738,11 @@ Expr : num { Err(Default::default())?; 0 };
         let HoverContents::Markup(markup) = hover_res.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup
-            .value
-            .contains("Result::Err(::rusty_lr::DefaultReduceActionError)"));
+        assert!(
+            markup
+                .value
+                .contains("Result::Err(::rusty_lr::DefaultReduceActionError)")
+        );
         assert!(!markup.value.contains("moduleprefix"));
     }
 
@@ -1739,9 +1767,11 @@ Expr : num { Err(Default::default())?; 0 };
         let HoverContents::Markup(markup) = hover_res.contents else {
             panic!("expected markup hover");
         };
-        assert!(markup
-            .value
-            .contains("Result::Err(::my_prefix::DefaultReduceActionError)"));
+        assert!(
+            markup
+                .value
+                .contains("Result::Err(::my_prefix::DefaultReduceActionError)")
+        );
         assert!(!markup.value.contains("moduleprefix"));
     }
 
@@ -1770,9 +1800,11 @@ Expr : num { let _ = data; let _ = @$; let _ = lookahead; Err(Default::default()
         let HoverContents::Markup(data_markup) = data_hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(data_markup
-            .value
-            .contains("data: &mut ::my_prefix::UserData"));
+        assert!(
+            data_markup
+                .value
+                .contains("data: &mut ::my_prefix::UserData")
+        );
         assert!(!data_markup.value.contains("$moduleprefix"));
 
         let location_offset = grammar.find("@$").unwrap();
@@ -1796,9 +1828,11 @@ Expr : num { let _ = data; let _ = @$; let _ = lookahead; Err(Default::default()
         let HoverContents::Markup(lookahead_markup) = lookahead_hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(lookahead_markup
-            .value
-            .contains("lookahead: &::my_prefix::Token"));
+        assert!(
+            lookahead_markup
+                .value
+                .contains("lookahead: &::my_prefix::Token")
+        );
         assert!(!lookahead_markup.value.contains("$moduleprefix"));
 
         let err_offset = grammar.find("Err(").unwrap();
@@ -1810,9 +1844,11 @@ Expr : num { let _ = data; let _ = @$; let _ = lookahead; Err(Default::default()
         let HoverContents::Markup(err_markup) = err_hover.contents else {
             panic!("expected markup hover");
         };
-        assert!(err_markup
-            .value
-            .contains("Result::Err(::my_prefix::UserData)"));
+        assert!(
+            err_markup
+                .value
+                .contains("Result::Err(::my_prefix::UserData)")
+        );
         assert!(!err_markup.value.contains("$userdata"));
     }
 
@@ -2005,9 +2041,11 @@ Expr : num { 0 }
             panic!("expected markup hover");
         };
         assert!(markup_start.value.contains("### Reduce Action"));
-        assert!(markup_start
-            .value
-            .contains("A block of Rust code executed when this production rule is reduced"));
+        assert!(
+            markup_start
+                .value
+                .contains("A block of Rust code executed when this production rule is reduced")
+        );
         assert!(markup_start.value.contains("#reduceaction-optional"));
         assert_eq!(
             hover_start.range.unwrap(),

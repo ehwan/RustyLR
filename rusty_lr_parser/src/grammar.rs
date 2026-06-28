@@ -2,11 +2,11 @@ use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use quote::format_ident;
 use quote::quote;
+use rusty_lr_core::Symbol;
+use rusty_lr_core::TerminalSymbol;
 use rusty_lr_core::hash::HashMap;
 use rusty_lr_core::hash::HashSet;
 use rusty_lr_core::production::Precedence;
-use rusty_lr_core::Symbol;
-use rusty_lr_core::TerminalSymbol;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
@@ -1391,103 +1391,117 @@ impl Grammar {
                 }
 
                 // parse %prec definition
-                let prec = if let Some(prec) = rule.precs().next() {
-                    // check if this ident exists in tokens
-                    let from_token = match prec {
-                        IdentOrLiteral::Ident(ident) => {
-                            let mut prec = None;
-                            for (idx, token) in tokens.iter().enumerate() {
-                                if token.mapto.as_ref().map(|m| m) == Some(ident) {
-                                    prec = Some(idx);
-                                    break;
-                                }
-                            }
-                            prec
-                        }
-                        _ => None,
-                    };
-                    if let Some(from_token) = from_token {
-                        let from_token_location = tokens[from_token].location;
-                        // check if from_token'th token is terminal symbol
-                        if let Symbol::Terminal(term) = tokens[from_token].symbol {
-                            match term {
-                                TerminalSymbol::Terminal(term_idx) => {
-                                    if let Some(level) = grammar.terminals[term_idx].precedence {
-                                        Some(Located::new(
-                                            Precedence::Fixed(level.into_value()),
-                                            from_token_location,
-                                        ))
-                                    } else {
-                                        return Err(ParseError::PrecedenceNotDefined(prec.clone()));
+                let prec = match rule.precs().next() {
+                    Some(prec) => {
+                        // check if this ident exists in tokens
+                        let from_token = match prec {
+                            IdentOrLiteral::Ident(ident) => {
+                                let mut prec = None;
+                                for (idx, token) in tokens.iter().enumerate() {
+                                    if token.mapto.as_ref().map(|m| m) == Some(ident) {
+                                        prec = Some(idx);
+                                        break;
                                     }
                                 }
-                                TerminalSymbol::Error => {
-                                    if let Some(error_prec) = grammar.error_precedence {
-                                        Some(Located::new(
-                                            Precedence::Fixed(error_prec),
-                                            from_token_location,
-                                        ))
-                                    } else {
-                                        return Err(ParseError::PrecedenceNotDefined(prec.clone()));
+                                prec
+                            }
+                            _ => None,
+                        };
+                        if let Some(from_token) = from_token {
+                            let from_token_location = tokens[from_token].location;
+                            // check if from_token'th token is terminal symbol
+                            if let Symbol::Terminal(term) = tokens[from_token].symbol {
+                                match term {
+                                    TerminalSymbol::Terminal(term_idx) => {
+                                        if let Some(level) = grammar.terminals[term_idx].precedence
+                                        {
+                                            Some(Located::new(
+                                                Precedence::Fixed(level.into_value()),
+                                                from_token_location,
+                                            ))
+                                        } else {
+                                            return Err(ParseError::PrecedenceNotDefined(
+                                                prec.clone(),
+                                            ));
+                                        }
+                                    }
+                                    TerminalSymbol::Error => {
+                                        if let Some(error_prec) = grammar.error_precedence {
+                                            Some(Located::new(
+                                                Precedence::Fixed(error_prec),
+                                                from_token_location,
+                                            ))
+                                        } else {
+                                            return Err(ParseError::PrecedenceNotDefined(
+                                                prec.clone(),
+                                            ));
+                                        }
+                                    }
+                                    TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
+                                        unreachable!(
+                                            "eof/virtual start token cannot be used in %prec, nor cannot be used in production rules"
+                                        )
                                     }
                                 }
-                                TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
-                                    unreachable!("eof/virtual start token cannot be used in %prec, nor cannot be used in production rules")
-                                }
+                            } else {
+                                return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                             }
+                        } else if let Some(&level) = grammar.precedence_levels.get(&prec) {
+                            Some(level.map(Precedence::Fixed))
                         } else {
                             return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                         }
-                    } else if let Some(&level) = grammar.precedence_levels.get(&prec) {
-                        Some(level.map(Precedence::Fixed))
-                    } else {
-                        return Err(ParseError::PrecedenceNotDefined(prec.clone()));
                     }
-                } else {
-                    // not defined,
-                    // choose the last terminal symbol that has precedence
-                    let mut op = None;
-                    for token in tokens.iter().rev() {
-                        if let Symbol::Terminal(term) = token.symbol {
-                            match term {
-                                TerminalSymbol::Terminal(term_idx) => {
-                                    if let Some(level) = grammar.terminals[term_idx].precedence {
-                                        op = Some(Located::new(
-                                            Precedence::Fixed(level.into_value()),
-                                            token.location,
-                                        ));
-                                        break;
+                    _ => {
+                        // not defined,
+                        // choose the last terminal symbol that has precedence
+                        let mut op = None;
+                        for token in tokens.iter().rev() {
+                            if let Symbol::Terminal(term) = token.symbol {
+                                match term {
+                                    TerminalSymbol::Terminal(term_idx) => {
+                                        if let Some(level) = grammar.terminals[term_idx].precedence
+                                        {
+                                            op = Some(Located::new(
+                                                Precedence::Fixed(level.into_value()),
+                                                token.location,
+                                            ));
+                                            break;
+                                        }
                                     }
-                                }
-                                TerminalSymbol::Error => {
-                                    if let Some(error_prec) = grammar.error_precedence {
-                                        op = Some(Located::new(
-                                            Precedence::Fixed(error_prec),
-                                            token.location,
-                                        ));
-                                        break;
+                                    TerminalSymbol::Error => {
+                                        if let Some(error_prec) = grammar.error_precedence {
+                                            op = Some(Located::new(
+                                                Precedence::Fixed(error_prec),
+                                                token.location,
+                                            ));
+                                            break;
+                                        }
                                     }
-                                }
-                                TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
-                                    unreachable!("eof/virtual start token cannot be used in %prec, nor cannot be used in production rules, this case must be filtered out in parsing stage")
+                                    TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
+                                        unreachable!(
+                                            "eof/virtual start token cannot be used in %prec, nor cannot be used in production rules, this case must be filtered out in parsing stage"
+                                        )
+                                    }
                                 }
                             }
                         }
+                        op
                     }
-                    op
                 };
 
                 // parse %dprec literal value
-                let dprec = if let Some(dprec) = rule.dprecs().next() {
-                    let val = match dprec.base10_parse::<usize>() {
-                        Ok(val) => val,
-                        Err(_) => {
-                            return Err(ParseError::OnlyUsizeLiteral(dprec.location()));
-                        }
-                    };
-                    Some(Located::new(val, dprec.location()))
-                } else {
-                    None
+                let dprec = match rule.dprecs().next() {
+                    Some(dprec) => {
+                        let val = match dprec.base10_parse::<usize>() {
+                            Ok(val) => val,
+                            Err(_) => {
+                                return Err(ParseError::OnlyUsizeLiteral(dprec.location()));
+                            }
+                        };
+                        Some(Located::new(val, dprec.location()))
+                    }
+                    _ => None,
                 };
 
                 // rename all '@var_name' to '__rustylr_location_{var_name}'
@@ -1699,11 +1713,7 @@ impl Grammar {
                                 None
                             }
                         } {
-                            if idx < tokens.len() {
-                                Some(idx)
-                            } else {
-                                None
-                            }
+                            if idx < tokens.len() { Some(idx) } else { None }
                         } else {
                             tokens
                                 .iter()
@@ -4118,17 +4128,21 @@ mod tests {
         };
 
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
-        assert!(grammar_args
-            .allowed_diagnostics
-            .iter()
-            .any(|d| d.0.value() == "nonterm_unreachable"));
+        assert!(
+            grammar_args
+                .allowed_diagnostics
+                .iter()
+                .any(|d| d.0.value() == "nonterm_unreachable")
+        );
 
         let span_manager = grammar_args.span_manager.clone();
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
-        assert!(grammar
-            .allowed_diagnostics
-            .contains_key("nonterm_unreachable"));
+        assert!(
+            grammar
+                .allowed_diagnostics
+                .contains_key("nonterm_unreachable")
+        );
 
         grammar.optimize(25);
         // Find the NonTermUnreachable warning
@@ -4155,18 +4169,22 @@ mod tests {
         };
 
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar");
-        assert!(grammar_args
-            .allowed_diagnostics
-            .iter()
-            .any(|d| d.0.value() == "nonterm_unreachable"
-                && d.1.as_ref().unwrap().to_string_repr() == "Unused1"));
+        assert!(
+            grammar_args
+                .allowed_diagnostics
+                .iter()
+                .any(|d| d.0.value() == "nonterm_unreachable"
+                    && d.1.as_ref().unwrap().to_string_repr() == "Unused1")
+        );
 
         let span_manager = grammar_args.span_manager.clone();
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to construct grammar");
-        assert!(grammar
-            .allowed_diagnostics
-            .contains_key("nonterm_unreachable"));
+        assert!(
+            grammar
+                .allowed_diagnostics
+                .contains_key("nonterm_unreachable")
+        );
         let scopes = grammar
             .allowed_diagnostics
             .get("nonterm_unreachable")
@@ -4200,15 +4218,19 @@ mod tests {
 
         // Warning for Unused1 should be suppressed
         assert!(grammar.is_warning_allowed(warning));
-        assert!(warning
-            .to_compile_warning(&grammar, &span_manager)
-            .is_empty());
+        assert!(
+            warning
+                .to_compile_warning(&grammar, &span_manager)
+                .is_empty()
+        );
 
         // Warning for Unused2 should NOT be suppressed
         assert!(!grammar.is_warning_allowed(warning2));
-        assert!(!warning2
-            .to_compile_warning(&grammar, &span_manager)
-            .is_empty());
+        assert!(
+            !warning2
+                .to_compile_warning(&grammar, &span_manager)
+                .is_empty()
+        );
     }
 
     #[test]

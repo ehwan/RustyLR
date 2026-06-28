@@ -218,9 +218,11 @@ E : num plus error ;
         let diags_err =
             crate::lsp::diagnostics::compile_and_get_diagnostics(MOCK_GRAMMAR_WITH_ERROR);
         assert!(!diags_err.is_empty());
-        assert!(diags_err
-            .iter()
-            .any(|d| d.message.contains("not defined") || d.message.contains("error")));
+        assert!(
+            diags_err
+                .iter()
+                .any(|d| d.message.contains("not defined") || d.message.contains("error"))
+        );
     }
 
     #[test]

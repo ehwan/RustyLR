@@ -249,14 +249,17 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
             TokenTree::Ident(ident) => {
                 let location = context.userdata_mut().span_manager.add_span(span);
                 let location = Location::Range(location, location + 1);
-                if let Some(keyword) = ident_to_keyword(ident.clone()) {
-                    if context.can_feed(&keyword) {
-                        context.feed_location(keyword, location)?;
-                    } else {
+                match ident_to_keyword(ident.clone()) {
+                    Some(keyword) => {
+                        if context.can_feed(&keyword) {
+                            context.feed_location(keyword, location)?;
+                        } else {
+                            context.feed_location(Lexed::Ident(ident), location)?;
+                        }
+                    }
+                    _ => {
                         context.feed_location(Lexed::Ident(ident), location)?;
                     }
-                } else {
-                    context.feed_location(Lexed::Ident(ident), location)?;
                 }
             }
             TokenTree::Punct(punct) => {

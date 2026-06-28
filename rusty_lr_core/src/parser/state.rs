@@ -1,5 +1,5 @@
-use crate::parser::table::ShiftTarget;
 use crate::TriState;
+use crate::parser::table::ShiftTarget;
 
 /// One decoded parser-table row used by generated code and the grammar builder before converting
 /// to a concrete runtime table layout.

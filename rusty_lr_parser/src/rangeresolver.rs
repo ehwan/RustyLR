@@ -112,7 +112,7 @@ impl RangeResolver {
         self.ranges = new_ranges;
     }
 
-    pub fn get_ranges(&self, start: u32, last: u32) -> impl Iterator<Item = usize> {
+    pub fn get_ranges(&self, start: u32, last: u32) -> impl Iterator<Item = usize> + use<> {
         let first_idx = match self.ranges.binary_search(&(start, start)) {
             Ok(idx) => idx,
             Err(idx) => idx,

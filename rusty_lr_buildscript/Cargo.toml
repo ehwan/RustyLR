@@ -1,7 +1,8 @@
 [package]
 name = "rusty_lr_buildscript"
 version = "0.68.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 description = "Build script helpers for RustyLR, a Bison-inspired parser generator for Rust."
 repository = "https://github.com/ehwan/RustyLR"

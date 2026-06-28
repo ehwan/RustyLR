@@ -3,13 +3,13 @@ use std::collections::BTreeSet;
 use super::ParseError;
 use crate::Location;
 
+use crate::parser::Parser;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::semantic_value::SemanticValue;
 use crate::parser::semantic_value::StartExtractor;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
-use crate::parser::Parser;
 
 use crate::TerminalSymbol;
 
@@ -37,11 +37,11 @@ pub struct Context<
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-    > Context<P, Data, Start, StateIndex>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index + Copy,
+> Context<P, Data, Start, StateIndex>
 {
     /// Create a new context.
     /// The state stack is initialized with the root state and the selected start state.
@@ -236,8 +236,8 @@ impl<
     pub fn expected_token_str<'a>(
         &self,
     ) -> (
-        impl Iterator<Item = &'static str>,
-        impl Iterator<Item = &'static str>,
+        impl Iterator<Item = &'static str> + use<P, Data, Start, StateIndex>,
+        impl Iterator<Item = &'static str> + use<P, Data, Start, StateIndex>,
     )
     where
         P::TermClass: Ord,
@@ -669,11 +669,11 @@ impl<
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-    > Default for Context<P, Data, Start, StateIndex>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index + Copy,
+> Default for Context<P, Data, Start, StateIndex>
 where
     Data::UserData: Default,
 {
@@ -683,11 +683,11 @@ where
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-    > Clone for Context<P, Data, Start, StateIndex>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index + Copy,
+> Clone for Context<P, Data, Start, StateIndex>
 where
     Data: Clone,
     Data::Term: Clone,
@@ -710,11 +710,11 @@ where
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-    > std::fmt::Debug for Context<P, Data, Start, StateIndex>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index + Copy,
+> std::fmt::Debug for Context<P, Data, Start, StateIndex>
 where
     Data: std::fmt::Debug,
     Data::UserData: std::fmt::Debug,

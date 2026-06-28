@@ -2,10 +2,10 @@
 //!
 //! This module is the public home for parser table layouts used by generated parsers.
 
+use crate::TriState;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::IntermediateState;
 use crate::parser::terminalclass::TerminalClass;
-use crate::TriState;
 
 /// For state, terminal and class indices, we use the most compact integer type that can hold the maximum value.
 /// This trait defines the conversion between {u8, u16, u32, usize} <-> usize.

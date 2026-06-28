@@ -717,8 +717,11 @@ E(i32):left=E plus n { left }
         assert!(formatted.contains("%userdata ParserState;"));
         assert!(formatted.contains("%allow unused_terminals([ 'a'-'z' '+' ]);"));
         assert!(formatted.contains("%left plus \"spaced literal\";"));
-        assert!(formatted
-            .contains("E(i32)\n    : left=E plus n { left }\n    | n {\n        n\n    }\n    ;"));
+        assert!(
+            formatted.contains(
+                "E(i32)\n    : left=E plus n { left }\n    | n {\n        n\n    }\n    ;"
+            )
+        );
     }
 
     #[test]

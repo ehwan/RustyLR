@@ -286,7 +286,7 @@ impl Builder {
                 let diag = Diagnostic::error()
                     .with_message("Lexing error")
                     .with_labels(vec![
-                        Label::primary(file_id, range).with_message(e.to_string())
+                        Label::primary(file_id, range).with_message(e.to_string()),
                     ]);
                 let writer = self.stream();
                 let config = codespan_reporting::term::Config::default();
@@ -320,11 +320,10 @@ impl Builder {
                 let diag = match e {
                     ParseArgError::MacroLineParse { location, message } => Diagnostic::error()
                         .with_message("Parse Failed")
-                        .with_labels(vec![Label::primary(
-                            file_id,
-                            sm.get_byterange(&location).unwrap_or(0..0),
-                        )
-                        .with_message("Error here")])
+                        .with_labels(vec![
+                            Label::primary(file_id, sm.get_byterange(&location).unwrap_or(0..0))
+                                .with_message("Error here"),
+                        ])
                         .with_notes(vec![message]),
                 };
 
@@ -344,7 +343,7 @@ impl Builder {
             let diag = Diagnostic::error()
                 .with_message("Syntax error in grammar")
                 .with_labels(vec![
-                    Label::primary(file_id, range).with_message(error.message.clone())
+                    Label::primary(file_id, range).with_message(error.message.clone()),
                 ])
                 .with_notes(vec![format!("refer to: {}", error.link)]);
             let writer = self.stream();
@@ -380,7 +379,7 @@ impl Builder {
                             .with_message("Multiple %moduleprefix definition")
                             .with_labels(labels)
                             .with_notes(vec![
-                                "Only one %moduleprefix definition is allowed".to_string()
+                                "Only one %moduleprefix definition is allowed".to_string(),
                             ])
                     }
                     ArgError::MultipleUserDataDefinition(locs) => {
@@ -400,9 +399,9 @@ impl Builder {
                         Diagnostic::error()
                             .with_message("Multiple %userdata definition")
                             .with_labels(labels)
-                            .with_notes(
-                                vec!["Only one %userdata definition is allowed".to_string()],
-                            )
+                            .with_notes(vec![
+                                "Only one %userdata definition is allowed".to_string(),
+                            ])
                     }
                     ArgError::MultipleErrorDefinition(locs) => {
                         let mut labels = Vec::new();
@@ -443,7 +442,7 @@ impl Builder {
                             .with_message("Multiple %tokentype definition")
                             .with_labels(labels)
                             .with_notes(vec![
-                                "Only one %tokentype definition is allowed".to_string()
+                                "Only one %tokentype definition is allowed".to_string(),
                             ])
                     }
                     ArgError::MultipleLocationDefinition(locs) => {
@@ -464,9 +463,9 @@ impl Builder {
                         Diagnostic::error()
                             .with_message("Multiple %location definition")
                             .with_labels(labels)
-                            .with_notes(
-                                vec!["Only one %location definition is allowed".to_string()],
-                            )
+                            .with_notes(vec![
+                                "Only one %location definition is allowed".to_string(),
+                            ])
                     }
 
                     ArgError::MultipleStartDefinition(locs) => {
@@ -589,8 +588,10 @@ impl Builder {
                             .unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message(format!("Duplicate start symbol definition: `{}`", name))
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("duplicate start symbol defined here")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("duplicate start symbol defined here"),
+                            ])
                     }
                 };
 
@@ -637,7 +638,7 @@ impl Builder {
                             .with_message(format!("Multiple reduce definition"))
                             .with_labels(labels)
                             .with_notes(vec![
-                                "Reduce type must be unique, either %left or %right".to_string()
+                                "Reduce type must be unique, either %left or %right".to_string(),
                             ])
                     }
 
@@ -669,8 +670,10 @@ impl Builder {
 
                         Diagnostic::error()
                             .with_message("Start non-terminal not defined")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This name is given to %start")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("This name is given to %start"),
+                            ])
                             .with_notes(vec!["Non-terminal name must be defined".to_string()])
                     }
 
@@ -679,8 +682,10 @@ impl Builder {
 
                         Diagnostic::error()
                             .with_message("Terminal symbol not defined")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This terminal symbol is not defined")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("This terminal symbol is not defined"),
+                            ])
                             .with_notes(vec!["Terminal symbol must be defined".to_string()])
                     }
 
@@ -689,8 +694,10 @@ impl Builder {
 
                         Diagnostic::error()
                             .with_message("Unsupported literal type")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This literal type is not supported")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("This literal type is not supported"),
+                            ])
                             .with_notes(vec![
                                 "If %tokentype is `char`, only `char` or `&str` are supported"
                                     .to_string(),
@@ -778,16 +785,20 @@ impl Builder {
                         let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Only terminal or terminal set is allowed")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This pattern is not terminal")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("This pattern is not terminal"),
+                            ])
                             .with_notes(vec!["".to_string()])
                     }
                     ParseError::NonTerminalNotDefined(ident) => {
                         let range = span_manager.get_byterange(&ident).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Non-terminal not defined")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This non-terminal is not defined")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("This non-terminal is not defined"),
+                            ])
                     }
                     ParseError::OnlyUsizeLiteral(loc) => {
                         let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
@@ -800,8 +811,10 @@ impl Builder {
                         let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
                         Diagnostic::error()
                             .with_message("Bison variable $0 is not supported")
-                            .with_labels(vec![Label::primary(file_id, range)
-                                .with_message("This variable reference is invalid")])
+                            .with_labels(vec![
+                                Label::primary(file_id, range)
+                                    .with_message("This variable reference is invalid"),
+                            ])
                             .with_notes(vec!["Bison variable $0 is not supported".to_string()])
                     }
 
@@ -1030,8 +1043,10 @@ impl Builder {
                         .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("NonTerminal deleted")
-                        .with_labels(vec![Label::primary(file_id, range)
-                            .with_message("non-terminal defined here")])
+                        .with_labels(vec![
+                            Label::primary(file_id, range)
+                                .with_message("non-terminal defined here"),
+                        ])
                         .with_notes(vec![
                             "This non-terminal cannot be reached from initial state".to_string(),
                         ])
@@ -1055,8 +1070,10 @@ impl Builder {
                         .unwrap_or(0..0);
                     Diagnostic::warning()
                         .with_message("NonTerminal data type not used")
-                        .with_labels(vec![Label::primary(file_id, range)
-                            .with_message("non-terminal defined here")])
+                        .with_labels(vec![
+                            Label::primary(file_id, range)
+                                .with_message("non-terminal defined here"),
+                        ])
                         .with_notes(vec![
                             "This non-terminal's data type is not used in any reduce action"
                                 .to_string(),
@@ -1104,10 +1121,10 @@ impl Builder {
                     Diagnostic::note()
                         .with_message("Production Rule deleted")
                         .with_labels(vec![
-                            Label::primary(file_id, range).with_message("defined here")
+                            Label::primary(file_id, range).with_message("defined here"),
                         ])
                         .with_notes(vec![
-                            "Will be merged into rule using terminal class".to_string()
+                            "Will be merged into rule using terminal class".to_string(),
                         ])
                 }
                 rusty_lr_parser::error::Info::UnitProductionEliminated {

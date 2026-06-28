@@ -9,11 +9,11 @@ use super::BuildError;
 use super::DiagnosticCollector;
 use super::State;
 use super::States;
+use crate::TerminalSymbol;
+use crate::TriState;
 use crate::hash::HashMap;
 use crate::production::*;
 use crate::symbol::Symbol;
-use crate::TerminalSymbol;
-use crate::TriState;
 
 /// struct that holding pre-calculated information for `expand()` function.
 #[derive(Debug, Clone)]

@@ -1,5 +1,9 @@
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response};
 use lsp_types::{
+    CodeActionKind, CodeActionOptions, CompletionOptions, Diagnostic, DiagnosticSeverity,
+    GotoDefinitionResponse, Hover, HoverProviderCapability, InlayHint, InlayHintOptions,
+    InlayHintServerCapabilities, Location, OneOf, PublishDiagnosticsParams, Range,
+    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
     notification::{
         DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument, PublishDiagnostics,
     },
@@ -7,14 +11,10 @@ use lsp_types::{
         CodeActionRequest, Completion, Formatting, GotoDefinition, HoverRequest, InlayHintRequest,
         SemanticTokensFullRequest,
     },
-    CodeActionKind, CodeActionOptions, CompletionOptions, Diagnostic, DiagnosticSeverity,
-    GotoDefinitionResponse, Hover, HoverProviderCapability, InlayHint, InlayHintOptions,
-    InlayHintServerCapabilities, Location, OneOf, PublishDiagnosticsParams, Range,
-    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
 };
 use std::collections::HashMap;
 use std::error::Error;
-use std::panic::{catch_unwind, set_hook, take_hook, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind, set_hook, take_hook};
 
 // Import the traits providing `METHOD` constant:
 use lsp_types::notification::Notification as LspNotification;

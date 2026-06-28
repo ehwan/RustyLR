@@ -21,6 +21,8 @@ Default path:
 4. Run `rustylr src/grammar.rustylr src/parser.rs`.
 5. Feed tokens into the generated `<Start>Context`; call `accept()` to get the result.
 
+RustyLR targets Rust 2024 and requires Rust 1.85 or newer.
+
 Generated `<Start>Context` types are the normal parser contexts downstream code should use. They initialize parsing for the selected start symbol and return the typed start value from `accept()` or `accept_all()`.
 
 Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone`; user data must also implement `Clone` when cloning contexts or using GLR branch-local user data.

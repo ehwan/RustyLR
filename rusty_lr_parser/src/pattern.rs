@@ -17,7 +17,7 @@ use std::collections::BTreeSet;
 use proc_macro2::TokenStream;
 
 use quote::format_ident;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 
 /// Some regex pattern
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]

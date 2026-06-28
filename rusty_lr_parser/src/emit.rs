@@ -849,28 +849,31 @@ impl Grammar {
 
         // iterates through nonterminals
         for nonterm in self.nonterminals.iter() {
-            if let Some(ruletype_stream) = nonterm.ruletype.as_ref().cloned() {
-                let cur_len = ruletype_variant_map.len();
-                let key = format!(
-                    "{}_boxed:{}",
-                    remove_whitespaces(ruletype_stream.to_string()),
-                    nonterm.ruletype_boxed
-                );
-                let variant_name = ruletype_variant_map
-                    .entry(key)
-                    .or_insert_with(|| {
-                        let new_variant_name = format_ident!("__variant{}", cur_len);
-                        variant_names_in_order.push((
-                            new_variant_name.clone(),
-                            ruletype_stream.clone(),
-                            nonterm.ruletype_boxed,
-                        ));
-                        new_variant_name
-                    })
-                    .clone();
-                variant_names_for_nonterm.push(variant_name);
-            } else {
-                variant_names_for_nonterm.push(empty_variant_name.clone());
+            match nonterm.ruletype.as_ref().cloned() {
+                Some(ruletype_stream) => {
+                    let cur_len = ruletype_variant_map.len();
+                    let key = format!(
+                        "{}_boxed:{}",
+                        remove_whitespaces(ruletype_stream.to_string()),
+                        nonterm.ruletype_boxed
+                    );
+                    let variant_name = ruletype_variant_map
+                        .entry(key)
+                        .or_insert_with(|| {
+                            let new_variant_name = format_ident!("__variant{}", cur_len);
+                            variant_names_in_order.push((
+                                new_variant_name.clone(),
+                                ruletype_stream.clone(),
+                                nonterm.ruletype_boxed,
+                            ));
+                            new_variant_name
+                        })
+                        .clone();
+                    variant_names_for_nonterm.push(variant_name);
+                }
+                _ => {
+                    variant_names_for_nonterm.push(empty_variant_name.clone());
+                }
             }
         }
 

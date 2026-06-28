@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 members = [
   "rusty_lr",
   "rusty_lr_core",

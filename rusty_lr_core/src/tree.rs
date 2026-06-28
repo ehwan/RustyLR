@@ -5,9 +5,9 @@ use std::ops::DerefMut;
 
 use termtree::Tree as TermTree;
 
+use crate::TerminalSymbol;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::nonterminal::NonTerminalType;
-use crate::TerminalSymbol;
 
 /// Tree represention of single non-terminal token.
 /// User must enable feature `tree` to use this.
@@ -45,11 +45,13 @@ impl<Term, NonTerm> TreeNonTerminal<Term, NonTerm> {
             | Some(NonTerminalType::Error)
             | Some(NonTerminalType::Group) => {
                 let tree = TermTree::new(nonterm_name);
-                vec![tree.with_leaves(
-                    self.tokens
-                        .iter()
-                        .flat_map(|token| token.to_term_tree(term_to_display, nonterm_to_display)),
-                )]
+                vec![
+                    tree.with_leaves(
+                        self.tokens.iter().flat_map(|token| {
+                            token.to_term_tree(term_to_display, nonterm_to_display)
+                        }),
+                    ),
+                ]
             }
 
             // remove parent, directly add children

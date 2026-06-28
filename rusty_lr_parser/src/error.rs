@@ -515,11 +515,15 @@ impl Warning {
             }
             Warning::NonTermUnproductive { nonterm_name } => {
                 let name = nonterm_name.value();
-                format!("Non-terminal `{name}` is unproductive and cannot derive any sequence of terminals")
+                format!(
+                    "Non-terminal `{name}` is unproductive and cannot derive any sequence of terminals"
+                )
             }
             Warning::UnusedTerminals { class_idx } => {
                 let class_name = grammar.class_pretty_name_abbr(*class_idx);
-                format!("Terminals merged in class `{class_name}` are defined but not used in any production rule")
+                format!(
+                    "Terminals merged in class `{class_name}` are defined but not used in any production rule"
+                )
             }
         }
     }

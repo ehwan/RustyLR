@@ -43,6 +43,8 @@ rusty_lr = "<version>"
 cargo install rustylr
 ```
 
+RustyLR targets Rust 2024 and requires Rust 1.85 or newer.
+
 The `rustylr` CLI and `rusty_lr` runtime must be from compatible releases. Generated parsers embed an internal generator version, and the runtime accepts compatible major/minor versions while ignoring patch differences. Avoid mixing arbitrary generator/runtime versions.
 
 3. Create `src/grammar.rustylr`:

@@ -1,7 +1,8 @@
 [package]
 name = "glr"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 
 [dependencies]
 rusty_lr = { path = "../../rusty_lr", features = ["tree"] }

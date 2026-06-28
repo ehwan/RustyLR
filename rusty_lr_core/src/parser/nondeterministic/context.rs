@@ -3,15 +3,15 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::ParseError;
 
+use crate::Location;
+use crate::TerminalSymbol;
+use crate::parser::Parser;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::semantic_value::SemanticValue;
 use crate::parser::semantic_value::StartExtractor;
 use crate::parser::table::Index;
 use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
-use crate::parser::Parser;
-use crate::Location;
-use crate::TerminalSymbol;
 
 /// Iterator for traverse node to root.
 /// Note that root node is not included in this iterator.
@@ -27,13 +27,13 @@ pub struct NodeRefIterator<
     node: Option<usize>,
 }
 impl<
-        'a,
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex,
-        const MAX_REDUCE_RULES: usize,
-    > Clone for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
+    'a,
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex,
+    const MAX_REDUCE_RULES: usize,
+> Clone for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     fn clone(&self) -> Self {
         NodeRefIterator {
@@ -43,13 +43,13 @@ impl<
     }
 }
 impl<
-        'a,
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index + Copy,
-        const MAX_REDUCE_RULES: usize,
-    > Iterator for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
+    'a,
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index + Copy,
+    const MAX_REDUCE_RULES: usize,
+> Iterator for NodeRefIterator<'a, P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     type Item = &'a Node<Data, StateIndex>;
 
@@ -123,12 +123,12 @@ pub struct Context<
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index,
-        const MAX_REDUCE_RULES: usize,
-    > Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index,
+    const MAX_REDUCE_RULES: usize,
+> Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     /// Create a new context.
     /// `current_nodes` is initialized with a root node.
@@ -828,8 +828,8 @@ impl<
     pub fn expected_token_str<'a>(
         &self,
     ) -> (
-        impl Iterator<Item = &'static str>,
-        impl Iterator<Item = &'static str>,
+        impl Iterator<Item = &'static str> + use<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
+        impl Iterator<Item = &'static str> + use<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
     )
     where
         P::TermClass: Ord,
@@ -1646,12 +1646,12 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index,
-        const MAX_REDUCE_RULES: usize,
-    > Default for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index,
+    const MAX_REDUCE_RULES: usize,
+> Default for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Data::UserData: Default,
 {
@@ -1661,12 +1661,12 @@ where
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index,
-        const MAX_REDUCE_RULES: usize,
-    > Clone for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index,
+    const MAX_REDUCE_RULES: usize,
+> Clone for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Node<Data, StateIndex>: Clone,
     Data::UserData: Clone,
@@ -1690,12 +1690,12 @@ where
 }
 
 impl<
-        P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
-        Data: SemanticValue,
-        Start: StartExtractor<Data>,
-        StateIndex: Index,
-        const MAX_REDUCE_RULES: usize,
-    > std::fmt::Debug for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
+    P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+    Data: SemanticValue,
+    Start: StartExtractor<Data>,
+    StateIndex: Index,
+    const MAX_REDUCE_RULES: usize,
+> std::fmt::Debug for Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 where
     Data: std::fmt::Debug,
     Data::UserData: std::fmt::Debug,

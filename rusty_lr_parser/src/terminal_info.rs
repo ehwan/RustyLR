@@ -2,8 +2,8 @@ use proc_macro2::Span;
 
 use crate::parser::location::Located;
 use proc_macro2::TokenStream;
-use quote::format_ident;
 use quote::ToTokens;
+use quote::format_ident;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum TerminalName {
