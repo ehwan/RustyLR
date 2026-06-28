@@ -9,7 +9,8 @@ lr1! {
     S(NotClone): { NotClone };
 }
 
+fn assert_clone<T: Clone>() {}
+
 fn main() {
-    let context = SContext::with_default_userdata();
-    let _cloned = context.clone();
+    assert_clone::<SContext>();
 }
