@@ -1508,11 +1508,17 @@ impl Grammar {
             debug_arms.extend(quote! {
                 Self::Empty => f.write_str("Empty"),
             });
+            let clone_derive = if self.glr {
+                quote! { #[derive(Clone)] }
+            } else {
+                quote! {}
+            };
+
             quote! {
                 /// enum for each non-terminal and terminal symbol, that actually hold data
                 #[rustfmt::skip]
                 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-                #[derive(Clone)]
+                #clone_derive
                 pub enum #data_enum_typename {
                     #variants
                 }
