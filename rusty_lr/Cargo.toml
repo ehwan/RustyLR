@@ -15,6 +15,9 @@ rusty_lr_core = { version = "4.4.0", path = "../rusty_lr_core" }
 rusty_lr_derive = { version = "2.50.0", path = "../rusty_lr_derive", optional = true }
 rusty_lr_buildscript = { version = "0.69.0", path = "../rusty_lr_buildscript", optional = true }
 
+[dev-dependencies]
+trybuild = "1.0"
+
 [features]
 default = ["derive"]
 build = ["dep:rusty_lr_buildscript"]

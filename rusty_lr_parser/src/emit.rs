@@ -1488,19 +1488,26 @@ impl Grammar {
         let data_enum_definition = {
             let mut variants = TokenStream::new();
             let mut debug_arms = TokenStream::new();
-            for (variant_name, typename, boxed) in &variant_names_in_order {
-                if *boxed {
-                    variants.extend(quote! {
-                        #variant_name(::std::boxed::Box<#typename>),
-                    });
+            let data_storage_enum_typename = format_ident!("__RustyLRData");
+            let mut data_storage_generic_params = Vec::with_capacity(variant_names_in_order.len());
+            let mut data_storage_type_args = Vec::with_capacity(variant_names_in_order.len());
+            for (idx, (variant_name, typename, boxed)) in variant_names_in_order.iter().enumerate()
+            {
+                let storage_type_param = format_ident!("__RustyLRData{}", idx);
+                let storage_type_arg = if *boxed {
+                    quote! { ::std::boxed::Box<#typename> }
                 } else {
-                    variants.extend(quote! {
-                        #variant_name(#typename),
-                    });
-                }
+                    quote! { #typename }
+                };
+
+                variants.extend(quote! {
+                    #variant_name(#storage_type_param),
+                });
                 debug_arms.extend(quote! {
                     Self::#variant_name(..) => f.write_str(stringify!(#variant_name)),
                 });
+                data_storage_generic_params.push(storage_type_param);
+                data_storage_type_args.push(storage_type_arg);
             }
             variants.extend(quote! {
                 Empty,
@@ -1508,20 +1515,29 @@ impl Grammar {
             debug_arms.extend(quote! {
                 Self::Empty => f.write_str("Empty"),
             });
-            let clone_derive = if self.glr {
-                quote! { #[derive(Clone)] }
-            } else {
+
+            let data_storage_generic_params = if data_storage_generic_params.is_empty() {
                 quote! {}
+            } else {
+                quote! { <#(#data_storage_generic_params),*> }
+            };
+            let data_storage_type_args = if data_storage_type_args.is_empty() {
+                quote! {}
+            } else {
+                quote! { <#(#data_storage_type_args),*> }
             };
 
             quote! {
                 /// enum for each non-terminal and terminal symbol, that actually hold data
                 #[rustfmt::skip]
                 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-                #clone_derive
-                pub enum #data_enum_typename {
+                #[doc(hidden)]
+                #[derive(Clone)]
+                pub enum #data_storage_enum_typename #data_storage_generic_params {
                     #variants
                 }
+
+                pub type #data_enum_typename = #data_storage_enum_typename #data_storage_type_args;
 
                 impl ::std::fmt::Debug for #data_enum_typename {
                     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {

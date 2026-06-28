@@ -201,11 +201,14 @@ impl ::rusty_lr::parser::nonterminal::NonTerminal for NonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub enum Data {
-    __terminals(Token),
-    __variant1(i32),
+#[doc(hidden)]
+#[derive(Clone)]
+pub enum __RustyLRData<__RustyLRData0, __RustyLRData1> {
+    __terminals(__RustyLRData0),
+    __variant1(__RustyLRData1),
     Empty,
 }
+pub type Data = __RustyLRData<Token, i32>;
 impl ::std::fmt::Debug for Data {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
@@ -734,7 +737,7 @@ impl ::rusty_lr::parser::Parser for Parser {
     }
     #[doc(hidden)]
     fn __rusty_lr_parser_version() -> (usize, usize, usize) {
-        (4, 4, 0)
+        (4, 4, 1)
     }
     #[doc(hidden)]
     fn __rustylr_version() -> (usize, usize, usize) {

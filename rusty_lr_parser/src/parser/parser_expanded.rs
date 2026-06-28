@@ -580,29 +580,74 @@ impl ::rusty_lr_core::parser::nonterminal::NonTerminal for NonTerminals {
 /// enum for each non-terminal and terminal symbol, that actually hold data
 #[rustfmt::skip]
 #[allow(unused_braces, unused_parens, non_snake_case, non_camel_case_types)]
-pub enum Data {
-    __terminals(Lexed),
-    __variant1(::std::boxed::Box<RuleDefArgs>),
-    __variant2(Option<Group>),
-    __variant3(Vec<RuleLineArgs>),
-    __variant4(::std::boxed::Box<RuleLineArgs>),
-    __variant5(::std::boxed::Box<PrecDPrecArgs>),
-    __variant6(::std::boxed::Box<(Option<Located<String>>, PatternArgs)>),
-    __variant7(TerminalSetItem),
-    __variant8(TerminalSet),
-    __variant9(PatternArgs),
-    __variant10(IdentOrLiteral),
-    __variant11(AllowTarget),
-    __variant12(Vec<(Option<Located<String>>, PatternArgs)>),
-    __variant13(Vec<PrecDPrecArgs>),
-    __variant14(Option<Lexed>),
-    __variant15(Vec<TerminalSetItem>),
-    __variant16(Vec<PatternArgs>),
-    __variant17(Vec<Vec<PatternArgs>>),
-    __variant18(Vec<Lexed>),
-    __variant19(Vec<IdentOrLiteral>),
+#[doc(hidden)]
+#[derive(Clone)]
+pub enum __RustyLRData<
+    __RustyLRData0,
+    __RustyLRData1,
+    __RustyLRData2,
+    __RustyLRData3,
+    __RustyLRData4,
+    __RustyLRData5,
+    __RustyLRData6,
+    __RustyLRData7,
+    __RustyLRData8,
+    __RustyLRData9,
+    __RustyLRData10,
+    __RustyLRData11,
+    __RustyLRData12,
+    __RustyLRData13,
+    __RustyLRData14,
+    __RustyLRData15,
+    __RustyLRData16,
+    __RustyLRData17,
+    __RustyLRData18,
+    __RustyLRData19,
+> {
+    __terminals(__RustyLRData0),
+    __variant1(__RustyLRData1),
+    __variant2(__RustyLRData2),
+    __variant3(__RustyLRData3),
+    __variant4(__RustyLRData4),
+    __variant5(__RustyLRData5),
+    __variant6(__RustyLRData6),
+    __variant7(__RustyLRData7),
+    __variant8(__RustyLRData8),
+    __variant9(__RustyLRData9),
+    __variant10(__RustyLRData10),
+    __variant11(__RustyLRData11),
+    __variant12(__RustyLRData12),
+    __variant13(__RustyLRData13),
+    __variant14(__RustyLRData14),
+    __variant15(__RustyLRData15),
+    __variant16(__RustyLRData16),
+    __variant17(__RustyLRData17),
+    __variant18(__RustyLRData18),
+    __variant19(__RustyLRData19),
     Empty,
 }
+pub type Data = __RustyLRData<
+    Lexed,
+    ::std::boxed::Box<RuleDefArgs>,
+    Option<Group>,
+    Vec<RuleLineArgs>,
+    ::std::boxed::Box<RuleLineArgs>,
+    ::std::boxed::Box<PrecDPrecArgs>,
+    ::std::boxed::Box<(Option<Located<String>>, PatternArgs)>,
+    TerminalSetItem,
+    TerminalSet,
+    PatternArgs,
+    IdentOrLiteral,
+    AllowTarget,
+    Vec<(Option<Located<String>>, PatternArgs)>,
+    Vec<PrecDPrecArgs>,
+    Option<Lexed>,
+    Vec<TerminalSetItem>,
+    Vec<PatternArgs>,
+    Vec<Vec<PatternArgs>>,
+    Vec<Lexed>,
+    Vec<IdentOrLiteral>,
+>;
 impl ::std::fmt::Debug for Data {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
@@ -7701,7 +7746,7 @@ impl ::rusty_lr_core::parser::Parser for Parser {
     }
     #[doc(hidden)]
     fn __rusty_lr_parser_version() -> (usize, usize, usize) {
-        (4, 4, 0)
+        (4, 4, 1)
     }
     #[doc(hidden)]
     fn __rustylr_version() -> (usize, usize, usize) {

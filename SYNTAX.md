@@ -338,7 +338,7 @@ Defines the entry point of the grammar. RustyLR automatically creates an augment
 
 RustyLR generates a `<Start>Context` for every start symbol, including grammars with only one `%start`. Each context initializes parsing for its start symbol and returns that start symbol's typed value when parsing is accepted.
 
-Generated contexts implement `Clone` when the generated semantic-value storage and user data satisfy the required `Clone` bounds. Token values and non-terminal production values stored by the parser must implement `Clone`.
+Generated contexts implement `Clone` when the generated semantic-value storage and user data satisfy the required `Clone` bounds. Token values and non-terminal production values stored by the parser must implement `Clone` only when cloning contexts or using parser modes that clone runtime branches.
 
 ### Multiple Start Symbols
 

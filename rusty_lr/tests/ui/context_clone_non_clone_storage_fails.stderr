@@ -1,0 +1,31 @@
+error[E0599]: the method `clone` exists for struct `rusty_lr::parser::deterministic::Context<Parser, __RustyLRData<NotClone>, SExtracter, u8>`, but its trait bounds were not satisfied
+  --> tests/ui/context_clone_non_clone_storage_fails.rs:14:27
+   |
+ 5 | / lr1! {
+ 6 | |     %tokentype char;
+ 7 | |     %start S;
+...  |
+10 | | }
+   | |_- doesn't satisfy `__RustyLRData<NotClone>: Clone`
+...
+14 |       let _cloned = context.clone();
+   |                             ^^^^^ method cannot be called due to unsatisfied trait bounds
+   |
+  ::: $WORKSPACE/rusty_lr_core/src/parser/deterministic/context.rs
+   |
+   | / pub struct Context<
+   | |     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
+   | |     Data: SemanticValue,
+   | |     Start: StartExtractor<Data>,
+   | |     StateIndex,
+   | | > {
+   | |_- doesn't satisfy `_: Clone`
+   |
+   = note: the following trait bounds were not satisfied:
+           `__RustyLRData<NotClone>: Clone`
+           which is required by `rusty_lr::parser::deterministic::Context<Parser, __RustyLRData<NotClone>, SExtracter, u8>: Clone`
+note: the trait `Clone` must be implemented
+  --> $RUST/core/src/clone.rs
+   |
+   | pub const trait Clone: Sized {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

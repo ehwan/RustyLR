@@ -25,7 +25,7 @@ RustyLR targets Rust 2024 and requires Rust 1.85 or newer.
 
 Generated `<Start>Context` types are the normal parser contexts downstream code should use. They initialize parsing for the selected start symbol and return the typed start value from `accept()` or `accept_all()`.
 
-Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone`; user data must also implement `Clone` when cloning contexts or using GLR branch-local user data.
+Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone` when cloning contexts or using GLR branch-local user data; user data must also implement `Clone` in those cases.
 
 Context `Debug` output reports parser stack state and user data; GLR output is grouped by active branch. Use the explicit tree APIs for syntax-tree inspection when the `tree` feature is enabled.
 
