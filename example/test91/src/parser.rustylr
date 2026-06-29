@@ -1,0 +1,18 @@
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Ast {
+    True,
+    And(Box<Ast>, Box<Ast>),
+}
+
+%%
+
+%glr;
+%tokentype char;
+%start Expr;
+
+Expr(Ast)
+    : 't' { Ast::True }
+    | '!'? left=Expr '&' right=Expr {
+        Ast::And(Box::new(left), Box::new(right))
+    }
+    ;
