@@ -163,6 +163,11 @@ impl Builder {
         }
     }
 
+    fn with_extra_note(mut diag: Diagnostic<usize>, note: String) -> Diagnostic<usize> {
+        diag.notes.push(note);
+        diag
+    }
+
     /// build and emit code to output file
     pub fn build(&self, output_file: &str) {
         let output = match self.build_impl() {
@@ -1431,12 +1436,13 @@ impl Builder {
                     _ => true, // Optimization notes are printed unconditionally
                 };
                 if should_print {
-                    let mut notes = diag.notes.clone();
-                    notes.push(format!(
-                        "to ignore this info, add `{}` to the grammar",
-                        info_variant.suggestion(&grammar)
-                    ));
-                    let diag = diag.clone().with_notes(notes);
+                    let diag = Self::with_extra_note(
+                        diag.clone(),
+                        format!(
+                            "to ignore this info, add `{}` to the grammar",
+                            info_variant.suggestion(&grammar)
+                        ),
+                    );
                     let writer = self.stream();
                     let config = codespan_reporting::term::Config::default();
                     term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
@@ -1456,12 +1462,13 @@ impl Builder {
                     _ => false,
                 };
                 if should_print {
-                    let mut notes = diag.notes.clone();
-                    notes.push(format!(
-                        "to ignore this info, add `{}` to the grammar",
-                        info_variant.suggestion(&grammar)
-                    ));
-                    let diag = diag.clone().with_notes(notes);
+                    let diag = Self::with_extra_note(
+                        diag.clone(),
+                        format!(
+                            "to ignore this info, add `{}` to the grammar",
+                            info_variant.suggestion(&grammar)
+                        ),
+                    );
                     let writer = self.stream();
                     let config = codespan_reporting::term::Config::default();
                     term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
@@ -1475,12 +1482,13 @@ impl Builder {
             if grammar.is_warning_allowed(warning) {
                 continue;
             }
-            let mut notes = diag.notes.clone();
-            notes.push(format!(
-                "to ignore this warning, add `{}` to the grammar",
-                warning.suggestion(&grammar)
-            ));
-            let diag = diag.clone().with_notes(notes);
+            let diag = Self::with_extra_note(
+                diag.clone(),
+                format!(
+                    "to ignore this warning, add `{}` to the grammar",
+                    warning.suggestion(&grammar)
+                ),
+            );
             let writer = self.stream();
             let config = codespan_reporting::term::Config::default();
             term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
@@ -1545,5 +1553,24 @@ impl Builder {
 impl Default for Builder {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adding_suppression_note_preserves_existing_notes_once() {
+        let diag = Diagnostic::note()
+            .with_message("example")
+            .with_notes(vec!["existing note".to_string()]);
+
+        let diag = Builder::with_extra_note(diag, "suppression note".to_string());
+
+        assert_eq!(
+            diag.notes,
+            vec!["existing note".to_string(), "suppression note".to_string()]
+        );
     }
 }
