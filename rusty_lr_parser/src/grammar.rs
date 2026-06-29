@@ -153,6 +153,54 @@ pub enum ResolvedAllowTarget {
 }
 
 impl Grammar {
+    fn ruletype_key(ruletype: &TokenStream, boxed: bool) -> (String, bool) {
+        (
+            ruletype
+                .to_string()
+                .chars()
+                .filter(|c| !c.is_whitespace())
+                .collect(),
+            boxed,
+        )
+    }
+
+    fn symbol_data_key(
+        &self,
+        symbol: Symbol<TerminalSymbol<TerminalClass>, usize>,
+    ) -> Option<(String, bool)> {
+        match symbol {
+            Symbol::Terminal(TerminalSymbol::Terminal(term)) => self.terminal_classes[term]
+                .data_used
+                .then(|| Self::ruletype_key(&self.token_typename, self.is_tokentype_boxed)),
+            Symbol::Terminal(
+                TerminalSymbol::Error | TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_),
+            ) => None,
+            Symbol::NonTerminal(nonterm) => {
+                let nonterminal = &self.nonterminals[nonterm];
+                nonterminal
+                    .ruletype
+                    .as_ref()
+                    .map(|ruletype| Self::ruletype_key(ruletype, nonterminal.ruletype_boxed))
+            }
+        }
+    }
+
+    fn reduce_only_state_bypass_push(&self, nonterm_idx: usize, rule: &Rule) -> Option<bool> {
+        match &rule.reduce_action {
+            None => Some(false),
+            Some(ReduceAction::Identity(identity_idx)) => {
+                // Identity actions may still be required to rewrap the semantic value into
+                // a different Data enum variant. Bypass only when both sides use the same
+                // generated storage variant, approximated by the normalized Rust type plus
+                // boxedness.
+                let lhs_key = self.symbol_data_key(Symbol::NonTerminal(nonterm_idx))?;
+                let rhs_key = self.symbol_data_key(rule.tokens[*identity_idx].symbol)?;
+                (lhs_key == rhs_key).then_some(true)
+            }
+            Some(ReduceAction::Custom(_)) => None,
+        }
+    }
+
     /// Resolved Rust type for `%tokentype`, after substitutions such as `$tokentype`
     /// and storage modifiers such as `box` have been stripped.
     pub fn token_type(&self) -> &TokenStream {
@@ -2947,30 +2995,16 @@ impl Grammar {
                 for (_, next_state) in &mut state.shift_goto_map_term {
                     if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state] {
                         let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
-                        match rule.reduce_action {
-                            None => {
-                                let idx = state
-                                    .shift_goto_map_nonterm
-                                    .iter()
-                                    .position(|(nt, _)| *nt == nonterm_idx)
-                                    .unwrap();
-                                let ns = state.shift_goto_map_nonterm[idx].1;
-                                next_state.state = ns.state;
-                                next_state.push = false;
-                                changed = true;
-                            }
-                            Some(ReduceAction::Identity(_)) => {
-                                let idx = state
-                                    .shift_goto_map_nonterm
-                                    .iter()
-                                    .position(|(nt, _)| *nt == nonterm_idx)
-                                    .unwrap();
-                                let ns = state.shift_goto_map_nonterm[idx].1;
-                                next_state.state = ns.state;
-                                next_state.push = true;
-                                changed = true;
-                            }
-                            _ => {}
+                        if let Some(push) = self.reduce_only_state_bypass_push(nonterm_idx, rule) {
+                            let idx = state
+                                .shift_goto_map_nonterm
+                                .iter()
+                                .position(|(nt, _)| *nt == nonterm_idx)
+                                .unwrap();
+                            let ns = state.shift_goto_map_nonterm[idx].1;
+                            next_state.state = ns.state;
+                            next_state.push = push;
+                            changed = true;
                         }
                     }
                 }
@@ -2980,30 +3014,16 @@ impl Grammar {
                     let next_state = state.shift_goto_map_nonterm[i].1;
                     if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state] {
                         let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
-                        match rule.reduce_action {
-                            None => {
-                                let idx = state
-                                    .shift_goto_map_nonterm
-                                    .iter()
-                                    .position(|(nt, _)| *nt == nonterm_idx)
-                                    .unwrap();
-                                let ns = state.shift_goto_map_nonterm[idx].1;
-                                state.shift_goto_map_nonterm[i].1.state = ns.state;
-                                state.shift_goto_map_nonterm[i].1.push = false;
-                                changed = true;
-                            }
-                            Some(ReduceAction::Identity(_)) => {
-                                let idx = state
-                                    .shift_goto_map_nonterm
-                                    .iter()
-                                    .position(|(nt, _)| *nt == nonterm_idx)
-                                    .unwrap();
-                                let ns = state.shift_goto_map_nonterm[idx].1;
-                                state.shift_goto_map_nonterm[i].1.state = ns.state;
-                                state.shift_goto_map_nonterm[i].1.push = true;
-                                changed = true;
-                            }
-                            _ => {}
+                        if let Some(push) = self.reduce_only_state_bypass_push(nonterm_idx, rule) {
+                            let idx = state
+                                .shift_goto_map_nonterm
+                                .iter()
+                                .position(|(nt, _)| *nt == nonterm_idx)
+                                .unwrap();
+                            let ns = state.shift_goto_map_nonterm[idx].1;
+                            state.shift_goto_map_nonterm[i].1.state = ns.state;
+                            state.shift_goto_map_nonterm[i].1.push = push;
+                            changed = true;
                         }
                     }
                 }
@@ -3861,6 +3881,103 @@ mod tests {
         assert!(
             code_str.contains("Empty"),
             "Empty variant should be unconditionally included"
+        );
+    }
+
+    #[test]
+    fn test_identity_unit_reduce_action_is_emitted_after_state_build() {
+        // Regression test for issue #90.
+        let input = quote! {
+            %tokentype Token;
+            %glr;
+            %start Program;
+
+            %token LET Token::Let;
+            %token IDENT Token::Ident(_);
+            %token SEMI Token::Semi;
+
+            Program(Vec<Statement>)
+                : statements=Statement* {
+                    statements
+                }
+                ;
+
+            Statement(Statement)
+                : SEMI! {
+                    Statement::Empty
+                }
+                | statement=LetStatement {
+                    statement
+                }
+                ;
+
+            LetStatement(LetStatement)
+                : LET! name=IDENT SEMI! {
+                    let Token::Ident(name) = name else {
+                        unreachable!("expected IDENT token")
+                    };
+                    Statement::Let(name)
+                }
+                ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        grammar.builder = grammar.create_builder();
+        let _ = grammar.build_grammar();
+
+        let code = grammar.emit_compiletime();
+        let code_str = code.to_string();
+
+        assert!(
+            code_str.contains("fn reduce_Statement_1"),
+            "identity unit production Statement -> LetStatement must keep its reduce function"
+        );
+        assert!(
+            code_str.contains("2usize => Self :: reduce_Statement_1"),
+            "rule 2 must dispatch to the Statement -> LetStatement reduce action"
+        );
+    }
+
+    #[test]
+    fn test_identity_unit_reduce_action_with_matching_type_can_be_bypassed() {
+        let input = quote! {
+            %tokentype Token;
+            %glr;
+            %start Program;
+
+            %token ITEM Token::Item(_);
+
+            Program(Node)
+                : item=Item {
+                    item
+                }
+                ;
+
+            Item(Node)
+                : ITEM {
+                    Node
+                }
+                ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        grammar.builder = grammar.create_builder();
+        let _ = grammar.build_grammar();
+
+        let code = grammar.emit_compiletime();
+        let code_str = code.to_string();
+
+        assert!(
+            !code_str.contains("fn reduce_Program_0"),
+            "identity unit production with matching storage type should be bypassed"
+        );
+        assert!(
+            !code_str.contains("0usize => Self :: reduce_Program_0"),
+            "bypassed identity unit production should not be dispatched"
         );
     }
 
