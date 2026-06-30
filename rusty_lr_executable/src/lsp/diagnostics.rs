@@ -231,9 +231,7 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
         }
     };
 
-    if grammar.optimize {
-        grammar.optimize(25);
-    }
+    grammar.optimize(25);
     grammar.builder = match grammar.create_builder() {
         Ok(builder) => builder,
         Err(err) => {

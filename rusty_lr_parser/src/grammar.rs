@@ -100,7 +100,8 @@ pub struct Grammar {
     pub is_char: bool,
     pub is_u8: bool,
 
-    /// do terminal classificate optimization
+    /// Whether grammar and table optimization passes are enabled.
+    /// This is false when `%nooptim` is used.
     pub optimize: bool,
     pub builder: rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize>,
     pub states:
@@ -3101,6 +3102,10 @@ impl Grammar {
     }
 
     pub fn optimize(&mut self, max_iter: usize) {
+        if !self.optimize {
+            return;
+        }
+
         // check if RuleType and ReduceAction can be removed from certain non-terminals
         let mut add_to_diags = BTreeSet::new();
         loop {
@@ -3425,88 +3430,97 @@ impl Grammar {
             rusty_lr_core::parser::state::IntermediateState<TerminalSymbol<TerminalClass>, usize>,
         > = states.into_iter().map(Into::into).collect();
 
-        // Identify states that only perform a single reduction of a single-token rule.
-        // These are candidates for optimization.
-        let mut reduce_states: Vec<_> = Vec::with_capacity(states.len());
-        for state in states.iter() {
-            if !state.shift_goto_map_term.is_empty() || !state.shift_goto_map_nonterm.is_empty() {
-                // this state is not a reduce state
-                reduce_states.push(None);
-                continue;
+        if self.optimize {
+            // Identify states that only perform a single reduction of a single-token rule.
+            // These are candidates for optimization.
+            let mut reduce_states: Vec<_> = Vec::with_capacity(states.len());
+            for state in states.iter() {
+                if !state.shift_goto_map_term.is_empty() || !state.shift_goto_map_nonterm.is_empty()
+                {
+                    // this state is not a reduce state
+                    reduce_states.push(None);
+                    continue;
+                }
+
+                let rules = state
+                    .reduce_map
+                    .iter()
+                    .map(|(_, r)| r)
+                    .collect::<BTreeSet<_>>();
+
+                if rules.len() != 1 {
+                    reduce_states.push(None);
+                    continue;
+                }
+                let rule_set = rules.into_iter().next().unwrap();
+                if rule_set.len() != 1 {
+                    reduce_states.push(None);
+                    continue;
+                }
+                let rule = rule_set[0];
+                let (nonterm, local_rule_id) = self.get_rule_by_id(rule).unwrap();
+                if nonterm.rules[local_rule_id].tokens.len() != 1 {
+                    reduce_states.push(None);
+                    continue;
+                }
+
+                let nonterm_idx = self.nonterminals_index[nonterm.name.value().as_str()];
+                reduce_states.push(Some((nonterm_idx, local_rule_id)));
             }
 
-            let rules = state
-                .reduce_map
-                .iter()
-                .map(|(_, r)| r)
-                .collect::<BTreeSet<_>>();
+            // Iteratively optimize the state machine by bypassing the reduce-only states identified above.
+            // This continues until no more optimizations can be made.
+            loop {
+                let mut changed = false;
 
-            if rules.len() != 1 {
-                reduce_states.push(None);
-                continue;
-            }
-            let rule_set = rules.into_iter().next().unwrap();
-            if rule_set.len() != 1 {
-                reduce_states.push(None);
-                continue;
-            }
-            let rule = rule_set[0];
-            let (nonterm, local_rule_id) = self.get_rule_by_id(rule).unwrap();
-            if nonterm.rules[local_rule_id].tokens.len() != 1 {
-                reduce_states.push(None);
-                continue;
-            }
+                for state in &mut states {
+                    // Optimize shift-on-terminal transitions.
+                    for (_, next_state) in &mut state.shift_goto_map_term {
+                        if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state]
+                        {
+                            let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
+                            if let Some(push) =
+                                self.reduce_only_state_bypass_push(nonterm_idx, rule)
+                            {
+                                let idx = state
+                                    .shift_goto_map_nonterm
+                                    .iter()
+                                    .position(|(nt, _)| *nt == nonterm_idx)
+                                    .unwrap();
+                                let ns = state.shift_goto_map_nonterm[idx].1;
+                                next_state.state = ns.state;
+                                next_state.push = push;
+                                changed = true;
+                            }
+                        }
+                    }
 
-            let nonterm_idx = self.nonterminals_index[nonterm.name.value().as_str()];
-            reduce_states.push(Some((nonterm_idx, local_rule_id)));
-        }
-
-        // Iteratively optimize the state machine by bypassing the reduce-only states identified above.
-        // This continues until no more optimizations can be made.
-        loop {
-            let mut changed = false;
-
-            for state in &mut states {
-                // Optimize shift-on-terminal transitions.
-                for (_, next_state) in &mut state.shift_goto_map_term {
-                    if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state] {
-                        let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
-                        if let Some(push) = self.reduce_only_state_bypass_push(nonterm_idx, rule) {
-                            let idx = state
-                                .shift_goto_map_nonterm
-                                .iter()
-                                .position(|(nt, _)| *nt == nonterm_idx)
-                                .unwrap();
-                            let ns = state.shift_goto_map_nonterm[idx].1;
-                            next_state.state = ns.state;
-                            next_state.push = push;
-                            changed = true;
+                    // Optimize shift-on-nonterminal transitions.
+                    for i in 0..state.shift_goto_map_nonterm.len() {
+                        let next_state = state.shift_goto_map_nonterm[i].1;
+                        if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state]
+                        {
+                            let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
+                            if let Some(push) =
+                                self.reduce_only_state_bypass_push(nonterm_idx, rule)
+                            {
+                                let idx = state
+                                    .shift_goto_map_nonterm
+                                    .iter()
+                                    .position(|(nt, _)| *nt == nonterm_idx)
+                                    .unwrap();
+                                let ns = state.shift_goto_map_nonterm[idx].1;
+                                state.shift_goto_map_nonterm[i].1.state = ns.state;
+                                state.shift_goto_map_nonterm[i].1.push = push;
+                                changed = true;
+                            }
                         }
                     }
                 }
 
-                // Optimize shift-on-nonterminal transitions.
-                for i in 0..state.shift_goto_map_nonterm.len() {
-                    let next_state = state.shift_goto_map_nonterm[i].1;
-                    if let Some((nonterm_idx, rule_local_id)) = reduce_states[next_state.state] {
-                        let rule = &self.nonterminals[nonterm_idx].rules[rule_local_id];
-                        if let Some(push) = self.reduce_only_state_bypass_push(nonterm_idx, rule) {
-                            let idx = state
-                                .shift_goto_map_nonterm
-                                .iter()
-                                .position(|(nt, _)| *nt == nonterm_idx)
-                                .unwrap();
-                            let ns = state.shift_goto_map_nonterm[idx].1;
-                            state.shift_goto_map_nonterm[i].1.state = ns.state;
-                            state.shift_goto_map_nonterm[i].1.push = push;
-                            changed = true;
-                        }
-                    }
+                if !changed {
+                    break;
                 }
-            }
-
-            if !changed {
-                break;
             }
         }
 
@@ -4462,6 +4476,56 @@ mod tests {
     }
 
     #[test]
+    fn test_nooptim_disables_identity_unit_reduce_bypass() {
+        let input = quote! {
+            %nooptim;
+            %tokentype Token;
+            %glr;
+            %start Program;
+
+            %token ITEM Token::Item(_);
+
+            Program(Node)
+                : item=Item {
+                    item
+                }
+                ;
+
+            Item(Node)
+                : ITEM {
+                    Node
+                }
+                ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        assert!(
+            !grammar.optimize,
+            "%nooptim must disable both grammar and table optimization passes"
+        );
+
+        grammar.optimize(25);
+        grammar.builder = grammar
+            .create_builder()
+            .expect("Failed to create parser builder");
+        let _ = grammar.build_grammar();
+
+        let code = grammar.emit_compiletime();
+        let code_str = code.to_string();
+
+        assert!(
+            code_str.contains("fn reduce_Program_0"),
+            "%nooptim should keep the identity unit production reduce function"
+        );
+        assert!(
+            code_str.contains("0usize => Self :: reduce_Program_0"),
+            "%nooptim should keep the identity unit production dispatch"
+        );
+    }
+
+    #[test]
     fn test_glr_optional_epsilon_self_loop_is_expanded_even_with_nooptim() {
         let input = quote! {
             %nooptim;
@@ -4559,9 +4623,7 @@ mod tests {
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-        if grammar.optimize {
-            grammar.optimize(25);
-        }
+        grammar.optimize(25);
 
         let err = grammar
             .create_builder()
@@ -4605,9 +4667,7 @@ mod tests {
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-        if grammar.optimize {
-            grammar.optimize(25);
-        }
+        grammar.optimize(25);
 
         let err = grammar
             .create_builder()

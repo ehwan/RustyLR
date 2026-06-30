@@ -922,9 +922,7 @@ impl Builder {
         };
 
         // diagnostics for optimization
-        if grammar.optimize {
-            grammar.optimize(25);
-        }
+        grammar.optimize(25);
 
         grammar.builder = match grammar.create_builder() {
             Ok(builder) => builder,

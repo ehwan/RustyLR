@@ -43,9 +43,7 @@ pub fn lr1(input: TokenStream) -> TokenStream {
         Ok(grammar) => grammar,
         Err(e) => return e.to_compile_error(&span_manager).into(),
     };
-    if grammar.optimize {
-        grammar.optimize(15);
-    }
+    grammar.optimize(15);
     grammar.builder = match grammar.create_builder() {
         Ok(builder) => builder,
         Err(e) => return e.to_compile_error(&span_manager).into(),
