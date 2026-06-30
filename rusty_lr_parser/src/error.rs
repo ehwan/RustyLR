@@ -138,6 +138,15 @@ pub enum ParseError {
 
     /// unknown diagnostic name allowed
     InvalidAllowDiagnostic { location: Location, name: String },
+
+    /// a nullable production can be reduced forever in GLR without consuming input
+    GlrNullableReduceCycle {
+        location: Location,
+        nullable_rule: String,
+        state: usize,
+        reason: String,
+        help: String,
+    },
 }
 impl ArgError {
     pub fn to_compile_error(
@@ -282,6 +291,7 @@ impl ParseError {
             ParseError::CircularDependency { location, .. } => vec![*location],
             ParseError::MaxSubstitutionDepthExceeded { location, .. } => vec![*location],
             ParseError::InvalidAllowDiagnostic { location, .. } => vec![*location],
+            ParseError::GlrNullableReduceCycle { location, .. } => vec![*location],
         }
     }
 
@@ -357,6 +367,16 @@ impl ParseError {
             }
             ParseError::InvalidAllowDiagnostic { name, .. } => {
                 format!("unknown diagnostic name: `{}`", name)
+            }
+            ParseError::GlrNullableReduceCycle {
+                nullable_rule,
+                reason,
+                ..
+            } => {
+                format!(
+                    "GLR nullable reduce cycle cannot be expanded safely: `{}` ({})",
+                    nullable_rule, reason
+                )
             }
         }
     }
@@ -543,6 +563,12 @@ pub enum Info {
         nonterm_name: Located<String>,
         rule_location: Location,
     },
+    GlrOptionalExpanded {
+        nonterm_name: Located<String>,
+        rule_location: Location,
+        before: String,
+        after: Vec<String>,
+    },
     ReduceReduceConflictResolved {
         max_priority: usize,
         reduce_rules: Vec<usize>,
@@ -578,6 +604,7 @@ impl Info {
             Info::TerminalsMerged { .. } => "terminals_merged",
             Info::RedundantRuleRemoved { .. } => "redundant_rule_removed",
             Info::UnitProductionEliminated { .. } => "unit_production_eliminated",
+            Info::GlrOptionalExpanded { .. } => "glr_optional_expanded",
             Info::ReduceReduceConflictResolved { .. } => "reduce_reduce_conflict_resolved",
             Info::ShiftReduceConflictResolvedShift { .. } => "shift_reduce_conflict_resolved",
             Info::ShiftReduceConflictResolvedReduce { .. } => "shift_reduce_conflict_resolved",
@@ -589,6 +616,10 @@ impl Info {
     pub fn suggestion(&self, grammar: &crate::grammar::Grammar) -> String {
         match self {
             Info::UnitProductionEliminated { nonterm_name, .. } => {
+                let name = nonterm_name.value();
+                format!("%allow {}({});", self.name(), name)
+            }
+            Info::GlrOptionalExpanded { nonterm_name, .. } => {
                 let name = nonterm_name.value();
                 format!("%allow {}({});", self.name(), name)
             }

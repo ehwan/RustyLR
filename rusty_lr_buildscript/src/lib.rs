@@ -869,7 +869,7 @@ impl Builder {
                             .with_labels(vec![Label::primary(file_id, range)
                                 .with_message("unknown diagnostic name")])
                             .with_notes(vec![
-                                "valid diagnostic names: nonterm_unreachable, unused_nonterm_data, nonterm_unproductive, unused_terminals, terminals_merged, redundant_rule_removed, unit_production_eliminated, reduce_reduce_conflict_resolved, shift_reduce_conflict_resolved, shift_reduce_conflict_glr, reduce_reduce_conflict_glr".to_string(),
+                                "valid diagnostic names: nonterm_unreachable, unused_nonterm_data, nonterm_unproductive, unused_terminals, terminals_merged, redundant_rule_removed, unit_production_eliminated, glr_optional_expanded, reduce_reduce_conflict_resolved, shift_reduce_conflict_resolved, shift_reduce_conflict_glr, reduce_reduce_conflict_glr".to_string(),
                             ])
                     }
 
@@ -889,6 +889,27 @@ impl Builder {
                                 "refer to https://github.com/ehwan/RustyLR/blob/main/SYNTAX.md#substitution-errors".to_string(),
                             ])
                     }
+                    ParseError::GlrNullableReduceCycle {
+                        location,
+                        nullable_rule,
+                        state,
+                        reason,
+                        help,
+                    } => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message("GLR nullable reduce cycle cannot be expanded safely")
+                            .with_labels(vec![Label::primary(file_id, range).with_message(
+                                "this nullable production participates in a zero-consuming GLR cycle",
+                            )])
+                            .with_notes(vec![
+                                format!(
+                                    "reducing `{nullable_rule}` in state {state} returns to the same state without consuming input"
+                                ),
+                                format!("why RustyLR cannot rewrite it automatically: {reason}"),
+                                format!("how to fix it: {help}"),
+                            ])
+                    }
                 };
 
                 let writer = self.stream();
@@ -905,7 +926,49 @@ impl Builder {
             grammar.optimize(25);
         }
 
-        grammar.builder = grammar.create_builder();
+        grammar.builder = match grammar.create_builder() {
+            Ok(builder) => builder,
+            Err(err) => {
+                let diag = match err {
+                    ParseError::GlrNullableReduceCycle {
+                        location,
+                        nullable_rule,
+                        state,
+                        reason,
+                        help,
+                    } => {
+                        let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message("GLR nullable reduce cycle cannot be expanded safely")
+                            .with_labels(vec![Label::primary(file_id, range).with_message(
+                                "this nullable production participates in a zero-consuming GLR cycle",
+                            )])
+                            .with_notes(vec![
+                                format!(
+                                    "reducing `{nullable_rule}` in state {state} returns to the same state without consuming input"
+                                ),
+                                format!("why RustyLR cannot rewrite it automatically: {reason}"),
+                                format!("how to fix it: {help}"),
+                            ])
+                    }
+                    err => {
+                        let range = err
+                            .locations()
+                            .first()
+                            .and_then(|loc| span_manager.get_byterange(loc))
+                            .unwrap_or(0..0);
+                        Diagnostic::error()
+                            .with_message(err.short_message())
+                            .with_labels(vec![Label::primary(file_id, range)])
+                    }
+                };
+                let writer = self.stream();
+                let config = codespan_reporting::term::Config::default();
+                term::emit_to_write_style(&mut writer.lock(), &config, &files, &diag)
+                    .expect("Failed to write to stderr");
+                return Err(diag.message);
+            }
+        };
         let diags_collector = grammar.build_grammar();
 
         let mut conflict_errors = Vec::new();
@@ -1152,6 +1215,31 @@ impl Builder {
                             "This non-terminal will be replaced by it's unique child rule"
                                 .to_string(),
                         ])
+                }
+                rusty_lr_parser::error::Info::GlrOptionalExpanded {
+                    nonterm_name,
+                    rule_location,
+                    before,
+                    after,
+                } => {
+                    let nonterm_range = span_manager
+                        .get_byterange(&nonterm_name.location())
+                        .unwrap_or(0..0);
+                    let rule_range = span_manager.get_byterange(rule_location).unwrap_or(0..0);
+                    let mut notes = vec![
+                        "This GLR production was expanded because an auto-generated optional empty branch formed a zero-consuming reduce cycle.".to_string(),
+                        format!("before: {before}"),
+                    ];
+                    notes.extend(after.iter().map(|rule| format!("after:  {rule}")));
+                    Diagnostic::note()
+                        .with_message("Production rule expanded")
+                        .with_labels(vec![
+                            Label::primary(file_id, rule_range)
+                                .with_message("production expanded here"),
+                            Label::secondary(file_id, nonterm_range)
+                                .with_message("left-hand side defined here"),
+                        ])
+                        .with_notes(notes)
                 }
                 rusty_lr_parser::error::Info::ReduceReduceConflictResolved {
                     max_priority,
@@ -1458,7 +1546,8 @@ impl Builder {
                 let should_print = match info_variant {
                     rusty_lr_parser::error::Info::TerminalsMerged { .. }
                     | rusty_lr_parser::error::Info::RedundantRuleRemoved { .. }
-                    | rusty_lr_parser::error::Info::UnitProductionEliminated { .. } => true,
+                    | rusty_lr_parser::error::Info::UnitProductionEliminated { .. }
+                    | rusty_lr_parser::error::Info::GlrOptionalExpanded { .. } => true,
                     _ => false,
                 };
                 if should_print {

@@ -46,7 +46,10 @@ pub fn lr1(input: TokenStream) -> TokenStream {
     if grammar.optimize {
         grammar.optimize(15);
     }
-    grammar.builder = grammar.create_builder();
+    grammar.builder = match grammar.create_builder() {
+        Ok(builder) => builder,
+        Err(e) => return e.to_compile_error(&span_manager).into(),
+    };
     let diags = grammar.build_grammar();
     if !grammar.glr {
         if let Some(((term, shift_rules, _), reduce_rules)) =
