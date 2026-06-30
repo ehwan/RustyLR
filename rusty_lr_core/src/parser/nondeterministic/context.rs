@@ -905,78 +905,72 @@ impl<
         };
         if let Some(reduce_rules) = reduce {
             let mut shift = shift_state;
-            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
-
-            for reduce_rule in reduce_rules.to_iter() {
-                reduces.push(reduce_rule);
-            }
 
             let mut shifted = false;
             let mut reduced_node = node;
             let mut reduced_userdata = userdata.clone();
-            if !reduces.is_empty() {
-                // Each GLR branch receives its own user data copy before running reduce actions.
-                let mut shift_ = false;
-                let l = reduces.len();
-                for (idx, reduce_rule) in reduces.into_iter().enumerate() {
-                    let mut pass = shift.is_some();
-                    let mut branch_userdata = userdata.clone();
 
-                    // in `self.reduce()`, it will delete the node if it is leaf node.
-                    // but there are multiple reduce actions for this node and also shift action,
-                    // so we need to prevent this node from being cleared.
-                    // force this node as non-leaf if it is not in the last reduce action, or there is a shift action left.
-                    let prevent_leaf = idx < l - 1 || shift.is_some();
-                    if prevent_leaf {
-                        self.node_mut(node).child_count += 1;
-                    }
-                    match self.reduce(
-                        reduce_rule.into_usize(),
-                        node,
-                        &term,
-                        &mut pass,
-                        &mut branch_userdata,
-                    ) {
-                        Ok(next_node) => {
-                            shift_ |= pass;
-                            // reduce recursively
+            // Each GLR branch receives its own user data copy before running reduce actions.
+            let mut shift_ = false;
+            let l = reduce_rules.to_iter().len();
+            for (idx, reduce_rule) in reduce_rules.to_iter().enumerate() {
+                let mut pass = shift.is_some();
+                let mut branch_userdata = userdata.clone();
 
-                            match self.feed_location_impl(
-                                next_node,
-                                term.clone(),
-                                class,
-                                location.clone(),
-                                branch_userdata,
-                            ) {
-                                Ok(_) => {
-                                    shifted = true;
-                                }
-                                Err((reduced_node_, _, _, userdata_)) => {
-                                    reduced_node = reduced_node_;
-                                    reduced_userdata = userdata_;
-                                }
+                // in `self.reduce()`, it will delete the node if it is leaf node.
+                // but there are multiple reduce actions for this node and also shift action,
+                // so we need to prevent this node from being cleared.
+                // force this node as non-leaf if it is not in the last reduce action, or there is a shift action left.
+                let prevent_leaf = idx < l - 1 || shift.is_some();
+                if prevent_leaf {
+                    self.node_mut(node).child_count += 1;
+                }
+                match self.reduce(
+                    reduce_rule.into_usize(),
+                    node,
+                    &term,
+                    &mut pass,
+                    &mut branch_userdata,
+                ) {
+                    Ok(next_node) => {
+                        shift_ |= pass;
+                        // reduce recursively
+
+                        match self.feed_location_impl(
+                            next_node,
+                            term.clone(),
+                            class,
+                            location.clone(),
+                            branch_userdata,
+                        ) {
+                            Ok(_) => {
+                                shifted = true;
+                            }
+                            Err((reduced_node_, _, _, userdata_)) => {
+                                reduced_node = reduced_node_;
+                                reduced_userdata = userdata_;
                             }
                         }
-                        Err(err) => {
-                            shift_ |= pass;
-                            self.reduce_errors.push(err);
-                        }
                     }
-
-                    if prevent_leaf {
-                        // if there are more reduce_rule left, or there is shift action,
-                        // add child to this node to prevent it from being cleared (as leaf)
-                        self.node_mut(node).child_count -= 1;
+                    Err(err) => {
+                        shift_ |= pass;
+                        self.reduce_errors.push(err);
                     }
                 }
-                // if every reduce action revoked shift,
-                // then reset shift to None
-                if !shift_ {
-                    if shift.is_some() {
-                        // remove node recursive
-                        self.try_remove_node_recursive(node);
-                        shift = None;
-                    }
+
+                if prevent_leaf {
+                    // if there are more reduce_rule left, or there is shift action,
+                    // add child to this node to prevent it from being cleared (as leaf)
+                    self.node_mut(node).child_count -= 1;
+                }
+            }
+            // if every reduce action revoked shift,
+            // then reset shift to None
+            if !shift_ {
+                if shift.is_some() {
+                    // remove node recursive
+                    self.try_remove_node_recursive(node);
+                    shift = None;
                 }
             }
             if let Some(shift) = shift {
