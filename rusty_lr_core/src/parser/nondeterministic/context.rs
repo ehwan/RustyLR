@@ -94,7 +94,7 @@ pub struct Context<
     const MAX_REDUCE_RULES: usize,
 > {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
-    pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
+    pub(crate) empty_node_indices: Vec<usize>,
 
     /// each element represents an end-point of diverged paths.
     pub(crate) current_nodes: Vec<usize>,
@@ -266,7 +266,7 @@ impl<
 
     /// Create a new node in the pool and return its index.
     pub(crate) fn new_node_with_capacity(&mut self, capacity: usize) -> usize {
-        if let Some(idx) = self.empty_node_indices.pop_first() {
+        if let Some(idx) = self.empty_node_indices.pop() {
             self.node_mut(idx).reserve(capacity);
             idx
         } else {
@@ -276,7 +276,7 @@ impl<
         }
     }
     pub(crate) fn new_node(&mut self) -> usize {
-        if let Some(idx) = self.empty_node_indices.pop_first() {
+        if let Some(idx) = self.empty_node_indices.pop() {
             idx
         } else {
             let idx = self.nodes_pool.len();
@@ -298,7 +298,7 @@ impl<
                 self.nodes_pool.pop();
             } else {
                 self.node_mut(node).clear();
-                self.empty_node_indices.insert(node);
+                self.empty_node_indices.push(node);
             }
         } else {
             node_.parent = None;
