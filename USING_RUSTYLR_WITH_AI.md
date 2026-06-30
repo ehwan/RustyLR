@@ -133,6 +133,7 @@ While implementing:
 When debugging:
 - Run `rustylr --state <grammar-file>` to inspect parser states.
 - Read conflict diagnostics before switching to GLR.
+- Add `%nooptim;` when debugging generated rules or parser states and you need grammar and table optimization passes disabled.
 - Remember that RustyLR may expand safe, unobserved `P?` occurrences in GLR grammars when the generated optional helper would otherwise create a zero-consuming reduce cycle; unexpandable nullable cycles are reported as generation errors with rewrite guidance.
 - Check `context.expected_token()` and `context.can_feed(&token)` for interactive or editor-facing parsers.
 - Use `Debug` on a context for parser stack state and user data; in GLR mode, inspect the branch-grouped output. Use `to_tree_list()`/`to_tree_lists()` when syntax-tree inspection is needed.

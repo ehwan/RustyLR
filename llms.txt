@@ -31,6 +31,8 @@ Context `Debug` output reports parser stack state and user data; GLR output is g
 
 In GLR grammars, RustyLR may expand safe, unobserved auto-generated `P?` occurrences when their empty branch would otherwise form a zero-consuming reduce cycle. Unexpandable nullable cycles are reported as generation errors with rewrite guidance.
 
+Use `%nooptim;` when generated rules or parser states must remain unoptimized for debugging. It disables grammar and parser-table optimization passes, while mandatory GLR correctness normalizations may still run.
+
 Important files:
 - `README.md`: Main quick start and examples.
 - `USING_RUSTYLR_WITH_AI.md`: Short implementation guide for AI coding agents using RustyLR in another Rust project.
