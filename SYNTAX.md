@@ -697,6 +697,7 @@ When a diagnostic is emitted, RustyLR will suggest the exact `%allow <name>(<tar
   - `terminals_merged`: Info about terminals being merged into a terminal class.
   - `redundant_rule_removed`: Info about a production rule being optimized out due to terminal class rules merging.
   - `unit_production_eliminated`: Info about a single non-terminal rule being replaced directly by its child rule.
+  - `glr_optional_expanded`: Info about an auto-generated optional pattern being expanded to avoid a zero-consuming GLR reduce cycle.
   - `reduce_reduce_conflict_resolved`: Info about a reduce/reduce conflict resolved via precedence.
   - `shift_reduce_conflict_resolved`: Info about a shift/reduce conflict resolved via precedence.
   - `shift_reduce_conflict_glr`: Info about a shift/reduce conflict that splits branches in GLR mode.

@@ -1,6 +1,7 @@
 use lsp_types::{Diagnostic, DiagnosticSeverity, Range};
 use proc_macro2::{Spacing, TokenStream, TokenTree};
 use rusty_lr_core::{TerminalSymbol, production::LR0ItemRef};
+use rusty_lr_parser::error::ParseError;
 use rusty_lr_parser::grammar::Grammar;
 use serde_json::json;
 use std::collections::{BTreeMap, BTreeSet};
@@ -233,7 +234,53 @@ pub fn compile_and_get_diagnostics(content: &str) -> Vec<Diagnostic> {
     if grammar.optimize {
         grammar.optimize(25);
     }
-    grammar.builder = grammar.create_builder();
+    grammar.builder = match grammar.create_builder() {
+        Ok(builder) => builder,
+        Err(err) => {
+            match err {
+                ParseError::GlrNullableReduceCycle {
+                    location,
+                    nullable_rule,
+                    state,
+                    reason,
+                    help,
+                } => {
+                    let range = span_manager.get_byterange(&location).unwrap_or(0..0);
+                    diagnostics.push(Diagnostic {
+                        range: range_to_lsp_range(content, range),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        code: None,
+                        code_description: None,
+                        source: Some("rusty_lr".to_string()),
+                        message: format!(
+                            "GLR nullable reduce cycle cannot be expanded safely: reducing `{nullable_rule}` in state {state} returns to the same state without consuming input. Reason: {reason}. Fix: {help}"
+                        ),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    });
+                }
+                err => {
+                    let msg = err.short_message();
+                    for loc in err.locations() {
+                        let range = span_manager.get_byterange(&loc).unwrap_or(0..0);
+                        diagnostics.push(Diagnostic {
+                            range: range_to_lsp_range(content, range),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            code: None,
+                            code_description: None,
+                            source: Some("rusty_lr".to_string()),
+                            message: msg.clone(),
+                            related_information: None,
+                            tags: None,
+                            data: None,
+                        });
+                    }
+                }
+            }
+            return diagnostics;
+        }
+    };
 
     // 7. Verify Shift/Reduce and Reduce/Reduce conflicts in non-GLR mode
     let diags_collector = grammar.build_grammar();

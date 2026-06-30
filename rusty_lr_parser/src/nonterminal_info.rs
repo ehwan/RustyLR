@@ -35,6 +35,7 @@ impl CustomReduceAction {
     }
 }
 
+#[derive(Clone)]
 pub enum ReduceAction {
     /// reduce action that is function-like TokenStream
     Custom(CustomReduceAction),
@@ -54,6 +55,7 @@ impl ReduceAction {
     }
 }
 
+#[derive(Clone)]
 pub struct Rule {
     pub tokens: Vec<MappedSymbol>,
     /// reduce action called when this rule is reduced

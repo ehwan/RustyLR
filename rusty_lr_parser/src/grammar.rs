@@ -201,6 +201,514 @@ impl Grammar {
         }
     }
 
+    fn rule_id_to_indices(&self, mut rule_idx: usize) -> Option<(usize, usize)> {
+        // Rule ids are assigned by walking non-terminals in storage order; keep the inverse
+        // mapping local so table analyses can talk back to the editable grammar.
+        for (nonterm_idx, nonterm) in self.nonterminals.iter().enumerate() {
+            if rule_idx < nonterm.rules.len() {
+                return Some((nonterm_idx, rule_idx));
+            }
+            rule_idx -= nonterm.rules.len();
+        }
+        None
+    }
+
+    fn create_builder_from_current_rules(
+        &self,
+    ) -> rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize> {
+        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize> =
+            rusty_lr_core::builder::Grammar::new();
+
+        for (term_idx, term_info) in self.terminals.iter().enumerate() {
+            if let Some(level) = &term_info.precedence {
+                let class = self.terminal_class_id[term_idx];
+                if !grammar.add_precedence(TerminalSymbol::Terminal(class), *level.value()) {
+                    unreachable!("set_reduce_type error");
+                }
+            }
+        }
+        if let Some(level) = self.error_precedence {
+            if !grammar.add_precedence(TerminalSymbol::Error, level) {
+                unreachable!("set_reduce_type error");
+            }
+        }
+        grammar.set_precedence_types(self.precedence_types.iter().map(|op| *op.value()).collect());
+
+        for (nonterm_id, nonterm) in self.nonterminals.iter().enumerate() {
+            for rule in nonterm.rules.iter() {
+                let tokens = rule
+                    .tokens
+                    .iter()
+                    .map(|token_mapped| token_mapped.symbol)
+                    .collect();
+
+                grammar.add_rule(
+                    nonterm_id,
+                    tokens,
+                    rule.prec
+                        .map(Located::into_value)
+                        .unwrap_or(Precedence::None),
+                    rule.dprec.map_or(0, Located::into_value),
+                );
+            }
+        }
+
+        grammar
+    }
+
+    fn is_optional_epsilon_self_loop_candidate(
+        &self,
+        nonterm_idx: usize,
+        local_rule_idx: usize,
+    ) -> bool {
+        let nonterm = &self.nonterminals[nonterm_idx];
+        let rule = &nonterm.rules[local_rule_idx];
+
+        // Only RustyLR-created optional symbols have known branch semantics; user-written
+        // nullable productions may contain intentional actions and must not be rewritten.
+        if nonterm.nonterm_type
+            != Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Optional)
+            || !nonterm.is_auto_generated()
+            || nonterm.is_protected()
+        {
+            return false;
+        }
+
+        // The dangerous closure edge must come from the empty branch itself.  Non-empty
+        // branches consume input and therefore cannot be the zero-progress cycle we are fixing.
+        rule.tokens.is_empty()
+    }
+
+    fn rule_uses_positional_bison_variables(rule: &Rule) -> bool {
+        // Expanding an optional occurrence changes token positions.  Named bindings remain stable,
+        // but already-rewritten `$n` or `@n` identifiers would point at the wrong symbol.
+        (0..rule.tokens.len()).any(|idx| {
+            rule.reduce_action_contains_ident(&format!("__rustylr_data_{idx}"))
+                || rule.reduce_action_contains_ident(&format!("__rustylr_location_{idx}"))
+        })
+    }
+
+    fn can_expand_optional_occurrence(rule: &Rule, token_idx: usize) -> bool {
+        let token = &rule.tokens[token_idx];
+
+        // Existing reduce-action chains mean another optimization has semantic work attached to
+        // this exact symbol occurrence, so leave it intact instead of guessing how to distribute it.
+        if !token.reduce_action_chains.is_empty() {
+            return false;
+        }
+
+        // Identity actions are positional by definition; rewriting their RHS shape would require
+        // remapping the identity index, so keep this conservative pass focused on custom/empty actions.
+        if matches!(rule.reduce_action, Some(ReduceAction::Identity(_))) {
+            return false;
+        }
+
+        if Self::rule_uses_positional_bison_variables(rule) {
+            return false;
+        }
+
+        if let Some(mapto) = &token.mapto {
+            // If the optional's value or location is observed, replacing it with a present/absent
+            // structural branch would change the user's reduce action contract.
+            if rule.reduce_action_contains_ident(mapto.value().as_str())
+                || rule.reduce_action_contains_ident(&utils::location_variable_name(
+                    mapto.value().as_str(),
+                ))
+            {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    fn mapped_symbol_pretty_name(&self, token: &MappedSymbol) -> String {
+        match token.symbol {
+            Symbol::Terminal(term) => self.class_pretty_name_list(term, 5),
+            Symbol::NonTerminal(nonterm) => self.nonterm_pretty_name(nonterm),
+        }
+    }
+
+    fn production_pretty_name(&self, nonterm_idx: usize, tokens: &[MappedSymbol]) -> String {
+        // Keep this close to the generated grammar comment format so the diagnostic explains the
+        // exact table-level rewrite without exposing internal rule ids.
+        let lhs = self.nonterm_pretty_name(nonterm_idx);
+        if tokens.is_empty() {
+            format!("{lhs} ->")
+        } else {
+            let rhs = tokens
+                .iter()
+                .map(|token| self.mapped_symbol_pretty_name(token))
+                .collect::<Vec<_>>()
+                .join(" ");
+            format!("{lhs} -> {rhs}")
+        }
+    }
+
+    fn expand_optional_occurrences(&mut self, optional_idx: usize) -> bool {
+        let Some(present_token) = self.nonterminals[optional_idx]
+            .rules
+            .iter()
+            .find(|rule| rule.tokens.len() == 1)
+            .map(|rule| rule.tokens[0].clone())
+        else {
+            return false;
+        };
+
+        let mut changed = false;
+        for nonterm_idx in 0..self.nonterminals.len() {
+            if nonterm_idx == optional_idx {
+                continue;
+            }
+
+            let old_rules = std::mem::take(&mut self.nonterminals[nonterm_idx].rules);
+            let mut new_rules = Vec::with_capacity(old_rules.len());
+
+            for rule in old_rules {
+                if !rule
+                    .tokens
+                    .iter()
+                    .any(|token| token.symbol == Symbol::NonTerminal(optional_idx))
+                {
+                    new_rules.push(rule);
+                    continue;
+                }
+
+                let mut variants = vec![Rule {
+                    tokens: Vec::with_capacity(rule.tokens.len()),
+                    ..rule.clone()
+                }];
+                let mut expanded_this_rule = false;
+                let mut can_keep_expanding = true;
+
+                for (token_idx, token) in rule.tokens.iter().enumerate() {
+                    if token.symbol != Symbol::NonTerminal(optional_idx) {
+                        for variant in &mut variants {
+                            variant.tokens.push(token.clone());
+                        }
+                        continue;
+                    }
+
+                    if !Self::can_expand_optional_occurrence(&rule, token_idx) {
+                        for variant in &mut variants {
+                            variant.tokens.push(token.clone());
+                        }
+                        can_keep_expanding = false;
+                        continue;
+                    }
+
+                    // Split the occurrence into its absent branch and its present branch.  The
+                    // parent action does not observe the optional value, so the present branch
+                    // carries only the underlying grammar symbol.
+                    let mut present = present_token.clone();
+                    present.mapto = None;
+                    present.location = token.location;
+
+                    let mut present_variants = variants.clone();
+                    for variant in &mut present_variants {
+                        variant.tokens.push(present.clone());
+                    }
+                    variants.extend(present_variants);
+                    expanded_this_rule = true;
+                }
+
+                if expanded_this_rule && can_keep_expanding {
+                    changed = true;
+                    self.infos.push(Info::GlrOptionalExpanded {
+                        nonterm_name: self.nonterminals[nonterm_idx].name.clone(),
+                        rule_location: rule.location(),
+                        before: self.production_pretty_name(nonterm_idx, &rule.tokens),
+                        after: variants
+                            .iter()
+                            .map(|variant| {
+                                self.production_pretty_name(nonterm_idx, &variant.tokens)
+                            })
+                            .collect(),
+                    });
+                    new_rules.extend(variants);
+                } else {
+                    new_rules.push(rule);
+                }
+            }
+
+            self.nonterminals[nonterm_idx].rules = new_rules;
+        }
+
+        let still_referenced = self.nonterminals.iter().any(|nonterm| {
+            nonterm.rules.iter().any(|rule| {
+                rule.tokens
+                    .iter()
+                    .any(|token| token.symbol == Symbol::NonTerminal(optional_idx))
+            })
+        });
+        if changed && !still_referenced {
+            // Once every occurrence has been structurally expanded, the generated helper has no
+            // remaining parser role and can be left empty for the normal cleanup path.
+            self.nonterminals[optional_idx].rules.clear();
+        }
+
+        changed
+    }
+
+    fn optional_expansion_error_context(
+        &self,
+        optional_idx: usize,
+    ) -> Option<(Location, String, String)> {
+        for nonterm in &self.nonterminals {
+            for rule in &nonterm.rules {
+                for (token_idx, token) in rule.tokens.iter().enumerate() {
+                    if token.symbol != Symbol::NonTerminal(optional_idx) {
+                        continue;
+                    }
+
+                    let production = self.production_pretty_name(
+                        *self.nonterminals_index.get(nonterm.name.value()).unwrap(),
+                        &rule.tokens,
+                    );
+                    let help = format!(
+                        "Rewrite `{production}` explicitly into one production without the optional branch and one production with the optional branch present."
+                    );
+
+                    if !token.reduce_action_chains.is_empty() {
+                        return Some((
+                            rule.location(),
+                            format!(
+                                "`{production}` has reduce-action chains attached to the optional occurrence"
+                            ),
+                            help,
+                        ));
+                    }
+                    if matches!(rule.reduce_action, Some(ReduceAction::Identity(_))) {
+                        return Some((
+                            rule.location(),
+                            format!(
+                                "`{production}` uses an identity reduce action whose positional result would change"
+                            ),
+                            help,
+                        ));
+                    }
+                    if Self::rule_uses_positional_bison_variables(rule) {
+                        return Some((
+                            rule.location(),
+                            format!(
+                                "`{production}` uses positional `$n` or `@n` references, so expansion would change token numbering"
+                            ),
+                            help,
+                        ));
+                    }
+                    if let Some(mapto) = &token.mapto {
+                        if rule.reduce_action_contains_ident(mapto.value().as_str()) {
+                            return Some((
+                                rule.location(),
+                                format!(
+                                    "`{production}` reads the optional value `{}` in its reduce action",
+                                    mapto.value()
+                                ),
+                                help,
+                            ));
+                        }
+                        if rule.reduce_action_contains_ident(&utils::location_variable_name(
+                            mapto.value().as_str(),
+                        )) {
+                            return Some((
+                                rule.location(),
+                                format!(
+                                    "`{production}` reads the optional location `@{}` in its reduce action",
+                                    mapto.value()
+                                ),
+                                help,
+                            ));
+                        }
+                    }
+
+                    if !Self::can_expand_optional_occurrence(rule, token_idx) {
+                        return Some((
+                            rule.location(),
+                            format!("`{production}` cannot be expanded without changing semantics"),
+                            help,
+                        ));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn glr_nullable_cycle_error(
+        &self,
+        state_idx: usize,
+        nonterm_idx: usize,
+        local_rule_idx: usize,
+    ) -> ParseError {
+        let nonterm = &self.nonterminals[nonterm_idx];
+        let rule = &nonterm.rules[local_rule_idx];
+        let nullable_rule = self.production_pretty_name(nonterm_idx, &rule.tokens);
+
+        let default_location = nonterm.root_location.unwrap_or_else(|| rule.location());
+        let (location, reason, help) = match nonterm.nonterm_type {
+            Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Optional) => {
+                self.optional_expansion_error_context(nonterm_idx).unwrap_or_else(|| {
+                    (
+                        default_location,
+                        format!(
+                            "`{}` is an optional helper, but no safe occurrence remained for automatic expansion",
+                            nonterm.pretty_name
+                        ),
+                        "Rewrite the optional occurrence explicitly as separate absent and present productions.".to_string(),
+                    )
+                })
+            }
+            Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Star) => (
+                default_location,
+                format!(
+                    "`{}` is a zero-or-more repetition helper; `*` denotes an unbounded family of productions and cannot be expanded into a finite replacement here",
+                    nonterm.pretty_name
+                ),
+                "Rewrite the grammar with an explicit non-empty list helper (`P+`) or factor the nullable repetition out of the left-recursive GLR position.".to_string(),
+            ),
+            _ if nonterm.is_auto_generated() => (
+                default_location,
+                format!(
+                    "`{}` is an auto-generated nullable helper that RustyLR does not know how to expand safely",
+                    nonterm.pretty_name
+                ),
+                "Rewrite the surrounding grammar manually so the nullable helper is not reduced back to the same GLR state without consuming input.".to_string(),
+            ),
+            _ => (
+                rule.location(),
+                format!(
+                    "`{}` is a user-defined nullable production; RustyLR cannot remove or duplicate its semantic behavior automatically",
+                    nullable_rule
+                ),
+                "Rewrite the grammar manually so this nullable production is not in a GLR reduce cycle, or make the recursive path consume a terminal before returning to the same state.".to_string(),
+            ),
+        };
+
+        ParseError::GlrNullableReduceCycle {
+            location,
+            nullable_rule,
+            state: state_idx,
+            reason,
+            help,
+        }
+    }
+
+    fn find_glr_nullable_reduce_cycle_error(
+        &self,
+        states: &[rusty_lr_core::builder::State<TerminalSymbol<TerminalClass>, usize>],
+    ) -> Option<ParseError> {
+        for (state_idx, state) in states.iter().enumerate() {
+            for reduce_rules in state.reduce_map.values() {
+                for &rule_idx in reduce_rules {
+                    let Some((nonterm_idx, local_rule_idx)) = self.rule_id_to_indices(rule_idx)
+                    else {
+                        continue;
+                    };
+                    if !self.nonterminals[nonterm_idx].rules[local_rule_idx]
+                        .tokens
+                        .is_empty()
+                    {
+                        continue;
+                    }
+                    if state
+                        .shift_goto_map_nonterm
+                        .get(&nonterm_idx)
+                        .is_some_and(|target| *target == state_idx)
+                    {
+                        return Some(self.glr_nullable_cycle_error(
+                            state_idx,
+                            nonterm_idx,
+                            local_rule_idx,
+                        ));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn expand_glr_epsilon_self_loop_optionals(&mut self) -> Result<(), ParseError> {
+        if !self.glr {
+            return Ok(());
+        }
+
+        // A rewrite can reveal another nullable self-loop through a different optional helper, so
+        // iterate to a fixed point while bounding the pass against accidental expansion churn.
+        for _ in 0..self.nonterminals.len() {
+            let mut builder = self.create_builder_from_current_rules();
+            let augmented_idx = *self.nonterminals_index.get(utils::AUGMENTED_NAME).unwrap();
+            let mut collector = rusty_lr_core::builder::DiagnosticCollector::new(true);
+            let states = if self.lalr {
+                builder.build_lalr(augmented_idx, &mut collector)
+            } else {
+                builder.build(augmented_idx, &mut collector)
+            }
+            .unwrap_or_else(|err| {
+                unreachable!(
+                    "Error building grammar during GLR nullable expansion: {:?}",
+                    err
+                )
+            })
+            .states;
+
+            let mut rewrite_target = None;
+            'states: for (state_idx, state) in states.iter().enumerate() {
+                for reduce_rules in state.reduce_map.values() {
+                    for &rule_idx in reduce_rules {
+                        let Some((nonterm_idx, local_rule_idx)) = self.rule_id_to_indices(rule_idx)
+                        else {
+                            continue;
+                        };
+                        if !self
+                            .is_optional_epsilon_self_loop_candidate(nonterm_idx, local_rule_idx)
+                        {
+                            continue;
+                        }
+                        if state
+                            .shift_goto_map_nonterm
+                            .iter()
+                            .any(|(nonterm, target)| {
+                                *nonterm == nonterm_idx && *target == state_idx
+                            })
+                        {
+                            rewrite_target = Some(nonterm_idx);
+                            break 'states;
+                        }
+                    }
+                }
+            }
+
+            let Some(optional_idx) = rewrite_target else {
+                break;
+            };
+            if !self.expand_optional_occurrences(optional_idx) {
+                break;
+            }
+        }
+
+        let mut builder = self.create_builder_from_current_rules();
+        let augmented_idx = *self.nonterminals_index.get(utils::AUGMENTED_NAME).unwrap();
+        let mut collector = rusty_lr_core::builder::DiagnosticCollector::new(true);
+        let states = if self.lalr {
+            builder.build_lalr(augmented_idx, &mut collector)
+        } else {
+            builder.build(augmented_idx, &mut collector)
+        }
+        .unwrap_or_else(|err| {
+            unreachable!(
+                "Error building grammar during GLR nullable cycle validation: {:?}",
+                err
+            )
+        })
+        .states;
+
+        if let Some(err) = self.find_glr_nullable_reduce_cycle_error(&states) {
+            return Err(err);
+        }
+
+        Ok(())
+    }
+
     /// Resolved Rust type for `%tokentype`, after substitutions such as `$tokentype`
     /// and storage modifiers such as `box` have been stripped.
     pub fn token_type(&self) -> &TokenStream {
@@ -368,6 +876,15 @@ impl Grammar {
             }
             match info {
                 Info::UnitProductionEliminated { nonterm_name, .. } => {
+                    for opt_target in scopes {
+                        if let Some(ResolvedAllowTarget::Name(name)) = opt_target {
+                            if name == nonterm_name.value() {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                Info::GlrOptionalExpanded { nonterm_name, .. } => {
                     for opt_target in scopes {
                         if let Some(ResolvedAllowTarget::Name(name)) = opt_target {
                             if name == nonterm_name.value() {
@@ -2091,6 +2608,7 @@ impl Grammar {
             "terminals_merged",
             "redundant_rule_removed",
             "unit_production_eliminated",
+            "glr_optional_expanded",
             "reduce_reduce_conflict_resolved",
             "shift_reduce_conflict_resolved",
             "shift_reduce_conflict_glr",
@@ -2879,54 +3397,12 @@ impl Grammar {
     /// create the rusty_lr_core::Grammar from the parsed CFGs
     pub fn create_builder(
         &mut self,
-    ) -> rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize> {
-        let mut grammar: rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize> =
-            rusty_lr_core::builder::Grammar::new();
-
-        let mut rules = Vec::new();
-        for (nonterm_idx, nonterminal) in self.nonterminals.iter().enumerate() {
-            rules.reserve(nonterminal.rules.len());
-            for rule in 0..nonterminal.rules.len() {
-                rules.push((nonterm_idx, rule));
-            }
-        }
-
-        for (term_idx, term_info) in self.terminals.iter().enumerate() {
-            if let Some(level) = &term_info.precedence {
-                let class = self.terminal_class_id[term_idx];
-                if !grammar.add_precedence(TerminalSymbol::Terminal(class), *level.value()) {
-                    unreachable!("set_reduce_type error");
-                }
-            }
-        }
-        if let Some(level) = self.error_precedence {
-            if !grammar.add_precedence(TerminalSymbol::Error, level) {
-                unreachable!("set_reduce_type error");
-            }
-        }
-        grammar.set_precedence_types(self.precedence_types.iter().map(|op| *op.value()).collect());
-
-        // add rules
-        for (nonterm_id, nonterm) in self.nonterminals.iter().enumerate() {
-            for rule in nonterm.rules.iter() {
-                let tokens = rule
-                    .tokens
-                    .iter()
-                    .map(|token_mapped| token_mapped.symbol)
-                    .collect();
-
-                grammar.add_rule(
-                    nonterm_id,
-                    tokens,
-                    rule.prec
-                        .map(Located::into_value)
-                        .unwrap_or(Precedence::None),
-                    rule.dprec.map_or(0, Located::into_value),
-                );
-            }
-        }
-
-        grammar
+    ) -> Result<rusty_lr_core::builder::Grammar<TerminalSymbol<TerminalClass>, usize>, ParseError>
+    {
+        // This normalization is not an optimization knob: it prevents GLR reduce closure from
+        // repeatedly applying an auto-generated optional empty branch without consuming input.
+        self.expand_glr_epsilon_self_loop_optionals()?;
+        Ok(self.create_builder_from_current_rules())
     }
 
     pub fn build_grammar(
@@ -3924,7 +4400,9 @@ mod tests {
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-        grammar.builder = grammar.create_builder();
+        grammar.builder = grammar
+            .create_builder()
+            .expect("Failed to create parser builder");
         let _ = grammar.build_grammar();
 
         let code = grammar.emit_compiletime();
@@ -3965,7 +4443,9 @@ mod tests {
         let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
         let mut grammar =
             Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
-        grammar.builder = grammar.create_builder();
+        grammar.builder = grammar
+            .create_builder()
+            .expect("Failed to create parser builder");
         let _ = grammar.build_grammar();
 
         let code = grammar.emit_compiletime();
@@ -3978,6 +4458,171 @@ mod tests {
         assert!(
             !code_str.contains("0usize => Self :: reduce_Program_0"),
             "bypassed identity unit production should not be dispatched"
+        );
+    }
+
+    #[test]
+    fn test_glr_optional_epsilon_self_loop_is_expanded_even_with_nooptim() {
+        let input = quote! {
+            %nooptim;
+            %glr;
+            %tokentype char;
+            %start Expr;
+
+            Expr(Ast)
+                : 't' { Ast::True }
+                | '!'? left=Expr '&' right=Expr {
+                    Ast::And(Box::new(left), Box::new(right))
+                }
+                ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        assert!(
+            !grammar.optimize,
+            "the regression must be covered even when ordinary optimization is disabled"
+        );
+
+        grammar.builder = grammar
+            .create_builder()
+            .expect("Failed to create parser builder");
+        let expansion_info = grammar
+            .infos
+            .iter()
+            .find_map(|info| match info {
+                Info::GlrOptionalExpanded { before, after, .. } => Some((before, after)),
+                _ => None,
+            })
+            .expect("expected GLR optional expansion info");
+        assert_eq!(
+            expansion_info.0, "Expr -> '!'? Expr '&' Expr",
+            "the info must report the original production"
+        );
+        assert_eq!(
+            expansion_info.1,
+            &vec![
+                "Expr -> Expr '&' Expr".to_string(),
+                "Expr -> '!' Expr '&' Expr".to_string(),
+            ],
+            "the info must report the generated replacement productions"
+        );
+
+        let _ = grammar.build_grammar();
+
+        for (state_idx, state) in grammar.states.iter().enumerate() {
+            for (_, reduce_rules) in &state.reduce_map {
+                for &rule_idx in reduce_rules {
+                    let Some((nonterm_idx, local_rule_idx)) = grammar.rule_id_to_indices(rule_idx)
+                    else {
+                        continue;
+                    };
+                    let nonterm = &grammar.nonterminals[nonterm_idx];
+                    let rule = &nonterm.rules[local_rule_idx];
+                    let is_optional_empty_rule = nonterm.nonterm_type
+                        == Some(rusty_lr_core::parser::nonterminal::NonTerminalType::Optional)
+                        && rule.tokens.is_empty();
+                    let has_self_goto =
+                        state
+                            .shift_goto_map_nonterm
+                            .iter()
+                            .any(|(nonterm, target)| {
+                                *nonterm == nonterm_idx && target.state == state_idx
+                            });
+
+                    assert!(
+                        !(is_optional_empty_rule && has_self_goto),
+                        "GLR tables must not keep an optional epsilon self-loop"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_glr_optional_epsilon_self_loop_reports_error_when_value_is_used() {
+        let input = quote! {
+            %glr;
+            %tokentype char;
+            %start Expr;
+
+            Expr(Ast)
+                : 't' { Ast::True }
+                | opt='!'? left=Expr '&' right=Expr {
+                    let _ = opt;
+                    Ast::And(Box::new(left), Box::new(right))
+                }
+                ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        if grammar.optimize {
+            grammar.optimize(25);
+        }
+
+        let err = grammar
+            .create_builder()
+            .expect_err("optional value use must block automatic GLR expansion");
+        let ParseError::GlrNullableReduceCycle {
+            nullable_rule,
+            reason,
+            help,
+            ..
+        } = err
+        else {
+            panic!("expected GLR nullable reduce cycle error");
+        };
+
+        assert_eq!(nullable_rule, "'!'? ->");
+        assert!(
+            reason.contains("reads the optional value `opt`"),
+            "reason should explain why automatic expansion is unsafe: {reason}"
+        );
+        assert!(
+            help.contains("Rewrite"),
+            "help should tell the user how to fix the grammar: {help}"
+        );
+    }
+
+    #[test]
+    fn test_glr_star_epsilon_self_loop_reports_error() {
+        let input = quote! {
+            %glr;
+            %tokentype char;
+            %start Expr;
+
+            Expr(Ast)
+                : 't' { Ast::True }
+                | '!'* left=Expr '&' right=Expr {
+                    Ast::And(Box::new(left), Box::new(right))
+                }
+                ;
+        };
+
+        let grammar_args = Grammar::parse_args(input).expect("Failed to parse grammar args");
+        let mut grammar =
+            Grammar::from_grammar_args(grammar_args).expect("Failed to build grammar");
+        if grammar.optimize {
+            grammar.optimize(25);
+        }
+
+        let err = grammar
+            .create_builder()
+            .expect_err("zero-or-more GLR cycle must be rejected");
+        let ParseError::GlrNullableReduceCycle { reason, help, .. } = err else {
+            panic!("expected GLR nullable reduce cycle error");
+        };
+
+        assert!(
+            reason.contains("zero-or-more repetition helper"),
+            "reason should explain that star cannot be finitely expanded: {reason}"
+        );
+        assert!(
+            help.contains("non-empty list helper"),
+            "help should suggest a useful manual rewrite: {help}"
         );
     }
 
@@ -4216,7 +4861,9 @@ mod tests {
             grammar.warnings
         );
 
-        grammar.builder = grammar.create_builder();
+        grammar.builder = grammar
+            .create_builder()
+            .expect("Failed to create parser builder");
         let _ = grammar.build_grammar();
 
         let has_resolved_info = grammar.infos.iter().any(|info| {
