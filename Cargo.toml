@@ -10,5 +10,5 @@ members = [
   "example/calculator",
   "example/calculator_u8",
   "example/glr",
-  "example/json", "example/test91",
+  "example/json",
 ]
