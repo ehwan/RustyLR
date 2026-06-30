@@ -94,7 +94,7 @@ pub struct Context<
     const MAX_REDUCE_RULES: usize,
 > {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
-    pub(crate) empty_node_indices: std::collections::BTreeSet<usize>,
+    pub(crate) empty_node_indices: Vec<usize>,
 
     /// each element represents an end-point of diverged paths.
     pub(crate) current_nodes: Vec<usize>,
@@ -266,7 +266,7 @@ impl<
 
     /// Create a new node in the pool and return its index.
     pub(crate) fn new_node_with_capacity(&mut self, capacity: usize) -> usize {
-        if let Some(idx) = self.empty_node_indices.pop_first() {
+        if let Some(idx) = self.empty_node_indices.pop() {
             self.node_mut(idx).reserve(capacity);
             idx
         } else {
@@ -276,7 +276,7 @@ impl<
         }
     }
     pub(crate) fn new_node(&mut self) -> usize {
-        if let Some(idx) = self.empty_node_indices.pop_first() {
+        if let Some(idx) = self.empty_node_indices.pop() {
             idx
         } else {
             let idx = self.nodes_pool.len();
@@ -298,7 +298,7 @@ impl<
                 self.nodes_pool.pop();
             } else {
                 self.node_mut(node).clear();
-                self.empty_node_indices.insert(node);
+                self.empty_node_indices.push(node);
             }
         } else {
             node_.parent = None;
@@ -905,78 +905,72 @@ impl<
         };
         if let Some(reduce_rules) = reduce {
             let mut shift = shift_state;
-            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
-
-            for reduce_rule in reduce_rules.to_iter() {
-                reduces.push(reduce_rule);
-            }
 
             let mut shifted = false;
             let mut reduced_node = node;
             let mut reduced_userdata = userdata.clone();
-            if !reduces.is_empty() {
-                // Each GLR branch receives its own user data copy before running reduce actions.
-                let mut shift_ = false;
-                let l = reduces.len();
-                for (idx, reduce_rule) in reduces.into_iter().enumerate() {
-                    let mut pass = shift.is_some();
-                    let mut branch_userdata = userdata.clone();
 
-                    // in `self.reduce()`, it will delete the node if it is leaf node.
-                    // but there are multiple reduce actions for this node and also shift action,
-                    // so we need to prevent this node from being cleared.
-                    // force this node as non-leaf if it is not in the last reduce action, or there is a shift action left.
-                    let prevent_leaf = idx < l - 1 || shift.is_some();
-                    if prevent_leaf {
-                        self.node_mut(node).child_count += 1;
-                    }
-                    match self.reduce(
-                        reduce_rule.into_usize(),
-                        node,
-                        &term,
-                        &mut pass,
-                        &mut branch_userdata,
-                    ) {
-                        Ok(next_node) => {
-                            shift_ |= pass;
-                            // reduce recursively
+            // Each GLR branch receives its own user data copy before running reduce actions.
+            let mut shift_ = false;
+            let l = reduce_rules.to_iter().len();
+            for (idx, reduce_rule) in reduce_rules.to_iter().enumerate() {
+                let mut pass = shift.is_some();
+                let mut branch_userdata = userdata.clone();
 
-                            match self.feed_location_impl(
-                                next_node,
-                                term.clone(),
-                                class,
-                                location.clone(),
-                                branch_userdata,
-                            ) {
-                                Ok(_) => {
-                                    shifted = true;
-                                }
-                                Err((reduced_node_, _, _, userdata_)) => {
-                                    reduced_node = reduced_node_;
-                                    reduced_userdata = userdata_;
-                                }
+                // in `self.reduce()`, it will delete the node if it is leaf node.
+                // but there are multiple reduce actions for this node and also shift action,
+                // so we need to prevent this node from being cleared.
+                // force this node as non-leaf if it is not in the last reduce action, or there is a shift action left.
+                let prevent_leaf = idx < l - 1 || shift.is_some();
+                if prevent_leaf {
+                    self.node_mut(node).child_count += 1;
+                }
+                match self.reduce(
+                    reduce_rule.into_usize(),
+                    node,
+                    &term,
+                    &mut pass,
+                    &mut branch_userdata,
+                ) {
+                    Ok(next_node) => {
+                        shift_ |= pass;
+                        // reduce recursively
+
+                        match self.feed_location_impl(
+                            next_node,
+                            term.clone(),
+                            class,
+                            location.clone(),
+                            branch_userdata,
+                        ) {
+                            Ok(_) => {
+                                shifted = true;
+                            }
+                            Err((reduced_node_, _, _, userdata_)) => {
+                                reduced_node = reduced_node_;
+                                reduced_userdata = userdata_;
                             }
                         }
-                        Err(err) => {
-                            shift_ |= pass;
-                            self.reduce_errors.push(err);
-                        }
                     }
-
-                    if prevent_leaf {
-                        // if there are more reduce_rule left, or there is shift action,
-                        // add child to this node to prevent it from being cleared (as leaf)
-                        self.node_mut(node).child_count -= 1;
+                    Err(err) => {
+                        shift_ |= pass;
+                        self.reduce_errors.push(err);
                     }
                 }
-                // if every reduce action revoked shift,
-                // then reset shift to None
-                if !shift_ {
-                    if shift.is_some() {
-                        // remove node recursive
-                        self.try_remove_node_recursive(node);
-                        shift = None;
-                    }
+
+                if prevent_leaf {
+                    // if there are more reduce_rule left, or there is shift action,
+                    // add child to this node to prevent it from being cleared (as leaf)
+                    self.node_mut(node).child_count -= 1;
+                }
+            }
+            // if every reduce action revoked shift,
+            // then reset shift to None
+            if !shift_ {
+                if shift.is_some() {
+                    // remove node recursive
+                    self.try_remove_node_recursive(node);
+                    shift = None;
                 }
             }
             if let Some(shift) = shift {
@@ -1368,85 +1362,24 @@ impl<
         };
         if let Some(reduce_rules) = reduce {
             let shift = shift_state;
-            let mut reduces: arrayvec::ArrayVec<_, MAX_REDUCE_RULES> = Default::default();
 
             use crate::parser::table::ReduceRules;
-            for reduce_rule in reduce_rules.to_iter() {
-                reduces.push(reduce_rule);
-            }
 
             if shift.is_some() {
                 return Some(true);
             }
-            if reduces.is_empty() {
-                return None;
-            }
-
-            if reduces.len() == 1 {
-                let rule = *self.tables.rule(reduces[0].into_usize());
-                let tokens_len = rule.len;
-
-                // pop state stack
-                if tokens_len <= extra_state_stack.len() {
-                    extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
-                } else {
-                    let left = tokens_len - extra_state_stack.len();
-                    extra_state_stack.clear();
-
-                    let (node, len) = node_and_len.unwrap();
-                    let len = len.get();
-
-                    if left < len {
-                        node_and_len = Some((node, NonZeroUsize::new(len - left).unwrap()));
-                    } else {
-                        let parent = self.node(node).parent;
-                        if let Some(parent) = parent {
-                            node_and_len = self
-                                .skip_last_n(parent, left - len)
-                                .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
-                        } else {
-                            // reached root node
-                            node_and_len = None;
-                        }
-                    }
-                }
-
-                // shift with reduced nonterminal
-                let last_state = extra_state_stack
-                    .last()
-                    .copied()
-                    .map(Index::into_usize)
-                    .unwrap_or_else(|| {
-                        node_and_len
-                            .map(|(node, stack_len)| {
-                                self.node(node).state_stack[stack_len.get() - 1].into_usize()
-                            })
-                            .unwrap_or(0)
-                    });
-                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.lhs) {
-                    extra_state_stack.push(next_state_id.state);
-                } else {
-                    unreachable!(
-                        "unreachable: nonterminal shift should always succeed after reduce operation. \
-Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
-                        rule.lhs.as_str(),
-                        reduces[0].into_usize()
-                    );
-                }
-
-                self.can_feed_impl(extra_state_stack, node_and_len, class)
-            } else {
-                let mut ret = None;
-                for reduce_rule in reduces.into_iter() {
-                    let reduce_rule = *self.tables.rule(reduce_rule.into_usize());
-                    let tokens_len = reduce_rule.len;
-
-                    let mut extra_state_stack = extra_state_stack.clone();
+            let mut reduces = reduce_rules.to_iter();
+            match reduces.len() {
+                0 => return None,
+                // if there is only one reduce rule, we can just reduce and shift with nonterminal
+                1 => {
+                    let rule_index = reduces.next().unwrap().into_usize();
+                    let rule_info = *self.tables.rule(rule_index);
+                    let tokens_len = rule_info.len;
 
                     // pop state stack
-                    let new_node_and_len = if tokens_len <= extra_state_stack.len() {
+                    if tokens_len <= extra_state_stack.len() {
                         extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
-                        node_and_len
                     } else {
                         let left = tokens_len - extra_state_stack.len();
                         extra_state_stack.clear();
@@ -1455,18 +1388,19 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         let len = len.get();
 
                         if left < len {
-                            Some((node, NonZeroUsize::new(len - left).unwrap()))
+                            node_and_len = Some((node, NonZeroUsize::new(len - left).unwrap()));
                         } else {
                             let parent = self.node(node).parent;
                             if let Some(parent) = parent {
-                                self.skip_last_n(parent, left - len)
-                                    .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()))
+                                node_and_len = self
+                                    .skip_last_n(parent, left - len)
+                                    .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
                             } else {
                                 // reached root node
-                                None
+                                node_and_len = None;
                             }
                         }
-                    };
+                    }
 
                     // shift with reduced nonterminal
                     let last_state = extra_state_stack
@@ -1474,34 +1408,97 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         .copied()
                         .map(Index::into_usize)
                         .unwrap_or_else(|| {
-                            new_node_and_len
+                            node_and_len
                                 .map(|(node, stack_len)| {
                                     self.node(node).state_stack[stack_len.get() - 1].into_usize()
                                 })
                                 .unwrap_or(0)
                         });
-
                     if let Some(next_state_id) =
-                        self.tables.shift_goto_nonterm(last_state, reduce_rule.lhs)
+                        self.tables.shift_goto_nonterm(last_state, rule_info.lhs)
                     {
                         extra_state_stack.push(next_state_id.state);
                     } else {
                         unreachable!(
-                            "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
-                            reduce_rule.lhs.as_str(),
-                            last_state
+                            "unreachable: nonterminal shift should always succeed after reduce operation. \
+Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
+                            rule_info.lhs.as_str(),
+                            rule_index
                         );
                     }
 
-                    match self.can_feed_impl(&mut extra_state_stack, new_node_and_len, class) {
-                        Some(true) => return Some(true),
-                        Some(false) => {
-                            ret = Some(false);
-                        }
-                        None => {}
-                    }
+                    self.can_feed_impl(extra_state_stack, node_and_len, class)
                 }
-                ret
+                // if there are multiple reduce rules, we need to check all of them, create new state stack for each reduce rule, and check if any of them can shift the terminal
+                _ => {
+                    let mut ret = None;
+                    for reduce_rule in reduces {
+                        let reduce_rule = *self.tables.rule(reduce_rule.into_usize());
+                        let tokens_len = reduce_rule.len;
+
+                        let mut extra_state_stack = extra_state_stack.clone();
+
+                        // pop state stack
+                        let new_node_and_len = if tokens_len <= extra_state_stack.len() {
+                            extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
+                            node_and_len
+                        } else {
+                            let left = tokens_len - extra_state_stack.len();
+                            extra_state_stack.clear();
+
+                            let (node, len) = node_and_len.unwrap();
+                            let len = len.get();
+
+                            if left < len {
+                                Some((node, NonZeroUsize::new(len - left).unwrap()))
+                            } else {
+                                let parent = self.node(node).parent;
+                                if let Some(parent) = parent {
+                                    self.skip_last_n(parent, left - len)
+                                        .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()))
+                                } else {
+                                    // reached root node
+                                    None
+                                }
+                            }
+                        };
+
+                        // shift with reduced nonterminal
+                        let last_state = extra_state_stack
+                            .last()
+                            .copied()
+                            .map(Index::into_usize)
+                            .unwrap_or_else(|| {
+                                new_node_and_len
+                                    .map(|(node, stack_len)| {
+                                        self.node(node).state_stack[stack_len.get() - 1]
+                                            .into_usize()
+                                    })
+                                    .unwrap_or(0)
+                            });
+
+                        if let Some(next_state_id) =
+                            self.tables.shift_goto_nonterm(last_state, reduce_rule.lhs)
+                        {
+                            extra_state_stack.push(next_state_id.state);
+                        } else {
+                            unreachable!(
+                                "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
+                                reduce_rule.lhs.as_str(),
+                                last_state
+                            );
+                        }
+
+                        match self.can_feed_impl(&mut extra_state_stack, new_node_and_len, class) {
+                            Some(true) => return Some(true),
+                            Some(false) => {
+                                ret = Some(false);
+                            }
+                            None => {}
+                        }
+                    }
+                    ret
+                }
             }
         } else {
             Some(shift_state.is_some())

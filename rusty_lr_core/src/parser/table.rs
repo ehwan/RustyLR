@@ -114,7 +114,7 @@ pub trait ReduceRules {
     const CAP: usize;
     type RuleIndex: Index;
 
-    fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone;
+    fn to_iter(&self) -> impl ExactSizeIterator<Item = Self::RuleIndex> + Clone;
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self;
 }
 
@@ -248,7 +248,7 @@ impl<Integral: Index + Copy> ReduceRules for Integral {
     const CAP: usize = 1;
     type RuleIndex = Integral;
 
-    fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
+    fn to_iter(&self) -> impl ExactSizeIterator<Item = Self::RuleIndex> + Clone {
         std::iter::once(*self)
     }
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self {
@@ -262,7 +262,7 @@ impl<T: Index, const CAP: usize> ReduceRules for ArrayVec<T, CAP> {
     const CAP: usize = CAP;
     type RuleIndex = T;
 
-    fn to_iter(&self) -> impl Iterator<Item = Self::RuleIndex> + Clone {
+    fn to_iter(&self) -> impl ExactSizeIterator<Item = Self::RuleIndex> + Clone {
         self.iter().copied()
     }
     fn from_set<RuleIndexFrom: TryInto<Self::RuleIndex>>(set: Vec<RuleIndexFrom>) -> Self {
