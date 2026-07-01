@@ -478,9 +478,19 @@ Disables optimization passes on the generated table (which merge states and grou
 Enables location tracking in the parser. The specified `<RustType>` must implement the `rusty_lr::Location` trait:
 
 ```rust
-pub trait Location: Default + Clone {
-    fn merge(&self, other: &Self) -> Self;
+pub trait Location: Clone {
+    fn new<'a>(stack: impl Iterator<Item = &'a Self> + Clone, len: usize) -> Self
+    where
+        Self: 'a;
 }
+```
+
+`Location::new` receives an iterator over child locations from right to left. If a production `A : x y z` is reduced, the iterator yields `z`, then `y`, then `x`, and `len` is `3`. The returned value becomes the location of `A`.
+
+When `len` is `0`, RustyLR is creating a zero-width location, such as for an empty production or end-of-file marker. A common convention is to return an empty span at the end of the previous stack location. The built-in `std::ops::Range<T>` implementation follows that convention, so byte spans can usually be enabled directly:
+
+```rust
+%location std::ops::Range<usize>;
 ```
 
 To feed locations, use `feed_location` instead of `feed`:
