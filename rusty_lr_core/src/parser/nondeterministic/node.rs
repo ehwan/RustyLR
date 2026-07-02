@@ -1,21 +1,36 @@
 use crate::parser::semantic_value::SemanticValue;
 
-/// To handle multiple paths in the non-deterministic GLR parsing,
-/// this node represents a subrange in stack of the parser.
-/// this constructs LinkedList tree of nodes, where parent node is the previous token in the parse tree.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct NodeId(usize);
+
+impl NodeId {
+    pub(crate) fn new(index: usize) -> Self {
+        NodeId(index)
+    }
+
+    pub(crate) fn index(self) -> usize {
+        self.0
+    }
+}
+
+/// A segment of one deterministic subpath in the GLR graph-structured stack.
+///
+/// A full nondeterministic parse path is represented by walking from an active
+/// leaf node through its parent links. Each `Node` stores a maximal contiguous
+/// LR stack segment that can still be handled deterministically. Splitting a
+/// path creates new nodes only at branch points, so grammars that do not branch
+/// keep memory usage and stack operations close to the deterministic parser.
 #[derive(Clone)]
 pub struct Node<Data: SemanticValue, StateIndex> {
-    /// parent node
-    pub parent: Option<usize>,
+    pub(super) parent: Option<NodeId>,
 
-    pub child_count: usize,
+    pub(super) child_count: usize,
 
-    /// index of state in parser
-    pub state_stack: Vec<StateIndex>,
-    pub data_stack: Vec<Data>,
-    pub location_stack: Vec<Data::Location>,
+    pub(super) state_stack: Vec<StateIndex>,
+    pub(super) data_stack: Vec<Data>,
+    pub(super) location_stack: Vec<Data::Location>,
     #[cfg(feature = "tree")]
-    pub(crate) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
+    pub(super) tree_stack: Vec<crate::tree::Tree<Data::Term, Data::NonTerm>>,
 }
 
 impl<Data: SemanticValue, StateIndex> Default for Node<Data, StateIndex> {
@@ -48,6 +63,31 @@ impl<Data: SemanticValue, StateIndex> Node<Data, StateIndex> {
     }
     pub fn is_leaf(&self) -> bool {
         self.child_count == 0
+    }
+
+    pub fn parent(&self) -> Option<usize> {
+        self.parent.map(NodeId::index)
+    }
+
+    pub fn child_count(&self) -> usize {
+        self.child_count
+    }
+
+    pub fn state_stack(&self) -> &[StateIndex] {
+        &self.state_stack
+    }
+
+    pub fn data_stack(&self) -> &[Data] {
+        &self.data_stack
+    }
+
+    pub fn location_stack(&self) -> &[Data::Location] {
+        &self.location_stack
+    }
+
+    #[cfg(feature = "tree")]
+    pub fn tree_stack(&self) -> &[crate::tree::Tree<Data::Term, Data::NonTerm>] {
+        &self.tree_stack
     }
 
     pub fn with_capacity(capacity: usize) -> Self {

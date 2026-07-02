@@ -1,6 +1,7 @@
 use std::num::NonZeroUsize;
 
 use super::Node;
+use super::NodeId;
 use super::ParseError;
 
 use crate::Location;
@@ -24,7 +25,7 @@ pub struct NodeRefIterator<
     const MAX_REDUCE_RULES: usize,
 > {
     context: &'a Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
-    node: Option<usize>,
+    node: Option<NodeId>,
 }
 impl<
     'a,
@@ -84,6 +85,18 @@ where
     }
 }
 
+#[derive(Clone)]
+struct Branch<UserData> {
+    node: NodeId,
+    userdata: UserData,
+}
+
+impl<UserData> Branch<UserData> {
+    fn new(node: NodeId, userdata: UserData) -> Self {
+        Branch { node, userdata }
+    }
+}
+
 /// A struct that maintains the current state and the values associated with each symbol.
 /// This handles the divergence and merging of the parser.
 pub struct Context<
@@ -94,19 +107,16 @@ pub struct Context<
     const MAX_REDUCE_RULES: usize,
 > {
     pub(crate) nodes_pool: Vec<Node<Data, StateIndex>>,
-    pub(crate) empty_node_indices: Vec<usize>,
+    pub(crate) empty_node_indices: Vec<NodeId>,
 
-    /// each element represents an end-point of diverged paths.
-    pub(crate) current_nodes: Vec<usize>,
-    pub(crate) current_userdatas: Vec<Data::UserData>,
+    /// Each element represents an active GLR branch and its tail node.
+    current_branches: Vec<Branch<Data::UserData>>,
 
     /// temporary storage
-    pub(crate) next_nodes: Vec<usize>,
-    pub(crate) next_userdatas: Vec<Data::UserData>,
+    next_branches: Vec<Branch<Data::UserData>>,
 
     /// For recovery from error
-    pub(crate) fallback_nodes: Vec<usize>,
-    pub(crate) fallback_userdatas: Vec<Data::UserData>,
+    fallback_branches: Vec<Branch<Data::UserData>>,
 
     /// For temporary use. store reduce errors returned from `reduce_action`.
     /// But we don't want to reallocate every `feed` call
@@ -131,26 +141,24 @@ impl<
 > Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>
 {
     /// Create a new context.
-    /// `current_nodes` is initialized with a root node.
+    /// `current_branches` is initialized with a root node.
     pub fn new(userdata: Data::UserData) -> Self {
         P::__assert_rusty_lr_parser_version_compatible();
         let mut context = Context {
             nodes_pool: Default::default(),
             empty_node_indices: Default::default(),
-            current_nodes: Default::default(),
-            current_userdatas: Default::default(),
-            next_nodes: Default::default(),
-            next_userdatas: Default::default(),
+            current_branches: Default::default(),
+            next_branches: Default::default(),
             reduce_errors: Default::default(),
-            fallback_nodes: Default::default(),
-            fallback_userdatas: Default::default(),
+            fallback_branches: Default::default(),
             no_precedences: Default::default(),
             tables: P::get_tables(),
             _phantom: std::marker::PhantomData,
         };
         let root_node = context.new_node();
-        context.current_nodes.push(root_node);
-        context.current_userdatas.push(userdata);
+        context
+            .current_branches
+            .push(Branch::new(root_node, userdata));
         context.init_start_branch(Start::BRANCH_INDEX);
         context
     }
@@ -170,7 +178,7 @@ impl<
                 branch_idx
             )
         });
-        let root_node_idx = self.current_nodes[0];
+        let root_node_idx = self.current_branches[0].node;
         let root_node = self.node_mut(root_node_idx);
         root_node.state_stack.push(shift_to.state);
         root_node.data_stack.push(Data::new_empty());
@@ -189,8 +197,9 @@ impl<
     ///
     /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata(&self) -> &Data::UserData {
-        self.current_userdatas
+        self.current_branches
             .first()
+            .map(|branch| &branch.userdata)
             .expect("userdata() requires at least one active GLR path")
     }
 
@@ -198,15 +207,16 @@ impl<
     ///
     /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_all(&self) -> impl Iterator<Item = &Data::UserData> {
-        self.current_userdatas.iter()
+        self.current_branches.iter().map(|branch| &branch.userdata)
     }
 
     /// Mutably borrow the user data for the first active path.
     ///
     /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_mut(&mut self) -> &mut Data::UserData {
-        self.current_userdatas
+        self.current_branches
             .first_mut()
+            .map(|branch| &mut branch.userdata)
             .expect("userdata_mut() requires at least one active GLR path")
     }
 
@@ -214,25 +224,32 @@ impl<
     ///
     /// In GLR mode, each forked branch owns an independently cloned user data value.
     pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
-        self.current_userdatas.iter_mut()
+        self.current_branches
+            .iter_mut()
+            .map(|branch| &mut branch.userdata)
     }
 
-    pub fn node(&self, node: usize) -> &Node<Data, StateIndex> {
-        debug_assert!(!self.empty_node_indices.contains(&node) && node < self.nodes_pool.len());
+    pub(crate) fn node(&self, node: NodeId) -> &Node<Data, StateIndex> {
+        debug_assert!(
+            !self.empty_node_indices.contains(&node) && node.index() < self.nodes_pool.len()
+        );
 
-        &self.nodes_pool[node]
+        &self.nodes_pool[node.index()]
     }
-    pub fn node_mut(&mut self, node: usize) -> &mut Node<Data, StateIndex> {
-        debug_assert!(!self.empty_node_indices.contains(&node) && node < self.nodes_pool.len());
+    pub(crate) fn node_mut(&mut self, node: NodeId) -> &mut Node<Data, StateIndex> {
+        debug_assert!(
+            !self.empty_node_indices.contains(&node) && node.index() < self.nodes_pool.len()
+        );
 
-        &mut self.nodes_pool[node]
+        &mut self.nodes_pool[node.index()]
     }
 
     /// for debugging; checks for memory leak, not freed nodes, etc.
     pub fn debug_check(&self) {
         let mut active_nodes = std::collections::BTreeSet::new();
 
-        for &tail_node in self.current_nodes.iter() {
+        for branch in self.current_branches.iter() {
+            let tail_node = branch.node;
             let mut node = tail_node;
             loop {
                 if !active_nodes.insert(node) {
@@ -247,14 +264,15 @@ impl<
         }
 
         for (node, _) in self.nodes_pool.iter().enumerate() {
+            let node = NodeId::new(node);
             if self.empty_node_indices.contains(&node) {
                 if active_nodes.contains(&node) {
-                    panic!("empty node {} is in active nodes", node);
+                    panic!("empty node {} is in active nodes", node.index());
                 }
                 continue; // empty node
             } else {
                 if !active_nodes.contains(&node) {
-                    panic!("node {} is not in active nodes", node);
+                    panic!("node {} is not in active nodes", node.index());
                 }
                 active_nodes.remove(&node);
             }
@@ -265,36 +283,36 @@ impl<
     }
 
     /// Create a new node in the pool and return its index.
-    pub(crate) fn new_node_with_capacity(&mut self, capacity: usize) -> usize {
+    pub(crate) fn new_node_with_capacity(&mut self, capacity: usize) -> NodeId {
         if let Some(idx) = self.empty_node_indices.pop() {
             self.node_mut(idx).reserve(capacity);
             idx
         } else {
-            let idx = self.nodes_pool.len();
+            let idx = NodeId::new(self.nodes_pool.len());
             self.nodes_pool.push(Node::with_capacity(capacity));
             idx
         }
     }
-    pub(crate) fn new_node(&mut self) -> usize {
+    pub(crate) fn new_node(&mut self) -> NodeId {
         if let Some(idx) = self.empty_node_indices.pop() {
             idx
         } else {
-            let idx = self.nodes_pool.len();
+            let idx = NodeId::new(self.nodes_pool.len());
             self.nodes_pool.push(Node::default());
             idx
         }
     }
-    pub(crate) fn add_child(&mut self, node: usize, child: usize) {
+    pub(crate) fn add_child(&mut self, node: NodeId, child: NodeId) {
         debug_assert!(self.node(child).parent.is_none());
         self.node_mut(node).child_count += 1;
         self.node_mut(child).parent = Some(node);
     }
-    pub(crate) fn try_remove_node(&mut self, node: usize) -> Option<usize> {
+    pub(crate) fn try_remove_node(&mut self, node: NodeId) -> Option<NodeId> {
         let node_ = self.node_mut(node);
         let parent = node_.parent;
 
         if node_.is_leaf() {
-            if node == self.nodes_pool.len() - 1 {
+            if node.index() == self.nodes_pool.len() - 1 {
                 self.nodes_pool.pop();
             } else {
                 self.node_mut(node).clear();
@@ -310,7 +328,7 @@ impl<
         }
         parent
     }
-    pub(crate) fn try_remove_node_recursive(&mut self, node: usize) -> Option<usize> {
+    pub(crate) fn try_remove_node_recursive(&mut self, node: NodeId) -> Option<NodeId> {
         // remove node recursive
         let mut node = node;
         loop {
@@ -328,7 +346,7 @@ impl<
     /// Get iterator for all nodes in the current context.
     fn node_iter(
         &self,
-        node: usize,
+        node: NodeId,
     ) -> NodeRefIterator<'_, P, Data, Start, StateIndex, MAX_REDUCE_RULES> {
         NodeRefIterator {
             context: self,
@@ -336,7 +354,7 @@ impl<
         }
     }
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
-    fn location_iter(&self, node: usize) -> impl Iterator<Item = &Data::Location> + Clone
+    fn location_iter(&self, node: NodeId) -> impl Iterator<Item = &Data::Location> + Clone
     where
         Data: Clone,
     {
@@ -344,7 +362,7 @@ impl<
             .flat_map(|node| node.location_stack.iter().rev())
     }
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
-    fn state_iter(&self, node: usize) -> impl Iterator<Item = usize> + '_ {
+    fn state_iter(&self, node: NodeId) -> impl Iterator<Item = usize> + '_ {
         self.node_iter(node).flat_map(|node| {
             node.state_stack
                 .iter()
@@ -353,7 +371,7 @@ impl<
                 .map(Index::into_usize)
         })
     }
-    fn data_iter(&self, node: usize) -> impl Iterator<Item = &Data> + '_ {
+    fn data_iter(&self, node: NodeId) -> impl Iterator<Item = &Data> + '_ {
         self.node_iter(node)
             .flat_map(|node| node.data_stack.iter().rev())
     }
@@ -361,14 +379,14 @@ impl<
     /// Get iterator for `node` that traverses from `node` to root on the parsing tree.
     fn tree_iter(
         &self,
-        node: usize,
+        node: NodeId,
     ) -> impl Iterator<Item = &crate::tree::Tree<Data::Term, Data::NonTerm>> {
         self.node_iter(node)
             .flat_map(|node| node.tree_stack.iter().rev())
     }
 
     /// Get state of the node.
-    fn state(&self, mut node: usize) -> usize {
+    fn state(&self, mut node: NodeId) -> usize {
         while self.node(node).state_stack.is_empty() {
             if let Some(parent) = self.node(node).parent {
                 node = parent;
@@ -381,14 +399,16 @@ impl<
 
     /// Get current states in every diverged paths.
     pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
-        self.current_nodes.iter().map(|&node| self.state(node))
+        self.current_branches
+            .iter()
+            .map(|branch| self.state(branch.node))
     }
 
     /// Get iterators of state stacks in all diverged paths.
     pub fn state_stacks(&self) -> impl Iterator<Item = impl Iterator<Item = usize> + '_> + '_ {
-        self.current_nodes
+        self.current_branches
             .iter()
-            .map(move |&node| self.state_iter(node).chain(std::iter::once(0)))
+            .map(move |branch| self.state_iter(branch.node).chain(std::iter::once(0)))
     }
 
     /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
@@ -396,10 +416,10 @@ impl<
     /// and other stack containing the (data_stack.len() - reduce_token_count) number of elements.
     fn prepare_reduce_node(
         &mut self,
-        node_idx: usize,
+        node_idx: NodeId,
         reduce_token_count: usize,
         capacity: usize,
-    ) -> usize
+    ) -> NodeId
     where
         Data: Clone,
         Data::Term: Clone,
@@ -569,11 +589,11 @@ impl<
     fn reduce(
         &mut self,
         reduce_rule: usize,
-        node: usize,
+        node: NodeId,
         term: &crate::TerminalSymbol<P::Term>,
         shift: &mut bool,
         userdata: &mut Data::UserData,
-    ) -> Result<usize, Data::ReduceActionError>
+    ) -> Result<NodeId, Data::ReduceActionError>
     where
         Data: Clone,
         P::Term: Clone,
@@ -627,12 +647,12 @@ impl<
 
     /// Get number of diverged paths
     pub fn len_paths(&self) -> usize {
-        self.current_nodes.len()
+        self.current_branches.len()
     }
 
     /// Is there any path alive?
     pub fn is_empty(&self) -> bool {
-        self.current_nodes.is_empty()
+        self.current_branches.is_empty()
     }
 
     /// End this context and return the first successful start symbol and user data pair.
@@ -670,14 +690,13 @@ impl<
         //                  ^^^ here, current_node
         let Context {
             mut nodes_pool,
-            current_nodes,
-            current_userdatas,
+            current_branches,
             ..
         } = self;
 
-        let mut accepted = Vec::with_capacity(current_nodes.len());
-        for (node, userdata) in current_nodes.into_iter().zip(current_userdatas) {
-            let mut data_stack = std::mem::take(&mut nodes_pool[node].data_stack);
+        let mut accepted = Vec::with_capacity(current_branches.len());
+        for Branch { node, userdata } in current_branches {
+            let mut data_stack = std::mem::take(&mut nodes_pool[node.index()].data_stack);
             data_stack.pop(); // eof
             let start_value = data_stack.pop().unwrap_or_else(|| {
                 panic!(
@@ -707,8 +726,8 @@ impl<
         Data::Term: Clone,
         Data::NonTerm: Clone,
     {
-        self.current_nodes.iter().map(|node| {
-            let mut trees: Vec<_> = self.tree_iter(*node).cloned().collect();
+        self.current_branches.iter().map(|branch| {
+            let mut trees: Vec<_> = self.tree_iter(branch.node).cloned().collect();
             trees.reverse();
             crate::tree::TreeList { trees }
         })
@@ -717,7 +736,7 @@ impl<
     fn expected_token_impl(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
-        node_and_len: Option<(usize, NonZeroUsize)>,
+        node_and_len: Option<(NodeId, NonZeroUsize)>,
         terms: &mut std::collections::BTreeSet<P::TermClass>,
         nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
     ) where
@@ -802,7 +821,8 @@ impl<
         let mut nonterms = std::collections::BTreeSet::new();
         let mut extra_state_stack = Vec::new();
 
-        for &node in self.current_nodes.iter() {
+        for branch in self.current_branches.iter() {
+            let node = branch.node;
             let node_and_len = {
                 let node_ = self.node(node);
                 if node_.len() == 0 {
@@ -857,7 +877,7 @@ impl<
     {
         self.feed_location(term, Default::default())
     }
-    fn skip_last_n(&self, mut node: usize, mut count: usize) -> Option<(usize, usize)> {
+    fn skip_last_n(&self, mut node: NodeId, mut count: usize) -> Option<(NodeId, usize)> {
         loop {
             let node_ = self.node(node);
             if count < node_.len() {
@@ -875,7 +895,7 @@ impl<
 
     fn feed_location_impl(
         &mut self,
-        node: usize,
+        node: NodeId,
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
         location: Data::Location,
@@ -883,7 +903,7 @@ impl<
     ) -> Result<
         (),
         (
-            usize,
+            NodeId,
             TerminalSymbol<P::Term>,
             Data::Location,
             Data::UserData,
@@ -976,7 +996,7 @@ impl<
             if let Some(shift) = shift {
                 // If `node` acquired children during the reduce loop (e.g. an
                 // empty rule created a child via `prepare_reduce_node`), it is
-                // no longer a leaf.  Pushing it directly to `next_nodes` would
+                // no longer a leaf.  Pushing it directly to `next_branches` would
                 // violate the `is_leaf()` precondition of the next
                 // `feed_location_impl` call.  Instead, create a fresh leaf
                 // child that carries only the shift result.
@@ -1018,8 +1038,7 @@ impl<
                     }
                 }
 
-                self.next_nodes.push(shift_node);
-                self.next_userdatas.push(userdata);
+                self.next_branches.push(Branch::new(shift_node, userdata));
                 Ok(())
             } else if shifted {
                 Ok(())
@@ -1057,8 +1076,7 @@ impl<
                 }
             }
 
-            self.next_nodes.push(node);
-            self.next_userdatas.push(userdata);
+            self.next_branches.push(Branch::new(node, userdata));
             Ok(())
         } else {
             // no reduce, no shift
@@ -1067,7 +1085,7 @@ impl<
     }
     fn panic_mode(
         &mut self,
-        mut node: usize,
+        mut node: NodeId,
         userdata: Data::UserData,
         extra_state_stack: &mut Vec<StateIndex>,
     ) -> Data::Location
@@ -1191,16 +1209,13 @@ impl<
 
         self.reduce_errors.clear();
         self.no_precedences.clear();
-        self.fallback_nodes.clear();
-        self.fallback_userdatas.clear();
-        self.next_nodes.clear();
-        self.next_userdatas.clear();
+        self.fallback_branches.clear();
+        self.next_branches.clear();
 
         let class = P::TermClass::from_term(&term);
 
-        let mut current_nodes = std::mem::take(&mut self.current_nodes);
-        let mut current_userdatas = std::mem::take(&mut self.current_userdatas);
-        for (node, userdata) in current_nodes.drain(..).zip(current_userdatas.drain(..)) {
+        let mut current_branches = std::mem::take(&mut self.current_branches);
+        for Branch { node, userdata } in current_branches.drain(..) {
             if let Err((node, _, _, userdata)) = self.feed_location_impl(
                 node,
                 TerminalSymbol::Terminal(term.clone()),
@@ -1209,22 +1224,19 @@ impl<
                 userdata,
             ) {
                 // store to fallback nodes in case of all nodes failed to shift
-                self.fallback_nodes.push(node);
-                self.fallback_userdatas.push(userdata);
+                self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
         // put back for reused allocated memory
-        self.current_nodes = current_nodes;
-        self.current_userdatas = current_userdatas;
+        self.current_branches = current_branches;
 
-        // next_nodes is empty; invalid terminal was given
+        // next_branches is empty; invalid terminal was given
         // check for panic mode
-        // and restore nodes to original state from fallback_nodes
-        if self.next_nodes.is_empty() {
+        // and restore nodes to original state from fallback_branches
+        if self.next_branches.is_empty() {
             // early return if `error` token is not used in the grammar
             if !P::ERROR_USED {
-                std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
-                std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
+                std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
 
                 return Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
@@ -1235,24 +1247,24 @@ impl<
                 });
             }
 
-            let mut fallback_nodes = std::mem::take(&mut self.fallback_nodes);
-            let mut fallback_userdatas = std::mem::take(&mut self.fallback_userdatas);
-            let root_userdata = fallback_userdatas.first().cloned();
+            let mut fallback_branches = std::mem::take(&mut self.fallback_branches);
+            let root_userdata = fallback_branches
+                .first()
+                .map(|branch| branch.userdata.clone());
             let mut extra_state_stack = Vec::new();
-            let mut error_location = if let Some(&first_node) = fallback_nodes.first() {
-                Data::Location::new(self.location_iter(first_node), 0)
+            let mut error_location = if let Some(first_branch) = fallback_branches.first() {
+                Data::Location::new(self.location_iter(first_branch.node), 0)
             } else {
                 location.clone()
             };
-            // try enter panic mode and store error nodes to next_nodes
-            for (node, userdata) in fallback_nodes.drain(..).zip(fallback_userdatas.drain(..)) {
+            // try enter panic mode and store error nodes to next_branches
+            for Branch { node, userdata } in fallback_branches.drain(..) {
                 error_location = self.panic_mode(node, userdata, &mut extra_state_stack);
             }
             // put back for reuse allocated memory
-            self.fallback_nodes = fallback_nodes;
-            self.fallback_userdatas = fallback_userdatas;
+            self.fallback_branches = fallback_branches;
 
-            if self.next_nodes.is_empty() {
+            if self.next_branches.is_empty() {
                 // for-loop above doesn't check for root state (0).
                 // check for 0 state here
                 if self.tables.can_accept_error(0) == crate::TriState::True {
@@ -1279,8 +1291,8 @@ impl<
             }
 
             // if next_node is still empty, then no panic mode was entered, this is an error
-            // restore current_nodes to fallback_nodes
-            if self.next_nodes.is_empty() {
+            // restore current_branches to fallback_branches
+            if self.next_branches.is_empty() {
                 Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
@@ -1290,9 +1302,12 @@ impl<
                 })
             } else {
                 // try shift term to error state
-                let mut next_nodes = std::mem::take(&mut self.next_nodes);
-                let mut next_userdatas = std::mem::take(&mut self.next_userdatas);
-                for (error_node, userdata) in next_nodes.drain(..).zip(next_userdatas.drain(..)) {
+                let mut next_branches = std::mem::take(&mut self.next_branches);
+                for Branch {
+                    node: error_node,
+                    userdata,
+                } in next_branches.drain(..)
+                {
                     let last_state = self.state(error_node);
                     if let Some(next_state) = self.tables.shift_goto_class(last_state, class) {
                         // A -> a . error b
@@ -1311,8 +1326,8 @@ impl<
                             node.data_stack.push(Data::new_empty());
                         }
 
-                        self.current_nodes.push(error_node);
-                        self.current_userdatas.push(userdata);
+                        self.current_branches
+                            .push(Branch::new(error_node, userdata));
                     } else {
                         // here, fed token is in `error` non-terminal
                         // so merge location with previous
@@ -1324,17 +1339,15 @@ impl<
                         let node = self.node_mut(error_node);
                         *node.location_stack.last_mut().unwrap() = new_location;
 
-                        self.current_nodes.push(error_node);
-                        self.current_userdatas.push(userdata);
+                        self.current_branches
+                            .push(Branch::new(error_node, userdata));
                     }
                 }
-                self.next_nodes = next_nodes;
-                self.next_userdatas = next_userdatas;
+                self.next_branches = next_branches;
                 Ok(())
             }
         } else {
-            std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);
-            std::mem::swap(&mut self.current_userdatas, &mut self.next_userdatas);
+            std::mem::swap(&mut self.current_branches, &mut self.next_branches);
             Ok(())
         }
     }
@@ -1342,7 +1355,7 @@ impl<
     fn can_feed_impl(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
-        mut node_and_len: Option<(usize, NonZeroUsize)>,
+        mut node_and_len: Option<(NodeId, NonZeroUsize)>,
         class: P::TermClass,
     ) -> Option<bool> {
         let last_state = extra_state_stack
@@ -1512,7 +1525,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
     pub fn can_feed(&self, term: &P::Term) -> bool {
         let class = P::TermClass::from_term(term);
         let mut extra_state_stack = Vec::new();
-        self.current_nodes.iter().any(move |&node| {
+        self.current_branches.iter().any(move |branch| {
+            let node = branch.node;
             extra_state_stack.clear();
 
             let node_and_len = {
@@ -1537,8 +1551,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
         let mut extra_state_stack = Vec::new();
 
-        self.current_nodes.iter().any(move |&node| {
-            let mut node = node;
+        self.current_branches.iter().any(move |branch| {
+            let mut node = branch.node;
             let mut len = self.node(node).len();
 
             if len > 0 {
@@ -1586,20 +1600,17 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
         self.reduce_errors.clear();
         self.no_precedences.clear();
-        self.fallback_nodes.clear();
-        self.fallback_userdatas.clear();
-        self.next_nodes.clear();
-        self.next_userdatas.clear();
+        self.fallback_branches.clear();
+        self.next_branches.clear();
 
-        let eof_location = if let Some(&node) = self.current_nodes.first() {
-            Data::Location::new(self.location_iter(node), 0)
+        let eof_location = if let Some(branch) = self.current_branches.first() {
+            Data::Location::new(self.location_iter(branch.node), 0)
         } else {
             Data::Location::new(std::iter::empty(), 0)
         };
 
-        let mut current_nodes = std::mem::take(&mut self.current_nodes);
-        let mut current_userdatas = std::mem::take(&mut self.current_userdatas);
-        for (node, userdata) in current_nodes.drain(..).zip(current_userdatas.drain(..)) {
+        let mut current_branches = std::mem::take(&mut self.current_branches);
+        for Branch { node, userdata } in current_branches.drain(..) {
             let node_eof_location = Data::Location::new(self.location_iter(node), 0);
             if let Err((node, _, _, userdata)) = self.feed_location_impl(
                 node,
@@ -1608,19 +1619,16 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 node_eof_location,
                 userdata,
             ) {
-                self.fallback_nodes.push(node);
-                self.fallback_userdatas.push(userdata);
+                self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
-        self.current_nodes = current_nodes;
-        self.current_userdatas = current_userdatas;
+        self.current_branches = current_branches;
 
-        // next_nodes is empty; invalid terminal was given
+        // next_branches is empty; invalid terminal was given
         // check for panic mode
-        // and restore nodes to original state from fallback_nodes
-        if self.next_nodes.is_empty() {
-            std::mem::swap(&mut self.current_nodes, &mut self.fallback_nodes);
-            std::mem::swap(&mut self.current_userdatas, &mut self.fallback_userdatas);
+        // and restore nodes to original state from fallback_branches
+        if self.next_branches.is_empty() {
+            std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
 
             Err(ParseError {
                 term: TerminalSymbol::Eof,
@@ -1630,15 +1638,15 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 states: self.states().collect(),
             })
         } else {
-            std::mem::swap(&mut self.current_nodes, &mut self.next_nodes);
-            std::mem::swap(&mut self.current_userdatas, &mut self.next_userdatas);
+            std::mem::swap(&mut self.current_branches, &mut self.next_branches);
             Ok(())
         }
     }
     /// Check if current context can be terminated and get the start value.
     pub fn can_accept(&self) -> bool {
         let mut extra_state_stack = Vec::new();
-        self.current_nodes.iter().any(move |&node| {
+        self.current_branches.iter().any(move |branch| {
+            let node = branch.node;
             extra_state_stack.clear();
 
             let node_and_len = {
@@ -1686,13 +1694,10 @@ where
         Context {
             nodes_pool: self.nodes_pool.clone(),
             empty_node_indices: self.empty_node_indices.clone(),
-            current_nodes: self.current_nodes.clone(),
-            current_userdatas: self.current_userdatas.clone(),
-            next_nodes: Default::default(),
-            next_userdatas: Default::default(),
+            current_branches: self.current_branches.clone(),
+            next_branches: Default::default(),
             reduce_errors: Default::default(),
-            fallback_nodes: Default::default(),
-            fallback_userdatas: Default::default(),
+            fallback_branches: Default::default(),
             no_precedences: Default::default(),
             tables: self.tables,
             _phantom: std::marker::PhantomData,
@@ -1713,12 +1718,12 @@ where
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let branches: Vec<_> = self
-            .current_nodes
+            .current_branches
             .iter()
-            .copied()
-            .zip(&self.current_userdatas)
             .enumerate()
-            .map(|(index, (node, userdata))| {
+            .map(|(index, branch)| {
+                let node = branch.node;
+                let userdata = &branch.userdata;
                 let mut state_stack: Vec<_> =
                     self.state_iter(node).chain(std::iter::once(0)).collect();
                 state_stack.reverse();
@@ -1736,7 +1741,7 @@ where
             .collect();
 
         f.debug_struct("Context")
-            .field("branch_count", &self.current_nodes.len())
+            .field("branch_count", &self.current_branches.len())
             .field("branches", &branches)
             .finish()
     }

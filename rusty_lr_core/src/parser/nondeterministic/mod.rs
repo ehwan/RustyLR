@@ -5,3 +5,4 @@ mod node;
 pub use context::Context;
 pub use error::ParseError;
 pub use node::Node;
+pub(crate) use node::NodeId;
