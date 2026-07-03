@@ -184,7 +184,7 @@ impl<
             self.state_stack.len() - 1,
             &mut extra_state_stack,
             P::TermClass::EOF,
-        ) == Some(true)
+        )
     }
 
     /// Get current state index
@@ -347,8 +347,7 @@ impl<
                                 self.state_stack.len() - pop_count - 1,
                                 &mut extra_state_stack,
                                 P::TermClass::ERROR,
-                            ) == Some(true)
-                            {
+                            ) {
                                 found = true;
                                 break;
                             }
@@ -566,7 +565,7 @@ impl<
         let mut extra_state_stack = Vec::new();
         let class = P::TermClass::from_term(term);
 
-        self.can_feed_impl(self.state_stack.len() - 1, &mut extra_state_stack, class) == Some(true)
+        self.can_feed_impl(self.state_stack.len() - 1, &mut extra_state_stack, class)
     }
 
     /// Check if current context can enter panic mode
@@ -582,15 +581,14 @@ impl<
 
         loop {
             match self.can_feed_impl(stack_len, &mut extra_state_stack, error) {
-                Some(true) => break true, // successfully shifted `error`
-                Some(false) => {
+                true => break true, // successfully shifted `error`
+                false => {
                     if stack_len == 0 {
                         break false;
                     } else {
                         stack_len -= 1;
                     }
                 }
-                None => break false,
             }
             extra_state_stack.clear();
         }
@@ -601,7 +599,7 @@ impl<
         mut stack_len: usize,
         extra_state_stack: &mut Vec<StateIndex>,
         class: P::TermClass,
-    ) -> Option<bool> {
+    ) -> bool {
         let shift_to = loop {
             let state = extra_state_stack
                 .last()
@@ -653,7 +651,7 @@ impl<
         };
 
         // shift with terminal
-        Some(shift_to.is_some())
+        shift_to.is_some()
     }
 
     fn feed_eof(

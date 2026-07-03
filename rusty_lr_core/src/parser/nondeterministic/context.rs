@@ -1119,8 +1119,7 @@ impl<
                             extra_state_stack,
                             Some((node, NonZeroUsize::new(node_.len() - pop_count).unwrap())),
                             P::TermClass::ERROR,
-                        ) == Some(true)
-                        {
+                        ) {
                             found = true;
                             break;
                         }
@@ -1354,7 +1353,7 @@ impl<
         extra_state_stack: &mut Vec<StateIndex>,
         mut node_and_len: Option<(NodeId, NonZeroUsize)>,
         class: P::TermClass,
-    ) -> Option<bool> {
+    ) -> bool {
         let last_state = extra_state_stack
             .last()
             .copied()
@@ -1376,11 +1375,11 @@ impl<
             use crate::parser::table::ReduceRules;
 
             if shift.is_some() {
-                return Some(true);
+                return true;
             }
             let mut reduces = reduce_rules.to_iter();
             match reduces.len() {
-                0 => return None,
+                0 => return false, // since reduce is `Some`, this should be unreachable
                 // if there is only one reduce rule, we can just reduce and shift with nonterminal
                 1 => {
                     let rule_index = reduces.next().unwrap().into_usize();
@@ -1441,7 +1440,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 }
                 // if there are multiple reduce rules, we need to check all of them, create new state stack for each reduce rule, and check if any of them can shift the terminal
                 _ => {
-                    let mut ret = None;
                     for reduce_rule in reduces {
                         let reduce_rule = *self.tables.rule(reduce_rule.into_usize());
                         let tokens_len = reduce_rule.len;
@@ -1499,19 +1497,15 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                             );
                         }
 
-                        match self.can_feed_impl(&mut extra_state_stack, new_node_and_len, class) {
-                            Some(true) => return Some(true),
-                            Some(false) => {
-                                ret = Some(false);
-                            }
-                            None => {}
+                        if self.can_feed_impl(&mut extra_state_stack, new_node_and_len, class) {
+                            return true;
                         }
                     }
-                    ret
+                    false
                 }
             }
         } else {
-            Some(shift_state.is_some())
+            shift_state.is_some()
         }
     }
 
@@ -1535,7 +1529,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                     Some((node, NonZeroUsize::new(node_.len()).unwrap()))
                 }
             };
-            self.can_feed_impl(&mut extra_state_stack, node_and_len, class) == Some(true)
+            self.can_feed_impl(&mut extra_state_stack, node_and_len, class)
         })
     }
 
@@ -1560,8 +1554,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                         &mut extra_state_stack,
                         Some((node, NonZeroUsize::new(len).unwrap())),
                         P::TermClass::ERROR,
-                    ) == Some(true)
-                    {
+                    ) {
                         return true;
                     } else {
                         len -= 1;
@@ -1579,7 +1572,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
 
             // check root node
             extra_state_stack.clear();
-            self.can_feed_impl(&mut extra_state_stack, None, P::TermClass::ERROR) == Some(true)
+            self.can_feed_impl(&mut extra_state_stack, None, P::TermClass::ERROR)
         })
     }
 
@@ -1656,7 +1649,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 }
             };
             self.can_feed_impl(&mut extra_state_stack, node_and_len, P::TermClass::EOF)
-                == Some(true)
         })
     }
 }
