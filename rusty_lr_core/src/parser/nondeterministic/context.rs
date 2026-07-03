@@ -419,6 +419,7 @@ impl<
         node_idx: NodeId,
         reduce_token_count: usize,
         capacity: usize,
+        can_reuse_node_for_reduce: bool,
     ) -> NodeId
     where
         Data: Clone,
@@ -430,7 +431,7 @@ impl<
             // count <= node.len
             let i = node.len() - reduce_token_count;
 
-            if node.is_leaf() {
+            if can_reuse_node_for_reduce && node.is_leaf() {
                 let node = &mut self.node_mut(node_idx);
 
                 // truncate stacks to cut off reduce_token_count elements from back
@@ -532,7 +533,7 @@ impl<
         } else {
             let len = node.len();
             let parent = node.parent;
-            let node_stack = if node.is_leaf() {
+            let node_stack = if can_reuse_node_for_reduce && node.is_leaf() {
                 // move the values from current_node to reduce_args
 
                 let node = &mut self.node_mut(node_idx);
@@ -572,8 +573,12 @@ impl<
             #[cfg(not(feature = "tree"))]
             let (mut node_data_stack, mut node_location_stack) = node_stack;
 
-            let reduce_node_idx =
-                self.prepare_reduce_node(parent.unwrap(), reduce_token_count - len, capacity);
+            let reduce_node_idx = self.prepare_reduce_node(
+                parent.unwrap(),
+                reduce_token_count - len,
+                capacity,
+                can_reuse_node_for_reduce,
+            );
             let reduce_node = self.node_mut(reduce_node_idx);
             reduce_node.data_stack.append(&mut node_data_stack);
             reduce_node.location_stack.append(&mut node_location_stack);
@@ -592,6 +597,7 @@ impl<
         node: NodeId,
         term: &crate::TerminalSymbol<P::Term>,
         shift: &mut bool,
+        can_reuse_node_for_reduce: bool,
         userdata: &mut Data::UserData,
     ) -> Result<NodeId, Data::ReduceActionError>
     where
@@ -604,7 +610,7 @@ impl<
         let count = rule.len;
         let mut new_location = Data::Location::new(self.location_iter(node), count);
 
-        let node_to_shift = self.prepare_reduce_node(node, count, count);
+        let node_to_shift = self.prepare_reduce_node(node, count, count, can_reuse_node_for_reduce);
 
         let state = self.state(node_to_shift);
         let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(state, rule.lhs) else {
@@ -937,19 +943,16 @@ impl<
                 let mut pass = shift.is_some();
                 let mut branch_userdata = userdata.clone();
 
-                // in `self.reduce()`, it will delete the node if it is leaf node.
-                // but there are multiple reduce actions for this node and also shift action,
-                // so we need to prevent this node from being cleared.
-                // force this node as non-leaf if it is not in the last reduce action, or there is a shift action left.
-                let prevent_leaf = idx < l - 1 || shift.is_some();
-                if prevent_leaf {
-                    self.node_mut(node).child_count += 1;
-                }
+                // The current node may still be needed by later reduce alternatives
+                // or by the shift branch, so only the last reduce without a pending
+                // shift is allowed to reuse it in-place.
+                let can_reuse_node_for_reduce = idx == l - 1 && shift.is_none();
                 match self.reduce(
                     reduce_rule.into_usize(),
                     node,
                     &term,
                     &mut pass,
+                    can_reuse_node_for_reduce,
                     &mut branch_userdata,
                 ) {
                     Ok(next_node) => {
@@ -976,12 +979,6 @@ impl<
                         shift_ |= pass;
                         self.reduce_errors.push(err);
                     }
-                }
-
-                if prevent_leaf {
-                    // if there are more reduce_rule left, or there is shift action,
-                    // add child to this node to prevent it from being cleared (as leaf)
-                    self.node_mut(node).child_count -= 1;
                 }
             }
             // if every reduce action revoked shift,
