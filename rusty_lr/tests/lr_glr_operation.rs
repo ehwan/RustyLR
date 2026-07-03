@@ -39,6 +39,12 @@ mod deterministic_precedence {
     }
 
     #[test]
+    fn deterministic_state_stack_starts_at_virtual_start_branch() {
+        let ctx = ExprContext::new(Vec::new());
+        assert_eq!(ctx.state_stack().count(), 1);
+    }
+
+    #[test]
     fn precedence_and_associativity_drive_deterministic_lr_reductions() {
         assert_eq!(parse("2+3*4+5").0, 19);
         assert_eq!(parse("2^3^2").0, 512);
@@ -295,6 +301,16 @@ mod glr_ambiguous_concatenation {
         results.sort();
 
         assert_eq!(results, ["((aa)a)", "(a(aa))"]);
+    }
+
+    #[test]
+    fn glr_state_stack_reporting_starts_at_virtual_start_branch() {
+        let ctx = SContext::with_default_userdata();
+        let counts = ctx
+            .state_stacks()
+            .map(|state_stack| state_stack.count())
+            .collect::<Vec<_>>();
+        assert_eq!(counts, [1]);
     }
 
     #[test]

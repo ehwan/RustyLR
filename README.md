@@ -258,7 +258,7 @@ context.can_feed(&token);  // Checks if a terminal can be fed next
 println!("{:?}", context); // Prints debugging state information
 ```
 
-`Debug` for a context reports parser-state data such as state stacks, semantic-value stacks, and user data. In GLR mode, this is grouped by active branch. With the `tree` feature enabled, syntax trees are available through the explicit `to_tree_list()` and `to_tree_lists()` inspection APIs.
+`Debug` for a context reports parser-state data such as state stacks, semantic-value stacks, and user data. The root parser state is implicit; reported state stacks begin at the selected start branch. In GLR mode, this is grouped by active branch. With the `tree` feature enabled, syntax trees are available through the explicit `to_tree_list()` and `to_tree_lists()` inspection APIs.
 
 ---
 

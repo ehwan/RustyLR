@@ -408,7 +408,7 @@ impl<
     pub fn state_stacks(&self) -> impl Iterator<Item = impl Iterator<Item = usize> + '_> + '_ {
         self.current_branches
             .iter()
-            .map(move |branch| self.state_iter(branch.node).chain(std::iter::once(0)))
+            .map(move |branch| self.state_iter(branch.node))
     }
 
     /// From `node`, collect `reduce_token_count` number of tokens for reduce_action.
@@ -1713,8 +1713,7 @@ where
             .map(|(index, branch)| {
                 let node = branch.node;
                 let userdata = &branch.userdata;
-                let mut state_stack: Vec<_> =
-                    self.state_iter(node).chain(std::iter::once(0)).collect();
+                let mut state_stack: Vec<_> = self.state_iter(node).collect();
                 state_stack.reverse();
                 let mut data_stack: Vec<_> = self.data_iter(node).collect();
                 data_stack.reverse();

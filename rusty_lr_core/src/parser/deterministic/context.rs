@@ -44,11 +44,11 @@ impl<
 > Context<P, Data, Start, StateIndex>
 {
     /// Create a new context.
-    /// The state stack is initialized with the root state and the selected start state.
+    /// The state stack is initialized with the selected start state.
     pub fn new(userdata: Data::UserData) -> Self {
         P::__assert_rusty_lr_parser_version_compatible();
         let mut ctx = Context {
-            state_stack: vec![StateIndex::from_usize_unchecked(0)],
+            state_stack: Vec::new(),
 
             data_stack: Vec::new(),
             location_stack: Vec::new(),
@@ -89,15 +89,11 @@ impl<
         }
     }
     /// Create a new context with given capacity of `state_stack` and `data_stack`.
-    /// The state stack is initialized with the root state and the selected start state.
+    /// The state stack is initialized with the selected start state.
     pub fn with_capacity(capacity: usize, userdata: Data::UserData) -> Self {
         P::__assert_rusty_lr_parser_version_compatible();
-        let mut state_stack = Vec::with_capacity(capacity);
-        state_stack.push(
-            StateIndex::from_usize_unchecked(0), // root state
-        );
         let mut ctx = Context {
-            state_stack,
+            state_stack: Vec::with_capacity(capacity),
 
             data_stack: Vec::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
@@ -136,6 +132,22 @@ impl<
     /// Mutably borrow the user data owned by this context as an iterator.
     pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
         std::iter::once(&mut self.userdata)
+    }
+
+    fn state_from_len(&self, stack_len: usize) -> usize {
+        if stack_len == 0 {
+            0
+        } else {
+            self.state_stack[stack_len - 1].into_usize()
+        }
+    }
+
+    fn simulated_state(&self, extra_state_stack: &[StateIndex], stack_len: usize) -> usize {
+        extra_state_stack
+            .last()
+            .copied()
+            .map(Index::into_usize)
+            .unwrap_or_else(|| self.state_from_len(stack_len))
     }
 
     /// End this context and pop the value of the start symbol from the data stack.
@@ -181,7 +193,7 @@ impl<
         let mut extra_state_stack = Vec::new();
 
         self.can_feed_impl(
-            self.state_stack.len() - 1,
+            self.state_stack.len(),
             &mut extra_state_stack,
             P::TermClass::EOF,
         )
@@ -190,9 +202,10 @@ impl<
     /// Get current state index
     #[inline]
     pub fn state(&self) -> usize {
-        self.state_stack.last().unwrap().into_usize()
+        self.state_from_len(self.state_stack.len())
     }
-    /// Get iterator of state stack
+    /// Get iterator of state stack.
+    /// The implicit root state is not included.
     pub fn state_stack(&self) -> impl Iterator<Item = usize> + '_ {
         self.state_stack.iter().map(|s| s.into_usize())
     }
@@ -225,7 +238,7 @@ impl<
         let mut extra_state_stack = Vec::new();
         self.expected_token_impl(
             &mut extra_state_stack,
-            self.state_stack.len() - 1,
+            self.state_stack.len(),
             &mut terms,
             &mut nonterms,
         );
@@ -260,11 +273,7 @@ impl<
         P::TermClass: Ord,
         P::NonTerm: Ord,
     {
-        let state = extra_state_stack
-            .last()
-            .copied()
-            .unwrap_or_else(|| self.state_stack[stack_len])
-            .into_usize();
+        let state = self.simulated_state(extra_state_stack, stack_len);
 
         terms.extend(self.tables.expected_shift_term(state));
         nonterms.extend(self.tables.expected_shift_nonterm(state));
@@ -283,11 +292,7 @@ impl<
             } else {
                 extra_state_stack[..extra_state_stack.len() - tokens_len].to_vec()
             };
-            let state = extra_state_stack
-                .last()
-                .copied()
-                .unwrap_or_else(|| self.state_stack[stack_len])
-                .into_usize();
+            let state = self.simulated_state(&extra_state_stack, stack_len);
             if let Some(next_state) = self.tables.shift_goto_nonterm(state, nonterm) {
                 extra_state_stack.push(next_state.state);
                 self.expected_token_impl(&mut extra_state_stack, stack_len, terms, nonterms);
@@ -344,7 +349,7 @@ impl<
                             extra_state_stack.clear();
 
                             if self.can_feed_impl(
-                                self.state_stack.len() - pop_count - 1,
+                                self.state_stack.len() - pop_count,
                                 &mut extra_state_stack,
                                 P::TermClass::ERROR,
                             ) {
@@ -369,8 +374,7 @@ impl<
                     Data::Location::new(self.location_stack.iter().rev(), pop_count);
                 self.location_stack
                     .truncate(self.location_stack.len() - pop_count);
-                self.data_stack
-                    .truncate(self.state_stack.len() - pop_count - 1);
+                self.data_stack.truncate(self.data_stack.len() - pop_count);
                 self.state_stack
                     .truncate(self.state_stack.len() - pop_count);
 
@@ -389,9 +393,7 @@ impl<
                         // try shift given term again
                         // to check if the given terminal should be merged with `error` token
                         // or it can be shift right after the error token
-                        if let Some(next_state) = self
-                            .tables
-                            .shift_goto_class(self.state_stack.last().unwrap().into_usize(), class)
+                        if let Some(next_state) = self.tables.shift_goto_class(self.state(), class)
                         {
                             #[cfg(feature = "tree")]
                             self.tree_stack
@@ -444,7 +446,7 @@ impl<
         use crate::Location;
 
         let shift_to = loop {
-            let state = self.state_stack.last().unwrap().into_usize();
+            let state = self.state();
 
             let (shift, reduce) = match self.tables.term_action(state, class) {
                 Some(action) => (action.shift(), action.reduce()),
@@ -464,14 +466,13 @@ impl<
                 let mut new_location =
                     Data::Location::new(self.location_stack.iter().rev(), tokens_len);
 
-                let Some(next_nonterm_shift) = self
-                    .tables
-                    .shift_goto_nonterm(self.state_stack.last().unwrap().into_usize(), rule.lhs)
+                let Some(next_nonterm_shift) =
+                    self.tables.shift_goto_nonterm(self.state(), rule.lhs)
                 else {
                     unreachable!(
                         "Failed to shift nonterminal: {:?} in state {}",
                         rule.lhs,
-                        self.state_stack.last().unwrap().into_usize()
+                        self.state()
                     );
                 };
 
@@ -565,7 +566,7 @@ impl<
         let mut extra_state_stack = Vec::new();
         let class = P::TermClass::from_term(term);
 
-        self.can_feed_impl(self.state_stack.len() - 1, &mut extra_state_stack, class)
+        self.can_feed_impl(self.state_stack.len(), &mut extra_state_stack, class)
     }
 
     /// Check if current context can enter panic mode
@@ -577,7 +578,7 @@ impl<
 
         let mut extra_state_stack = Vec::new();
         let error = P::TermClass::ERROR;
-        let mut stack_len = self.state_stack.len() - 1;
+        let mut stack_len = self.state_stack.len();
 
         loop {
             match self.can_feed_impl(stack_len, &mut extra_state_stack, error) {
@@ -601,11 +602,7 @@ impl<
         class: P::TermClass,
     ) -> bool {
         let shift_to = loop {
-            let state = extra_state_stack
-                .last()
-                .copied()
-                .unwrap_or_else(|| self.state_stack[stack_len])
-                .into_usize();
+            let state = self.simulated_state(extra_state_stack, stack_len);
 
             let (shift, reduce) = match self.tables.term_action(state, class) {
                 Some(action) => (action.shift(), action.reduce()),
@@ -630,8 +627,8 @@ impl<
                 let last_state = extra_state_stack
                     .last()
                     .copied()
-                    .unwrap_or_else(|| self.state_stack[stack_len])
-                    .into_usize();
+                    .map(Index::into_usize)
+                    .unwrap_or_else(|| self.state_from_len(stack_len));
                 if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.lhs) {
                     extra_state_stack.push(next_state_id.state);
                 } else {
@@ -641,8 +638,8 @@ impl<
                         extra_state_stack
                             .last()
                             .copied()
-                            .unwrap_or_else(|| self.state_stack[stack_len])
-                            .into_usize()
+                            .map(Index::into_usize)
+                            .unwrap_or_else(|| self.state_from_len(stack_len))
                     );
                 }
             } else {

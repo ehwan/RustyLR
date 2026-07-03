@@ -340,6 +340,8 @@ RustyLR generates a `<Start>Context` for every start symbol, including grammars 
 
 Generated contexts implement `Clone` when the generated semantic-value storage and user data satisfy the required `Clone` bounds. Token values and non-terminal production values stored by the parser must implement `Clone` only when cloning contexts or using parser modes that clone runtime branches.
 
+Context state-stack inspection treats the root parser state as implicit. The reported stack begins with the internal start-branch marker for the selected `%start`.
+
 ### Multiple Start Symbols
 
 You can define multiple start symbols by writing multiple `%start` directives:

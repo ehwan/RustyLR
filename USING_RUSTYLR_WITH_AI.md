@@ -116,6 +116,7 @@ Before implementing:
 - Identify the token type the user's lexer will produce.
 - Decide the start symbol and semantic return type.
 - Use the generated `<Start>Context` as the parser context; it handles initialization and returns the typed start value.
+- Treat the root parser state as implicit when inspecting context state stacks; reported stacks begin at the selected start branch.
 - Ensure token values and semantic return values stored by the parser implement `Clone` when the context is cloned or GLR branch-local parsing is used; user data must also implement `Clone` in those cases.
 - Put Rust imports, token definitions, AST definitions, and helper types above `%%`.
 - Put `%tokentype`, `%start`, `%token`, precedence directives, and productions below `%%`.

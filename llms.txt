@@ -27,7 +27,7 @@ Generated `<Start>Context` types are the normal parser contexts downstream code 
 
 Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone` when cloning contexts or using GLR branch-local user data; user data must also implement `Clone` in those cases.
 
-Context `Debug` output reports parser stack state and user data; GLR output is grouped by active branch. Use the explicit tree APIs for syntax-tree inspection when the `tree` feature is enabled.
+Context `Debug` output reports parser stack state and user data; the root parser state is implicit, and GLR output is grouped by active branch. Use the explicit tree APIs for syntax-tree inspection when the `tree` feature is enabled.
 
 In GLR grammars, RustyLR may expand safe, unobserved auto-generated `P?` occurrences when their empty branch would otherwise form a zero-consuming reduce cycle. Unexpandable nullable cycles are reported as generation errors with rewrite guidance.
 
