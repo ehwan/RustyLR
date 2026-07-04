@@ -110,6 +110,8 @@ fn parse(tokens: impl IntoIterator<Item = parser::Token>) -> Result<i64, String>
 }
 ```
 
+Feed failures have two main runtime causes. `NoAction` means the CFG cannot consume the lookahead terminal, leaves the parser stack unchanged, and is the only failure kind that can enter panic-mode recovery. `ReduceAction` means the terminal was grammatically feedable, but runtime execution failed.
+
 ## Agent Checklist
 
 Before implementing:
@@ -129,6 +131,7 @@ While implementing:
 - Use `%left`, `%right`, or `%precedence` before changing grammar shape solely to fix expression conflicts.
 - Use the `error` terminal for recovery points such as delimiters, statements, or object members.
 - Include `error` in precedence declarations if recovery productions introduce a shift/reduce conflict.
+- Treat reduce-action `Err` values as semantic failures, not recovery triggers. In GLR mode, a successful feed may still return branch errors through its success value when other branches were pruned.
 - Keep generated parser files committed only if the project convention does so.
 
 When debugging:

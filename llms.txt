@@ -25,6 +25,10 @@ RustyLR targets Rust 2024 and requires Rust 1.85 or newer.
 
 Generated `<Start>Context` types are the normal parser contexts downstream code should use. They initialize parsing for the selected start symbol and return the typed start value from `accept()` or `accept_all()`.
 
+Feed failures have two main runtime causes. `NoAction` means the CFG cannot consume the lookahead terminal, leaves the parser stack unchanged, and is the only failure kind that can enter panic-mode recovery. `ReduceAction` means the terminal was grammatically feedable, but runtime execution failed.
+
+Reduce-action errors are semantic failures, not panic-mode recovery triggers. GLR feed success values may contain branch errors when one branch survives and sibling branches are pruned.
+
 Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone` when cloning contexts or using GLR branch-local user data; user data must also implement `Clone` in those cases.
 
 Context `Debug` output reports parser stack state and user data; the root parser state is implicit, and GLR output is grouped by active branch. Use the explicit tree APIs for syntax-tree inspection when the `tree` feature is enabled.
