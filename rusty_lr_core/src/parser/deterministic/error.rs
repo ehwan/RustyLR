@@ -17,14 +17,6 @@ pub struct ReduceActionError<Term, Location, Source> {
     pub source: Source,
 }
 
-#[derive(Clone, Debug)]
-pub struct NoPrecedenceError<Term, Location> {
-    pub term: TerminalSymbol<Term>,
-    pub location: Location,
-    pub state: usize,
-    pub rule: usize,
-}
-
 /// Error type for feed()
 #[derive(Clone, Debug)]
 pub enum ParseError<Term, Location, ReduceAction> {
@@ -33,10 +25,6 @@ pub enum ParseError<Term, Location, ReduceAction> {
 
     /// Error from reduce action.
     ReduceAction(ReduceActionError<Term, Location, ReduceAction>),
-
-    /// Rule index when shift/reduce conflict occur with no shift/reduce precedence defined.
-    /// This is same as when setting %nonassoc in Bison.
-    NoPrecedence(NoPrecedenceError<Term, Location>),
 }
 
 impl<Term, Location, ReduceAction> ParseError<Term, Location, ReduceAction> {
@@ -44,7 +32,6 @@ impl<Term, Location, ReduceAction> ParseError<Term, Location, ReduceAction> {
         match self {
             ParseError::NoAction(err) => &err.location,
             ParseError::ReduceAction(err) => &err.location,
-            ParseError::NoPrecedence(err) => &err.location,
         }
     }
 
@@ -52,7 +39,6 @@ impl<Term, Location, ReduceAction> ParseError<Term, Location, ReduceAction> {
         match self {
             ParseError::NoAction(err) => &err.term,
             ParseError::ReduceAction(err) => &err.term,
-            ParseError::NoPrecedence(err) => &err.term,
         }
     }
 
@@ -60,7 +46,6 @@ impl<Term, Location, ReduceAction> ParseError<Term, Location, ReduceAction> {
         match self {
             ParseError::NoAction(err) => err.state,
             ParseError::ReduceAction(err) => err.state,
-            ParseError::NoPrecedence(err) => err.state,
         }
     }
 }
@@ -81,9 +66,6 @@ where
                     "ReduceAction: {}, State: {}\nSource: {}",
                     err.term, err.state, err.source
                 )
-            }
-            ParseError::NoPrecedence(err) => {
-                write!(f, "NoPrecedence: {}, State: {}", err.rule, err.state)
             }
         }
     }

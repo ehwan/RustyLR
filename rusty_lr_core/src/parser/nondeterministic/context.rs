@@ -3,6 +3,7 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::NodeId;
 use super::ParseError;
+use super::error::FeedSuccess;
 
 use crate::Location;
 use crate::TerminalSymbol;
@@ -91,6 +92,15 @@ struct Branch<UserData> {
     userdata: UserData,
 }
 
+/// Branch state returned when a GLR feed path reaches no terminal shift.
+///
+/// The caller only needs the graph node and user data to keep or discard that branch; the lookahead
+/// terminal and location are owned by the failed attempt and do not need to be returned.
+struct UnshiftedBranch<UserData> {
+    node: NodeId,
+    userdata: UserData,
+}
+
 impl<UserData> Branch<UserData> {
     fn new(node: NodeId, userdata: UserData) -> Self {
         Branch { node, userdata }
@@ -122,9 +132,8 @@ pub struct Context<
     /// But we don't want to reallocate every `feed` call
     pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
 
-    /// For temporary use.
-    /// store rule indices where shift/reduce conflicts occured with no precedence defined.
-    pub(crate) no_precedences: Vec<usize>,
+    // Future optimization point: GLR can also reuse simulation state stacks, but branch-local
+    // recursion and cloned alternatives need a separate scratch ownership strategy.
     /// Decoded parser tables shared by every active GLR branch.
     ///
     /// Branches clone stack/userdata state, but they all read the same immutable runtime tables.
@@ -151,7 +160,6 @@ impl<
             next_branches: Default::default(),
             reduce_errors: Default::default(),
             fallback_branches: Default::default(),
-            no_precedences: Default::default(),
             tables: P::get_tables(),
             _phantom: std::marker::PhantomData,
         };
@@ -873,7 +881,10 @@ impl<
     pub fn feed(
         &mut self,
         term: Data::Term,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<
+        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -906,15 +917,7 @@ impl<
         class: P::TermClass,
         location: Data::Location,
         userdata: Data::UserData,
-    ) -> Result<
-        (),
-        (
-            NodeId,
-            TerminalSymbol<P::Term>,
-            Data::Location,
-            Data::UserData,
-        ),
-    >
+    ) -> Result<(), UnshiftedBranch<Data::UserData>>
     where
         Data: Clone,
         Data::UserData: Clone,
@@ -934,7 +937,7 @@ impl<
 
             let mut shifted = false;
             let mut reduced_node = node;
-            let mut reduced_userdata = userdata.clone();
+            let mut reduced_userdata = None;
 
             // Each GLR branch receives its own user data copy before running reduce actions.
             let mut shift_ = false;
@@ -969,9 +972,9 @@ impl<
                             Ok(_) => {
                                 shifted = true;
                             }
-                            Err((reduced_node_, _, _, userdata_)) => {
-                                reduced_node = reduced_node_;
-                                reduced_userdata = userdata_;
+                            Err(unshifted) => {
+                                reduced_node = unshifted.node;
+                                reduced_userdata = Some(unshifted.userdata);
                             }
                         }
                     }
@@ -1040,7 +1043,10 @@ impl<
             } else if shifted {
                 Ok(())
             } else {
-                Err((reduced_node, term, location, reduced_userdata))
+                Err(UnshiftedBranch {
+                    node: reduced_node,
+                    userdata: reduced_userdata.unwrap_or(userdata),
+                })
             }
         } else if let Some(shift) = shift_state {
             let node_ = self.node_mut(node);
@@ -1077,7 +1083,7 @@ impl<
             Ok(())
         } else {
             // no reduce, no shift
-            Err((node, term, location, userdata))
+            Err(UnshiftedBranch { node, userdata })
         }
     }
     fn panic_mode(
@@ -1085,8 +1091,7 @@ impl<
         mut node: NodeId,
         userdata: Data::UserData,
         extra_state_stack: &mut Vec<StateIndex>,
-    ) -> Data::Location
-    where
+    ) where
         Data: Clone,
         Data::UserData: Clone,
         P::Term: Clone,
@@ -1100,10 +1105,8 @@ impl<
         let pop_count = loop {
             let node_ = self.node(node);
             if !node_.is_leaf() {
-                let loc = error_location_preserved
-                    .unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
                 self.try_remove_node(node);
-                return loc;
+                return;
             }
 
             let mut pop_count = 0;
@@ -1143,14 +1146,11 @@ impl<
                     Data::Location::new(self.location_iter(node), pop_count)
                 });
 
-                let loc = error_location_preserved
-                    .clone()
-                    .unwrap_or_else(|| Data::Location::new(self.location_iter(node), 0));
                 if let Some(parent) = self.try_remove_node(node) {
                     node = parent;
                     continue;
                 } else {
-                    return loc;
+                    return;
                 }
             } else {
                 break pop_count;
@@ -1179,22 +1179,30 @@ impl<
             node,
             TerminalSymbol::Error,
             P::TermClass::ERROR,
-            error_location.clone(),
+            error_location,
             userdata,
         ) {
             Ok(()) => {}
-            Err((err_node, _, _, _)) => {
-                self.try_remove_node(err_node);
+            Err(unshifted) => {
+                self.try_remove_node(unshifted.node);
             } // other errors
         }
-        error_location
     }
     /// Feed one terminal with location to parser, and update state stack.
+    ///
+    /// Each active GLR branch is first checked with the same CFG simulation used by `can_feed`.
+    /// Branches rejected by that simulation are `NoAction` branches and are the only branches
+    /// eligible for panic-mode recovery. If at least one branch can grammatically shift the
+    /// terminal, recovery is not entered; failed sibling branches are returned in
+    /// `FeedSuccess::errors`.
     pub fn feed_location(
         &mut self,
         term: P::Term,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<
+        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1204,22 +1212,42 @@ impl<
         use crate::Location;
 
         self.reduce_errors.clear();
-        self.no_precedences.clear();
         self.fallback_branches.clear();
         self.next_branches.clear();
 
         let class = P::TermClass::from_term(&term);
 
         let mut current_branches = std::mem::take(&mut self.current_branches);
+        let mut feedable_branch_seen = false;
         for Branch { node, userdata } in current_branches.drain(..) {
-            if let Err((node, _, _, userdata)) = self.feed_location_impl(
-                node,
-                TerminalSymbol::Terminal(term.clone()),
-                class,
-                location.clone(),
-                userdata,
-            ) {
-                // store to fallback nodes in case of all nodes failed to shift
+            // Classify this branch before mutating the graph-structured stack. Only branches that
+            // fail this CFG simulation are considered `NoAction` branches.
+            let mut extra_state_stack = Vec::new();
+            let node_and_len = {
+                let node_ = self.node(node);
+                if node_.len() == 0 {
+                    None
+                } else {
+                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
+                }
+            };
+
+            if self.can_feed_impl(&mut extra_state_stack, node_and_len, class) {
+                feedable_branch_seen = true;
+
+                // The CFG admits this terminal on this branch. From here on, failures are caused
+                // by semantic reduce actions or runtime conflict decisions, so they must not
+                // trigger error recovery.
+                let _ = self.feed_location_impl(
+                    node,
+                    TerminalSymbol::Terminal(term.clone()),
+                    class,
+                    location.clone(),
+                    userdata,
+                );
+            } else {
+                // This branch cannot grammatically shift the lookahead. Keep it only as a
+                // recovery candidate in case every active branch is also `NoAction`.
                 self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
@@ -1230,6 +1258,19 @@ impl<
         // check for panic mode
         // and restore nodes to original state from fallback_branches
         if self.next_branches.is_empty() {
+            if feedable_branch_seen {
+                // A branch was grammatically able to shift the terminal, but failed while
+                // committing semantic/runtime actions. That is not syntax recovery input.
+                std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+
+                return Err(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states: self.states().collect(),
+                });
+            }
+
             // early return if `error` token is not used in the grammar
             if !P::ERROR_USED {
                 std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
@@ -1238,52 +1279,30 @@ impl<
                     term: TerminalSymbol::Terminal(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
                 });
             }
 
             let mut fallback_branches = std::mem::take(&mut self.fallback_branches);
-            let root_userdata = fallback_branches
-                .first()
-                .map(|branch| branch.userdata.clone());
             let mut extra_state_stack = Vec::new();
-            let mut error_location = if let Some(first_branch) = fallback_branches.first() {
-                Data::Location::new(self.location_iter(first_branch.node), 0)
-            } else {
-                location.clone()
-            };
             // try enter panic mode and store error nodes to next_branches
             for Branch { node, userdata } in fallback_branches.drain(..) {
-                error_location = self.panic_mode(node, userdata, &mut extra_state_stack);
+                // GLR recovery only searches concrete branch stacks. The implicit root state 0 is
+                // before the virtual start symbol and cannot accept a synthetic `error` token.
+                self.panic_mode(node, userdata, &mut extra_state_stack);
             }
             // put back for reuse allocated memory
             self.fallback_branches = fallback_branches;
 
-            if self.next_branches.is_empty() {
-                // for-loop above doesn't check for root state (0).
-                // check for 0 state here
-                if self.tables.can_accept_error(0) == crate::TriState::True {
-                    if let Some(userdata) = root_userdata {
-                        // all nodes were deleted, so create new
-                        let node = self.new_node();
-                        if let Err(_) = self.feed_location_impl(
-                            node,
-                            TerminalSymbol::Error,
-                            P::TermClass::ERROR,
-                            error_location,
-                            userdata,
-                        ) {
-                            return Err(ParseError {
-                                term: TerminalSymbol::Terminal(term),
-                                location,
-                                reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                                no_precedences: std::mem::take(&mut self.no_precedences),
-                                states: self.states().collect(),
-                            });
-                        }
-                    }
-                }
+            if !self.reduce_errors.is_empty() {
+                // Shifting the synthetic `error` token may execute reduce actions. If one fails,
+                // recovery itself failed semantically and must be reported.
+                return Err(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states: self.states().collect(),
+                });
             }
 
             // if next_node is still empty, then no panic mode was entered, this is an error
@@ -1293,7 +1312,6 @@ impl<
                     term: TerminalSymbol::Terminal(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
                 })
             } else {
@@ -1340,11 +1358,31 @@ impl<
                     }
                 }
                 self.next_branches = next_branches;
-                Ok(())
+                // Recovery consumed or merged the lookahead. This is a successful feed, and the
+                // original `NoAction` branches have been transformed into recovery branches.
+                Ok(FeedSuccess { errors: None })
             }
         } else {
+            // At least one original branch accepted the terminal. Report sibling branch failures
+            // to callers without treating this feed as fatal.
+            let errors = if self.fallback_branches.is_empty() && self.reduce_errors.is_empty() {
+                None
+            } else {
+                let states = self
+                    .fallback_branches
+                    .iter()
+                    .map(|branch| self.state(branch.node))
+                    .collect();
+                self.fallback_branches.clear();
+                Some(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states,
+                })
+            };
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
-            Ok(())
+            Ok(FeedSuccess { errors })
         }
     }
     /// Feed one terminal with location to parser, and update state stack.
@@ -1570,9 +1608,8 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 }
             }
 
-            // check root node
-            extra_state_stack.clear();
-            self.can_feed_impl(&mut extra_state_stack, None, P::TermClass::ERROR)
+            // State 0 is the implicit root before virtual start and cannot accept `error`.
+            false
         })
     }
 
@@ -1589,7 +1626,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         use crate::location::Location;
 
         self.reduce_errors.clear();
-        self.no_precedences.clear();
         self.fallback_branches.clear();
         self.next_branches.clear();
 
@@ -1602,14 +1638,15 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         let mut current_branches = std::mem::take(&mut self.current_branches);
         for Branch { node, userdata } in current_branches.drain(..) {
             let node_eof_location = Data::Location::new(self.location_iter(node), 0);
-            if let Err((node, _, _, userdata)) = self.feed_location_impl(
+            if let Err(unshifted) = self.feed_location_impl(
                 node,
                 TerminalSymbol::Eof,
                 P::TermClass::EOF,
                 node_eof_location,
                 userdata,
             ) {
-                self.fallback_branches.push(Branch::new(node, userdata));
+                self.fallback_branches
+                    .push(Branch::new(unshifted.node, unshifted.userdata));
             }
         }
         self.current_branches = current_branches;
@@ -1624,7 +1661,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 term: TerminalSymbol::Eof,
                 location: eof_location,
                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                no_precedences: std::mem::take(&mut self.no_precedences),
                 states: self.states().collect(),
             })
         } else {
@@ -1687,7 +1723,6 @@ where
             next_branches: Default::default(),
             reduce_errors: Default::default(),
             fallback_branches: Default::default(),
-            no_precedences: Default::default(),
             tables: self.tables,
             _phantom: std::marker::PhantomData,
         }

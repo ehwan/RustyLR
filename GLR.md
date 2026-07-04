@@ -97,6 +97,8 @@ Initialize the generated context with initial user data (or `with_default_userda
 
 In GLR mode, user data is branch-local. When the parser forks because of a conflict, the current semantic stack and user data are cloned, and each resulting branch owns and mutates its own `UserData` value independently. Token values, semantic return values, and user data must therefore implement `Clone` for GLR branch-local parsing. Results returned from `accept_all()` include the final user data for each successful branch.
 
+`NoAction` is the only feed failure that means the CFG cannot consume the lookahead terminal. `ReduceAction` means the terminal was grammatically feedable, but a runtime semantic action failed. GLR recovery is entered only when every active branch fails with `NoAction`; if at least one branch survives, the feed succeeds and any sibling branch failures are returned in `FeedSuccess::errors`.
+
 For example, this ambiguous grammar creates two branches for the same input terminal symbol. Each branch mutates its own cloned `Vec<&'static str>`:
 
 ```rust
@@ -143,15 +145,26 @@ fn main() {
     // Feed tokens to the GLR parser
     for token in input {
         // basic feeding:
-        if let Err(e) = context.feed(token) {
-            eprintln!("Fatal parse error: {}", e);
-            return;
+        match context.feed(token) {
+            Ok(success) => {
+                if let Some(branch_errors) = success.errors {
+                    eprintln!("Some GLR branches were pruned: {}", branch_errors);
+                }
+            }
+            Err(e) => {
+                eprintln!("Fatal parse error: {}", e);
+                return;
+            }
         }
 
         // or location-aware feeding (if %location is configured in the grammar):
         // let span = MySpan { start: ..., end: ... };
-        // if let Err(e) = context.feed_location(token, span) {
-        //     eprintln!("Fatal parse error: {}", e);
+        // if let Ok(success) = context.feed_location(token, span) {
+        //     if let Some(branch_errors) = success.errors {
+        //         eprintln!("Some GLR branches were pruned: {}", branch_errors);
+        //     }
+        // } else {
+        //     eprintln!("Fatal parse error");
         //     return;
         // }
     }
@@ -172,7 +185,8 @@ fn main() {
 
 ### Key API Components
 - **`EContext::new(userdata)`**: Initializes a new GLR state context with initial user data. Use `EContext::with_default_userdata()` when `UserData: Default`.
-- **`context.feed(token)`**: Feeds a token into all active parsing stacks.
-- **`context.feed_location(token, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar).
+- **`context.feed(token)`**: Feeds a token into all active parsing stacks and returns `FeedSuccess` when at least one branch survives.
+- **`context.feed_location(token, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar) and returns `FeedSuccess` when at least one branch survives.
+- **`FeedSuccess::errors`**: Optional branch-failure information from GLR branches pruned while the feed still succeeded.
 - **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns the first successful `(parse_result, userdata)` pair.
 - **`context.accept_all()`**: Finalizes parsing and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches.

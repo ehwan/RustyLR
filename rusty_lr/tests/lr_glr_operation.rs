@@ -376,4 +376,93 @@ mod reduce_action_errors {
         }
         assert!(too_large.accept().is_err());
     }
+
+    mod glr_recovery {
+        use rusty_lr::lr1;
+
+        // Keep optimization disabled so `Rejected` remains a distinct reduction that fails before
+        // the following terminal is shifted. This makes the recovery boundary observable.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %userdata Vec<&'static str>;
+            %error &'static str;
+            %start Item;
+
+            Item(char)
+                : Rejected 'y' {
+                    Rejected
+                }
+                | error 'y' {
+                    data.push("recovered");
+                    '?'
+                }
+                ;
+
+            Rejected(char): 'x' {
+                if true {
+                    return Err("rejected token");
+                }
+                'x'
+            };
+        }
+
+        #[test]
+        fn glr_reduce_action_error_does_not_enter_recovery_mode() {
+            let mut ctx = ItemContext::new(Vec::new());
+            ctx.feed('x').unwrap();
+
+            // `error 'y'` could recover from a grammatical `NoAction`, but the failing branch is
+            // grammatically valid and dies from a reduce-action error instead.
+            let err = ctx.feed('y').unwrap_err();
+
+            assert_eq!(err.reduce_action_errors, ["rejected token"]);
+            assert!(ctx.userdata_all().all(|userdata| userdata.is_empty()));
+        }
+    }
+
+    mod glr_partial_errors {
+        use rusty_lr::lr1;
+
+        // This grammar keeps one shift path alive while a competing reduce path fails
+        // semantically, exercising successful feeds with pruned-branch diagnostics.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %error &'static str;
+            %start S;
+
+            S(&'static str)
+                : A 'y' {
+                    "reduce path"
+                }
+                | 'x' 'y' {
+                    "shift path"
+                }
+                ;
+
+            A(char): 'x' {
+                if true {
+                    return Err("bad reduce path");
+                }
+                'x'
+            };
+        }
+
+        #[test]
+        fn glr_feed_success_reports_pruned_branch_errors() {
+            let mut ctx = SContext::with_default_userdata();
+            assert!(ctx.feed('x').unwrap().errors.is_none());
+
+            // Feeding `y` succeeds through the direct shift branch, while the reduce branch reports
+            // its semantic failure through `FeedSuccess::errors`.
+            let success = ctx.feed('y').unwrap();
+            let errors = success.errors.expect("reduce branch should be reported");
+
+            assert_eq!(errors.reduce_action_errors, ["bad reduce path"]);
+            assert_eq!(ctx.accept().unwrap(), ("shift path", ()));
+        }
+    }
 }

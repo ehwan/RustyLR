@@ -395,7 +395,9 @@ Expr: '{' Stmt* '}'
     ;
 ```
 
-The reserved terminal `error` is used to implement panic-mode recovery. When the parser encounters an unexpected token:
+The reserved terminal `error` is used to implement panic-mode recovery. Recovery is entered only for `NoAction`, which means the CFG cannot consume the lookahead terminal. `ReduceAction` means the terminal was grammatically feedable, but a runtime semantic action failed.
+
+When the parser encounters an unexpected token:
 1. **Pop Stack**: The parser pops states off the parser stack until it finds a state that can shift the `error` symbol. If no such state is found, parsing aborts immediately with a `ParseError::NoAction`.
 2. **Shift `error`**: The parser shifts the `error` symbol onto the stack. The initial span/location of the `error` token is set to the span of the popped tokens.
 3. **Handle Lookahead & Merge**: 
@@ -408,7 +410,7 @@ The reserved terminal `error` is used to implement panic-mode recovery. When the
 #### Notes
 - The `error` token does not carry a semantic value.
 - You can access the entire span of all discarded/merged tokens using the location binder `@error`.
-- In GLR mode, the parser will prefer non-error paths and only trigger error recovery if all other active branches fail.
+- In GLR mode, the parser will prefer non-error paths and only trigger error recovery if all active branches fail with `NoAction`.
 - **Comparison to Bison**: Unlike Bison, which runs a blocking pull-loop internally to discard tokens until it finds a synchronizing token, RustyLR integrates with a push-based model (`feed()`). If a token cannot follow `error`, RustyLR discards it and merges its location span into the `error` token's span, returning control to the caller. This enables reactive parsing and easy diagnostics via `@error` containing the full range of discarded tokens.
 
 ### Operator Precedence
@@ -461,6 +463,8 @@ Expr
 
 Defines a custom error type returned by reduce actions. If your reduce action returns a `Result`, returning an `Err(custom_error)` will stop execution (or prune the GLR branch) and bubble the error up wrapped in `ParseError::ReduceAction`.
 
+A reduce-action error is semantic failure, not a syntax `NoAction`. It does not enter panic-mode error recovery. In GLR mode, if another branch successfully shifts the same terminal, the feed succeeds and reports the pruned-branch error in the GLR feed success value.
+
 ## No Optimization
 
 ```
@@ -499,6 +503,8 @@ To feed locations, use `feed_location` instead of `feed`:
 ```rust
 context.feed_location(token, span);
 ```
+
+`NoAction` means the CFG cannot consume the lookahead terminal and leaves the parser stack unchanged. `ReduceAction` means the terminal was grammatically feedable, but runtime execution failed. Only `NoAction` can enter panic-mode recovery.
 
 Within reduce actions, access symbol spans using the `@` prefix:
 ```rust
