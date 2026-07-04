@@ -236,6 +236,16 @@ fn ident_to_keyword(ident: Ident) -> Option<Lexed> {
     }
 }
 
+fn feed_location(
+    context: &mut GrammarContext,
+    term: Lexed,
+    location: Location,
+) -> Result<(), ParseError> {
+    // The grammar lexer only needs fatal parse errors here. In GLR builds, successful feeds may
+    // carry pruned-branch diagnostics, but lexer fallback decisions are driven by `can_feed`.
+    context.feed_location(term, location).map(|_| ())
+}
+
 /// lex & feed stream to parser
 /// For '%' directives and 'Group' variants,
 /// First tries to feed the Compound token
@@ -252,13 +262,13 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                 match ident_to_keyword(ident.clone()) {
                     Some(keyword) => {
                         if context.can_feed(&keyword) {
-                            context.feed_location(keyword, location)?;
+                            feed_location(context, keyword, location)?;
                         } else {
-                            context.feed_location(Lexed::Ident(ident), location)?;
+                            feed_location(context, Lexed::Ident(ident), location)?;
                         }
                     }
                     _ => {
-                        context.feed_location(Lexed::Ident(ident), location)?;
+                        feed_location(context, Lexed::Ident(ident), location)?;
                     }
                 }
             }
@@ -267,21 +277,21 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                 let location = Location::Range(location, location + 1);
 
                 match punct.as_char() {
-                    ':' => context.feed_location(Lexed::Colon(punct), location)?,
-                    ';' => context.feed_location(Lexed::Semicolon(punct), location)?,
-                    '|' => context.feed_location(Lexed::Pipe(punct), location)?,
-                    '+' => context.feed_location(Lexed::Plus(punct), location)?,
-                    '*' => context.feed_location(Lexed::Star(punct), location)?,
-                    '?' => context.feed_location(Lexed::Question(punct), location)?,
-                    '^' => context.feed_location(Lexed::Caret(punct), location)?,
-                    '-' => context.feed_location(Lexed::Minus(punct), location)?,
-                    '=' => context.feed_location(Lexed::Equal(punct), location)?,
-                    '!' => context.feed_location(Lexed::Exclamation(punct), location)?,
-                    '.' => context.feed_location(Lexed::Dot(punct), location)?,
-                    '%' => context.feed_location(Lexed::Percent(punct), location)?,
-                    '$' => context.feed_location(Lexed::Dollar(punct), location)?,
-                    ',' => context.feed_location(Lexed::Comma(punct), location)?,
-                    _ => context.feed_location(Lexed::OtherPunct(punct), location)?,
+                    ':' => feed_location(context, Lexed::Colon(punct), location)?,
+                    ';' => feed_location(context, Lexed::Semicolon(punct), location)?,
+                    '|' => feed_location(context, Lexed::Pipe(punct), location)?,
+                    '+' => feed_location(context, Lexed::Plus(punct), location)?,
+                    '*' => feed_location(context, Lexed::Star(punct), location)?,
+                    '?' => feed_location(context, Lexed::Question(punct), location)?,
+                    '^' => feed_location(context, Lexed::Caret(punct), location)?,
+                    '-' => feed_location(context, Lexed::Minus(punct), location)?,
+                    '=' => feed_location(context, Lexed::Equal(punct), location)?,
+                    '!' => feed_location(context, Lexed::Exclamation(punct), location)?,
+                    '.' => feed_location(context, Lexed::Dot(punct), location)?,
+                    '%' => feed_location(context, Lexed::Percent(punct), location)?,
+                    '$' => feed_location(context, Lexed::Dollar(punct), location)?,
+                    ',' => feed_location(context, Lexed::Comma(punct), location)?,
+                    _ => feed_location(context, Lexed::OtherPunct(punct), location)?,
                 }
             }
             TokenTree::Group(group) => match group.delimiter() {
@@ -290,7 +300,7 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                     if context.can_feed(&token) {
                         let location = context.userdata_mut().span_manager.add_span(span);
                         let location = Location::Range(location, location + 1);
-                        context.feed_location(token, location)?;
+                        feed_location(context, token, location)?;
                     } else {
                         let Lexed::ParenGroup(group) = token else {
                             unreachable!();
@@ -304,7 +314,7 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                         let open_location = Location::Range(open_location, open_location + 1);
 
                         // feed the splitted tokens
-                        context.feed_location(Lexed::LParen, open_location)?;
+                        feed_location(context, Lexed::LParen, open_location)?;
                         feed_recursive(group.stream(), context)?;
 
                         let close_span = group.span_close();
@@ -313,21 +323,21 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                             .span_manager
                             .add_span(close_span.clone());
                         let close_location = Location::Range(close_location, close_location + 1);
-                        context.feed_location(Lexed::RParen, close_location)?;
+                        feed_location(context, Lexed::RParen, close_location)?;
                     }
                 }
                 Delimiter::Brace => {
                     let location = context.userdata_mut().span_manager.add_span(span);
                     let location = Location::Range(location, location + 1);
                     // for now, splitted for brace is not in syntax, so ignore it
-                    context.feed_location(Lexed::BraceGroup(group), location)?;
+                    feed_location(context, Lexed::BraceGroup(group), location)?;
                 }
                 Delimiter::Bracket => {
                     let token = Lexed::BracketGroup(group);
                     if context.can_feed(&token) {
                         let location = context.userdata_mut().span_manager.add_span(span);
                         let location = Location::Range(location, location + 1);
-                        context.feed_location(token, location)?;
+                        feed_location(context, token, location)?;
                     } else {
                         let Lexed::BracketGroup(group) = token else {
                             unreachable!();
@@ -339,7 +349,7 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                             .add_span(open_span.clone());
                         let open_location = Location::Range(open_location, open_location + 1);
                         // feed the splitted tokens
-                        context.feed_location(Lexed::LBracket, open_location)?;
+                        feed_location(context, Lexed::LBracket, open_location)?;
                         feed_recursive(group.stream(), context)?;
 
                         let close_span = group.span_close();
@@ -348,14 +358,14 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                             .span_manager
                             .add_span(close_span.clone());
                         let close_location = Location::Range(close_location, close_location + 1);
-                        context.feed_location(Lexed::RBracket, close_location)?;
+                        feed_location(context, Lexed::RBracket, close_location)?;
                     }
                 }
                 _ => {
                     let location = context.userdata_mut().span_manager.add_span(span);
                     let location = Location::Range(location, location + 1);
                     // for now, compound for nonegroup is not in syntax, so ignore it
-                    context.feed_location(Lexed::NoneGroup(group), location)?;
+                    feed_location(context, Lexed::NoneGroup(group), location)?;
                 }
             },
             TokenTree::Literal(literal) => {
@@ -379,7 +389,7 @@ pub fn feed_recursive(input: TokenStream, context: &mut GrammarContext) -> Resul
                 };
                 let location = context.userdata_mut().span_manager.add_span(span);
                 let location = Location::Range(location, location + 1);
-                context.feed_location(term, location)?
+                feed_location(context, term, location)?
             }
         };
     }

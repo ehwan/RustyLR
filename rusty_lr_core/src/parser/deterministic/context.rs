@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::BTreeSet;
 
 use super::ParseError;
@@ -12,6 +13,35 @@ use crate::parser::table::ParserTables;
 use crate::parser::terminalclass::TerminalClass;
 
 use crate::TerminalSymbol;
+
+/// One deterministic reduction captured during pre-feed simulation.
+///
+/// This stores the production and goto decision so the commit phase does not re-query the LR table
+/// for the same reduce step.
+struct PlannedReduction<NonTerm, StateIndex> {
+    rule_index: usize,
+    tokens_len: usize,
+    #[allow(dead_code)]
+    lhs: NonTerm,
+    next_nonterm_shift: crate::parser::table::ShiftTarget<StateIndex>,
+}
+
+/// Commit record produced by the deterministic pre-feed CFG simulation.
+///
+/// `feed_location` builds this before mutating semantic stacks. If terminal shift is impossible,
+/// no reduce action has run and the parser stack is left unchanged.
+struct FeedPlan<NonTerm, StateIndex> {
+    reductions: Vec<PlannedReduction<NonTerm, StateIndex>>,
+    terminal_shift: crate::parser::table::ShiftTarget<StateIndex>,
+}
+
+/// Minimal syntax failure captured by the simulation before the original terminal is moved.
+///
+/// Keeping only the failed state lets the caller build `NoAction` without cloning the terminal
+/// during planning.
+struct FeedPlanError {
+    state: usize,
+}
 
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<
@@ -30,6 +60,11 @@ pub struct Context<
     /// Keeping this reference in the context avoids repeated `Parser::get_tables()` calls in the
     /// token-feeding hot path.
     pub(crate) tables: &'static P::Tables,
+    /// Reusable simulation stack for deterministic pre-feed planning.
+    ///
+    /// `can_feed` only has `&self`, so this scratch buffer uses interior mutability to avoid
+    /// allocating a fresh `Vec` for each grammatical simulation.
+    pub(crate) feed_extra_state_stack: RefCell<Vec<StateIndex>>,
     /// Tree stack for tree representation of the parse.
     #[cfg(feature = "tree")]
     pub(crate) tree_stack: crate::tree::TreeList<Data::Term, Data::NonTerm>,
@@ -54,6 +89,7 @@ impl<
             location_stack: Vec::new(),
             userdata,
             tables: P::get_tables(),
+            feed_extra_state_stack: RefCell::new(Vec::new()),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -99,6 +135,7 @@ impl<
             location_stack: Vec::with_capacity(capacity),
             userdata,
             tables: P::get_tables(),
+            feed_extra_state_stack: RefCell::new(Vec::with_capacity(capacity)),
 
             #[cfg(feature = "tree")]
             tree_stack: crate::tree::TreeList::new(),
@@ -190,13 +227,8 @@ impl<
     }
 
     pub fn can_accept(&self) -> bool {
-        let mut extra_state_stack = Vec::new();
-
-        self.can_feed_impl(
-            self.state_stack.len(),
-            &mut extra_state_stack,
-            P::TermClass::EOF,
-        )
+        // EOF acceptance uses the same grammatical feed simulation as regular terminals.
+        self.plan_feed_location(P::TermClass::EOF).is_ok()
     }
 
     /// Get current state index
@@ -337,38 +369,31 @@ impl<
                     return Err(ParseError::NoAction(err));
                 }
 
-                let mut extra_state_stack = Vec::new();
-
                 use crate::TriState;
                 let mut pop_count = 0;
-                let mut found = false;
+                let mut error_plan = None;
                 for &s in self.state_stack.iter().rev() {
                     match self.tables.can_accept_error(s.into_usize()) {
                         TriState::False => {}
-                        TriState::Maybe => {
-                            extra_state_stack.clear();
-
-                            if self.can_feed_impl(
+                        TriState::Maybe | TriState::True => {
+                            // Reuse the same CFG simulation used by normal feeds when deciding
+                            // whether this stack prefix can actually shift the recovery token.
+                            if let Ok(plan) = self.plan_feed_location_from_stack_len(
                                 self.state_stack.len() - pop_count,
-                                &mut extra_state_stack,
                                 P::TermClass::ERROR,
                             ) {
-                                found = true;
+                                error_plan = Some(plan);
                                 break;
                             }
-                        }
-                        TriState::True => {
-                            found = true;
-                            break;
                         }
                     }
 
                     pop_count += 1;
                 }
 
-                if !found {
+                let Some(error_plan) = error_plan else {
                     return Err(ParseError::NoAction(err));
-                }
+                };
 
                 let error_location =
                     Data::Location::new(self.location_stack.iter().rev(), pop_count);
@@ -384,11 +409,7 @@ impl<
                     self.tree_stack.truncate(l);
                 }
 
-                match self.feed_location_impl(
-                    TerminalSymbol::Error,
-                    P::TermClass::ERROR,
-                    error_location,
-                ) {
+                match self.apply_feed_plan(error_plan, TerminalSymbol::Error, error_location) {
                     Ok(()) => {
                         // try shift given term again
                         // to check if the given terminal should be merged with `error` token
@@ -442,12 +463,62 @@ impl<
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
     {
+        // First build a complete grammatical feed plan. No semantic action runs until this
+        // succeeds, so late `NoAction` cannot leave partially reduced stacks behind.
+        let plan = match self.plan_feed_location(class) {
+            Ok(plan) => plan,
+            Err(err) => {
+                return Err(ParseError::NoAction(super::error::NoActionError {
+                    term,
+                    location,
+                    state: err.state,
+                }));
+            }
+        };
+        self.apply_feed_plan(plan, term, location)
+    }
+
+    /// Simulate the deterministic LR stack operations needed to feed one terminal.
+    ///
+    /// The returned plan is a commit log: every reduction records its production, pop length, and
+    /// non-terminal goto, followed by the final terminal shift. Returning `NoAction` means the
+    /// caller has not mutated parser state.
+    fn plan_feed_location(
+        &self,
+        class: P::TermClass,
+    ) -> Result<FeedPlan<P::NonTerm, StateIndex>, FeedPlanError> {
+        self.plan_feed_location_from_stack_len(self.state_stack.len(), class)
+    }
+
+    /// Build a feed plan against a retained prefix of the current state stack.
+    ///
+    /// Error recovery uses this to test candidate pop depths and then commit the selected `error`
+    /// token feed without repeating the table simulation.
+    fn plan_feed_location_from_stack_len(
+        &self,
+        stack_len: usize,
+        class: P::TermClass,
+    ) -> Result<FeedPlan<P::NonTerm, StateIndex>, FeedPlanError> {
+        let mut extra_state_stack = self.feed_extra_state_stack.borrow_mut();
+        extra_state_stack.clear();
+
+        self.plan_feed_location_with_extra_stack(stack_len, class, &mut extra_state_stack)
+    }
+
+    fn plan_feed_location_with_extra_stack(
+        &self,
+        mut stack_len: usize,
+        class: P::TermClass,
+        extra_state_stack: &mut Vec<StateIndex>,
+    ) -> Result<FeedPlan<P::NonTerm, StateIndex>, FeedPlanError> {
         use super::super::table::ReduceRules;
-        use crate::Location;
 
-        let shift_to = loop {
-            let state = self.state();
+        let mut reductions = Vec::new();
 
+        // Walk the same reduce chain that a real feed would perform, but keep all new states in
+        // `extra_state_stack` so the real parser stack remains untouched.
+        let terminal_shift = loop {
+            let state = self.simulated_state(&extra_state_stack, stack_len);
             let (shift, reduce) = match self.tables.term_action(state, class) {
                 Some(action) => (action.shift(), action.reduce()),
                 None => (None, None),
@@ -457,105 +528,145 @@ impl<
                 let rule = *self.tables.rule(reduce_rule.into_usize());
                 let tokens_len = rule.len;
 
-                // pop state stack
-                self.state_stack
-                    .truncate(self.state_stack.len() - tokens_len);
+                // Simulate popping the RHS of the production across already-simulated states and
+                // the original stack prefix.
+                if tokens_len <= extra_state_stack.len() {
+                    extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
+                } else {
+                    let left = tokens_len - extra_state_stack.len();
+                    extra_state_stack.clear();
+                    stack_len -= left;
+                }
 
-                let mut shift = false;
-
-                let mut new_location =
-                    Data::Location::new(self.location_stack.iter().rev(), tokens_len);
-
-                let Some(next_nonterm_shift) =
-                    self.tables.shift_goto_nonterm(self.state(), rule.lhs)
-                else {
+                let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(
+                    self.simulated_state(&extra_state_stack, stack_len),
+                    rule.lhs,
+                ) else {
                     unreachable!(
-                        "Failed to shift nonterminal: {:?} in state {}",
-                        rule.lhs,
-                        self.state()
+                        "Failed to shift nonterminal: {} in state {}",
+                        rule.lhs.as_str(),
+                        self.simulated_state(&extra_state_stack, stack_len)
                     );
                 };
 
-                // call reduce action
-                match Data::reduce_action(
-                    &mut self.data_stack,
-                    &mut self.location_stack,
-                    next_nonterm_shift.push,
-                    reduce_rule.into_usize(),
-                    &mut shift,
-                    &term,
-                    &mut self.userdata,
-                    &mut new_location,
-                ) {
-                    Ok(_) => {}
-                    Err(err) => {
-                        return Err(ParseError::ReduceAction(super::error::ReduceActionError {
-                            term,
-                            location,
-                            state: self.state(),
-                            source: err,
-                        }));
-                    }
-                };
-                self.location_stack.push(new_location);
-
-                // construct tree
-                #[cfg(feature = "tree")]
-                {
-                    let mut children = Vec::with_capacity(rule.len);
-                    for _ in 0..rule.len {
-                        let tree = self.tree_stack.pop().unwrap();
-                        children.push(tree);
-                    }
-                    children.reverse();
-
-                    self.tree_stack.push(crate::tree::Tree::new_nonterminal(
-                        rule.lhs.clone(),
-                        children,
-                    ));
-                }
-
-                // shift with reduced nonterminal
-                self.state_stack.push(next_nonterm_shift.state);
+                // Record the reduce and goto decision now so commit can replay it without
+                // re-running table selection.
+                reductions.push(PlannedReduction {
+                    rule_index: reduce_rule.into_usize(),
+                    tokens_len,
+                    lhs: rule.lhs,
+                    next_nonterm_shift,
+                });
+                extra_state_stack.push(next_nonterm_shift.state);
             } else {
                 break shift;
             }
         };
 
-        // shift with terminal
-        if let Some(next_state_id) = shift_to {
-            self.state_stack.push(next_state_id.state);
+        // A feed is grammatically possible only if the simulated reduce chain reaches a terminal
+        // shift. Otherwise this is a syntax `NoAction`, not a semantic failure.
+        match terminal_shift {
+            Some(terminal_shift) => Ok(FeedPlan {
+                reductions,
+                terminal_shift,
+            }),
+            None => Err(FeedPlanError {
+                state: self.simulated_state(&extra_state_stack, stack_len),
+            }),
+        }
+    }
+
+    /// Apply a previously simulated deterministic feed plan to the real parser stacks.
+    ///
+    /// At this point CFG-level success is known. Remaining errors can only come from user reduce
+    /// actions, so they are reported as semantic reduce-action failures instead of recovery input.
+    fn apply_feed_plan(
+        &mut self,
+        plan: FeedPlan<P::NonTerm, StateIndex>,
+        term: TerminalSymbol<P::Term>,
+        location: Data::Location,
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    where
+        P::Term: Clone,
+        P::NonTerm: std::fmt::Debug,
+    {
+        use crate::Location;
+
+        for reduction in plan.reductions {
+            // Replay the simulated RHS pop before invoking the generated reduce action, matching
+            // the stack shape that the generated action expects.
+            self.state_stack
+                .truncate(self.state_stack.len() - reduction.tokens_len);
+
+            let mut shift = false;
+            let mut new_location =
+                Data::Location::new(self.location_stack.iter().rev(), reduction.tokens_len);
+
+            match Data::reduce_action(
+                &mut self.data_stack,
+                &mut self.location_stack,
+                reduction.next_nonterm_shift.push,
+                reduction.rule_index,
+                &mut shift,
+                &term,
+                &mut self.userdata,
+                &mut new_location,
+            ) {
+                Ok(_) => {}
+                Err(err) => {
+                    return Err(ParseError::ReduceAction(super::error::ReduceActionError {
+                        term,
+                        location,
+                        state: self.state(),
+                        source: err,
+                    }));
+                }
+            };
+            self.location_stack.push(new_location);
 
             #[cfg(feature = "tree")]
-            self.tree_stack
-                .push(crate::tree::Tree::new_terminal(term.clone()));
+            {
+                // Mirror the same reduction in the optional syntax tree stack.
+                let mut children = Vec::with_capacity(reduction.tokens_len);
+                for _ in 0..reduction.tokens_len {
+                    let tree = self.tree_stack.pop().unwrap();
+                    children.push(tree);
+                }
+                children.reverse();
 
-            if next_state_id.push {
-                match term {
-                    TerminalSymbol::Terminal(t) => self.data_stack.push(Data::new_terminal(t)),
-                    TerminalSymbol::Error
-                    | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
-                }
-            } else {
-                match term {
-                    TerminalSymbol::Terminal(_)
-                    | TerminalSymbol::Error
-                    | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
-                }
+                self.tree_stack
+                    .push(crate::tree::Tree::new_nonterminal(reduction.lhs, children));
             }
 
-            self.location_stack.push(location);
-
-            Ok(())
-        } else {
-            Err(ParseError::NoAction(super::error::NoActionError {
-                term,
-                location,
-                state: self.state(),
-            }))
+            self.state_stack.push(reduction.next_nonterm_shift.state);
         }
+
+        // Commit the terminal shift only after all planned reductions have been replayed.
+        self.state_stack.push(plan.terminal_shift.state);
+
+        #[cfg(feature = "tree")]
+        self.tree_stack
+            .push(crate::tree::Tree::new_terminal(term.clone()));
+
+        if plan.terminal_shift.push {
+            match term {
+                TerminalSymbol::Terminal(t) => self.data_stack.push(Data::new_terminal(t)),
+                TerminalSymbol::Error | TerminalSymbol::Eof | TerminalSymbol::VirtualStart(_) => {
+                    self.data_stack.push(Data::new_empty())
+                }
+            }
+        } else {
+            match term {
+                TerminalSymbol::Terminal(_)
+                | TerminalSymbol::Error
+                | TerminalSymbol::Eof
+                | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
+            }
+        }
+
+        self.location_stack.push(location);
+
+        Ok(())
     }
 
     /// Check if `term` can be feeded to current state.
@@ -563,10 +674,9 @@ impl<
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &Data::Term) -> bool {
-        let mut extra_state_stack = Vec::new();
         let class = P::TermClass::from_term(term);
 
-        self.can_feed_impl(self.state_stack.len(), &mut extra_state_stack, class)
+        self.plan_feed_location(class).is_ok()
     }
 
     /// Check if current context can enter panic mode
@@ -576,12 +686,14 @@ impl<
             return false;
         }
 
-        let mut extra_state_stack = Vec::new();
         let error = P::TermClass::ERROR;
         let mut stack_len = self.state_stack.len();
 
         loop {
-            match self.can_feed_impl(stack_len, &mut extra_state_stack, error) {
+            match self
+                .plan_feed_location_from_stack_len(stack_len, error)
+                .is_ok()
+            {
                 true => break true, // successfully shifted `error`
                 false => {
                     if stack_len == 0 {
@@ -591,64 +703,7 @@ impl<
                     }
                 }
             }
-            extra_state_stack.clear();
         }
-    }
-
-    fn can_feed_impl(
-        &self,
-        mut stack_len: usize,
-        extra_state_stack: &mut Vec<StateIndex>,
-        class: P::TermClass,
-    ) -> bool {
-        let shift_to = loop {
-            let state = self.simulated_state(extra_state_stack, stack_len);
-
-            let (shift, reduce) = match self.tables.term_action(state, class) {
-                Some(action) => (action.shift(), action.reduce()),
-                None => (None, None),
-            };
-            if let Some(reduce_rule) = reduce {
-                use super::super::table::ReduceRules;
-                let reduce_rule = reduce_rule.to_iter().next().unwrap();
-                let rule = *self.tables.rule(reduce_rule.into_usize());
-                let tokens_len = rule.len;
-
-                // pop state stack
-                if tokens_len <= extra_state_stack.len() {
-                    extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
-                } else {
-                    let left = tokens_len - extra_state_stack.len();
-                    extra_state_stack.clear();
-                    stack_len -= left;
-                }
-
-                // shift with reduced nonterminal
-                let last_state = extra_state_stack
-                    .last()
-                    .copied()
-                    .map(Index::into_usize)
-                    .unwrap_or_else(|| self.state_from_len(stack_len));
-                if let Some(next_state_id) = self.tables.shift_goto_nonterm(last_state, rule.lhs) {
-                    extra_state_stack.push(next_state_id.state);
-                } else {
-                    unreachable!(
-                        "unreachable: nonterminal shift should always succeed after reduce operation. Failed to shift nonterminal '{}' in state {}.",
-                        rule.lhs.as_str(),
-                        extra_state_stack
-                            .last()
-                            .copied()
-                            .map(Index::into_usize)
-                            .unwrap_or_else(|| self.state_from_len(stack_len))
-                    );
-                }
-            } else {
-                break shift;
-            }
-        };
-
-        // shift with terminal
-        shift_to.is_some()
     }
 
     fn feed_eof(
@@ -699,6 +754,7 @@ where
 
             #[cfg(feature = "tree")]
             tree_stack: self.tree_stack.clone(),
+            feed_extra_state_stack: RefCell::new(Vec::new()),
             _phantom: std::marker::PhantomData,
         }
     }
@@ -722,5 +778,371 @@ where
             .field("data_stack", &self.data_stack)
             .field("userdata", &self.userdata)
             .finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::DefaultLocation;
+    use crate::TriState;
+    use crate::parser::table::ShiftTarget;
+    use crate::parser::table::TermActionRef;
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    enum TestTermClass {
+        Error,
+        Eof,
+        Start,
+        A,
+        B,
+    }
+
+    impl TerminalClass for TestTermClass {
+        type Term = char;
+
+        const ERROR: Self = TestTermClass::Error;
+        const EOF: Self = TestTermClass::Eof;
+
+        fn as_str(&self) -> &'static str {
+            match self {
+                TestTermClass::Error => "error",
+                TestTermClass::Eof => "eof",
+                TestTermClass::Start => "start",
+                TestTermClass::A => "a",
+                TestTermClass::B => "b",
+            }
+        }
+
+        fn to_usize(&self) -> usize {
+            *self as usize
+        }
+
+        fn from_term(term: &Self::Term) -> Self {
+            match term {
+                'a' => TestTermClass::A,
+                'b' => TestTermClass::B,
+                _ => TestTermClass::Error,
+            }
+        }
+
+        fn from_virtual_start(_branch_idx: u32) -> Self {
+            TestTermClass::Start
+        }
+    }
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    enum TestNonTerm {
+        N,
+    }
+
+    impl NonTerminal for TestNonTerm {
+        fn nonterm_type(&self) -> Option<crate::parser::nonterminal::NonTerminalType> {
+            None
+        }
+
+        fn as_str(&self) -> &'static str {
+            "N"
+        }
+
+        fn to_usize(&self) -> usize {
+            0
+        }
+    }
+
+    struct TestTables;
+
+    impl ParserTables for TestTables {
+        type TermClass = TestTermClass;
+        type NonTerm = TestNonTerm;
+        type ReduceRules = usize;
+        type StateIndex = usize;
+
+        fn term_action(
+            &self,
+            state: usize,
+            class: Self::TermClass,
+        ) -> Option<TermActionRef<'_, Self::ReduceRules, Self::StateIndex>> {
+            // This table intentionally reduces on lookahead `b`, but the state after reducing has
+            // no `b` shift. It exercises late `NoAction` after a planned reduction.
+            match (state, class) {
+                (0, TestTermClass::Start) => Some(TermActionRef::Shift(ShiftTarget::new(1, false))),
+                (1, TestTermClass::A) => Some(TermActionRef::Shift(ShiftTarget::new(2, true))),
+                (2, TestTermClass::B) => Some(TermActionRef::Reduce(&0)),
+                _ => None,
+            }
+        }
+
+        fn shift_goto_nonterm(
+            &self,
+            state: usize,
+            nonterm: Self::NonTerm,
+        ) -> Option<ShiftTarget<Self::StateIndex>> {
+            match (state, nonterm) {
+                (1, TestNonTerm::N) => Some(ShiftTarget::new(3, true)),
+                _ => None,
+            }
+        }
+
+        fn is_accept(&self, _state: usize) -> bool {
+            false
+        }
+
+        fn expected_shift_term(&self, _state: usize) -> impl Iterator<Item = Self::TermClass> + '_ {
+            std::iter::empty()
+        }
+
+        fn expected_shift_nonterm(
+            &self,
+            _state: usize,
+        ) -> impl Iterator<Item = Self::NonTerm> + '_ {
+            std::iter::empty()
+        }
+
+        fn expected_reduce_rule(&self, _state: usize) -> impl Iterator<Item = impl Index> + '_ {
+            std::iter::empty::<usize>()
+        }
+
+        fn can_accept_error(&self, _state: usize) -> TriState {
+            TriState::False
+        }
+
+        fn rule(&self, rule: usize) -> &crate::parser::table::RuleInfo<Self::NonTerm> {
+            static RULES: [crate::parser::table::RuleInfo<TestNonTerm>; 1] =
+                [crate::parser::table::RuleInfo {
+                    lhs: TestNonTerm::N,
+                    len: 1,
+                }];
+            &RULES[rule]
+        }
+
+        fn state_count(&self) -> usize {
+            4
+        }
+
+        fn rule_count(&self) -> usize {
+            1
+        }
+    }
+
+    struct TestParser;
+
+    impl Parser for TestParser {
+        const ERROR_USED: bool = false;
+
+        type Term = char;
+        type TermClass = TestTermClass;
+        type NonTerm = TestNonTerm;
+        type StateIndex = usize;
+        type ReduceRules = usize;
+        type Tables = TestTables;
+
+        fn get_tables() -> &'static Self::Tables {
+            &TestTables
+        }
+
+        fn __rusty_lr_parser_version() -> (usize, usize, usize) {
+            crate::versions::EXPECTED_RUSTY_LR_PARSER_VERSION
+        }
+    }
+
+    struct RecoveryTables;
+
+    impl ParserTables for RecoveryTables {
+        type TermClass = TestTermClass;
+        type NonTerm = TestNonTerm;
+        type ReduceRules = usize;
+        type StateIndex = usize;
+
+        fn term_action(
+            &self,
+            state: usize,
+            class: Self::TermClass,
+        ) -> Option<TermActionRef<'_, Self::ReduceRules, Self::StateIndex>> {
+            // Recovery from state 2 must reduce before the synthetic `error` token can shift.
+            // Marking the state as `TriState::True` below ensures recovery still builds a plan.
+            match (state, class) {
+                (0, TestTermClass::Start) => Some(TermActionRef::Shift(ShiftTarget::new(1, false))),
+                (1, TestTermClass::A) => Some(TermActionRef::Shift(ShiftTarget::new(2, true))),
+                (2, TestTermClass::Error) => Some(TermActionRef::Reduce(&0)),
+                (3, TestTermClass::Error) => Some(TermActionRef::Shift(ShiftTarget::new(4, false))),
+                (4, TestTermClass::B) => Some(TermActionRef::Shift(ShiftTarget::new(5, true))),
+                _ => None,
+            }
+        }
+
+        fn shift_goto_nonterm(
+            &self,
+            state: usize,
+            nonterm: Self::NonTerm,
+        ) -> Option<ShiftTarget<Self::StateIndex>> {
+            match (state, nonterm) {
+                (1, TestNonTerm::N) => Some(ShiftTarget::new(3, true)),
+                _ => None,
+            }
+        }
+
+        fn is_accept(&self, _state: usize) -> bool {
+            false
+        }
+
+        fn expected_shift_term(&self, _state: usize) -> impl Iterator<Item = Self::TermClass> + '_ {
+            std::iter::empty()
+        }
+
+        fn expected_shift_nonterm(
+            &self,
+            _state: usize,
+        ) -> impl Iterator<Item = Self::NonTerm> + '_ {
+            std::iter::empty()
+        }
+
+        fn expected_reduce_rule(&self, _state: usize) -> impl Iterator<Item = impl Index> + '_ {
+            std::iter::empty::<usize>()
+        }
+
+        fn can_accept_error(&self, state: usize) -> TriState {
+            match state {
+                2 => TriState::True,
+                _ => TriState::False,
+            }
+        }
+
+        fn rule(&self, rule: usize) -> &crate::parser::table::RuleInfo<Self::NonTerm> {
+            static RULES: [crate::parser::table::RuleInfo<TestNonTerm>; 1] =
+                [crate::parser::table::RuleInfo {
+                    lhs: TestNonTerm::N,
+                    len: 1,
+                }];
+            &RULES[rule]
+        }
+
+        fn state_count(&self) -> usize {
+            6
+        }
+
+        fn rule_count(&self) -> usize {
+            1
+        }
+    }
+
+    struct RecoveryParser;
+
+    impl Parser for RecoveryParser {
+        const ERROR_USED: bool = true;
+
+        type Term = char;
+        type TermClass = TestTermClass;
+        type NonTerm = TestNonTerm;
+        type StateIndex = usize;
+        type ReduceRules = usize;
+        type Tables = RecoveryTables;
+
+        fn get_tables() -> &'static Self::Tables {
+            &RecoveryTables
+        }
+
+        fn __rusty_lr_parser_version() -> (usize, usize, usize) {
+            crate::versions::EXPECTED_RUSTY_LR_PARSER_VERSION
+        }
+    }
+
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    enum TestData {
+        Empty,
+        Terminal(char),
+        N,
+    }
+
+    impl SemanticValue for TestData {
+        type Term = char;
+        type NonTerm = TestNonTerm;
+        type UserData = Vec<&'static str>;
+        type ReduceActionError = ();
+        type Location = DefaultLocation;
+
+        fn new_empty() -> Self {
+            TestData::Empty
+        }
+
+        fn new_terminal(term: Self::Term) -> Self {
+            TestData::Terminal(term)
+        }
+
+        fn reduce_action(
+            data_stack: &mut Vec<Self>,
+            location_stack: &mut Vec<Self::Location>,
+            push_data: bool,
+            rule_index: usize,
+            _shift: &mut bool,
+            _lookahead: &TerminalSymbol<Self::Term>,
+            userdata: &mut Self::UserData,
+            _location0: &mut Self::Location,
+        ) -> Result<(), Self::ReduceActionError> {
+            assert_eq!(rule_index, 0);
+            assert_eq!(data_stack.pop(), Some(TestData::Terminal('a')));
+            location_stack.pop();
+            userdata.push("reduced");
+            if push_data {
+                data_stack.push(TestData::N);
+            } else {
+                data_stack.push(TestData::Empty);
+            }
+            Ok(())
+        }
+    }
+
+    struct TestStart;
+
+    impl StartExtractor<TestData> for TestStart {
+        type StartType = ();
+
+        const BRANCH_INDEX: u32 = 0;
+
+        fn extract(_value: TestData) -> Option<Self::StartType> {
+            Some(())
+        }
+    }
+
+    #[test]
+    fn feed_failure_after_planned_reductions_does_not_commit_stack_changes() {
+        let mut ctx = Context::<TestParser, TestData, TestStart, usize>::new(Vec::new());
+        ctx.feed('a').unwrap();
+
+        // `b` would trigger a reduction before discovering that it cannot be shifted. The context
+        // must remain byte-for-byte equivalent to its pre-feed state.
+        let state_stack = ctx.state_stack.clone();
+        let data_stack = ctx.data_stack.clone();
+        let location_stack = ctx.location_stack.clone();
+
+        let err = ctx.feed('b').unwrap_err();
+
+        assert_eq!(err.state(), 3);
+        assert_eq!(ctx.state_stack, state_stack);
+        assert_eq!(ctx.data_stack, data_stack);
+        assert_eq!(ctx.location_stack, location_stack);
+        assert!(ctx.userdata.is_empty());
+    }
+
+    #[test]
+    fn error_token_recovery_commits_the_precomputed_plan() {
+        let mut ctx = Context::<RecoveryParser, TestData, TestStart, usize>::new(Vec::new());
+        ctx.feed('a').unwrap();
+
+        // Feeding `b` has no direct action, so recovery shifts `error`. That recovery shift must
+        // use the reduction discovered by pre-feed simulation.
+        ctx.feed('b').unwrap();
+
+        assert_eq!(ctx.userdata, vec!["reduced"]);
+        assert_eq!(ctx.state_stack, vec![1, 3, 4, 5]);
+        assert_eq!(
+            ctx.data_stack,
+            vec![
+                TestData::Empty,
+                TestData::N,
+                TestData::Empty,
+                TestData::Terminal('b')
+            ]
+        );
     }
 }
