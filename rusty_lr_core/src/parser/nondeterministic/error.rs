@@ -10,12 +10,23 @@ pub struct ParseError<Term, Location, ReduceActionError> {
     pub location: Location,
     /// Error from reduce action (from every diverged paths)
     pub reduce_action_errors: Vec<ReduceActionError>,
-    /// Rule indices when shift/reduce conflict occur with no shift/reduce precedence defined.
-    /// This is same as when setting %nonassoc in Bison.
-    pub no_precedences: Vec<usize>,
 
     /// States when the error occurred (from all diverged paths)
     pub(crate) states: Vec<usize>,
+}
+
+/// Successful GLR feed result.
+///
+/// GLR parsing can keep one branch alive while other branches fail. In that case the feed is a
+/// success, but `errors` records the branches that were pruned by `NoAction` or reduce-action
+/// failure.
+#[derive(Clone, Debug)]
+pub struct FeedSuccess<Term, Location, ReduceActionError> {
+    /// Branch errors observed while at least one GLR branch survived this feed.
+    ///
+    /// This is intentionally optional so callers that only care about fatal parse failure can keep
+    /// using `context.feed(token)?` or `context.feed(token).unwrap()`.
+    pub errors: Option<ParseError<Term, Location, ReduceActionError>>,
 }
 
 impl<Term, Location, ReduceActionError> ParseError<Term, Location, ReduceActionError> {

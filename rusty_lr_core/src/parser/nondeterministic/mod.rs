@@ -3,6 +3,7 @@ mod error;
 mod node;
 
 pub use context::Context;
+pub use error::FeedSuccess;
 pub use error::ParseError;
 pub use node::Node;
 pub(crate) use node::NodeId;

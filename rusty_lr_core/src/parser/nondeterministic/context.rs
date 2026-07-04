@@ -3,6 +3,7 @@ use std::num::NonZeroUsize;
 use super::Node;
 use super::NodeId;
 use super::ParseError;
+use super::error::FeedSuccess;
 
 use crate::Location;
 use crate::TerminalSymbol;
@@ -122,9 +123,8 @@ pub struct Context<
     /// But we don't want to reallocate every `feed` call
     pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
 
-    /// For temporary use.
-    /// store rule indices where shift/reduce conflicts occured with no precedence defined.
-    pub(crate) no_precedences: Vec<usize>,
+    // Future optimization point: GLR can also reuse simulation state stacks, but branch-local
+    // recursion and cloned alternatives need a separate scratch ownership strategy.
     /// Decoded parser tables shared by every active GLR branch.
     ///
     /// Branches clone stack/userdata state, but they all read the same immutable runtime tables.
@@ -151,7 +151,6 @@ impl<
             next_branches: Default::default(),
             reduce_errors: Default::default(),
             fallback_branches: Default::default(),
-            no_precedences: Default::default(),
             tables: P::get_tables(),
             _phantom: std::marker::PhantomData,
         };
@@ -873,7 +872,10 @@ impl<
     pub fn feed(
         &mut self,
         term: Data::Term,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<
+        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1190,11 +1192,20 @@ impl<
         error_location
     }
     /// Feed one terminal with location to parser, and update state stack.
+    ///
+    /// Each active GLR branch is first checked with the same CFG simulation used by `can_feed`.
+    /// Branches rejected by that simulation are `NoAction` branches and are the only branches
+    /// eligible for panic-mode recovery. If at least one branch can grammatically shift the
+    /// terminal, recovery is not entered; failed sibling branches are returned in
+    /// `FeedSuccess::errors`.
     pub fn feed_location(
         &mut self,
         term: P::Term,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<
+        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+    >
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1204,22 +1215,49 @@ impl<
         use crate::Location;
 
         self.reduce_errors.clear();
-        self.no_precedences.clear();
         self.fallback_branches.clear();
         self.next_branches.clear();
 
         let class = P::TermClass::from_term(&term);
 
         let mut current_branches = std::mem::take(&mut self.current_branches);
+        let mut reduce_action_failed = false;
         for Branch { node, userdata } in current_branches.drain(..) {
-            if let Err((node, _, _, userdata)) = self.feed_location_impl(
-                node,
-                TerminalSymbol::Terminal(term.clone()),
-                class,
-                location.clone(),
-                userdata,
-            ) {
-                // store to fallback nodes in case of all nodes failed to shift
+            // Classify this branch before mutating the graph-structured stack. Only branches that
+            // fail this CFG simulation are considered `NoAction` branches.
+            let mut extra_state_stack = Vec::new();
+            let node_and_len = {
+                let node_ = self.node(node);
+                if node_.len() == 0 {
+                    None
+                } else {
+                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
+                }
+            };
+
+            if self.can_feed_impl(&mut extra_state_stack, node_and_len, class) {
+                // The CFG admits this terminal on this branch. From here on, failures are caused
+                // by semantic reduce actions or runtime conflict decisions, so they must not
+                // trigger error recovery.
+                let reduce_error_count = self.reduce_errors.len();
+                if let Err((_node, _, _, _userdata)) = self.feed_location_impl(
+                    node,
+                    TerminalSymbol::Terminal(term.clone()),
+                    class,
+                    location.clone(),
+                    userdata,
+                ) {
+                    if self.reduce_errors.len() == reduce_error_count {
+                        // The CFG simulation said this branch could shift the terminal, so a
+                        // later failure is semantic/runtime conflict resolution, not NoAction.
+                        reduce_action_failed = true;
+                    } else {
+                        reduce_action_failed = true;
+                    }
+                }
+            } else {
+                // This branch cannot grammatically shift the lookahead. Keep it only as a
+                // recovery candidate in case every active branch is also `NoAction`.
                 self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
@@ -1230,6 +1268,19 @@ impl<
         // check for panic mode
         // and restore nodes to original state from fallback_branches
         if self.next_branches.is_empty() {
+            if reduce_action_failed {
+                // A branch was grammatically able to shift the terminal, but failed while
+                // committing semantic/runtime actions. That is not syntax recovery input.
+                std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+
+                return Err(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states: self.states().collect(),
+                });
+            }
+
             // early return if `error` token is not used in the grammar
             if !P::ERROR_USED {
                 std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
@@ -1238,7 +1289,6 @@ impl<
                     term: TerminalSymbol::Terminal(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
                 });
             }
@@ -1260,6 +1310,17 @@ impl<
             // put back for reuse allocated memory
             self.fallback_branches = fallback_branches;
 
+            if !self.reduce_errors.is_empty() {
+                // Shifting the synthetic `error` token may execute reduce actions. If one fails,
+                // recovery itself failed semantically and must be reported.
+                return Err(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states: self.states().collect(),
+                });
+            }
+
             if self.next_branches.is_empty() {
                 // for-loop above doesn't check for root state (0).
                 // check for 0 state here
@@ -1278,12 +1339,22 @@ impl<
                                 term: TerminalSymbol::Terminal(term),
                                 location,
                                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                                no_precedences: std::mem::take(&mut self.no_precedences),
                                 states: self.states().collect(),
                             });
                         }
                     }
                 }
+            }
+
+            if !self.reduce_errors.is_empty() {
+                // The root-state recovery path follows the same rule: reduce-action errors are
+                // fatal semantic failures, not discarded syntax.
+                return Err(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states: self.states().collect(),
+                });
             }
 
             // if next_node is still empty, then no panic mode was entered, this is an error
@@ -1293,7 +1364,6 @@ impl<
                     term: TerminalSymbol::Terminal(term),
                     location,
                     reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    no_precedences: std::mem::take(&mut self.no_precedences),
                     states: self.states().collect(),
                 })
             } else {
@@ -1340,11 +1410,31 @@ impl<
                     }
                 }
                 self.next_branches = next_branches;
-                Ok(())
+                // Recovery consumed or merged the lookahead. This is a successful feed, and the
+                // original `NoAction` branches have been transformed into recovery branches.
+                Ok(FeedSuccess { errors: None })
             }
         } else {
+            // At least one original branch accepted the terminal. Report sibling branch failures
+            // to callers without treating this feed as fatal.
+            let errors = if self.fallback_branches.is_empty() && self.reduce_errors.is_empty() {
+                None
+            } else {
+                let states = self
+                    .fallback_branches
+                    .iter()
+                    .map(|branch| self.state(branch.node))
+                    .collect();
+                self.fallback_branches.clear();
+                Some(ParseError {
+                    term: TerminalSymbol::Terminal(term),
+                    location,
+                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
+                    states,
+                })
+            };
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
-            Ok(())
+            Ok(FeedSuccess { errors })
         }
     }
     /// Feed one terminal with location to parser, and update state stack.
@@ -1589,7 +1679,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
         use crate::location::Location;
 
         self.reduce_errors.clear();
-        self.no_precedences.clear();
         self.fallback_branches.clear();
         self.next_branches.clear();
 
@@ -1624,7 +1713,6 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 term: TerminalSymbol::Eof,
                 location: eof_location,
                 reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                no_precedences: std::mem::take(&mut self.no_precedences),
                 states: self.states().collect(),
             })
         } else {
@@ -1687,7 +1775,6 @@ where
             next_branches: Default::default(),
             reduce_errors: Default::default(),
             fallback_branches: Default::default(),
-            no_precedences: Default::default(),
             tables: self.tables,
             _phantom: std::marker::PhantomData,
         }
