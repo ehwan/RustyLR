@@ -2,7 +2,6 @@
 //!
 //! This module is the public home for parser table layouts used by generated parsers.
 
-use crate::TriState;
 use crate::parser::nonterminal::NonTerminal;
 use crate::parser::state::IntermediateState;
 use crate::parser::terminalclass::TerminalClass;
@@ -233,8 +232,6 @@ pub trait ParserTables {
 
     fn expected_reduce_rule(&self, state: usize) -> impl Iterator<Item = impl Index> + '_;
 
-    fn can_accept_error(&self, state: usize) -> TriState;
-
     /// Returns compact rule metadata used while reducing.
     fn rule(&self, rule: usize) -> &RuleInfo<Self::NonTerm>;
 
@@ -285,8 +282,6 @@ pub struct SparseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex> {
     nonterm_offsets: Vec<usize>,
     /// Sorted `(nonterminal, goto)` pairs for all states concatenated together.
     nonterm_goto: Vec<(NonTerm, ShiftTarget<StateIndex>)>,
-    /// Error-recovery capability for each state.
-    can_accept_error: Vec<TriState>,
     /// Compact rule metadata indexed by reduce rule id.
     rules: Vec<RuleInfo<NonTerm>>,
 }
@@ -305,7 +300,6 @@ where
         let mut term_actions = Vec::new();
         let mut nonterm_offsets = Vec::with_capacity(intermediate.state_rows.len() + 1);
         let mut nonterm_goto = Vec::new();
-        let mut can_accept_error = Vec::with_capacity(intermediate.state_rows.len());
 
         term_offsets.push(0);
         nonterm_offsets.push(0);
@@ -367,7 +361,6 @@ where
                     .map(|(nonterm, target)| (nonterm, target.compact())),
             );
             nonterm_offsets.push(nonterm_goto.len());
-            can_accept_error.push(state.can_accept_error);
         }
 
         SparseFlatTables {
@@ -375,7 +368,6 @@ where
             term_actions,
             nonterm_offsets,
             nonterm_goto,
-            can_accept_error,
             rules: intermediate.rules,
         }
     }
@@ -458,16 +450,12 @@ where
             .flat_map(RuleContainer::to_iter)
     }
 
-    fn can_accept_error(&self, state: usize) -> TriState {
-        self.can_accept_error[state]
-    }
-
     fn rule(&self, rule: usize) -> &RuleInfo<Self::NonTerm> {
         &self.rules[rule]
     }
 
     fn state_count(&self) -> usize {
-        self.can_accept_error.len()
+        self.term_offsets.len() - 1
     }
 
     fn rule_count(&self) -> usize {
@@ -500,8 +488,6 @@ pub struct DenseFlatTables<TermClass, NonTerm, RuleContainer, StateIndex> {
     nonterm_keys_offsets: Vec<usize>,
     /// Nonterminal keys present in each goto row.
     nonterm_keys: Vec<NonTerm>,
-    /// Error-recovery capability for each state.
-    can_accept_error: Vec<TriState>,
     /// Compact rule metadata indexed by reduce rule id.
     rules: Vec<RuleInfo<NonTerm>>,
 }
@@ -527,7 +513,6 @@ where
         let mut nonterm_goto = Vec::new();
         let mut nonterm_keys_offsets = Vec::with_capacity(intermediate.state_rows.len() + 1);
         let mut nonterm_keys = Vec::new();
-        let mut can_accept_error = Vec::with_capacity(intermediate.state_rows.len());
 
         term_offsets.push(0);
         term_keys_offsets.push(0);
@@ -627,8 +612,6 @@ where
             }
             nonterm_offsets.push(nonterm_goto.len());
             nonterm_keys_offsets.push(nonterm_keys.len());
-
-            can_accept_error.push(state.can_accept_error);
         }
 
         DenseFlatTables {
@@ -642,7 +625,6 @@ where
             nonterm_goto,
             nonterm_keys_offsets,
             nonterm_keys,
-            can_accept_error,
             rules: intermediate.rules,
         }
     }
@@ -716,16 +698,12 @@ where
             .flat_map(RuleContainer::to_iter)
     }
 
-    fn can_accept_error(&self, state: usize) -> TriState {
-        self.can_accept_error[state]
-    }
-
     fn rule(&self, rule: usize) -> &RuleInfo<Self::NonTerm> {
         &self.rules[rule]
     }
 
     fn state_count(&self) -> usize {
-        self.can_accept_error.len()
+        self.term_offsets.len() - 1
     }
 
     fn rule_count(&self) -> usize {

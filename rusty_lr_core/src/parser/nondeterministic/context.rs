@@ -1098,8 +1098,6 @@ impl<
         P::NonTerm: std::fmt::Debug,
     {
         use crate::Location;
-        use crate::TriState;
-
         let mut error_location_preserved = None;
 
         let pop_count = loop {
@@ -1112,25 +1110,16 @@ impl<
             let mut pop_count = 0;
             let mut found = false;
 
-            for &s in node_.state_stack.iter().rev() {
-                match self.tables.can_accept_error(s.into_usize()) {
-                    TriState::False => {}
-                    TriState::Maybe => {
-                        extra_state_stack.clear();
+            for _ in node_.state_stack.iter().rev() {
+                extra_state_stack.clear();
 
-                        if self.can_feed_impl(
-                            extra_state_stack,
-                            Some((node, NonZeroUsize::new(node_.len() - pop_count).unwrap())),
-                            P::TermClass::ERROR,
-                        ) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    TriState::True => {
-                        found = true;
-                        break;
-                    }
+                if self.can_feed_impl(
+                    extra_state_stack,
+                    Some((node, NonZeroUsize::new(node_.len() - pop_count).unwrap())),
+                    P::TermClass::ERROR,
+                ) {
+                    found = true;
+                    break;
                 }
 
                 pop_count += 1;

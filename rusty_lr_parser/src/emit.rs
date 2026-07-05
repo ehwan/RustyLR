@@ -522,7 +522,6 @@ impl Grammar {
         let mut shift_nonterm_offsets = Vec::new();
         let mut reduce_data = Vec::new();
         let mut reduce_offsets = Vec::new();
-        let mut can_accept_error = Vec::new();
 
         shift_term_offsets.push(0);
         shift_nonterm_offsets.push(0);
@@ -601,14 +600,6 @@ impl Grammar {
                 }
             }
             reduce_offsets.push(reduce_data.len() as u32);
-
-            // 5. can_accept_error: TriState
-            let tri_val = match state.can_accept_error {
-                rusty_lr_core::TriState::False => 0u8,
-                rusty_lr_core::TriState::True => 1u8,
-                rusty_lr_core::TriState::Maybe => 2u8,
-            };
-            can_accept_error.push(tri_val);
         }
 
         let num_rules = self.builder.rules.len();
@@ -642,10 +633,6 @@ impl Grammar {
         let reduce_offsets = reduce_offsets
             .into_iter()
             .map(proc_macro2::Literal::u32_unsuffixed);
-        let can_accept_error = can_accept_error
-            .into_iter()
-            .map(proc_macro2::Literal::u8_unsuffixed);
-
         // range-compressed Vec based terminal-class_id map
         stream.extend(quote! {
             /// A lightweight parser struct that references the static parser tables and production rules.
@@ -687,14 +674,12 @@ impl Grammar {
                         // - SHIFT_TERM_OFFSETS & SHIFT_NONTERM_OFFSETS: Boundaries separating transitions for each state
                         // - REDUCE_DATA: Variable-length reduce map encoding (term_class, len, rules...)
                         // - REDUCE_OFFSETS: Boundaries separating reduce maps for each state
-                        // - CAN_ACCEPT_ERROR: TriState (0 = False, 1 = True, 2 = Maybe)
                         static SHIFT_TERM_DATA: &[u32] = &[ #(#shift_term_data),* ];
                         static SHIFT_TERM_OFFSETS: &[u32] = &[ #(#shift_term_offsets),* ];
                         static SHIFT_NONTERM_DATA: &[u32] = &[ #(#shift_nonterm_data),* ];
                         static SHIFT_NONTERM_OFFSETS: &[u32] = &[ #(#shift_nonterm_offsets),* ];
                         static REDUCE_DATA: &[u32] = &[ #(#reduce_data),* ];
                         static REDUCE_OFFSETS: &[u32] = &[ #(#reduce_offsets),* ];
-                        static CAN_ACCEPT_ERROR: &[u8] = &[ #(#can_accept_error),* ];
 
                         let num_rules = #num_rules;
                         let mut rules = Vec::with_capacity(num_rules);
@@ -751,19 +736,11 @@ impl Grammar {
                                 idx += 2 + len;
                             }
 
-                            let can_accept_error = match CAN_ACCEPT_ERROR[i] {
-                                0 => #module_prefix::TriState::False,
-                                1 => #module_prefix::TriState::True,
-                                2 => #module_prefix::TriState::Maybe,
-                                _ => unreachable!(),
-                            };
-
                             let intermediate = #module_prefix::parser::state::IntermediateState {
                                 shift_goto_map_term,
                                 shift_goto_map_nonterm,
                                 reduce_map,
                                 ruleset: Vec::new(),
-                                can_accept_error,
                             };
                             state_rows.push(intermediate);
                         }

@@ -369,23 +369,17 @@ impl<
                     return Err(ParseError::NoAction(err));
                 }
 
-                use crate::TriState;
                 let mut pop_count = 0;
                 let mut error_plan = None;
-                for &s in self.state_stack.iter().rev() {
-                    match self.tables.can_accept_error(s.into_usize()) {
-                        TriState::False => {}
-                        TriState::Maybe | TriState::True => {
-                            // Reuse the same CFG simulation used by normal feeds when deciding
-                            // whether this stack prefix can actually shift the recovery token.
-                            if let Ok(plan) = self.plan_feed_location_from_stack_len(
-                                self.state_stack.len() - pop_count,
-                                P::TermClass::ERROR,
-                            ) {
-                                error_plan = Some(plan);
-                                break;
-                            }
-                        }
+                for _ in self.state_stack.iter().rev() {
+                    // Reuse the same CFG simulation used by normal feeds when deciding whether
+                    // this stack prefix can actually shift the recovery token.
+                    if let Ok(plan) = self.plan_feed_location_from_stack_len(
+                        self.state_stack.len() - pop_count,
+                        P::TermClass::ERROR,
+                    ) {
+                        error_plan = Some(plan);
+                        break;
                     }
 
                     pop_count += 1;
@@ -428,7 +422,7 @@ impl<
                                 self.data_stack.push(Data::new_empty());
                             }
 
-                            self.location_stack.push(err.location.clone());
+                            self.location_stack.push(err.location);
                             self.state_stack.push(next_state.state);
                         } else {
                             // merge term with previous error
@@ -627,12 +621,8 @@ impl<
             #[cfg(feature = "tree")]
             {
                 // Mirror the same reduction in the optional syntax tree stack.
-                let mut children = Vec::with_capacity(reduction.tokens_len);
-                for _ in 0..reduction.tokens_len {
-                    let tree = self.tree_stack.pop().unwrap();
-                    children.push(tree);
-                }
-                children.reverse();
+                let l = self.tree_stack.len() - reduction.tokens_len;
+                let children = self.tree_stack.split_off(l);
 
                 self.tree_stack
                     .push(crate::tree::Tree::new_nonterminal(reduction.lhs, children));
@@ -656,12 +646,7 @@ impl<
                 }
             }
         } else {
-            match term {
-                TerminalSymbol::Terminal(_)
-                | TerminalSymbol::Error
-                | TerminalSymbol::Eof
-                | TerminalSymbol::VirtualStart(_) => self.data_stack.push(Data::new_empty()),
-            }
+            self.data_stack.push(Data::new_empty());
         }
 
         self.location_stack.push(location);
@@ -690,12 +675,9 @@ impl<
         let mut stack_len = self.state_stack.len();
 
         loop {
-            match self
-                .plan_feed_location_from_stack_len(stack_len, error)
-                .is_ok()
-            {
-                true => break true, // successfully shifted `error`
-                false => {
+            match self.plan_feed_location_from_stack_len(stack_len, error) {
+                Ok(_) => break true, // successfully shifted `error`
+                Err(_) => {
                     if stack_len == 0 {
                         break false;
                     } else {
@@ -785,7 +767,6 @@ where
 mod tests {
     use super::*;
     use crate::DefaultLocation;
-    use crate::TriState;
     use crate::parser::table::ShiftTarget;
     use crate::parser::table::TermActionRef;
 
@@ -903,10 +884,6 @@ mod tests {
             std::iter::empty::<usize>()
         }
 
-        fn can_accept_error(&self, _state: usize) -> TriState {
-            TriState::False
-        }
-
         fn rule(&self, rule: usize) -> &crate::parser::table::RuleInfo<Self::NonTerm> {
             static RULES: [crate::parser::table::RuleInfo<TestNonTerm>; 1] =
                 [crate::parser::table::RuleInfo {
@@ -960,7 +937,6 @@ mod tests {
             class: Self::TermClass,
         ) -> Option<TermActionRef<'_, Self::ReduceRules, Self::StateIndex>> {
             // Recovery from state 2 must reduce before the synthetic `error` token can shift.
-            // Marking the state as `TriState::True` below ensures recovery still builds a plan.
             match (state, class) {
                 (0, TestTermClass::Start) => Some(TermActionRef::Shift(ShiftTarget::new(1, false))),
                 (1, TestTermClass::A) => Some(TermActionRef::Shift(ShiftTarget::new(2, true))),
@@ -999,13 +975,6 @@ mod tests {
 
         fn expected_reduce_rule(&self, _state: usize) -> impl Iterator<Item = impl Index> + '_ {
             std::iter::empty::<usize>()
-        }
-
-        fn can_accept_error(&self, state: usize) -> TriState {
-            match state {
-                2 => TriState::True,
-                _ => TriState::False,
-            }
         }
 
         fn rule(&self, rule: usize) -> &crate::parser::table::RuleInfo<Self::NonTerm> {
