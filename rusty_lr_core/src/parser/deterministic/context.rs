@@ -403,44 +403,25 @@ impl<
                     self.tree_stack.truncate(l);
                 }
 
-                match self.apply_feed_plan(error_plan, TerminalSymbol::Error, error_location) {
-                    Ok(()) => {
-                        // try shift given term again
-                        // to check if the given terminal should be merged with `error` token
-                        // or it can be shift right after the error token
-                        if let Some(next_state) = self.tables.shift_goto_class(self.state(), class)
-                        {
-                            #[cfg(feature = "tree")]
-                            self.tree_stack
-                                .push(crate::tree::Tree::new_terminal(err.term.clone()));
-
-                            // shift after `error` token
-                            if next_state.push {
-                                self.data_stack
-                                    .push(Data::new_terminal(err.term.into_term().unwrap()));
-                            } else {
-                                self.data_stack.push(Data::new_empty());
-                            }
-
-                            self.location_stack.push(err.location);
-                            self.state_stack.push(next_state.state);
+                self.apply_feed_plan(error_plan, TerminalSymbol::Error, error_location)?;
+                // `error` was feed, now check with the original terminal symbol again.
+                // If the original terminal is still not accepted, it is part of the `error`.
+                match self.plan_feed_location(class) {
+                    Ok(term_plan) => self.apply_feed_plan(term_plan, err.term, err.location),
+                    Err(_) => {
+                        // The terminal symbol is still not feedable, so it belongs to the `error` token.
+                        // merge term with previous error
+                        let error_location = Data::Location::new(
+                            std::iter::once(&err.location).chain(self.location_stack.iter().rev()),
+                            2, // error node
+                        );
+                        if let Some(err_loc) = self.location_stack.last_mut() {
+                            *err_loc = error_location;
                         } else {
-                            // merge term with previous error
-
-                            let error_location = Data::Location::new(
-                                std::iter::once(&err.location)
-                                    .chain(self.location_stack.iter().rev()),
-                                2, // error node
-                            );
-                            if let Some(err_loc) = self.location_stack.last_mut() {
-                                *err_loc = error_location;
-                            } else {
-                                unreachable!("location stack must have at least one element");
-                            }
+                            unreachable!("location stack must have at least one element");
                         }
                         Ok(())
                     }
-                    Err(_) => Err(ParseError::NoAction(err)), // other errors
                 }
             }
             Err(err) => Err(err),

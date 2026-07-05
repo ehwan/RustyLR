@@ -193,6 +193,69 @@ mod token_userdata_and_recovery {
     }
 }
 
+mod recovery_reduce_before_sync_token {
+    mod deterministic {
+        use rusty_lr::lr1;
+
+        lr1! {
+            %nooptim;
+            %tokentype char;
+            %location std::ops::Range<usize>;
+            %userdata Vec<std::ops::Range<usize>>;
+            %start S;
+
+            S(&'static str): error Tail {
+                data.push(@error.clone());
+                "recovered"
+            };
+
+            Tail(()): Empty 's' { () };
+            Empty(()): "" { () };
+        }
+
+        #[test]
+        fn deterministic_recovery_feeds_sync_token_through_reduce_chain() {
+            let mut ctx = SContext::new(Vec::new());
+            ctx.feed_location('s', 0..1).unwrap();
+
+            let (value, recovered_spans) = ctx.accept().unwrap();
+            assert_eq!(value, "recovered");
+            assert_eq!(recovered_spans, [0..0]);
+        }
+    }
+
+    mod glr {
+        use rusty_lr::lr1;
+
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %location std::ops::Range<usize>;
+            %userdata Vec<std::ops::Range<usize>>;
+            %start S;
+
+            S(&'static str): error Tail {
+                data.push(@error.clone());
+                "recovered"
+            };
+
+            Tail(()): Empty 's' { () };
+            Empty(()): "" { () };
+        }
+
+        #[test]
+        fn glr_recovery_feeds_sync_token_through_reduce_chain() {
+            let mut ctx = SContext::new(Vec::new());
+            ctx.feed_location('s', 0..1).unwrap();
+
+            let (value, recovered_spans) = ctx.accept().unwrap();
+            assert_eq!(value, "recovered");
+            assert_eq!(recovered_spans, [0..0]);
+        }
+    }
+}
+
 mod left_recursive_nullable_list {
     use rusty_lr::lr1;
 
@@ -463,6 +526,52 @@ mod reduce_action_errors {
 
             assert_eq!(errors.reduce_action_errors, ["bad reduce path"]);
             assert_eq!(ctx.accept().unwrap(), ("shift path", ()));
+        }
+    }
+
+    mod glr_recovery_partial_errors {
+        use rusty_lr::lr1;
+
+        // Recovery can have GLR alternatives too. A semantic failure in one recovery branch should
+        // be reported without killing sibling recovery branches that successfully shifted `error`.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %error &'static str;
+            %start S;
+
+            S(&'static str)
+                : Good error 's' {
+                    "recovered"
+                }
+                | Bad error 's' {
+                    "bad"
+                }
+                ;
+
+            Good(()): "" { () };
+
+            Bad(()): "" {
+                if true {
+                    return Err("bad recovery branch");
+                }
+                ()
+            };
+        }
+
+        #[test]
+        fn glr_recovery_success_reports_pruned_recovery_branch_errors() {
+            let mut ctx = SContext::with_default_userdata();
+
+            let success = ctx.feed('x').unwrap();
+            let errors = success
+                .errors
+                .expect("failed recovery branch should be reported");
+            assert_eq!(errors.reduce_action_errors, ["bad recovery branch"]);
+
+            ctx.feed('s').unwrap();
+            assert_eq!(ctx.accept().unwrap(), ("recovered", ()));
         }
     }
 }
