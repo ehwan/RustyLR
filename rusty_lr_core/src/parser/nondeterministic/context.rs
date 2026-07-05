@@ -95,11 +95,15 @@ struct Branch<UserData> {
 
 /// Branch state returned when a GLR feed path reaches no terminal shift.
 ///
-/// The caller only needs the graph node and user data to keep or discard that branch; the lookahead
-/// terminal and location are owned by the failed attempt and do not need to be returned.
-struct UnshiftedBranch<UserData> {
+/// The caller only needs the graph node to discard that branch; the lookahead terminal, location,
+/// and user data are owned by the failed attempt and do not need to be returned.
+struct UnshiftedBranch {
     node: NodeId,
-    userdata: UserData,
+}
+
+enum FailedFeedPlan {
+    Unshifted(UnshiftedBranch),
+    Removed,
 }
 
 #[derive(Clone, Copy)]
@@ -170,6 +174,14 @@ pub struct Context<
     /// allocating a fresh top-level `Vec` for each query.
     can_feed_extra_state_stack: RefCell<Vec<StateIndex>>,
 
+    /// Reusable plan storage for `can_feed`/`can_accept`/`can_panic`.
+    ///
+    /// These queries share the same CFG-only planner as real feeds, but keep their buffers
+    /// separate because they only borrow the context immutably.
+    can_feed_plans: RefCell<Vec<GlrFeedPlan<StateIndex>>>,
+    can_feed_plan_reductions: RefCell<Vec<PlannedGlrReduction<P::NonTerm, StateIndex>>>,
+    can_feed_plan_extra_state_stacks: RefCell<Vec<Vec<StateIndex>>>,
+
     /// Decoded parser tables shared by every active GLR branch.
     ///
     /// Branches clone stack/userdata state, but they all read the same immutable runtime tables.
@@ -200,6 +212,9 @@ impl<
             feed_plan_reductions: Default::default(),
             feed_plan_extra_state_stacks: Default::default(),
             can_feed_extra_state_stack: Default::default(),
+            can_feed_plans: Default::default(),
+            can_feed_plan_reductions: Default::default(),
+            can_feed_plan_extra_state_stacks: Default::default(),
             tables: P::get_tables(),
             _phantom: std::marker::PhantomData,
         };
@@ -290,6 +305,9 @@ impl<
         );
 
         &mut self.nodes_pool[node.index()]
+    }
+    fn node_is_live(&self, node: NodeId) -> bool {
+        node.index() < self.nodes_pool.len() && !self.empty_node_indices.contains(&node)
     }
 
     /// for debugging; checks for memory leak, not freed nodes, etc.
@@ -388,6 +406,31 @@ impl<
                 }
             }
             break parent;
+        }
+    }
+    pub(crate) fn try_remove_node_subtree_recursive(&mut self, node: NodeId) -> Option<NodeId> {
+        let children = self
+            .nodes_pool
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, child)| {
+                let child_id = NodeId::new(idx);
+                if !self.empty_node_indices.contains(&child_id) && child.parent == Some(node) {
+                    Some(child_id)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        for child in children {
+            self.try_remove_node_subtree_recursive(child);
+        }
+
+        if self.node_is_live(node) {
+            self.try_remove_node_recursive(node)
+        } else {
+            None
         }
     }
 
@@ -634,68 +677,6 @@ impl<
             reduce_node.tree_stack.append(&mut node_tree_stack);
 
             reduce_node_idx
-        }
-    }
-
-    /// give lookahead token to parser, and check if there is any reduce action.
-    /// returns false if shift action is revoked
-    fn reduce(
-        &mut self,
-        reduce_rule: usize,
-        node: NodeId,
-        term: &crate::TerminalSymbol<P::Term>,
-        shift: &mut bool,
-        can_reuse_node_for_reduce: bool,
-        userdata: &mut Data::UserData,
-    ) -> Result<NodeId, Data::ReduceActionError>
-    where
-        Data: Clone,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        use crate::Location;
-        let rule = *self.tables.rule(reduce_rule);
-        let count = rule.len;
-        let mut new_location = Data::Location::new(self.location_iter(node), count);
-
-        let node_to_shift = self.prepare_reduce_node(node, count, count, can_reuse_node_for_reduce);
-
-        let state = self.state(node_to_shift);
-        let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(state, rule.lhs) else {
-            unreachable!(
-                "Failed to shift non-terminal: {:?} in state {}",
-                rule.lhs, state
-            );
-        };
-
-        let node = self.node_mut(node_to_shift);
-        #[cfg(feature = "tree")]
-        let trees = node.tree_stack.split_off(node.tree_stack.len() - count);
-
-        match Data::reduce_action(
-            &mut node.data_stack,
-            &mut node.location_stack,
-            next_nonterm_shift.push,
-            reduce_rule,
-            shift,
-            term,
-            userdata,
-            &mut new_location,
-        ) {
-            Ok(_) => {
-                node.state_stack.push(next_nonterm_shift.state);
-                node.location_stack.push(new_location);
-                #[cfg(feature = "tree")]
-                {
-                    node.tree_stack
-                        .push(crate::tree::Tree::new_nonterminal(rule.lhs.clone(), trees));
-                }
-                Ok(node_to_shift)
-            }
-            Err(err) => {
-                self.try_remove_node_recursive(node_to_shift);
-                Err(err)
-            }
         }
     }
 
@@ -1038,6 +1019,17 @@ impl<
         self.feed_plan_extra_state_stacks.push(stack);
     }
 
+    fn take_extra_state_stack(scratch: &mut Vec<Vec<StateIndex>>) -> Vec<StateIndex> {
+        let mut stack = scratch.pop().unwrap_or_default();
+        stack.clear();
+        stack
+    }
+
+    fn put_extra_state_stack(scratch: &mut Vec<Vec<StateIndex>>, mut stack: Vec<StateIndex>) {
+        stack.clear();
+        scratch.push(stack);
+    }
+
     fn simulate_planned_reduction(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
@@ -1095,6 +1087,36 @@ impl<
         node_and_len: Option<(NodeId, NonZeroUsize)>,
         class: P::TermClass,
     ) -> Option<usize> {
+        let mut feed_plans = std::mem::take(&mut self.feed_plans);
+        let mut feed_plan_reductions = std::mem::take(&mut self.feed_plan_reductions);
+        let mut feed_plan_extra_state_stacks =
+            std::mem::take(&mut self.feed_plan_extra_state_stacks);
+
+        let plan_id = self.plan_feed_impl_with_storage(
+            extra_state_stack,
+            node_and_len,
+            class,
+            &mut feed_plans,
+            &mut feed_plan_reductions,
+            &mut feed_plan_extra_state_stacks,
+        );
+
+        self.feed_plans = feed_plans;
+        self.feed_plan_reductions = feed_plan_reductions;
+        self.feed_plan_extra_state_stacks = feed_plan_extra_state_stacks;
+
+        plan_id
+    }
+
+    fn plan_feed_impl_with_storage(
+        &self,
+        extra_state_stack: &mut Vec<StateIndex>,
+        node_and_len: Option<(NodeId, NonZeroUsize)>,
+        class: P::TermClass,
+        feed_plans: &mut Vec<GlrFeedPlan<StateIndex>>,
+        feed_plan_reductions: &mut Vec<PlannedGlrReduction<P::NonTerm, StateIndex>>,
+        feed_plan_extra_state_stacks: &mut Vec<Vec<StateIndex>>,
+    ) -> Option<usize> {
         use crate::parser::table::ReduceRules;
 
         let last_state = self.simulated_state(extra_state_stack, node_and_len);
@@ -1103,8 +1125,8 @@ impl<
             None => (None, None),
         };
 
-        let plan_id = self.feed_plans.len();
-        self.feed_plans.push(GlrFeedPlan {
+        let plan_id = feed_plans.len();
+        feed_plans.push(GlrFeedPlan {
             shift,
             first_reduction: None,
         });
@@ -1115,8 +1137,8 @@ impl<
         if let Some(reduce_rules) = reduce {
             for reduce_rule in reduce_rules.to_iter() {
                 let rule_index = reduce_rule.into_usize();
-                let reduction_id = self.feed_plan_reductions.len();
-                self.feed_plan_reductions.push(PlannedGlrReduction {
+                let reduction_id = feed_plan_reductions.len();
+                feed_plan_reductions.push(PlannedGlrReduction {
                     rule_index,
                     tokens_len: 0,
                     lhs: self.tables.rule(rule_index).lhs,
@@ -1128,8 +1150,9 @@ impl<
                     next_sibling: None,
                 });
 
-                let plan_checkpoint = self.feed_plans.len();
-                let mut branch_extra_state_stack = self.take_feed_plan_extra_state_stack();
+                let plan_checkpoint = feed_plans.len();
+                let mut branch_extra_state_stack =
+                    Self::take_extra_state_stack(feed_plan_extra_state_stacks);
                 branch_extra_state_stack.extend_from_slice(extra_state_stack);
 
                 let (next_node_and_len, lhs, tokens_len, next_nonterm_shift) = self
@@ -1139,12 +1162,18 @@ impl<
                         rule_index,
                     );
 
-                let next_plan =
-                    self.plan_feed_impl(&mut branch_extra_state_stack, next_node_and_len, class);
-                self.put_feed_plan_extra_state_stack(branch_extra_state_stack);
+                let next_plan = self.plan_feed_impl_with_storage(
+                    &mut branch_extra_state_stack,
+                    next_node_and_len,
+                    class,
+                    feed_plans,
+                    feed_plan_reductions,
+                    feed_plan_extra_state_stacks,
+                );
+                Self::put_extra_state_stack(feed_plan_extra_state_stacks, branch_extra_state_stack);
 
                 if let Some(next_plan) = next_plan {
-                    self.feed_plan_reductions[reduction_id] = PlannedGlrReduction {
+                    feed_plan_reductions[reduction_id] = PlannedGlrReduction {
                         rule_index,
                         tokens_len,
                         lhs,
@@ -1154,25 +1183,24 @@ impl<
                     };
 
                     if let Some(previous_reduction) = previous_reduction {
-                        self.feed_plan_reductions[previous_reduction].next_sibling =
-                            Some(reduction_id);
+                        feed_plan_reductions[previous_reduction].next_sibling = Some(reduction_id);
                     } else {
                         first_reduction = Some(reduction_id);
                     }
                     previous_reduction = Some(reduction_id);
                 } else {
-                    self.feed_plans.truncate(plan_checkpoint);
-                    self.feed_plan_reductions.truncate(reduction_id);
+                    feed_plans.truncate(plan_checkpoint);
+                    feed_plan_reductions.truncate(reduction_id);
                 }
             }
         }
 
         if shift.is_none() && first_reduction.is_none() {
-            debug_assert_eq!(self.feed_plans.len(), plan_id + 1);
-            self.feed_plans.pop();
+            debug_assert_eq!(feed_plans.len(), plan_id + 1);
+            feed_plans.pop();
             None
         } else {
-            self.feed_plans[plan_id] = GlrFeedPlan {
+            feed_plans[plan_id] = GlrFeedPlan {
                 shift,
                 first_reduction,
             };
@@ -1229,7 +1257,7 @@ impl<
         term: TerminalSymbol<P::Term>,
         location: Data::Location,
         userdata: Data::UserData,
-    ) -> Result<(), UnshiftedBranch<Data::UserData>>
+    ) -> Result<(), FailedFeedPlan>
     where
         Data: Clone,
         Data::UserData: Clone,
@@ -1240,9 +1268,10 @@ impl<
 
         if let Some(mut reduction_id) = plan.first_reduction {
             let mut shifted = false;
-            let mut reduced_node = node;
-            let mut reduced_userdata = None;
+            let mut failed_branch = None;
             let mut shift_allowed = false;
+            let mut node_removed = false;
+            let mut reused_node_kept = false;
 
             loop {
                 let reduction = self.feed_plan_reductions[reduction_id];
@@ -1261,6 +1290,7 @@ impl<
                 ) {
                     Ok(next_node) => {
                         shift_allowed |= pass;
+                        let mut branch_accepted = false;
                         match self.apply_feed_plan(
                             reduction.next_plan,
                             next_node,
@@ -1268,15 +1298,26 @@ impl<
                             location.clone(),
                             branch_userdata,
                         ) {
-                            Ok(()) => shifted = true,
-                            Err(unshifted) => {
-                                reduced_node = unshifted.node;
-                                reduced_userdata = Some(unshifted.userdata);
+                            Ok(()) => {
+                                shifted = true;
+                                branch_accepted = true;
                             }
+                            Err(FailedFeedPlan::Unshifted(unshifted)) => {
+                                if let Some(previous) = failed_branch.replace(unshifted) {
+                                    self.try_remove_node_subtree_recursive(previous.node);
+                                }
+                            }
+                            Err(FailedFeedPlan::Removed) => {}
+                        }
+                        if can_reuse_node_for_reduce {
+                            reused_node_kept = branch_accepted;
                         }
                     }
                     Err(err) => {
                         shift_allowed |= pass;
+                        if can_reuse_node_for_reduce {
+                            node_removed = true;
+                        }
                         self.reduce_errors.push(err);
                     }
                 }
@@ -1292,20 +1333,35 @@ impl<
             if !shift_allowed {
                 if shift.is_some() {
                     self.try_remove_node_recursive(node);
+                    node_removed = true;
                     shift = None;
                 }
             }
 
             if let Some(shift) = shift {
+                if let Some(unshifted) = failed_branch {
+                    self.try_remove_node_subtree_recursive(unshifted.node);
+                }
                 self.shift_terminal_for_plan(node, shift, term, location, userdata);
                 Ok(())
             } else if shifted {
+                if let Some(unshifted) = failed_branch {
+                    self.try_remove_node_subtree_recursive(unshifted.node);
+                }
+                if !node_removed
+                    && !reused_node_kept
+                    && self.node_is_live(node)
+                    && self.node(node).is_leaf()
+                {
+                    self.try_remove_node_recursive(node);
+                }
                 Ok(())
             } else {
-                Err(UnshiftedBranch {
-                    node: reduced_node,
-                    userdata: reduced_userdata.unwrap_or(userdata),
-                })
+                match failed_branch {
+                    Some(failed_branch) => Err(FailedFeedPlan::Unshifted(failed_branch)),
+                    None if node_removed => Err(FailedFeedPlan::Removed),
+                    None => Err(FailedFeedPlan::Unshifted(UnshiftedBranch { node })),
+                }
             }
         } else if let Some(shift) = plan.shift {
             self.shift_terminal_for_plan(node, shift, term, location, userdata);
@@ -1315,182 +1371,16 @@ impl<
         }
     }
 
-    fn feed_location_impl(
-        &mut self,
-        node: NodeId,
-        term: TerminalSymbol<P::Term>,
-        class: P::TermClass,
-        location: Data::Location,
-        userdata: Data::UserData,
-    ) -> Result<(), UnshiftedBranch<Data::UserData>>
-    where
-        Data: Clone,
-        Data::UserData: Clone,
-        P::Term: Clone,
-        P::NonTerm: std::fmt::Debug,
-    {
-        debug_assert!(self.node(node).is_leaf());
-        use crate::parser::table::ReduceRules;
+    fn discard_branch_node(&mut self, node: NodeId) {
+        self.try_remove_node_subtree_recursive(node);
+    }
 
-        let last_state = self.state(node);
-        let (shift_state, reduce) = match self.tables.term_action(last_state, class) {
-            Some(action) => (action.shift(), action.reduce()),
-            None => (None, None),
-        };
-        if let Some(reduce_rules) = reduce {
-            let mut shift = shift_state;
-
-            let mut shifted = false;
-            let mut reduced_node = node;
-            let mut reduced_userdata = None;
-
-            // Each GLR branch receives its own user data copy before running reduce actions.
-            let mut shift_ = false;
-            let l = reduce_rules.to_iter().len();
-            for (idx, reduce_rule) in reduce_rules.to_iter().enumerate() {
-                let mut pass = shift.is_some();
-                let mut branch_userdata = userdata.clone();
-
-                // The current node may still be needed by later reduce alternatives
-                // or by the shift branch, so only the last reduce without a pending
-                // shift is allowed to reuse it in-place.
-                let can_reuse_node_for_reduce = idx == l - 1 && shift.is_none();
-                match self.reduce(
-                    reduce_rule.into_usize(),
-                    node,
-                    &term,
-                    &mut pass,
-                    can_reuse_node_for_reduce,
-                    &mut branch_userdata,
-                ) {
-                    Ok(next_node) => {
-                        shift_ |= pass;
-                        // reduce recursively
-
-                        match self.feed_location_impl(
-                            next_node,
-                            term.clone(),
-                            class,
-                            location.clone(),
-                            branch_userdata,
-                        ) {
-                            Ok(_) => {
-                                shifted = true;
-                            }
-                            Err(unshifted) => {
-                                reduced_node = unshifted.node;
-                                reduced_userdata = Some(unshifted.userdata);
-                            }
-                        }
-                    }
-                    Err(err) => {
-                        shift_ |= pass;
-                        self.reduce_errors.push(err);
-                    }
-                }
-            }
-            // if every reduce action revoked shift,
-            // then reset shift to None
-            if !shift_ {
-                if shift.is_some() {
-                    // remove node recursive
-                    self.try_remove_node_recursive(node);
-                    shift = None;
-                }
-            }
-            if let Some(shift) = shift {
-                // If `node` acquired children during the reduce loop (e.g. an
-                // empty rule created a child via `prepare_reduce_node`), it is
-                // no longer a leaf.  Pushing it directly to `next_branches` would
-                // violate the `is_leaf()` precondition of the next
-                // `feed_location_impl` call.  Instead, create a fresh leaf
-                // child that carries only the shift result.
-                let shift_node = if self.node(node).is_leaf() {
-                    node
-                } else {
-                    let new_node_idx = self.new_node_with_capacity(1);
-                    self.add_child(node, new_node_idx);
-                    new_node_idx
-                };
-
-                let node_ = self.node_mut(shift_node);
-                node_.state_stack.push(shift.state);
-                node_.location_stack.push(location.clone());
-                #[cfg(feature = "tree")]
-                node_
-                    .tree_stack
-                    .push(crate::tree::Tree::new_terminal(term.clone()));
-
-                if shift.push {
-                    match term {
-                        TerminalSymbol::Terminal(term) => {
-                            node_.data_stack.push(Data::new_terminal(term));
-                        }
-                        TerminalSymbol::Error
-                        | TerminalSymbol::Eof
-                        | TerminalSymbol::VirtualStart(_) => {
-                            node_.data_stack.push(Data::new_empty());
-                        }
-                    }
-                } else {
-                    match term {
-                        TerminalSymbol::Terminal(_)
-                        | TerminalSymbol::Error
-                        | TerminalSymbol::Eof
-                        | TerminalSymbol::VirtualStart(_) => {
-                            node_.data_stack.push(Data::new_empty());
-                        }
-                    }
-                }
-
-                self.next_branches.push(Branch::new(shift_node, userdata));
-                Ok(())
-            } else if shifted {
-                Ok(())
-            } else {
-                Err(UnshiftedBranch {
-                    node: reduced_node,
-                    userdata: reduced_userdata.unwrap_or(userdata),
-                })
-            }
-        } else if let Some(shift) = shift_state {
-            let node_ = self.node_mut(node);
-            node_.state_stack.push(shift.state);
-            node_.location_stack.push(location);
-            #[cfg(feature = "tree")]
-            node_
-                .tree_stack
-                .push(crate::tree::Tree::new_terminal(term.clone()));
-
-            if shift.push {
-                match term {
-                    TerminalSymbol::Terminal(term) => {
-                        node_.data_stack.push(Data::new_terminal(term));
-                    }
-                    TerminalSymbol::Error
-                    | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => {
-                        node_.data_stack.push(Data::new_empty());
-                    }
-                }
-            } else {
-                match term {
-                    TerminalSymbol::Terminal(_)
-                    | TerminalSymbol::Error
-                    | TerminalSymbol::Eof
-                    | TerminalSymbol::VirtualStart(_) => {
-                        node_.data_stack.push(Data::new_empty());
-                    }
-                }
-            }
-
-            self.next_branches.push(Branch::new(node, userdata));
-            Ok(())
-        } else {
-            // no reduce, no shift
-            Err(UnshiftedBranch { node, userdata })
+    fn discard_fallback_branches(&mut self) {
+        while let Some(branch) = self.fallback_branches.pop() {
+            self.discard_branch_node(branch.node);
         }
     }
+
     fn panic_mode(
         &mut self,
         mut node: NodeId,
@@ -1579,9 +1469,10 @@ impl<
             userdata,
         ) {
             Ok(()) => {}
-            Err(unshifted) => {
-                self.try_remove_node(unshifted.node);
+            Err(FailedFeedPlan::Unshifted(unshifted)) => {
+                self.try_remove_node_subtree_recursive(unshifted.node);
             }
+            Err(FailedFeedPlan::Removed) => {}
         }
     }
     /// Feed one terminal with location to parser, and update state stack.
@@ -1632,17 +1523,20 @@ impl<
 
                 // Once the CFG admits this terminal, later failures are semantic/runtime branch
                 // pruning and must not be reclassified as syntax recovery input.
-                if self
-                    .apply_feed_plan(
-                        plan_id,
-                        node,
-                        TerminalSymbol::Terminal(term.clone()),
-                        location.clone(),
-                        userdata,
-                    )
-                    .is_ok()
-                {
-                    accepted_branch_found = true;
+                match self.apply_feed_plan(
+                    plan_id,
+                    node,
+                    TerminalSymbol::Terminal(term.clone()),
+                    location.clone(),
+                    userdata,
+                ) {
+                    Ok(()) => {
+                        accepted_branch_found = true;
+                    }
+                    Err(FailedFeedPlan::Unshifted(unshifted)) => {
+                        self.try_remove_node_subtree_recursive(unshifted.node);
+                    }
+                    Err(FailedFeedPlan::Removed) => {}
                 }
             } else {
                 // Keep grammatical `NoAction` branches only as recovery candidates; a surviving
@@ -1706,13 +1600,19 @@ impl<
                     ) {
                         // After shifting `error`, the original lookahead is a normal feed again:
                         // it may need nullable reductions before the terminal shift is visible.
-                        let _ = self.apply_feed_plan(
+                        match self.apply_feed_plan(
                             plan_id,
                             error_node,
                             TerminalSymbol::Terminal(term.clone()),
                             location.clone(),
                             userdata,
-                        );
+                        ) {
+                            Ok(()) => {}
+                            Err(FailedFeedPlan::Unshifted(unshifted)) => {
+                                self.try_remove_node_subtree_recursive(unshifted.node);
+                            }
+                            Err(FailedFeedPlan::Removed) => {}
+                        }
                     } else {
                         // Otherwise the lookahead is part of the `error`; merge it so
                         // diagnostics report the full discarded range.
@@ -1767,7 +1667,7 @@ impl<
                     .iter()
                     .map(|branch| self.state(branch.node))
                     .collect();
-                self.fallback_branches.clear();
+                self.discard_fallback_branches();
                 Some(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
@@ -1779,166 +1679,28 @@ impl<
             Ok(FeedSuccess { errors })
         }
     }
-    /// Feed one terminal with location to parser, and update state stack.
-    fn can_feed_impl(
+    fn can_plan_feed(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
-        mut node_and_len: Option<(NodeId, NonZeroUsize)>,
+        node_and_len: Option<(NodeId, NonZeroUsize)>,
         class: P::TermClass,
     ) -> bool {
-        let last_state = extra_state_stack
-            .last()
-            .copied()
-            .map(Index::into_usize)
-            .unwrap_or_else(|| {
-                node_and_len
-                    .map(|(node, stack_len)| {
-                        self.node(node).state_stack[stack_len.get() - 1].into_usize()
-                    })
-                    .unwrap_or(0)
-            });
-        let (shift_state, reduce) = match self.tables.term_action(last_state, class) {
-            Some(action) => (action.shift(), action.reduce()),
-            None => (None, None),
-        };
-        if let Some(reduce_rules) = reduce {
-            let shift = shift_state;
+        let mut feed_plans = self.can_feed_plans.borrow_mut();
+        let mut feed_plan_reductions = self.can_feed_plan_reductions.borrow_mut();
+        let mut feed_plan_extra_state_stacks = self.can_feed_plan_extra_state_stacks.borrow_mut();
 
-            use crate::parser::table::ReduceRules;
+        feed_plans.clear();
+        feed_plan_reductions.clear();
 
-            if shift.is_some() {
-                return true;
-            }
-            let mut reduces = reduce_rules.to_iter();
-            match reduces.len() {
-                0 => return false, // since reduce is `Some`, this should be unreachable
-                // if there is only one reduce rule, we can just reduce and shift with nonterminal
-                1 => {
-                    let rule_index = reduces.next().unwrap().into_usize();
-                    let rule_info = *self.tables.rule(rule_index);
-                    let tokens_len = rule_info.len;
-
-                    // pop state stack
-                    if tokens_len <= extra_state_stack.len() {
-                        extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
-                    } else {
-                        let left = tokens_len - extra_state_stack.len();
-                        extra_state_stack.clear();
-
-                        let (node, len) = node_and_len.unwrap();
-                        let len = len.get();
-
-                        if left < len {
-                            node_and_len = Some((node, NonZeroUsize::new(len - left).unwrap()));
-                        } else {
-                            let parent = self.node(node).parent;
-                            if let Some(parent) = parent {
-                                node_and_len = self
-                                    .skip_last_n(parent, left - len)
-                                    .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
-                            } else {
-                                // reached root node
-                                node_and_len = None;
-                            }
-                        }
-                    }
-
-                    // shift with reduced nonterminal
-                    let last_state = extra_state_stack
-                        .last()
-                        .copied()
-                        .map(Index::into_usize)
-                        .unwrap_or_else(|| {
-                            node_and_len
-                                .map(|(node, stack_len)| {
-                                    self.node(node).state_stack[stack_len.get() - 1].into_usize()
-                                })
-                                .unwrap_or(0)
-                        });
-                    if let Some(next_state_id) =
-                        self.tables.shift_goto_nonterm(last_state, rule_info.lhs)
-                    {
-                        extra_state_stack.push(next_state_id.state);
-                    } else {
-                        unreachable!(
-                            "unreachable: nonterminal shift should always succeed after reduce operation. \
-Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a parser state machine bug.",
-                            rule_info.lhs.as_str(),
-                            rule_index
-                        );
-                    }
-
-                    self.can_feed_impl(extra_state_stack, node_and_len, class)
-                }
-                // if there are multiple reduce rules, we need to check all of them, create new state stack for each reduce rule, and check if any of them can shift the terminal
-                _ => {
-                    for reduce_rule in reduces {
-                        let reduce_rule = *self.tables.rule(reduce_rule.into_usize());
-                        let tokens_len = reduce_rule.len;
-
-                        let mut extra_state_stack = extra_state_stack.clone();
-
-                        // pop state stack
-                        let new_node_and_len = if tokens_len <= extra_state_stack.len() {
-                            extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
-                            node_and_len
-                        } else {
-                            let left = tokens_len - extra_state_stack.len();
-                            extra_state_stack.clear();
-
-                            let (node, len) = node_and_len.unwrap();
-                            let len = len.get();
-
-                            if left < len {
-                                Some((node, NonZeroUsize::new(len - left).unwrap()))
-                            } else {
-                                let parent = self.node(node).parent;
-                                if let Some(parent) = parent {
-                                    self.skip_last_n(parent, left - len)
-                                        .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()))
-                                } else {
-                                    // reached root node
-                                    None
-                                }
-                            }
-                        };
-
-                        // shift with reduced nonterminal
-                        let last_state = extra_state_stack
-                            .last()
-                            .copied()
-                            .map(Index::into_usize)
-                            .unwrap_or_else(|| {
-                                new_node_and_len
-                                    .map(|(node, stack_len)| {
-                                        self.node(node).state_stack[stack_len.get() - 1]
-                                            .into_usize()
-                                    })
-                                    .unwrap_or(0)
-                            });
-
-                        if let Some(next_state_id) =
-                            self.tables.shift_goto_nonterm(last_state, reduce_rule.lhs)
-                        {
-                            extra_state_stack.push(next_state_id.state);
-                        } else {
-                            unreachable!(
-                                "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
-                                reduce_rule.lhs.as_str(),
-                                last_state
-                            );
-                        }
-
-                        if self.can_feed_impl(&mut extra_state_stack, new_node_and_len, class) {
-                            return true;
-                        }
-                    }
-                    false
-                }
-            }
-        } else {
-            shift_state.is_some()
-        }
+        self.plan_feed_impl_with_storage(
+            extra_state_stack,
+            node_and_len,
+            class,
+            &mut feed_plans,
+            &mut feed_plan_reductions,
+            &mut feed_plan_extra_state_stacks,
+        )
+        .is_some()
     }
 
     /// Check if `term` can be feeded to current state.
@@ -1953,7 +1715,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             extra_state_stack.clear();
 
             let node_and_len = self.branch_node_and_len(node);
-            self.can_feed_impl(&mut extra_state_stack, node_and_len, class)
+            self.can_plan_feed(&mut extra_state_stack, node_and_len, class)
         })
     }
 
@@ -1964,9 +1726,9 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             return false;
         }
 
-        let mut extra_state_stack = Vec::new();
+        let mut extra_state_stack = self.can_feed_extra_state_stack.borrow_mut();
 
-        self.current_branches.iter().any(move |branch| {
+        self.current_branches.iter().any(|branch| {
             let mut node = branch.node;
             let mut len = self.node(node).len();
 
@@ -1974,7 +1736,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 loop {
                     extra_state_stack.clear();
 
-                    if self.can_feed_impl(
+                    if self.can_plan_feed(
                         &mut extra_state_stack,
                         Some((node, NonZeroUsize::new(len).unwrap())),
                         P::TermClass::ERROR,
@@ -2021,19 +1783,37 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
             Data::Location::new(std::iter::empty(), 0)
         };
 
+        let mut extra_state_stack = self.take_feed_plan_extra_state_stack();
         while let Some(Branch { node, userdata }) = self.current_branches.pop() {
             let node_eof_location = Data::Location::new(self.location_iter(node), 0);
-            if let Err(unshifted) = self.feed_location_impl(
-                node,
-                TerminalSymbol::Eof,
+
+            self.feed_plans.clear();
+            self.feed_plan_reductions.clear();
+            extra_state_stack.clear();
+
+            if let Some(plan_id) = self.plan_feed_impl(
+                &mut extra_state_stack,
+                self.branch_node_and_len(node),
                 P::TermClass::EOF,
-                node_eof_location,
-                userdata,
             ) {
-                self.fallback_branches
-                    .push(Branch::new(unshifted.node, unshifted.userdata));
+                match self.apply_feed_plan(
+                    plan_id,
+                    node,
+                    TerminalSymbol::Eof,
+                    node_eof_location,
+                    userdata,
+                ) {
+                    Ok(()) => {}
+                    Err(FailedFeedPlan::Unshifted(unshifted)) => {
+                        self.try_remove_node_subtree_recursive(unshifted.node);
+                    }
+                    Err(FailedFeedPlan::Removed) => {}
+                }
+            } else {
+                self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
+        self.put_feed_plan_extra_state_stack(extra_state_stack);
 
         // next_branches is empty; invalid terminal was given
         // check for panic mode
@@ -2048,14 +1828,15 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                 states: self.states().collect(),
             })
         } else {
+            self.discard_fallback_branches();
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
             Ok(())
         }
     }
     /// Check if current context can be terminated and get the start value.
     pub fn can_accept(&self) -> bool {
-        let mut extra_state_stack = Vec::new();
-        self.current_branches.iter().any(move |branch| {
+        let mut extra_state_stack = self.can_feed_extra_state_stack.borrow_mut();
+        self.current_branches.iter().any(|branch| {
             let node = branch.node;
             extra_state_stack.clear();
 
@@ -2068,7 +1849,7 @@ Failed to shift nonterminal '{}' after reducing rule '{}'. This indicates a pars
                     Some((node, NonZeroUsize::new(node_.len()).unwrap()))
                 }
             };
-            self.can_feed_impl(&mut extra_state_stack, node_and_len, P::TermClass::EOF)
+            self.can_plan_feed(&mut extra_state_stack, node_and_len, P::TermClass::EOF)
         })
     }
 }
@@ -2111,6 +1892,9 @@ where
             feed_plan_reductions: Default::default(),
             feed_plan_extra_state_stacks: Default::default(),
             can_feed_extra_state_stack: Default::default(),
+            can_feed_plans: Default::default(),
+            can_feed_plan_reductions: Default::default(),
+            can_feed_plan_extra_state_stacks: Default::default(),
             tables: self.tables,
             _phantom: std::marker::PhantomData,
         }

@@ -383,6 +383,43 @@ mod glr_ambiguous_concatenation {
     }
 }
 
+mod glr_can_feed_planning {
+    use rusty_lr::lr1;
+
+    lr1! {
+        %glr;
+        %nooptim;
+        %tokentype char;
+        %start S;
+
+        S(&'static str)
+            : A 'x' {
+                "x"
+            }
+            | B 'y' {
+                "y"
+            }
+            | Empty {
+                "empty"
+            }
+            ;
+
+        A(()): Empty { () };
+        B(()): Empty { () };
+        Empty(()): "" { () };
+    }
+
+    #[test]
+    fn glr_can_feed_and_can_accept_reuse_feed_planning_through_reduce_chains() {
+        let ctx = SContext::with_default_userdata();
+
+        assert!(ctx.can_feed(&'x'));
+        assert!(ctx.can_feed(&'y'));
+        assert!(!ctx.can_feed(&'z'));
+        assert!(ctx.can_accept());
+    }
+}
+
 mod glr_dynamic_precedence {
     use rusty_lr::lr1;
 
@@ -569,9 +606,216 @@ mod reduce_action_errors {
                 .errors
                 .expect("failed recovery branch should be reported");
             assert_eq!(errors.reduce_action_errors, ["bad recovery branch"]);
+            ctx.debug_check();
 
             ctx.feed('s').unwrap();
+            ctx.debug_check();
             assert_eq!(ctx.accept().unwrap(), ("recovered", ()));
+        }
+    }
+
+    mod glr_failed_sibling_cleanup {
+        use rusty_lr::lr1;
+
+        // One nullable sibling succeeds, while another reaches a deeper reduce-action failure.
+        // The failed branch must be detached from the GSS when the successful sibling survives.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %error &'static str;
+            %start S;
+
+            S(&'static str)
+                : Good GoodTail {
+                    "good"
+                }
+                | Bad BadTail {
+                    "bad"
+                }
+                ;
+
+            Good(()): "" { () };
+            GoodTail(()): 'x' { () };
+
+            Bad(()): "" { () };
+            BadTail(()): BadReduce 'x' { () };
+            BadReduce(()): "" {
+                if true {
+                    return Err("bad nested branch");
+                }
+                ()
+            };
+        }
+
+        #[test]
+        fn glr_feed_cleans_failed_sibling_nodes_when_another_sibling_survives() {
+            let mut ctx = SContext::with_default_userdata();
+            let success = ctx.feed('x').unwrap();
+
+            let errors = success
+                .errors
+                .expect("failed sibling branch should be reported");
+            assert_eq!(errors.reduce_action_errors, ["bad nested branch"]);
+
+            ctx.debug_check();
+            assert_eq!(ctx.accept().unwrap(), ("good", ()));
+        }
+    }
+
+    mod glr_no_action_sibling_cleanup {
+        use rusty_lr::lr1;
+
+        // Feeding `p` creates two live GLR branches. The following `q` keeps only the `A`
+        // branch, so the `B` branch is a grammatical NoAction sibling and must be removed.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %start S;
+
+            S(&'static str)
+                : A 'q' {
+                    "a"
+                }
+                | B 'r' {
+                    "b"
+                }
+                ;
+
+            A(()): X 'p' { () };
+            B(()): Y 'p' { () };
+            X(()): 'x' { () };
+            Y(()): 'x' { () };
+        }
+
+        #[test]
+        fn glr_feed_cleans_no_action_sibling_nodes_when_another_branch_survives() {
+            let mut ctx = SContext::with_default_userdata();
+
+            ctx.feed('x').unwrap();
+            ctx.feed('p').unwrap();
+            ctx.debug_check();
+
+            let success = ctx.feed('q').unwrap();
+            assert!(success.errors.is_some());
+
+            ctx.debug_check();
+            assert_eq!(ctx.accept().unwrap(), ("a", ()));
+        }
+    }
+
+    mod glr_panic_mode_node_cleanup {
+        use rusty_lr::lr1;
+
+        // The `abc` branch lets `b` be shifted normally. When the next token is invalid,
+        // recovery must pop that shifted `b` node back to the state after `a`, where
+        // `error 's'` is available. The popped node must be removed from the GSS.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %start S;
+
+            S(&'static str)
+                : 'a' error 's' {
+                    "recovered"
+                }
+                | 'a' 'b' 'c' {
+                    "abc"
+                }
+                ;
+        }
+
+        #[test]
+        fn glr_panic_mode_cleans_nodes_popped_during_recovery() {
+            let mut ctx = SContext::with_default_userdata();
+
+            ctx.feed('a').unwrap();
+            ctx.feed('b').unwrap();
+            ctx.debug_check();
+            assert!(ctx.can_panic());
+
+            ctx.feed('x').unwrap();
+            ctx.debug_check();
+
+            ctx.feed('s').unwrap();
+            ctx.debug_check();
+            assert_eq!(ctx.accept().unwrap(), ("recovered", ()));
+        }
+    }
+
+    mod glr_conflict_free_reduce_reuse {
+        use rusty_lr::{Location, lr1};
+        use std::sync::atomic::{AtomicUsize, Ordering};
+
+        static DATA_CLONES: AtomicUsize = AtomicUsize::new(0);
+        static WATCHED_LOCATION_CLONES: AtomicUsize = AtomicUsize::new(0);
+
+        #[derive(Debug, PartialEq, Eq)]
+        struct CloneWatchedValue(&'static str);
+
+        impl Clone for CloneWatchedValue {
+            fn clone(&self) -> Self {
+                DATA_CLONES.fetch_add(1, Ordering::SeqCst);
+                Self(self.0)
+            }
+        }
+
+        #[derive(Debug, PartialEq, Eq)]
+        struct CloneWatchedLocation {
+            reduced: bool,
+        }
+
+        impl Clone for CloneWatchedLocation {
+            fn clone(&self) -> Self {
+                if self.reduced {
+                    WATCHED_LOCATION_CLONES.fetch_add(1, Ordering::SeqCst);
+                }
+                Self {
+                    reduced: self.reduced,
+                }
+            }
+        }
+
+        impl Location for CloneWatchedLocation {
+            fn new<'a>(_stack: impl Iterator<Item = &'a Self> + Clone, len: usize) -> Self
+            where
+                Self: 'a,
+            {
+                Self { reduced: len > 0 }
+            }
+        }
+
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %location CloneWatchedLocation;
+            %start S;
+
+            S(CloneWatchedValue): Pair 'c' { Pair };
+            Pair(CloneWatchedValue): Item 'b' { Item };
+            Item(CloneWatchedValue): 'a' { CloneWatchedValue("item") };
+        }
+
+        #[test]
+        fn glr_conflict_free_reduce_does_not_clone_semantic_or_location_stacks() {
+            DATA_CLONES.store(0, Ordering::SeqCst);
+            WATCHED_LOCATION_CLONES.store(0, Ordering::SeqCst);
+
+            let mut ctx = SContext::with_default_userdata();
+            ctx.feed_location('a', CloneWatchedLocation { reduced: false })
+                .unwrap();
+            ctx.feed_location('b', CloneWatchedLocation { reduced: false })
+                .unwrap();
+            ctx.feed_location('c', CloneWatchedLocation { reduced: false })
+                .unwrap();
+
+            let (value, _) = ctx.accept().unwrap();
+            assert_eq!(value, CloneWatchedValue("item"));
+            assert_eq!(DATA_CLONES.load(Ordering::SeqCst), 0);
+            assert_eq!(WATCHED_LOCATION_CLONES.load(Ordering::SeqCst), 0);
         }
     }
 }
