@@ -37,7 +37,7 @@
     "theme": "dark"
   },
   "rustylr": {
-    "requiredServerVersion": "1.36.0"
+    "requiredServerVersion": "1.37.0"
   },
   "main": "./dist/extension.js",
   "scripts": {
