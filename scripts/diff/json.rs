@@ -2096,14 +2096,6 @@ impl ::rusty_lr::parser::Parser for Parser {
                     1188, 1191, 1194, 1197, 1200, 1215, 1215, 1230, 1239, 1245, 1245,
                     1254, 1260, 1260,
                 ];
-                static CAN_ACCEPT_ERROR: &[u8] = &[
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0,
-                ];
                 let num_rules = 99usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
@@ -2166,18 +2158,11 @@ impl ::rusty_lr::parser::Parser for Parser {
                         reduce_map.push((term_class, rules));
                         idx += 2 + len;
                     }
-                    let can_accept_error = match CAN_ACCEPT_ERROR[i] {
-                        0 => ::rusty_lr::TriState::False,
-                        1 => ::rusty_lr::TriState::True,
-                        2 => ::rusty_lr::TriState::Maybe,
-                        _ => unreachable!(),
-                    };
                     let intermediate = ::rusty_lr::parser::state::IntermediateState {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
                         ruleset: Vec::new(),
-                        can_accept_error,
                     };
                     state_rows.push(intermediate);
                 }

@@ -10,7 +10,6 @@ use super::DiagnosticCollector;
 use super::State;
 use super::States;
 use crate::TerminalSymbol;
-use crate::TriState;
 use crate::hash::HashMap;
 use crate::production::*;
 use crate::symbol::Symbol;
@@ -529,16 +528,6 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
             panic!("main state is not 0");
         }
 
-        for state in &mut states {
-            if state
-                .shift_goto_map_term
-                .contains_key(&TerminalSymbol::Error)
-                || state.reduce_map.contains_key(&TerminalSymbol::Error)
-            {
-                state.can_accept_error = TriState::True;
-            }
-        }
-
         Ok(States { states })
     }
 
@@ -676,8 +665,6 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                                 .shift_goto_map_nonterm
                                 .append(&mut state_b.shift_goto_map_nonterm);
                             state_a.reduce_map.append(&mut state_b.reduce_map);
-                            state_a.can_accept_error =
-                                state_a.can_accept_error | state_b.can_accept_error;
                             merged = true;
                         }
                     }
@@ -773,8 +760,6 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                         .or_default()
                         .append(&mut reduce_rules);
                 }
-                states[state_a].can_accept_error =
-                    states[state_a].can_accept_error | state_b.can_accept_error;
             }
         }
         let mut new_states = Vec::with_capacity(states.len() - merge_into.len());

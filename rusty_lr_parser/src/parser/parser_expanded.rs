@@ -7643,17 +7643,6 @@ impl ::rusty_lr_core::parser::Parser for Parser {
                     2709, 2709, 2718, 2721, 2721, 2721, 2730, 2739, 2739, 2748, 2748,
                     2757, 2766, 2769, 2772, 2772, 2772,
                 ];
-                static CAN_ACCEPT_ERROR: &[u8] = &[
-                    0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1, 0, 1,
-                    0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 0, 0, 0, 2, 0,
-                    2, 2, 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 1, 0, 2, 0, 2, 0, 2, 0, 2,
-                    0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                ];
                 let num_rules = 163usize;
                 let mut rules = Vec::with_capacity(num_rules);
                 for i in 0..num_rules {
@@ -7722,18 +7711,11 @@ impl ::rusty_lr_core::parser::Parser for Parser {
                         reduce_map.push((term_class, rules));
                         idx += 2 + len;
                     }
-                    let can_accept_error = match CAN_ACCEPT_ERROR[i] {
-                        0 => ::rusty_lr_core::TriState::False,
-                        1 => ::rusty_lr_core::TriState::True,
-                        2 => ::rusty_lr_core::TriState::Maybe,
-                        _ => unreachable!(),
-                    };
                     let intermediate = ::rusty_lr_core::parser::state::IntermediateState {
                         shift_goto_map_term,
                         shift_goto_map_nonterm,
                         reduce_map,
                         ruleset: Vec::new(),
-                        can_accept_error,
                     };
                     state_rows.push(intermediate);
                 }

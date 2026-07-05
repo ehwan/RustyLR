@@ -4149,10 +4149,14 @@ mod tests {
         let grammar_args =
             Grammar::parse_args(input).expect("Should recover from malformed symbol binding");
 
-        assert_eq!(grammar_args.error_recovered.len(), 1);
+        assert_eq!(grammar_args.error_recovered.len(), 2);
         assert_eq!(
             grammar_args.error_recovered[0].message,
             "Expected pattern after symbol binding"
+        );
+        assert_eq!(
+            grammar_args.error_recovered[1].message,
+            "Expected %prec or %dprec"
         );
         assert_eq!(grammar_args.rules.len(), 2);
         assert_eq!(grammar_args.rules[0].name.value(), "Expr");
