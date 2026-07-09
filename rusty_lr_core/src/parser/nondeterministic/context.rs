@@ -110,6 +110,11 @@ enum FailedFeedPlan {
 #[derive(Clone, Copy)]
 struct GlrFeedPlan<StateIndex> {
     shift: Option<crate::parser::table::ShiftTarget<StateIndex>>,
+    /// Head of the reduction alternatives for this plan.
+    ///
+    /// Reductions are stored in `FeedPlanContainer::reductions` as a sibling-linked list instead
+    /// of a nested `Vec` so that feed planning can reuse one flat allocation and roll back failed
+    /// speculative branches with `truncate`.
     first_reduction: Option<usize>,
 }
 
@@ -120,8 +125,47 @@ struct PlannedGlrReduction<NonTerm, StateIndex> {
     #[allow(dead_code)]
     lhs: NonTerm,
     next_nonterm_shift: crate::parser::table::ShiftTarget<StateIndex>,
+    /// Continuation plan after applying this reduction.
+    ///
+    /// This is an index into `FeedPlanContainer::plans`, not an owned child, to keep the recursive
+    /// plan tree in a flat arena. That avoids per-plan heap allocations and keeps speculative
+    /// planning compatible with cheap append/truncate rollback.
     next_plan: usize,
+    /// Next reduction alternative belonging to the same `GlrFeedPlan`.
+    ///
+    /// The sibling link represents a small adjacency list inside the flat `reductions` arena,
+    /// avoiding a separate `Vec<PlannedGlrReduction>` allocation for every plan node.
     next_sibling: Option<usize>,
+}
+
+/// Non-empty prefix of a graph-structured-stack node used by CFG-only simulation.
+///
+/// Feed planning does not mutate parser nodes while it simulates reductions. When a simulated
+/// reduction pops only part of a node segment, the remaining simulated stack is represented as
+/// `node.state_stack[..prefix_len]`: a subrange taken from the front of that node's contiguous
+/// stack segment. The suffix after `prefix_len` is ignored by the simulation.
+#[derive(Clone, Copy)]
+struct NodeSubRange {
+    node: NodeId,
+    prefix_len: NonZeroUsize,
+}
+
+impl NodeSubRange {
+    fn new(node: NodeId, prefix_len: NonZeroUsize) -> Self {
+        NodeSubRange { node, prefix_len }
+    }
+
+    fn node(self) -> NodeId {
+        self.node
+    }
+
+    fn len(self) -> usize {
+        self.prefix_len.get()
+    }
+
+    fn last_index(self) -> usize {
+        self.len() - 1
+    }
 }
 
 struct FeedPlanContainer<NonTerm, StateIndex> {
@@ -166,6 +210,237 @@ impl<NonTerm, StateIndex> FeedPlanContainer<NonTerm, StateIndex> {
         stack.clear();
         self.extra_state_stacks.push(stack);
     }
+
+    fn node_subrange<P, Data, Start, const MAX_REDUCE_RULES: usize>(
+        &self,
+        parser: &Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
+        node: NodeId,
+    ) -> Option<NodeSubRange>
+    where
+        P: Parser<Term = Data::Term, NonTerm = NonTerm, StateIndex = StateIndex>,
+        Data: SemanticValue<NonTerm = NonTerm>,
+        NonTerm: NonTerminal,
+        Start: StartExtractor<Data>,
+        StateIndex: Index,
+    {
+        let node_ = parser.node(node);
+        if node_.len() == 0 {
+            None
+        } else {
+            Some(NodeSubRange::new(
+                node,
+                NonZeroUsize::new(node_.len()).unwrap(),
+            ))
+        }
+    }
+
+    fn simulated_state<P, Data, Start, const MAX_REDUCE_RULES: usize>(
+        parser: &Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
+        extra_state_stack: &[StateIndex],
+        node_range: Option<NodeSubRange>,
+    ) -> usize
+    where
+        P: Parser<Term = Data::Term, NonTerm = NonTerm, StateIndex = StateIndex>,
+        Data: SemanticValue<NonTerm = NonTerm>,
+        NonTerm: NonTerminal,
+        Start: StartExtractor<Data>,
+        StateIndex: Index,
+    {
+        extra_state_stack
+            .last()
+            .copied()
+            .map(Index::into_usize)
+            .unwrap_or_else(|| {
+                node_range
+                    .map(|range| {
+                        parser.node(range.node()).state_stack[range.last_index()].into_usize()
+                    })
+                    .unwrap_or(0)
+            })
+    }
+
+    fn simulate_planned_reduction<P, Data, Start, const MAX_REDUCE_RULES: usize>(
+        parser: &Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
+        extra_state_stack: &mut Vec<StateIndex>,
+        mut node_range: Option<NodeSubRange>,
+        rule_index: usize,
+    ) -> (
+        Option<NodeSubRange>,
+        NonTerm,
+        usize,
+        crate::parser::table::ShiftTarget<StateIndex>,
+    )
+    where
+        P: Parser<Term = Data::Term, NonTerm = NonTerm, StateIndex = StateIndex>,
+        Data: SemanticValue<NonTerm = NonTerm>,
+        NonTerm: NonTerminal,
+        Start: StartExtractor<Data>,
+        StateIndex: Index,
+    {
+        let rule_info = *parser.tables.rule(rule_index);
+        let tokens_len = rule_info.len;
+
+        if tokens_len <= extra_state_stack.len() {
+            extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
+        } else {
+            let left = tokens_len - extra_state_stack.len();
+            extra_state_stack.clear();
+
+            let range = node_range.unwrap();
+            let node = range.node();
+            let len = range.len();
+
+            if left < len {
+                node_range = Some(NodeSubRange::new(
+                    node,
+                    NonZeroUsize::new(len - left).unwrap(),
+                ));
+            } else {
+                let parent = parser.node(node).parent;
+                if let Some(parent) = parent {
+                    node_range = parser.skip_last_n(parent, left - len).map(|(node, i)| {
+                        NodeSubRange::new(node, NonZeroUsize::new(i + 1).unwrap())
+                    });
+                } else {
+                    node_range = None;
+                }
+            }
+        }
+
+        let last_state = Self::simulated_state(parser, extra_state_stack, node_range);
+        let Some(next_nonterm_shift) = parser.tables.shift_goto_nonterm(last_state, rule_info.lhs)
+        else {
+            unreachable!(
+                "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
+                rule_info.lhs.as_str(),
+                last_state
+            );
+        };
+        extra_state_stack.push(next_nonterm_shift.state);
+
+        (node_range, rule_info.lhs, tokens_len, next_nonterm_shift)
+    }
+
+    fn plan_feed<P, Data, Start, const MAX_REDUCE_RULES: usize>(
+        &mut self,
+        parser: &Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
+        extra_state_stack: &mut Vec<StateIndex>,
+        node_range: Option<NodeSubRange>,
+        class: P::TermClass,
+    ) -> Option<usize>
+    where
+        P: Parser<Term = Data::Term, NonTerm = NonTerm, StateIndex = StateIndex>,
+        Data: SemanticValue<NonTerm = NonTerm>,
+        NonTerm: NonTerminal,
+        Start: StartExtractor<Data>,
+        StateIndex: Index,
+    {
+        self.clear_plans();
+        self.plan_feed_impl(parser, extra_state_stack, node_range, class)
+    }
+
+    fn plan_feed_impl<P, Data, Start, const MAX_REDUCE_RULES: usize>(
+        &mut self,
+        parser: &Context<P, Data, Start, StateIndex, MAX_REDUCE_RULES>,
+        extra_state_stack: &mut Vec<StateIndex>,
+        node_range: Option<NodeSubRange>,
+        class: P::TermClass,
+    ) -> Option<usize>
+    where
+        P: Parser<Term = Data::Term, NonTerm = NonTerm, StateIndex = StateIndex>,
+        Data: SemanticValue<NonTerm = NonTerm>,
+        NonTerm: NonTerminal,
+        Start: StartExtractor<Data>,
+        StateIndex: Index,
+    {
+        use crate::parser::table::ReduceRules;
+
+        let last_state = Self::simulated_state(parser, extra_state_stack, node_range);
+        let (shift, reduce) = match parser.tables.term_action(last_state, class) {
+            Some(action) => (action.shift(), action.reduce()),
+            None => (None, None),
+        };
+
+        let plan_id = self.plans.len();
+        self.plans.push(GlrFeedPlan {
+            shift,
+            first_reduction: None,
+        });
+
+        let mut first_reduction: Option<usize> = None;
+        let mut previous_reduction: Option<usize> = None;
+
+        if let Some(reduce_rules) = reduce {
+            for reduce_rule in reduce_rules.to_iter() {
+                let rule_index = reduce_rule.into_usize();
+                let reduction_id = self.reductions.len();
+                self.reductions.push(PlannedGlrReduction {
+                    rule_index,
+                    tokens_len: 0,
+                    lhs: parser.tables.rule(rule_index).lhs,
+                    next_nonterm_shift: crate::parser::table::ShiftTarget {
+                        state: StateIndex::from_usize_unchecked(0),
+                        push: false,
+                    },
+                    next_plan: usize::MAX,
+                    next_sibling: None,
+                });
+
+                let plan_checkpoint = self.plans.len();
+                let mut branch_extra_state_stack = self.take_extra_state_stack();
+                branch_extra_state_stack.extend_from_slice(extra_state_stack);
+
+                let (next_node_range, lhs, tokens_len, next_nonterm_shift) =
+                    Self::simulate_planned_reduction(
+                        parser,
+                        &mut branch_extra_state_stack,
+                        node_range,
+                        rule_index,
+                    );
+
+                let next_plan = self.plan_feed_impl(
+                    parser,
+                    &mut branch_extra_state_stack,
+                    next_node_range,
+                    class,
+                );
+                self.put_extra_state_stack(branch_extra_state_stack);
+
+                if let Some(next_plan) = next_plan {
+                    self.reductions[reduction_id] = PlannedGlrReduction {
+                        rule_index,
+                        tokens_len,
+                        lhs,
+                        next_nonterm_shift,
+                        next_plan,
+                        next_sibling: None,
+                    };
+
+                    if let Some(previous_reduction) = previous_reduction {
+                        self.reductions[previous_reduction].next_sibling = Some(reduction_id);
+                    } else {
+                        first_reduction = Some(reduction_id);
+                    }
+                    previous_reduction = Some(reduction_id);
+                } else {
+                    self.plans.truncate(plan_checkpoint);
+                    self.reductions.truncate(reduction_id);
+                }
+            }
+        }
+
+        if shift.is_none() && first_reduction.is_none() {
+            debug_assert_eq!(self.plans.len(), plan_id + 1);
+            self.plans.pop();
+            None
+        } else {
+            self.plans[plan_id] = GlrFeedPlan {
+                shift,
+                first_reduction,
+            };
+            Some(plan_id)
+        }
+    }
 }
 
 impl<UserData> Branch<UserData> {
@@ -202,12 +477,6 @@ pub struct Context<
     /// Reusable container for CFG-only GLR feed plans.
     feed_plan_container: FeedPlanContainer<P::NonTerm, StateIndex>,
 
-    /// Reusable simulation stack for `can_feed`.
-    ///
-    /// `can_feed` only has `&self`, so this reusable buffer uses interior mutability to avoid
-    /// allocating a fresh top-level `Vec` for each query.
-    can_feed_extra_state_stack: RefCell<Vec<StateIndex>>,
-
     /// Reusable plan container for `can_feed`/`can_accept`/`can_panic`.
     ///
     /// These queries share the same CFG-only planner as real feeds, but keep their buffers
@@ -241,7 +510,6 @@ impl<
             reduce_errors: Default::default(),
             fallback_branches: Default::default(),
             feed_plan_container: Default::default(),
-            can_feed_extra_state_stack: Default::default(),
             can_feed_plan_container: Default::default(),
             tables: P::get_tables(),
             _phantom: std::marker::PhantomData,
@@ -849,7 +1117,7 @@ impl<
     fn expected_token_impl(
         &self,
         extra_state_stack: &mut Vec<StateIndex>,
-        node_and_len: Option<(NodeId, NonZeroUsize)>,
+        node_range: Option<NodeSubRange>,
         terms: &mut std::collections::BTreeSet<P::TermClass>,
         nonterms: &mut std::collections::BTreeSet<Data::NonTerm>,
     ) where
@@ -861,9 +1129,9 @@ impl<
             .copied()
             .map(Index::into_usize)
             .unwrap_or_else(|| {
-                node_and_len
-                    .map(|(node, stack_len)| {
-                        self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                node_range
+                    .map(|range| {
+                        self.node(range.node()).state_stack[range.last_index()].into_usize()
                     })
                     .unwrap_or(0)
             });
@@ -876,24 +1144,30 @@ impl<
             reduce_nonterms.insert((prod_rule.len, prod_rule.lhs));
         }
         for &(mut tokens_len, nonterm) in reduce_nonterms.iter() {
-            let mut node_and_len = node_and_len;
+            let mut node_range = node_range;
             let mut extra_state_stack = if tokens_len > extra_state_stack.len() {
                 tokens_len -= extra_state_stack.len();
 
-                let (node, node_len) = node_and_len.unwrap();
-                let node_len = node_len.get();
+                let range = node_range.unwrap();
+                let node = range.node();
+                let node_len = range.len();
 
                 if tokens_len < node_len {
-                    node_and_len = Some((node, NonZeroUsize::new(node_len - tokens_len).unwrap()));
+                    node_range = Some(NodeSubRange::new(
+                        node,
+                        NonZeroUsize::new(node_len - tokens_len).unwrap(),
+                    ));
                 } else {
                     let parent = self.node(node).parent;
                     if let Some(parent) = parent {
-                        node_and_len = self
-                            .skip_last_n(parent, tokens_len - node_len)
-                            .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
+                        node_range =
+                            self.skip_last_n(parent, tokens_len - node_len)
+                                .map(|(node, i)| {
+                                    NodeSubRange::new(node, NonZeroUsize::new(i + 1).unwrap())
+                                });
                     } else {
                         // reached root node
-                        node_and_len = None;
+                        node_range = None;
                     }
                 }
                 Vec::new()
@@ -906,15 +1180,15 @@ impl<
                 .copied()
                 .map(Index::into_usize)
                 .unwrap_or_else(|| {
-                    node_and_len
-                        .map(|(node, stack_len)| {
-                            self.node(node).state_stack[stack_len.get() - 1].into_usize()
+                    node_range
+                        .map(|range| {
+                            self.node(range.node()).state_stack[range.last_index()].into_usize()
                         })
                         .unwrap_or(0)
                 });
             if let Some(next_state) = self.tables.shift_goto_nonterm(state, nonterm) {
                 extra_state_stack.push(next_state.state);
-                self.expected_token_impl(&mut extra_state_stack, node_and_len, terms, nonterms);
+                self.expected_token_impl(&mut extra_state_stack, node_range, terms, nonterms);
             }
         }
     }
@@ -936,20 +1210,23 @@ impl<
 
         for branch in self.current_branches.iter() {
             let node = branch.node;
-            let node_and_len = {
+            let node_range = {
                 let node_ = self.node(node);
                 if node_.len() == 0 {
                     // only root node can have 0 length stack
                     None
                 } else {
-                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
+                    Some(NodeSubRange::new(
+                        node,
+                        NonZeroUsize::new(node_.len()).unwrap(),
+                    ))
                 }
             };
             extra_state_stack.clear();
 
             self.expected_token_impl(
                 &mut extra_state_stack,
-                node_and_len,
+                node_range,
                 &mut terms,
                 &mut nonterms,
             );
@@ -1009,207 +1286,6 @@ impl<
         }
     }
 
-    fn branch_node_and_len(&self, node: NodeId) -> Option<(NodeId, NonZeroUsize)> {
-        let node_ = self.node(node);
-        if node_.len() == 0 {
-            None
-        } else {
-            Some((node, NonZeroUsize::new(node_.len()).unwrap()))
-        }
-    }
-
-    fn simulated_state(
-        &self,
-        extra_state_stack: &[StateIndex],
-        node_and_len: Option<(NodeId, NonZeroUsize)>,
-    ) -> usize {
-        extra_state_stack
-            .last()
-            .copied()
-            .map(Index::into_usize)
-            .unwrap_or_else(|| {
-                node_and_len
-                    .map(|(node, stack_len)| {
-                        self.node(node).state_stack[stack_len.get() - 1].into_usize()
-                    })
-                    .unwrap_or(0)
-            })
-    }
-
-    fn take_feed_plan_extra_state_stack(&mut self) -> Vec<StateIndex> {
-        self.feed_plan_container.take_extra_state_stack()
-    }
-
-    fn put_feed_plan_extra_state_stack(&mut self, stack: Vec<StateIndex>) {
-        self.feed_plan_container.put_extra_state_stack(stack);
-    }
-
-    fn simulate_planned_reduction(
-        &self,
-        extra_state_stack: &mut Vec<StateIndex>,
-        mut node_and_len: Option<(NodeId, NonZeroUsize)>,
-        rule_index: usize,
-    ) -> (
-        Option<(NodeId, NonZeroUsize)>,
-        P::NonTerm,
-        usize,
-        crate::parser::table::ShiftTarget<StateIndex>,
-    ) {
-        let rule_info = *self.tables.rule(rule_index);
-        let tokens_len = rule_info.len;
-
-        if tokens_len <= extra_state_stack.len() {
-            extra_state_stack.truncate(extra_state_stack.len() - tokens_len);
-        } else {
-            let left = tokens_len - extra_state_stack.len();
-            extra_state_stack.clear();
-
-            let (node, len) = node_and_len.unwrap();
-            let len = len.get();
-
-            if left < len {
-                node_and_len = Some((node, NonZeroUsize::new(len - left).unwrap()));
-            } else {
-                let parent = self.node(node).parent;
-                if let Some(parent) = parent {
-                    node_and_len = self
-                        .skip_last_n(parent, left - len)
-                        .map(|(node, i)| (node, NonZeroUsize::new(i + 1).unwrap()));
-                } else {
-                    node_and_len = None;
-                }
-            }
-        }
-
-        let last_state = self.simulated_state(extra_state_stack, node_and_len);
-        let Some(next_nonterm_shift) = self.tables.shift_goto_nonterm(last_state, rule_info.lhs)
-        else {
-            unreachable!(
-                "unreachable: nonterminal shift should always succeed after reduce operation, but failed for nonterminal '{}' from state {:?}",
-                rule_info.lhs.as_str(),
-                last_state
-            );
-        };
-        extra_state_stack.push(next_nonterm_shift.state);
-
-        (node_and_len, rule_info.lhs, tokens_len, next_nonterm_shift)
-    }
-
-    fn plan_feed_impl(
-        &mut self,
-        extra_state_stack: &mut Vec<StateIndex>,
-        node_and_len: Option<(NodeId, NonZeroUsize)>,
-        class: P::TermClass,
-    ) -> Option<usize> {
-        let mut container = std::mem::take(&mut self.feed_plan_container);
-
-        let plan_id = self.plan_feed_impl_with_container(
-            extra_state_stack,
-            node_and_len,
-            class,
-            &mut container,
-        );
-
-        self.feed_plan_container = container;
-
-        plan_id
-    }
-
-    fn plan_feed_impl_with_container(
-        &self,
-        extra_state_stack: &mut Vec<StateIndex>,
-        node_and_len: Option<(NodeId, NonZeroUsize)>,
-        class: P::TermClass,
-        container: &mut FeedPlanContainer<P::NonTerm, StateIndex>,
-    ) -> Option<usize> {
-        use crate::parser::table::ReduceRules;
-
-        let last_state = self.simulated_state(extra_state_stack, node_and_len);
-        let (shift, reduce) = match self.tables.term_action(last_state, class) {
-            Some(action) => (action.shift(), action.reduce()),
-            None => (None, None),
-        };
-
-        let plan_id = container.plans.len();
-        container.plans.push(GlrFeedPlan {
-            shift,
-            first_reduction: None,
-        });
-
-        let mut first_reduction: Option<usize> = None;
-        let mut previous_reduction: Option<usize> = None;
-
-        if let Some(reduce_rules) = reduce {
-            for reduce_rule in reduce_rules.to_iter() {
-                let rule_index = reduce_rule.into_usize();
-                let reduction_id = container.reductions.len();
-                container.reductions.push(PlannedGlrReduction {
-                    rule_index,
-                    tokens_len: 0,
-                    lhs: self.tables.rule(rule_index).lhs,
-                    next_nonterm_shift: crate::parser::table::ShiftTarget {
-                        state: StateIndex::from_usize_unchecked(0),
-                        push: false,
-                    },
-                    next_plan: usize::MAX,
-                    next_sibling: None,
-                });
-
-                let plan_checkpoint = container.plans.len();
-                let mut branch_extra_state_stack = container.take_extra_state_stack();
-                branch_extra_state_stack.extend_from_slice(extra_state_stack);
-
-                let (next_node_and_len, lhs, tokens_len, next_nonterm_shift) = self
-                    .simulate_planned_reduction(
-                        &mut branch_extra_state_stack,
-                        node_and_len,
-                        rule_index,
-                    );
-
-                let next_plan = self.plan_feed_impl_with_container(
-                    &mut branch_extra_state_stack,
-                    next_node_and_len,
-                    class,
-                    container,
-                );
-                container.put_extra_state_stack(branch_extra_state_stack);
-
-                if let Some(next_plan) = next_plan {
-                    container.reductions[reduction_id] = PlannedGlrReduction {
-                        rule_index,
-                        tokens_len,
-                        lhs,
-                        next_nonterm_shift,
-                        next_plan,
-                        next_sibling: None,
-                    };
-
-                    if let Some(previous_reduction) = previous_reduction {
-                        container.reductions[previous_reduction].next_sibling = Some(reduction_id);
-                    } else {
-                        first_reduction = Some(reduction_id);
-                    }
-                    previous_reduction = Some(reduction_id);
-                } else {
-                    container.plans.truncate(plan_checkpoint);
-                    container.reductions.truncate(reduction_id);
-                }
-            }
-        }
-
-        if shift.is_none() && first_reduction.is_none() {
-            debug_assert_eq!(container.plans.len(), plan_id + 1);
-            container.plans.pop();
-            None
-        } else {
-            container.plans[plan_id] = GlrFeedPlan {
-                shift,
-                first_reduction,
-            };
-            Some(plan_id)
-        }
-    }
-
     fn shift_terminal_for_plan(
         &mut self,
         node: NodeId,
@@ -1254,6 +1330,7 @@ impl<
 
     fn apply_feed_plan(
         &mut self,
+        container: &FeedPlanContainer<P::NonTerm, StateIndex>,
         plan_id: usize,
         node: NodeId,
         term: TerminalSymbol<P::Term>,
@@ -1266,7 +1343,7 @@ impl<
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
     {
-        let plan = self.feed_plan_container.plans[plan_id];
+        let plan = container.plans[plan_id];
 
         if let Some(mut reduction_id) = plan.first_reduction {
             let mut shifted = false;
@@ -1276,7 +1353,7 @@ impl<
             let mut reused_node_kept = false;
 
             loop {
-                let reduction = self.feed_plan_container.reductions[reduction_id];
+                let reduction = container.reductions[reduction_id];
                 let mut pass = plan.shift.is_some();
                 let mut branch_userdata = userdata.clone();
                 let can_reuse_node_for_reduce =
@@ -1294,6 +1371,7 @@ impl<
                         shift_allowed |= pass;
                         let mut branch_accepted = false;
                         match self.apply_feed_plan(
+                            container,
                             reduction.next_plan,
                             next_node,
                             term.clone(),
@@ -1389,6 +1467,7 @@ impl<
 
     fn panic_mode(
         &mut self,
+        container: &mut FeedPlanContainer<P::NonTerm, StateIndex>,
         mut node: NodeId,
         userdata: Data::UserData,
         extra_state_stack: &mut Vec<StateIndex>,
@@ -1413,11 +1492,14 @@ impl<
 
             for retained_len in (1..=node_len).rev() {
                 extra_state_stack.clear();
-                self.feed_plan_container.clear_plans();
 
-                if let Some(plan_id) = self.plan_feed_impl(
+                if let Some(plan_id) = container.plan_feed(
+                    self,
                     extra_state_stack,
-                    Some((node, NonZeroUsize::new(retained_len).unwrap())),
+                    Some(NodeSubRange::new(
+                        node,
+                        NonZeroUsize::new(retained_len).unwrap(),
+                    )),
                     P::TermClass::ERROR,
                 ) {
                     found_plan = Some(plan_id);
@@ -1467,6 +1549,7 @@ impl<
             node_.tree_stack.truncate(l);
         }
         match self.apply_feed_plan(
+            container,
             plan_id,
             node,
             TerminalSymbol::Error,
@@ -1511,23 +1594,23 @@ impl<
 
         let mut feedable_branch_found = false;
         let mut accepted_branch_found = false;
-        let mut extra_state_stack = self.take_feed_plan_extra_state_stack();
+        let mut container = std::mem::take(&mut self.feed_plan_container);
+        let mut extra_state_stack = container.take_extra_state_stack();
         while let Some(Branch { node, userdata }) = self.current_branches.pop() {
             // Plan before mutating the graph-structured stack so syntax failures stay cleanly
             // separated from semantic reduce-action failures.
-            self.feed_plan_container.clear_plans();
             extra_state_stack.clear();
+            let node_range = container.node_subrange(self, node);
 
-            if let Some(plan_id) = self.plan_feed_impl(
-                &mut extra_state_stack,
-                self.branch_node_and_len(node),
-                class,
-            ) {
+            if let Some(plan_id) =
+                container.plan_feed(self, &mut extra_state_stack, node_range, class)
+            {
                 feedable_branch_found = true;
 
                 // Once the CFG admits this terminal, later failures are semantic/runtime branch
                 // pruning and must not be reclassified as syntax recovery input.
                 match self.apply_feed_plan(
+                    &container,
                     plan_id,
                     node,
                     TerminalSymbol::Terminal(term.clone()),
@@ -1548,7 +1631,7 @@ impl<
                 self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
-        self.put_feed_plan_extra_state_stack(extra_state_stack);
+        container.put_extra_state_stack(extra_state_stack);
 
         if !accepted_branch_found {
             debug_assert!(self.next_branches.is_empty());
@@ -1558,6 +1641,7 @@ impl<
                 // replaying its plan, report that semantic/runtime failure instead.
 
                 std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+                self.feed_plan_container = container;
 
                 return Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
@@ -1567,15 +1651,16 @@ impl<
                 });
             }
 
-            let mut extra_state_stack = self.take_feed_plan_extra_state_stack();
+            let mut extra_state_stack = container.take_extra_state_stack();
             while let Some(Branch { node, userdata }) = self.fallback_branches.pop() {
                 // Recovery searches only concrete branch stacks; the implicit root state precedes
                 // the virtual start symbol and cannot accept a synthetic `error`.
-                self.panic_mode(node, userdata, &mut extra_state_stack);
+                self.panic_mode(&mut container, node, userdata, &mut extra_state_stack);
             }
-            self.put_feed_plan_extra_state_stack(extra_state_stack);
+            container.put_extra_state_stack(extra_state_stack);
 
             if self.next_branches.is_empty() {
+                self.feed_plan_container = container;
                 Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
@@ -1585,7 +1670,7 @@ impl<
             } else {
                 debug_assert!(self.current_branches.is_empty());
                 std::mem::swap(&mut self.current_branches, &mut self.next_branches);
-                let mut extra_state_stack = self.take_feed_plan_extra_state_stack();
+                let mut extra_state_stack = container.take_extra_state_stack();
                 // `error` was feed, now check with the original terminal symbol again.
                 // If the original terminal is still not accepted, it is part of the `error`.
                 while let Some(Branch {
@@ -1593,17 +1678,16 @@ impl<
                     userdata,
                 }) = self.current_branches.pop()
                 {
-                    self.feed_plan_container.clear_plans();
                     extra_state_stack.clear();
+                    let node_range = container.node_subrange(self, error_node);
 
-                    if let Some(plan_id) = self.plan_feed_impl(
-                        &mut extra_state_stack,
-                        self.branch_node_and_len(error_node),
-                        class,
-                    ) {
+                    if let Some(plan_id) =
+                        container.plan_feed(self, &mut extra_state_stack, node_range, class)
+                    {
                         // After shifting `error`, the original lookahead is a normal feed again:
                         // it may need nullable reductions before the terminal shift is visible.
                         match self.apply_feed_plan(
+                            &container,
                             plan_id,
                             error_node,
                             TerminalSymbol::Terminal(term.clone()),
@@ -1629,9 +1713,10 @@ impl<
                         self.next_branches.push(Branch::new(error_node, userdata));
                     }
                 }
-                self.put_feed_plan_extra_state_stack(extra_state_stack);
+                container.put_extra_state_stack(extra_state_stack);
 
                 if self.next_branches.is_empty() {
+                    self.feed_plan_container = container;
                     Err(ParseError {
                         term: TerminalSymbol::Terminal(term),
                         location,
@@ -1655,6 +1740,7 @@ impl<
                     std::mem::swap(&mut self.current_branches, &mut self.next_branches);
                     // Recovery consumed or absorbed the lookahead, so the original syntax failure
                     // has been transformed into live recovery branches.
+                    self.feed_plan_container = container;
                     Ok(FeedSuccess { errors })
                 }
             }
@@ -1679,36 +1765,29 @@ impl<
                 })
             };
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
+            self.feed_plan_container = container;
             Ok(FeedSuccess { errors })
         }
     }
-    fn can_plan_feed(
-        &self,
-        extra_state_stack: &mut Vec<StateIndex>,
-        node_and_len: Option<(NodeId, NonZeroUsize)>,
-        class: P::TermClass,
-    ) -> bool {
-        let mut container = self.can_feed_plan_container.borrow_mut();
-        container.clear_plans();
-
-        self.plan_feed_impl_with_container(extra_state_stack, node_and_len, class, &mut container)
-            .is_some()
-    }
-
     /// Check if `term` can be feeded to current state.
     /// This does not simulate for reduce action error, or panic mode.
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &P::Term) -> bool {
         let class = P::TermClass::from_term(term);
-        let mut extra_state_stack = self.can_feed_extra_state_stack.borrow_mut();
-        self.current_branches.iter().any(|branch| {
+        let mut container = self.can_feed_plan_container.borrow_mut();
+        let mut extra_state_stack = container.take_extra_state_stack();
+        let can_feed = self.current_branches.iter().any(|branch| {
             let node = branch.node;
             extra_state_stack.clear();
 
-            let node_and_len = self.branch_node_and_len(node);
-            self.can_plan_feed(&mut extra_state_stack, node_and_len, class)
-        })
+            let node_range = container.node_subrange(self, node);
+            container
+                .plan_feed(self, &mut extra_state_stack, node_range, class)
+                .is_some()
+        });
+        container.put_extra_state_stack(extra_state_stack);
+        can_feed
     }
 
     /// Check if current context can enter panic mode.
@@ -1718,9 +1797,10 @@ impl<
             return false;
         }
 
-        let mut extra_state_stack = self.can_feed_extra_state_stack.borrow_mut();
+        let mut container = self.can_feed_plan_container.borrow_mut();
+        let mut extra_state_stack = container.take_extra_state_stack();
 
-        self.current_branches.iter().any(|branch| {
+        let can_panic = self.current_branches.iter().any(|branch| {
             let mut node = branch.node;
             let mut len = self.node(node).len();
 
@@ -1728,11 +1808,15 @@ impl<
                 loop {
                     extra_state_stack.clear();
 
-                    if self.can_plan_feed(
-                        &mut extra_state_stack,
-                        Some((node, NonZeroUsize::new(len).unwrap())),
-                        P::TermClass::ERROR,
-                    ) {
+                    if container
+                        .plan_feed(
+                            self,
+                            &mut extra_state_stack,
+                            Some(NodeSubRange::new(node, NonZeroUsize::new(len).unwrap())),
+                            P::TermClass::ERROR,
+                        )
+                        .is_some()
+                    {
                         return true;
                     } else {
                         len -= 1;
@@ -1750,7 +1834,9 @@ impl<
 
             // State 0 is the implicit root before virtual start and cannot accept `error`.
             false
-        })
+        });
+        container.put_extra_state_stack(extra_state_stack);
+        can_panic
     }
 
     /// Feed eof symbol with default zero-length location from the end of stream.
@@ -1775,19 +1861,19 @@ impl<
             Data::Location::new(std::iter::empty(), 0)
         };
 
-        let mut extra_state_stack = self.take_feed_plan_extra_state_stack();
+        let mut container = std::mem::take(&mut self.feed_plan_container);
+        let mut extra_state_stack = container.take_extra_state_stack();
         while let Some(Branch { node, userdata }) = self.current_branches.pop() {
             let node_eof_location = Data::Location::new(self.location_iter(node), 0);
 
-            self.feed_plan_container.clear_plans();
             extra_state_stack.clear();
+            let node_range = container.node_subrange(self, node);
 
-            if let Some(plan_id) = self.plan_feed_impl(
-                &mut extra_state_stack,
-                self.branch_node_and_len(node),
-                P::TermClass::EOF,
-            ) {
+            if let Some(plan_id) =
+                container.plan_feed(self, &mut extra_state_stack, node_range, P::TermClass::EOF)
+            {
                 match self.apply_feed_plan(
+                    &container,
                     plan_id,
                     node,
                     TerminalSymbol::Eof,
@@ -1804,13 +1890,14 @@ impl<
                 self.fallback_branches.push(Branch::new(node, userdata));
             }
         }
-        self.put_feed_plan_extra_state_stack(extra_state_stack);
+        container.put_extra_state_stack(extra_state_stack);
 
         // next_branches is empty; invalid terminal was given
         // check for panic mode
         // and restore nodes to original state from fallback_branches
         if self.next_branches.is_empty() {
             std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+            self.feed_plan_container = container;
 
             Err(ParseError {
                 term: TerminalSymbol::Eof,
@@ -1821,27 +1908,25 @@ impl<
         } else {
             self.discard_fallback_branches();
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
+            self.feed_plan_container = container;
             Ok(())
         }
     }
     /// Check if current context can be terminated and get the start value.
     pub fn can_accept(&self) -> bool {
-        let mut extra_state_stack = self.can_feed_extra_state_stack.borrow_mut();
-        self.current_branches.iter().any(|branch| {
+        let mut container = self.can_feed_plan_container.borrow_mut();
+        let mut extra_state_stack = container.take_extra_state_stack();
+        let can_accept = self.current_branches.iter().any(|branch| {
             let node = branch.node;
             extra_state_stack.clear();
 
-            let node_and_len = {
-                let node_ = self.node(node);
-                if node_.len() == 0 {
-                    // only root node can have 0 length stack
-                    None
-                } else {
-                    Some((node, NonZeroUsize::new(node_.len()).unwrap()))
-                }
-            };
-            self.can_plan_feed(&mut extra_state_stack, node_and_len, P::TermClass::EOF)
-        })
+            let node_range = container.node_subrange(self, node);
+            container
+                .plan_feed(self, &mut extra_state_stack, node_range, P::TermClass::EOF)
+                .is_some()
+        });
+        container.put_extra_state_stack(extra_state_stack);
+        can_accept
     }
 }
 
@@ -1880,7 +1965,6 @@ where
             reduce_errors: Default::default(),
             fallback_branches: Default::default(),
             feed_plan_container: Default::default(),
-            can_feed_extra_state_stack: Default::default(),
             can_feed_plan_container: Default::default(),
             tables: self.tables,
             _phantom: std::marker::PhantomData,

@@ -228,7 +228,7 @@ impl<
 
     pub fn can_accept(&self) -> bool {
         // EOF acceptance uses the same grammatical feed simulation as regular terminals.
-        self.plan_feed_location(P::TermClass::EOF).is_ok()
+        self.plan_feed(P::TermClass::EOF).is_ok()
     }
 
     /// Get current state index
@@ -372,9 +372,8 @@ impl<
                 let mut pop_count = 0;
                 let mut error_plan = None;
                 for _ in self.state_stack.iter().rev() {
-                    // Reuse the same CFG simulation used by normal feeds when deciding whether
-                    // this stack prefix can actually shift the recovery token.
-                    if let Ok(plan) = self.plan_feed_location_from_stack_len(
+                    // try feeding `error` token to check if we can go to panic mode
+                    if let Ok(plan) = self.plan_feed_from_stack_len(
                         self.state_stack.len() - pop_count,
                         P::TermClass::ERROR,
                     ) {
@@ -406,7 +405,7 @@ impl<
                 self.apply_feed_plan(error_plan, TerminalSymbol::Error, error_location)?;
                 // `error` was feed, now check with the original terminal symbol again.
                 // If the original terminal is still not accepted, it is part of the `error`.
-                match self.plan_feed_location(class) {
+                match self.plan_feed(class) {
                     Ok(term_plan) => self.apply_feed_plan(term_plan, err.term, err.location),
                     Err(_) => {
                         // The terminal symbol is still not feedable, so it belongs to the `error` token.
@@ -440,7 +439,7 @@ impl<
     {
         // First build a complete grammatical feed plan. No semantic action runs until this
         // succeeds, so late `NoAction` cannot leave partially reduced stacks behind.
-        let plan = match self.plan_feed_location(class) {
+        let plan = match self.plan_feed(class) {
             Ok(plan) => plan,
             Err(err) => {
                 return Err(ParseError::NoAction(super::error::NoActionError {
@@ -456,20 +455,17 @@ impl<
     /// Simulate the deterministic LR stack operations needed to feed one terminal.
     ///
     /// The returned plan is a commit log: every reduction records its production, pop length, and
-    /// non-terminal goto, followed by the final terminal shift. Returning `NoAction` means the
-    /// caller has not mutated parser state.
-    fn plan_feed_location(
+    /// non-terminal goto, followed by the final terminal shift.
+    /// Returning `NoAction` if the terminal cannot be shifted after all reductions.
+    fn plan_feed(
         &self,
         class: P::TermClass,
     ) -> Result<FeedPlan<P::NonTerm, StateIndex>, FeedPlanError> {
-        self.plan_feed_location_from_stack_len(self.state_stack.len(), class)
+        self.plan_feed_from_stack_len(self.state_stack.len(), class)
     }
 
-    /// Build a feed plan against a retained prefix of the current state stack.
-    ///
-    /// Error recovery uses this to test candidate pop depths and then commit the selected `error`
-    /// token feed without repeating the table simulation.
-    fn plan_feed_location_from_stack_len(
+    /// Same as `plan_feed`, but simulates on a prefix of the current stack.
+    fn plan_feed_from_stack_len(
         &self,
         stack_len: usize,
         class: P::TermClass,
@@ -477,10 +473,10 @@ impl<
         let mut extra_state_stack = self.feed_extra_state_stack.borrow_mut();
         extra_state_stack.clear();
 
-        self.plan_feed_location_with_extra_stack(stack_len, class, &mut extra_state_stack)
+        self.plan_feed_with_extra_stack(stack_len, class, &mut extra_state_stack)
     }
 
-    fn plan_feed_location_with_extra_stack(
+    fn plan_feed_with_extra_stack(
         &self,
         mut stack_len: usize,
         class: P::TermClass,
@@ -553,8 +549,8 @@ impl<
 
     /// Apply a previously simulated deterministic feed plan to the real parser stacks.
     ///
-    /// At this point CFG-level success is known. Remaining errors can only come from user reduce
-    /// actions, so they are reported as semantic reduce-action failures instead of recovery input.
+    /// At this point CFG-level success is known.
+    /// Remaining errors can only come from user reduce actions, so they are reported as semantic reduce-action failures
     fn apply_feed_plan(
         &mut self,
         plan: FeedPlan<P::NonTerm, StateIndex>,
@@ -642,7 +638,7 @@ impl<
     pub fn can_feed(&self, term: &Data::Term) -> bool {
         let class = P::TermClass::from_term(term);
 
-        self.plan_feed_location(class).is_ok()
+        self.plan_feed(class).is_ok()
     }
 
     /// Check if current context can enter panic mode
@@ -656,7 +652,7 @@ impl<
         let mut stack_len = self.state_stack.len();
 
         loop {
-            match self.plan_feed_location_from_stack_len(stack_len, error) {
+            match self.plan_feed_from_stack_len(stack_len, error) {
                 Ok(_) => break true, // successfully shifted `error`
                 Err(_) => {
                     if stack_len == 0 {
