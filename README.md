@@ -167,7 +167,7 @@ context.feed(token);
 context.feed_location(token, token_location);
 ```
 
-Feed failures are classified by cause. `NoAction` means the CFG cannot consume the lookahead terminal; it leaves the parser stack unchanged and is the only failure kind that can enter panic-mode recovery. `ReduceAction` means the terminal was grammatically feedable, but a runtime semantic action failed. In GLR mode, recovery is attempted only when every active branch fails with `NoAction`.
+Feed failures are classified by cause. `NoAction` means the CFG cannot consume the lookahead terminal; it leaves the parser stack and user data unchanged, and the same context can be fed again. `NoAction` is the only failure kind that can enter panic-mode recovery. `ReduceAction` means the terminal was grammatically feedable, but a runtime semantic action failed. In deterministic mode, `ReduceAction` moves user data into the error and consumes the context; later `feed()` or `accept()` attempts return `ParseError::ConsumedContext`. `accept()` borrows the context mutably: `NoAction` leaves it reusable, while successful acceptance moves the result and user data out and consumes the context. In GLR mode, `ReduceAction` consumes only the branch that failed. If every branch fails, branches that only saw `NoAction` are restored and the context remains reusable; the whole context is consumed only when no reusable branch remains.
 
 ---
 
@@ -175,7 +175,7 @@ Feed failures are classified by cause. `NoAction` means the CFG cannot consume t
 
 RustyLR provides native support for Generalized LR (GLR) parsing. When you add the `%glr;` directive to a grammar, RustyLR generates a non-deterministic parser that forks state branches upon encountering shift/reduce or reduce/reduce conflicts. This is particularly useful for ambiguous grammars or complex programming languages.
 
-GLR `feed()` and `feed_location()` return a success value that may contain errors from branches pruned while another branch survived. Treat the feed as failed only when the returned `Result` is `Err`; inspect the success value when branch-level diagnostics matter. GLR `ParseError::branch_errors` stores `ParseErrorBranch` values, each preserving the failed branch's state and, for semantic failures, its reduce-action error.
+GLR `feed()` and `feed_location()` return a success value that may contain errors from branches pruned while another branch survived. Treat the feed as failed only when the returned `Result` is `Err`; inspect the success value when branch-level diagnostics matter. GLR `ParseError::branch_errors` stores `ParseErrorBranch` values, each preserving the failed branch's state, branch-local user data, and, for semantic failures, its reduce-action error. Surviving GLR branches remain usable after a successful feed with pruned-branch errors. When no branch survives, `NoAction` branches are restored for reuse and consumed branches are reported in the error; later operations return a consumed-context error only if no reusable branch remains. Successful `accept()`/`accept_all()` moves accepted branch results out and consumes the context.
 
 In GLR mode, user data is branch-local. When the parser forks, the current user data is cloned so each active branch owns and mutates an independent `UserData` value.
 

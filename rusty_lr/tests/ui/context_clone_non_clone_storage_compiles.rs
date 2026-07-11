@@ -10,6 +10,6 @@ lr1! {
 }
 
 fn main() {
-    let context = SContext::with_default_userdata();
+    let mut context = SContext::with_default_userdata();
     let (_value, _userdata) = context.accept().unwrap();
 }

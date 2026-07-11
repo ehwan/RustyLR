@@ -204,6 +204,7 @@ pub type ParseError = ::rusty_lr_core::parser::deterministic::ParseError<
     Lexed,
     Location,
     ::rusty_lr_core::DefaultReduceActionError,
+    GrammarArgs,
 >;
 /// A enum that represents terminal classes
 #[allow(non_camel_case_types, dead_code)]

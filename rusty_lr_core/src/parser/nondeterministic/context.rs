@@ -479,7 +479,11 @@ pub struct Context<
     /// Reusable branch-scoped errors returned while processing one lookahead.
     ///
     /// Keeping this buffer on the context avoids reallocating on every `feed` call.
-    pub(crate) branch_errors: Vec<ParseErrorBranch<Data::ReduceActionError>>,
+    pub(crate) branch_errors: Vec<ParseErrorBranch<Data::ReduceActionError, Data::UserData>>,
+
+    /// Whether this context has been consumed by successful accept or by a failure that moved or
+    /// mutated every active branch.
+    consumed: bool,
 
     /// Reusable container for CFG-only GLR feed plans.
     feed_plan_container: FeedPlanContainer<P::NonTerm, StateIndex>,
@@ -515,6 +519,7 @@ impl<
             current_branches: Default::default(),
             next_branches: Default::default(),
             branch_errors: Default::default(),
+            consumed: false,
             fallback_branches: Default::default(),
             feed_plan_container: Default::default(),
             can_feed_plan_container: Default::default(),
@@ -1044,12 +1049,34 @@ impl<
         self.current_branches.is_empty()
     }
 
+    fn is_consumed(&self) -> bool {
+        self.consumed
+    }
+
+    fn context_consumed_error(
+        &self,
+        term: TerminalSymbol<P::Term>,
+        location: Data::Location,
+    ) -> ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData> {
+        ParseError {
+            term,
+            location,
+            branch_errors: Vec::new(),
+            context_consumed: true,
+        }
+    }
+
     /// End this context and return the first successful start symbol and user data pair.
+    ///
+    /// `ParseError` from EOF leaves branches that only saw `NoAction` reusable. Successful
+    /// acceptance moves accepted branch values out and consumes the context. If every branch is
+    /// consumed by reduce-action failure or failed recovery, later feeds or accepts return a
+    /// consumed-context error.
     pub fn accept(
-        self,
+        &mut self,
     ) -> Result<
         (Start::StartType, Data::UserData),
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
     >
     where
         Data: Clone,
@@ -1061,11 +1088,15 @@ impl<
     }
 
     /// End this context and return iterator of the start value and user data from each successful path.
+    ///
+    /// EOF is handled with the same branch lifecycle as a normal feed: branches that only see
+    /// `NoAction` remain reusable, branches that fail during reduce-action replay are consumed, and
+    /// successful acceptance moves all accepted branch values out and consumes the context.
     pub fn accept_all(
-        mut self,
+        &mut self,
     ) -> Result<
         impl Iterator<Item = (Start::StartType, Data::UserData)>,
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
     >
     where
         Data: Clone,
@@ -1073,15 +1104,14 @@ impl<
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
     {
-        self.feed_eof()?;
+        if let Err(err) = self.feed_eof() {
+            return Err(err);
+        }
         // since `eof` is feeded, every node graph should be like this:
         // Root <- Start <- EOF
         //                  ^^^ here, current_node
-        let Context {
-            mut nodes_pool,
-            current_branches,
-            ..
-        } = self;
+        let mut nodes_pool = std::mem::take(&mut self.nodes_pool);
+        let current_branches = std::mem::take(&mut self.current_branches);
 
         let mut accepted = Vec::with_capacity(current_branches.len());
         for Branch { node, userdata } in current_branches {
@@ -1101,6 +1131,12 @@ impl<
             });
             accepted.push((start_value, userdata));
         }
+
+        self.empty_node_indices.clear();
+        self.next_branches.clear();
+        self.fallback_branches.clear();
+        self.branch_errors.clear();
+        self.consumed = true;
 
         Ok(accepted.into_iter())
     }
@@ -1266,8 +1302,8 @@ impl<
         &mut self,
         term: Data::Term,
     ) -> Result<
-        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError>,
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
     >
     where
         P::Term: Clone,
@@ -1406,8 +1442,11 @@ impl<
                         if can_reuse_node_for_reduce {
                             node_removed = true;
                         }
-                        self.branch_errors
-                            .push(ParseErrorBranch::reduce_action(err.state, err.source));
+                        self.branch_errors.push(ParseErrorBranch::reduce_action(
+                            err.state,
+                            err.source,
+                            branch_userdata,
+                        ));
                     }
                 }
 
@@ -1468,21 +1507,36 @@ impl<
         self.try_remove_node_subtree_recursive(node);
     }
 
-    fn no_action_branch_errors_from<'a>(
+    fn cloned_no_action_branch_errors_from<'a>(
         &'a self,
         branches: impl Iterator<Item = &'a Branch<Data::UserData>>,
-    ) -> Vec<ParseErrorBranch<Data::ReduceActionError>> {
+    ) -> Vec<ParseErrorBranch<Data::ReduceActionError, Data::UserData>>
+    where
+        Data::UserData: Clone,
+    {
         branches
-            .map(|branch| ParseErrorBranch::no_action(self.state(branch.node)))
+            .map(|branch| {
+                ParseErrorBranch::no_action(self.state(branch.node), branch.userdata.clone())
+            })
             .collect()
     }
 
-    fn push_fallback_no_action_branch_errors(&mut self) {
-        let branch_errors = self.no_action_branch_errors_from(self.fallback_branches.iter());
-        self.branch_errors.extend(branch_errors);
+    fn push_no_action_branch_error(&mut self, branch: Branch<Data::UserData>) {
+        let state = self.state(branch.node);
+        self.discard_branch_node(branch.node);
+        self.branch_errors
+            .push(ParseErrorBranch::no_action(state, branch.userdata));
     }
 
-    fn take_branch_errors(&mut self) -> Vec<ParseErrorBranch<Data::ReduceActionError>> {
+    fn push_fallback_no_action_branch_errors(&mut self) {
+        while let Some(branch) = self.fallback_branches.pop() {
+            self.push_no_action_branch_error(branch);
+        }
+    }
+
+    fn take_branch_errors(
+        &mut self,
+    ) -> Vec<ParseErrorBranch<Data::ReduceActionError, Data::UserData>> {
         std::mem::take(&mut self.branch_errors)
     }
 
@@ -1597,13 +1651,24 @@ impl<
     /// eligible for panic-mode recovery. If at least one branch can grammatically shift the
     /// terminal, recovery is not entered; failed sibling branches are returned in
     /// `FeedSuccess::errors`.
+    ///
+    /// Branch lifecycle for one lookahead:
+    ///
+    /// - A branch that only reaches `NoAction` has not mutated its stack or user data. If no branch
+    ///   succeeds, it is restored into `current_branches` and the context remains reusable.
+    /// - A branch that fails in a reduce action is consumed; its user data moves into
+    ///   `ParseErrorBranch::ReduceAction`.
+    /// - If any branch succeeds, only successful branches remain active. Failed sibling branches
+    ///   are reported in `FeedSuccess::errors`.
+    /// - If no branch succeeds and no reusable `NoAction` branch remains, the whole context is
+    ///   consumed and later feeds or accepts return a consumed-context error.
     pub fn feed_location(
         &mut self,
         term: P::Term,
         location: Data::Location,
     ) -> Result<
-        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError>,
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+        FeedSuccess<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
     >
     where
         P::Term: Clone,
@@ -1612,6 +1677,10 @@ impl<
         Data::UserData: Clone,
     {
         use crate::Location;
+
+        if self.is_consumed() {
+            return Err(self.context_consumed_error(TerminalSymbol::Terminal(term), location));
+        }
 
         self.branch_errors.clear();
         self.fallback_branches.clear();
@@ -1664,24 +1733,28 @@ impl<
             debug_assert!(self.next_branches.is_empty());
 
             if !P::ERROR_USED || feedable_branch_found {
-                // Recovery is reserved for pure syntax failure. If an admitted branch died while
-                // replaying its plan, report that semantic/runtime failure instead.
-
-                std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+                // Recovery is reserved for pure syntax failure. Branches that only saw `NoAction`
+                // have not mutated their stacks, so they are restored even when sibling branches
+                // were consumed by reduce-action failures.
                 let no_action_branch_errors =
-                    self.no_action_branch_errors_from(self.current_branches.iter());
+                    self.cloned_no_action_branch_errors_from(self.fallback_branches.iter());
+                std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
                 self.branch_errors.extend(no_action_branch_errors);
+                if self.current_branches.is_empty() {
+                    self.consumed = true;
+                }
                 self.feed_plan_container = container;
 
                 return Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
                     branch_errors: self.take_branch_errors(),
+                    context_consumed: false,
                 });
             }
 
             let no_action_branch_errors =
-                self.no_action_branch_errors_from(self.fallback_branches.iter());
+                self.cloned_no_action_branch_errors_from(self.fallback_branches.iter());
             let mut extra_state_stack = container.take_extra_state_stack();
             while let Some(Branch { node, userdata }) = self.fallback_branches.pop() {
                 // Recovery searches only concrete branch stacks; the implicit root state precedes
@@ -1693,10 +1766,12 @@ impl<
             if self.next_branches.is_empty() {
                 self.branch_errors.extend(no_action_branch_errors);
                 self.feed_plan_container = container;
+                self.consumed = true;
                 Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
                     branch_errors: self.take_branch_errors(),
+                    context_consumed: false,
                 })
             } else {
                 debug_assert!(self.current_branches.is_empty());
@@ -1748,10 +1823,12 @@ impl<
 
                 if self.next_branches.is_empty() {
                     self.feed_plan_container = container;
+                    self.consumed = true;
                     Err(ParseError {
                         term: TerminalSymbol::Terminal(term),
                         location,
                         branch_errors: self.take_branch_errors(),
+                        context_consumed: false,
                     })
                 } else {
                     // A recovered branch keeps the feed successful. Semantic failures from sibling
@@ -1763,6 +1840,7 @@ impl<
                             term: TerminalSymbol::Terminal(term),
                             location: location.clone(),
                             branch_errors: self.take_branch_errors(),
+                            context_consumed: false,
                         })
                     };
 
@@ -1786,6 +1864,7 @@ impl<
                     term: TerminalSymbol::Terminal(term),
                     location,
                     branch_errors: self.take_branch_errors(),
+                    context_consumed: false,
                 })
             };
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
@@ -1798,6 +1877,9 @@ impl<
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &P::Term) -> bool {
+        if self.is_consumed() {
+            return false;
+        }
         let class = P::TermClass::from_term(term);
         let mut container = self.can_feed_plan_container.borrow_mut();
         let mut extra_state_stack = container.take_extra_state_stack();
@@ -1816,6 +1898,9 @@ impl<
 
     /// Check if current context can enter panic mode.
     pub fn can_panic(&self) -> bool {
+        if self.is_consumed() {
+            return false;
+        }
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -1864,9 +1949,14 @@ impl<
     }
 
     /// Feed eof symbol with default zero-length location from the end of stream.
+    ///
+    /// EOF uses the same branch lifecycle as `feed_location`: successful branches move to
+    /// `next_branches`; `NoAction` branches are restored when no branch accepts; reduce-action
+    /// failures consume only their branch. The context is consumed only when no reusable branch
+    /// remains, or when acceptance succeeds and accepted values are moved out.
     fn feed_eof(
         &mut self,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -1875,17 +1965,22 @@ impl<
     {
         use crate::location::Location;
 
-        self.branch_errors.clear();
-        self.fallback_branches.clear();
-        self.next_branches.clear();
-
         let eof_location = if let Some(branch) = self.current_branches.first() {
             Data::Location::new(self.location_iter(branch.node), 0)
         } else {
             Data::Location::new(std::iter::empty(), 0)
         };
 
+        if self.is_consumed() {
+            return Err(self.context_consumed_error(TerminalSymbol::Eof, eof_location));
+        }
+
+        self.branch_errors.clear();
+        self.fallback_branches.clear();
+        self.next_branches.clear();
+
         let mut container = std::mem::take(&mut self.feed_plan_container);
+        let mut feedable_branch_found = false;
         let mut extra_state_stack = container.take_extra_state_stack();
         while let Some(Branch { node, userdata }) = self.current_branches.pop() {
             let node_eof_location = Data::Location::new(self.location_iter(node), 0);
@@ -1896,6 +1991,7 @@ impl<
             if let Some(plan_id) =
                 container.plan_feed(self, &mut extra_state_stack, node_range, P::TermClass::EOF)
             {
+                feedable_branch_found = true;
                 match self.apply_feed_plan(
                     &container,
                     plan_id,
@@ -1920,16 +2016,21 @@ impl<
         // check for panic mode
         // and restore nodes to original state from fallback_branches
         if self.next_branches.is_empty() {
-            std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
             let no_action_branch_errors =
-                self.no_action_branch_errors_from(self.current_branches.iter());
+                self.cloned_no_action_branch_errors_from(self.fallback_branches.iter());
+            std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
             self.branch_errors.extend(no_action_branch_errors);
+            if self.current_branches.is_empty() {
+                debug_assert!(feedable_branch_found);
+                self.consumed = true;
+            }
             self.feed_plan_container = container;
 
             Err(ParseError {
                 term: TerminalSymbol::Eof,
                 location: eof_location,
                 branch_errors: self.take_branch_errors(),
+                context_consumed: false,
             })
         } else {
             self.discard_fallback_branches();
@@ -1940,6 +2041,9 @@ impl<
     }
     /// Check if current context can be terminated and get the start value.
     pub fn can_accept(&self) -> bool {
+        if self.is_consumed() {
+            return false;
+        }
         let mut container = self.can_feed_plan_container.borrow_mut();
         let mut extra_state_stack = container.take_extra_state_stack();
         let can_accept = self.current_branches.iter().any(|branch| {
@@ -1989,6 +2093,7 @@ where
             current_branches: self.current_branches.clone(),
             next_branches: Default::default(),
             branch_errors: Default::default(),
+            consumed: self.consumed,
             fallback_branches: Default::default(),
             feed_plan_container: Default::default(),
             can_feed_plan_container: Default::default(),

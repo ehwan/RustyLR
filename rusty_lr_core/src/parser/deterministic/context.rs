@@ -43,6 +43,17 @@ struct FeedPlanError {
     state: usize,
 }
 
+struct NoActionFailure<Term, Location> {
+    term: TerminalSymbol<Term>,
+    location: Location,
+    state: usize,
+}
+
+enum FeedLocationError<Term, Location, ReduceAction, UserData> {
+    NoAction(NoActionFailure<Term, Location>),
+    ReduceAction(ParseError<Term, Location, ReduceAction, UserData>),
+}
+
 /// A struct that maintains the current state and the values associated with each symbol.
 pub struct Context<
     P: Parser<Term = Data::Term, NonTerm = Data::NonTerm, StateIndex = StateIndex>,
@@ -54,7 +65,12 @@ pub struct Context<
     pub state_stack: Vec<StateIndex>,
     pub(crate) data_stack: Vec<Data>,
     pub(crate) location_stack: Vec<Data::Location>,
-    pub(crate) userdata: Data::UserData,
+    /// User data owned by this deterministic parse path.
+    ///
+    /// `NoAction` is detected before semantic actions run, so it leaves this value in place and
+    /// the context can be fed again. A reduce-action error may leave semantic state partially
+    /// mutated, so it moves this value into `ParseError::ReduceAction` and consumes the context.
+    pub(crate) userdata: Option<Data::UserData>,
     /// Decoded parser tables initialized when the context is created.
     ///
     /// Keeping this reference in the context avoids repeated `Parser::get_tables()` calls in the
@@ -87,7 +103,7 @@ impl<
 
             data_stack: Vec::new(),
             location_stack: Vec::new(),
-            userdata,
+            userdata: Some(userdata),
             tables: P::get_tables(),
             feed_extra_state_stack: RefCell::new(Vec::new()),
 
@@ -133,7 +149,7 @@ impl<
 
             data_stack: Vec::with_capacity(capacity),
             location_stack: Vec::with_capacity(capacity),
-            userdata,
+            userdata: Some(userdata),
             tables: P::get_tables(),
             feed_extra_state_stack: RefCell::new(Vec::with_capacity(capacity)),
 
@@ -151,24 +167,46 @@ impl<
     {
         Self::with_capacity(capacity, Default::default())
     }
+    fn userdata_ref(&self) -> &Data::UserData {
+        self.userdata
+            .as_ref()
+            .expect("parser context userdata was moved into a previous reduce-action parse error")
+    }
+
+    fn userdata_mut_ref(&mut self) -> &mut Data::UserData {
+        self.userdata
+            .as_mut()
+            .expect("parser context userdata was moved into a previous reduce-action parse error")
+    }
+
+    fn take_userdata(&mut self) -> Data::UserData {
+        self.userdata
+            .take()
+            .expect("parser context userdata was moved into a previous reduce-action parse error")
+    }
+
+    fn is_consumed(&self) -> bool {
+        self.userdata.is_none()
+    }
+
     /// Borrow the user data owned by this context.
     pub fn userdata(&self) -> &Data::UserData {
-        &self.userdata
+        self.userdata_ref()
     }
 
     /// Borrow the user data owned by this context as an iterator.
     pub fn userdata_all(&self) -> impl Iterator<Item = &Data::UserData> {
-        std::iter::once(&self.userdata)
+        self.userdata.iter()
     }
 
     /// Mutably borrow the user data owned by this context.
     pub fn userdata_mut(&mut self) -> &mut Data::UserData {
-        &mut self.userdata
+        self.userdata_mut_ref()
     }
 
     /// Mutably borrow the user data owned by this context as an iterator.
     pub fn userdata_all_mut(&mut self) -> impl Iterator<Item = &mut Data::UserData> {
-        std::iter::once(&mut self.userdata)
+        self.userdata.iter_mut()
     }
 
     fn state_from_len(&self, stack_len: usize) -> usize {
@@ -188,11 +226,15 @@ impl<
     }
 
     /// End this context and pop the value of the start symbol from the data stack.
+    ///
+    /// `ParseError::NoAction` leaves the context reusable, so callers may feed more tokens and
+    /// call `accept` again. Successful acceptance moves the start value and user data out of the
+    /// context, consuming it. A reduce-action failure also consumes the context.
     pub fn accept(
-        mut self,
+        &mut self,
     ) -> Result<
         (Start::StartType, Data::UserData),
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
     >
     where
         Data::Term: Clone,
@@ -209,15 +251,20 @@ impl<
                 Start::BRANCH_INDEX
             )
         });
-        Ok((start, self.userdata))
+        Ok((
+            start,
+            self.userdata.take().expect(
+                "parser context userdata was moved into a previous reduce-action parse error",
+            ),
+        ))
     }
 
     /// End this context and return an iterator with the start symbol and final user data.
     pub fn accept_all(
-        self,
+        &mut self,
     ) -> Result<
         impl Iterator<Item = (Start::StartType, Data::UserData)>,
-        ParseError<Data::Term, Data::Location, Data::ReduceActionError>,
+        ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
     >
     where
         Data::Term: Clone,
@@ -228,6 +275,9 @@ impl<
 
     pub fn can_accept(&self) -> bool {
         // EOF acceptance uses the same grammatical feed simulation as regular terminals.
+        if self.is_consumed() {
+            return false;
+        }
         self.plan_feed(P::TermClass::EOF).is_ok()
     }
 
@@ -337,7 +387,7 @@ impl<
     pub fn feed(
         &mut self,
         term: Data::Term,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -347,26 +397,35 @@ impl<
     }
 
     /// Feed one terminal with location to parser, and update stacks.
+    ///
+    /// If this returns `ParseError::NoAction`, no reduce action has run for the lookahead and the
+    /// context remains reusable. If this returns `ParseError::ReduceAction`, the user data has
+    /// been moved into the error and this context is consumed. Calling `feed` or `accept` on a
+    /// consumed context returns `ParseError::ConsumedContext`.
     pub fn feed_location(
         &mut self,
         term: P::Term,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
     {
         use crate::Location;
+        if self.is_consumed() {
+            return Err(self.consumed_context_error(TerminalSymbol::Terminal(term), location));
+        }
+
         let class = P::TermClass::from_term(&term);
 
         match self.feed_location_impl(TerminalSymbol::Terminal(term), class, location) {
             Ok(()) => Ok(()),
-            Err(ParseError::NoAction(err)) => {
+            Err(FeedLocationError::NoAction(err)) => {
                 // nothing shifted; enters panic mode
 
                 // if `error` token was not used in the grammar, early return here
                 if !P::ERROR_USED {
-                    return Err(ParseError::NoAction(err));
+                    return Err(Self::no_action_error(err));
                 }
 
                 let mut pop_count = 0;
@@ -385,7 +444,7 @@ impl<
                 }
 
                 let Some(error_plan) = error_plan else {
-                    return Err(ParseError::NoAction(err));
+                    return Err(Self::no_action_error(err));
                 };
 
                 let error_location =
@@ -423,7 +482,7 @@ impl<
                     }
                 }
             }
-            Err(err) => Err(err),
+            Err(FeedLocationError::ReduceAction(err)) => Err(err),
         }
     }
 
@@ -432,7 +491,10 @@ impl<
         term: TerminalSymbol<P::Term>,
         class: P::TermClass,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<
+        (),
+        FeedLocationError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>,
+    >
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -442,7 +504,7 @@ impl<
         let plan = match self.plan_feed(class) {
             Ok(plan) => plan,
             Err(err) => {
-                return Err(ParseError::NoAction(super::error::NoActionError {
+                return Err(FeedLocationError::NoAction(NoActionFailure {
                     term,
                     location,
                     state: err.state,
@@ -450,6 +512,31 @@ impl<
             }
         };
         self.apply_feed_plan(plan, term, location)
+            .map_err(FeedLocationError::ReduceAction)
+    }
+
+    fn no_action_error(
+        err: NoActionFailure<P::Term, Data::Location>,
+    ) -> ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData> {
+        // NoAction is raised by CFG-only planning before any semantic action runs, so user data
+        // stays in the context and the caller may recover by feeding another token.
+        ParseError::NoAction(super::error::NoActionError {
+            term: err.term,
+            location: err.location,
+            state: err.state,
+        })
+    }
+
+    fn consumed_context_error(
+        &self,
+        term: TerminalSymbol<P::Term>,
+        location: Data::Location,
+    ) -> ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData> {
+        ParseError::ConsumedContext(super::error::ConsumedContextError {
+            term,
+            location,
+            state: self.state(),
+        })
     }
 
     /// Simulate the deterministic LR stack operations needed to feed one terminal.
@@ -556,7 +643,7 @@ impl<
         plan: FeedPlan<P::NonTerm, StateIndex>,
         term: TerminalSymbol<P::Term>,
         location: Data::Location,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
@@ -580,16 +667,23 @@ impl<
                 reduction.rule_index,
                 &mut shift,
                 &term,
-                &mut self.userdata,
+                self.userdata.as_mut().expect(
+                    "parser context userdata was moved into a previous reduce-action parse error",
+                ),
                 &mut new_location,
             ) {
                 Ok(_) => {}
                 Err(err) => {
+                    let state = self.state();
+                    // A user reduce action may have mutated stacks or user data before failing.
+                    // Move user data into the error and leave the context unusable.
+                    let userdata = self.take_userdata();
                     return Err(ParseError::ReduceAction(super::error::ReduceActionError {
                         term,
                         location,
-                        state: self.state(),
+                        state,
                         source: err,
+                        userdata,
                     }));
                 }
             };
@@ -636,6 +730,9 @@ impl<
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &Data::Term) -> bool {
+        if self.is_consumed() {
+            return false;
+        }
         let class = P::TermClass::from_term(term);
 
         self.plan_feed(class).is_ok()
@@ -643,6 +740,9 @@ impl<
 
     /// Check if current context can enter panic mode
     pub fn can_panic(&self) -> bool {
+        if self.is_consumed() {
+            return false;
+        }
         // if `error` token was not used in the grammar, early return here
         if !P::ERROR_USED {
             return false;
@@ -667,13 +767,21 @@ impl<
 
     fn feed_eof(
         &mut self,
-    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError>>
+    ) -> Result<(), ParseError<Data::Term, Data::Location, Data::ReduceActionError, Data::UserData>>
     where
         P::Term: Clone,
         P::NonTerm: std::fmt::Debug,
     {
         let eof_location = Data::Location::new(self.location_stack.iter().rev(), 0);
-        self.feed_location_impl(TerminalSymbol::Eof, P::TermClass::EOF, eof_location)
+        if self.is_consumed() {
+            return Err(self.consumed_context_error(TerminalSymbol::Eof, eof_location));
+        }
+
+        match self.feed_location_impl(TerminalSymbol::Eof, P::TermClass::EOF, eof_location) {
+            Ok(()) => Ok(()),
+            Err(FeedLocationError::NoAction(err)) => Err(Self::no_action_error(err)),
+            Err(FeedLocationError::ReduceAction(err)) => Err(err),
+        }
     }
 }
 
@@ -1067,7 +1175,8 @@ mod tests {
         assert_eq!(ctx.state_stack, state_stack);
         assert_eq!(ctx.data_stack, data_stack);
         assert_eq!(ctx.location_stack, location_stack);
-        assert!(ctx.userdata.is_empty());
+        assert!(err.userdata().is_none());
+        assert!(ctx.userdata.as_ref().unwrap().is_empty());
     }
 
     #[test]
@@ -1079,7 +1188,7 @@ mod tests {
         // use the reduction discovered by pre-feed simulation.
         ctx.feed('b').unwrap();
 
-        assert_eq!(ctx.userdata, vec!["reduced"]);
+        assert_eq!(ctx.userdata.as_ref().unwrap(), &vec!["reduced"]);
         assert_eq!(ctx.state_stack, vec![1, 3, 4, 5]);
         assert_eq!(
             ctx.data_stack,
