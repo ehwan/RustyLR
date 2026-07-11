@@ -131,6 +131,7 @@ pub type ParseError = ::rusty_lr::parser::deterministic::ParseError<
     char,
     std::ops::Range<usize>,
     ::rusty_lr::DefaultReduceActionError,
+    Vec<std::ops::Range<usize>>,
 >;
 /// A enum that represents terminal classes
 #[allow(non_camel_case_types, dead_code)]

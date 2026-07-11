@@ -93,11 +93,21 @@ E(i32)
 
 ## Parsing with the GLR Parser
 
-Initialize the generated context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your terminal symbols (tokens) to it. The GLR parser shares a similar interface to the deterministic parser: `accept()` returns the first successful `(parse_result, userdata)` pair, while `accept_all()` returns an iterator over all successful pairs with the start type already extracted. You can feed terminal symbols (tokens) using either `feed` (basic) or `feed_location` (location-aware).
+Initialize the generated context with initial user data (or `with_default_userdata()` when the user data type implements `Default`), and feed your terminal symbols (tokens) to it. The GLR parser shares a similar interface to the deterministic parser: `accept()` mutably borrows the context and returns the first successful `(parse_result, userdata)` pair, while `accept_all()` returns an iterator over all successful pairs with the start type already extracted. Successful acceptance moves branch results out and consumes the context; later feeds or accepts return a consumed-context error. You can feed terminal symbols (tokens) using either `feed` (basic) or `feed_location` (location-aware).
 
 In GLR mode, user data is branch-local. When the parser forks because of a conflict, the current semantic stack and user data are cloned, and each resulting branch owns and mutates its own `UserData` value independently. Token values, semantic return values, and user data must therefore implement `Clone` for GLR branch-local parsing. Results returned from `accept_all()` include the final user data for each successful branch.
 
 `NoAction` is the only feed failure that means the CFG cannot consume the lookahead terminal. `ReduceAction` means the terminal was grammatically feedable, but a runtime semantic action failed. GLR recovery is entered only when every active branch fails with `NoAction`; if at least one branch survives, the feed succeeds and any sibling branch failures are returned in `FeedSuccess::errors`.
+
+GLR parse errors keep branch diagnostics grouped. `ParseError::branch_errors` is a list of `ParseErrorBranch` values; each value represents one failed nondeterministic branch for the current lookahead and preserves that branch's parser state, branch-local user data, and reduce-action error when the failure was semantic. When at least one branch survives, the context remains usable and the failed branch user data is available only through the reported branch error. When no branch survives, branches that only saw `NoAction` are restored for reuse and branches that failed with `ReduceAction` are consumed. Later feeds or accepts report a consumed-context error only if no reusable branch remains.
+
+Branch reuse follows the same rule for `feed()`, `feed_location()`, `accept()`, and `accept_all()`:
+
+- A branch that fails with `NoAction` has not run a semantic action for the lookahead, so its stack and user data are unchanged. If no branch succeeds, that branch is restored into the context and can be fed again.
+- A branch that fails with `ReduceAction` may have partially mutated semantic state. That branch is consumed, and its user data is moved into `ParseErrorBranch::ReduceAction`.
+- If at least one branch succeeds, the successful branches become the next active context. Failed sibling branches are pruned and reported through `FeedSuccess::errors`.
+- If no branch succeeds but at least one `NoAction` branch remains reusable, the call returns `Err(ParseError)` while keeping those reusable branches active for the next call.
+- If every branch has been consumed, the context itself is consumed. Later `feed()` or `accept()` calls return a consumed-context error.
 
 For example, this ambiguous grammar creates two branches for the same input terminal symbol. Each branch mutates its own cloned `Vec<&'static str>`:
 
@@ -188,5 +198,6 @@ fn main() {
 - **`context.feed(token)`**: Feeds a token into all active parsing stacks and returns `FeedSuccess` when at least one branch survives.
 - **`context.feed_location(token, location)`**: Feeds a token with its location span into all active parsing stacks (requires `%location` in the grammar) and returns `FeedSuccess` when at least one branch survives.
 - **`FeedSuccess::errors`**: Optional branch-failure information from GLR branches pruned while the feed still succeeded.
-- **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns the first successful `(parse_result, userdata)` pair.
-- **`context.accept_all()`**: Finalizes parsing and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches.
+- **`ParseError::branch_errors`**: Branch-grouped diagnostics. Each `ParseErrorBranch` is either `NoAction { state, userdata }` or `ReduceAction { state, source, userdata }`.
+- **`context.accept()`**: Finalizes parsing (feeding the end-of-file symbol) and returns the first successful `(parse_result, userdata)` pair. Branches that only see `NoAction` remain reusable; success consumes the context.
+- **`context.accept_all()`**: Finalizes parsing and returns an iterator over successful `(parse_result, userdata)` pairs from all active branches. Branches that only see `NoAction` remain reusable; success consumes the context.

@@ -123,7 +123,7 @@ mod pattern_operators {
 
     #[test]
     fn separated_pattern_rejects_missing_required_item() {
-        let ctx = CsvContext::with_default_userdata();
+        let mut ctx = CsvContext::with_default_userdata();
         assert!(ctx.accept().is_err());
 
         let mut ctx = CsvContext::with_default_userdata();
@@ -477,6 +477,113 @@ mod reduce_action_errors {
         assert!(too_large.accept().is_err());
     }
 
+    #[test]
+    fn deterministic_accept_no_action_is_reusable_but_success_consumes_context() {
+        let mut ctx = NumberContext::with_default_userdata();
+
+        let too_early = ctx.accept().unwrap_err();
+        assert_eq!(too_early.reduce_action_error(), None);
+        assert!(!too_early.is_consumed_context());
+
+        ctx.feed('7').unwrap();
+        assert_eq!(ctx.accept().unwrap(), (7, ()));
+
+        let consumed = ctx.feed('8').unwrap_err();
+        assert!(consumed.is_consumed_context());
+    }
+
+    mod deterministic_error_userdata {
+        use rusty_lr::lr1;
+
+        lr1! {
+            %nooptim;
+            %tokentype char;
+            %userdata Vec<&'static str>;
+            %error &'static str;
+            %start S;
+
+            S(()): A 'y' { () };
+
+            A(()): 'x' {
+                data.push("reduced a");
+                if true {
+                    return Err("bad a");
+                }
+                ()
+            };
+        }
+
+        #[test]
+        fn deterministic_reduce_action_error_returns_userdata() {
+            let mut ctx = SContext::new(vec!["seed"]);
+            ctx.feed('x').unwrap();
+
+            let err = ctx.feed('y').unwrap_err();
+
+            assert_eq!(err.reduce_action_error().unwrap(), &"bad a");
+            assert_eq!(err.userdata(), Some(&vec!["seed", "reduced a"]));
+            assert!(ctx.userdata_all().next().is_none());
+            assert!(!ctx.can_feed(&'y'));
+            assert!(!ctx.can_accept());
+
+            let consumed = ctx.feed('y').unwrap_err();
+            assert!(consumed.is_consumed_context());
+            assert!(consumed.userdata().is_none());
+        }
+    }
+
+    mod glr_accept_consume {
+        use rusty_lr::lr1;
+
+        lr1! {
+            %glr;
+            %tokentype char;
+            %start S;
+
+            S(char): 'x' { 'x' };
+        }
+
+        #[test]
+        fn glr_accept_success_consumes_context() {
+            let mut ctx = SContext::with_default_userdata();
+            ctx.feed('x').unwrap();
+            assert_eq!(ctx.accept().unwrap(), ('x', ()));
+
+            let consumed = ctx.feed('x').unwrap_err();
+            assert!(consumed.is_consumed_context());
+            assert!(!ctx.can_accept());
+        }
+
+        #[test]
+        fn glr_feed_no_action_is_reusable() {
+            let mut ctx = SContext::with_default_userdata();
+
+            let err = ctx.feed('y').unwrap_err();
+            assert_eq!(err.branch_errors.len(), 1);
+            assert!(err.branch_errors[0].reduce_action_error().is_none());
+            assert!(!err.is_consumed_context());
+            assert!(ctx.can_feed(&'x'));
+
+            ctx.feed('x').unwrap();
+            assert_eq!(ctx.accept().unwrap(), ('x', ()));
+        }
+
+        #[test]
+        fn glr_accept_no_action_is_reusable() {
+            let mut ctx = SContext::with_default_userdata();
+
+            let err = ctx.accept().unwrap_err();
+            assert_eq!(err.branch_errors.len(), 1);
+            assert!(err.branch_errors[0].reduce_action_error().is_none());
+            assert!(!err.is_consumed_context());
+            assert!(!ctx.can_accept());
+            assert!(ctx.can_feed(&'x'));
+
+            ctx.feed('x').unwrap();
+            assert_eq!(ctx.accept().unwrap(), ('x', ()));
+        }
+    }
+
     mod glr_recovery {
         use rusty_lr::lr1;
 
@@ -501,6 +608,7 @@ mod reduce_action_errors {
                 ;
 
             Rejected(char): 'x' {
+                data.push("rejected branch");
                 if true {
                     return Err("rejected token");
                 }
@@ -517,8 +625,20 @@ mod reduce_action_errors {
             // grammatically valid and dies from a reduce-action error instead.
             let err = ctx.feed('y').unwrap_err();
 
-            assert_eq!(err.reduce_action_errors, ["rejected token"]);
+            assert_eq!(err.branch_errors.len(), 1);
+            assert_eq!(
+                err.branch_errors[0].reduce_action_error(),
+                Some(&"rejected token")
+            );
+            assert_eq!(err.branch_errors[0].userdata(), &vec!["rejected branch"]);
             assert!(ctx.userdata_all().all(|userdata| userdata.is_empty()));
+            assert!(!ctx.can_feed(&'y'));
+            assert!(!ctx.can_accept());
+
+            let consumed = ctx.feed('y').unwrap_err();
+            assert!(consumed.is_consumed_context());
+            let consumed = ctx.accept().unwrap_err();
+            assert!(consumed.is_consumed_context());
         }
     }
 
@@ -561,8 +681,207 @@ mod reduce_action_errors {
             let success = ctx.feed('y').unwrap();
             let errors = success.errors.expect("reduce branch should be reported");
 
-            assert_eq!(errors.reduce_action_errors, ["bad reduce path"]);
+            assert_eq!(errors.branch_errors.len(), 1);
+            assert_eq!(
+                errors.branch_errors[0].reduce_action_error(),
+                Some(&"bad reduce path")
+            );
             assert_eq!(ctx.accept().unwrap(), ("shift path", ()));
+        }
+    }
+
+    mod glr_multiple_branch_errors {
+        use rusty_lr::lr1;
+
+        // Both reduce alternatives are grammatically valid for the lookahead, but each semantic
+        // action rejects its own GLR branch. The resulting parse error should preserve that branch
+        // boundary instead of flattening the reduce-action errors into one parser-wide list.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %error &'static str;
+            %start S;
+
+            S(&'static str)
+                : A 'y' {
+                    "a"
+                }
+                | B 'y' {
+                    "b"
+                }
+                ;
+
+            A(char): 'x' {
+                if true {
+                    return Err("bad a");
+                }
+                'a'
+            };
+
+            B(char): 'x' {
+                if true {
+                    return Err("bad b");
+                }
+                'b'
+            };
+        }
+
+        #[test]
+        fn glr_parse_error_keeps_reduce_errors_grouped_by_branch() {
+            let mut ctx = SContext::with_default_userdata();
+            ctx.feed('x').unwrap();
+
+            let err = ctx.feed('y').unwrap_err();
+
+            assert_eq!(err.branch_errors.len(), 2);
+            for branch in &err.branch_errors {
+                assert_eq!(branch.states().count(), 1);
+                assert!(branch.reduce_action_error().is_some());
+            }
+
+            let mut reduce_errors: Vec<_> = err
+                .branch_errors
+                .iter()
+                .map(|branch| *branch.reduce_action_error().unwrap())
+                .collect();
+            reduce_errors.sort();
+            assert_eq!(reduce_errors, ["bad a", "bad b"]);
+
+            assert!(!err.is_consumed_context());
+            assert!(!ctx.can_feed(&'y'));
+            assert!(!ctx.can_accept());
+
+            let consumed = ctx.feed('y').unwrap_err();
+            assert!(consumed.is_consumed_context());
+            let consumed = ctx.accept().unwrap_err();
+            assert!(consumed.is_consumed_context());
+        }
+    }
+
+    mod glr_mixed_branch_failure_reuse {
+        mod feed {
+            use rusty_lr::lr1;
+
+            lr1! {
+                %glr;
+                %nooptim;
+                %tokentype char;
+                %error &'static str;
+                %start S;
+
+                S(&'static str)
+                    : A 'q' {
+                        "a"
+                    }
+                    | B 'r' {
+                        "b"
+                    }
+                    ;
+
+                A(()): X 'p' {
+                    if true {
+                        return Err("bad reduce");
+                    }
+                    ()
+                };
+
+                B(()): Y 'p' { () };
+                X(()): 'x' { () };
+                Y(()): 'x' { () };
+            }
+
+            #[test]
+            fn glr_feed_restores_no_action_branch_when_sibling_reduce_fails() {
+                let mut ctx = SContext::with_default_userdata();
+                ctx.feed('x').unwrap();
+                ctx.feed('p').unwrap();
+
+                let err = ctx.feed('q').unwrap_err();
+
+                assert!(!err.is_consumed_context());
+                assert_eq!(err.branch_errors.len(), 2);
+                assert_eq!(
+                    err.branch_errors
+                        .iter()
+                        .filter(|branch| branch.reduce_action_error().is_none())
+                        .count(),
+                    1
+                );
+                assert_eq!(
+                    err.branch_errors
+                        .iter()
+                        .filter(|branch| branch.reduce_action_error() == Some(&"bad reduce"))
+                        .count(),
+                    1
+                );
+                assert!(ctx.can_feed(&'r'));
+
+                ctx.feed('r').unwrap();
+                assert_eq!(ctx.accept().unwrap(), ("b", ()));
+            }
+        }
+
+        mod accept {
+            use rusty_lr::lr1;
+
+            lr1! {
+                %glr;
+                %nooptim;
+                %tokentype char;
+                %error &'static str;
+                %start S;
+
+                S(&'static str)
+                    : A {
+                        "a"
+                    }
+                    | B 'r' {
+                        "b"
+                    }
+                    ;
+
+                A(()): X 'p' {
+                    if true {
+                        return Err("bad reduce");
+                    }
+                    ()
+                };
+
+                B(()): Y 'p' { () };
+                X(()): 'x' { () };
+                Y(()): 'x' { () };
+            }
+
+            #[test]
+            fn glr_accept_restores_no_action_branch_when_sibling_reduce_fails() {
+                let mut ctx = SContext::with_default_userdata();
+                ctx.feed('x').unwrap();
+                ctx.feed('p').unwrap();
+
+                let err = ctx.accept().unwrap_err();
+
+                assert!(!err.is_consumed_context());
+                assert_eq!(err.branch_errors.len(), 2);
+                assert_eq!(
+                    err.branch_errors
+                        .iter()
+                        .filter(|branch| branch.reduce_action_error().is_none())
+                        .count(),
+                    1
+                );
+                assert_eq!(
+                    err.branch_errors
+                        .iter()
+                        .filter(|branch| branch.reduce_action_error() == Some(&"bad reduce"))
+                        .count(),
+                    1
+                );
+                assert!(ctx.can_feed(&'r'));
+
+                ctx.feed('r').unwrap();
+                assert_eq!(ctx.accept().unwrap(), ("b", ()));
+            }
         }
     }
 
@@ -605,7 +924,11 @@ mod reduce_action_errors {
             let errors = success
                 .errors
                 .expect("failed recovery branch should be reported");
-            assert_eq!(errors.reduce_action_errors, ["bad recovery branch"]);
+            assert_eq!(errors.branch_errors.len(), 1);
+            assert_eq!(
+                errors.branch_errors[0].reduce_action_error(),
+                Some(&"bad recovery branch")
+            );
             ctx.debug_check();
 
             ctx.feed('s').unwrap();
@@ -656,7 +979,11 @@ mod reduce_action_errors {
             let errors = success
                 .errors
                 .expect("failed sibling branch should be reported");
-            assert_eq!(errors.reduce_action_errors, ["bad nested branch"]);
+            assert_eq!(errors.branch_errors.len(), 1);
+            assert_eq!(
+                errors.branch_errors[0].reduce_action_error(),
+                Some(&"bad nested branch")
+            );
 
             ctx.debug_check();
             assert_eq!(ctx.accept().unwrap(), ("good", ()));

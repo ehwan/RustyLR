@@ -131,7 +131,7 @@ While implementing:
 - Use `%left`, `%right`, or `%precedence` before changing grammar shape solely to fix expression conflicts.
 - Use the `error` terminal for recovery points such as delimiters, statements, or object members.
 - Include `error` in precedence declarations if recovery productions introduce a shift/reduce conflict.
-- Treat reduce-action `Err` values as semantic failures, not recovery triggers. In GLR mode, a successful feed may still return branch errors through its success value when other branches were pruned.
+- Treat reduce-action `Err` values as semantic failures, not recovery triggers. Deterministic `NoAction` leaves the context reusable, but deterministic `ReduceAction` moves user data into the error and consumes the context; later `feed()` or `accept()` returns `ParseError::ConsumedContext`. `accept()`/`accept_all()` borrow mutably: `NoAction` can be retried after more input, while success consumes the context. In GLR mode, a successful feed may still return branch errors through its success value when other branches were pruned; inspect `ParseError::branch_errors` to distinguish per-branch `NoAction { state, userdata }` and `ReduceAction { state, source, userdata }` failures. If no GLR branch survives, `NoAction` branches are restored for reuse and consumed branches are reported in the error; subsequent operations return consumed-context errors only if no reusable branch remains.
 - Keep generated parser files committed only if the project convention does so.
 
 When debugging:

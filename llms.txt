@@ -27,7 +27,7 @@ Generated `<Start>Context` types are the normal parser contexts downstream code 
 
 Feed failures have two main runtime causes. `NoAction` means the CFG cannot consume the lookahead terminal, leaves the parser stack unchanged, and is the only failure kind that can enter panic-mode recovery. `ReduceAction` means the terminal was grammatically feedable, but runtime execution failed.
 
-Reduce-action errors are semantic failures, not panic-mode recovery triggers. GLR feed success values may contain branch errors when one branch survives and sibling branches are pruned.
+Reduce-action errors are semantic failures, not panic-mode recovery triggers. Deterministic `NoAction` leaves the context reusable, but deterministic `ReduceAction` moves user data into the error and consumes the context; later `feed()` or `accept()` returns `ParseError::ConsumedContext`. `accept()`/`accept_all()` borrow mutably: `NoAction` can be retried after more input, while success consumes the context. GLR feed success values may contain branch errors when one branch survives and sibling branches are pruned. GLR `ParseError::branch_errors` stores per-branch `NoAction { state, userdata }` or `ReduceAction { state, source, userdata }` failures. If no GLR branch survives, `NoAction` branches are restored for reuse and consumed branches are reported in the error; subsequent operations return consumed-context errors only if no reusable branch remains.
 
 Generated contexts implement `Clone` when their runtime storage and user data satisfy the required `Clone` bounds. Choose token and semantic value types that implement `Clone` when cloning contexts or using GLR branch-local user data; user data must also implement `Clone` in those cases.
 

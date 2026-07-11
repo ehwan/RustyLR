@@ -463,7 +463,7 @@ Expr
 
 Defines a custom error type returned by reduce actions. If your reduce action returns a `Result`, returning an `Err(custom_error)` will stop execution (or prune the GLR branch) and bubble the error up wrapped in `ParseError::ReduceAction`.
 
-A reduce-action error is semantic failure, not a syntax `NoAction`. It does not enter panic-mode error recovery. In GLR mode, if another branch successfully shifts the same terminal, the feed succeeds and reports the pruned-branch error in the GLR feed success value.
+A reduce-action error is semantic failure, not a syntax `NoAction`. It does not enter panic-mode error recovery. In deterministic mode, `NoAction` leaves the context unchanged and reusable, while `ReduceAction` moves user data into the error because the reduce action may have partially mutated semantic state; later `feed()` or `accept()` attempts on that context return `ParseError::ConsumedContext`. `accept()` and `accept_all()` mutably borrow the context: `NoAction` leaves it reusable, while success moves the accepted result and user data out and consumes it. In GLR mode, if another branch successfully shifts the same terminal, the feed succeeds and reports the pruned-branch error in the GLR feed success value. If no branch survives, branches that only saw `NoAction` are restored for reuse and branches that failed with `ReduceAction` are consumed; later `feed()` or `accept()` reports a consumed-context error only if no reusable branch remains. GLR parse errors expose `branch_errors`, where each `ParseErrorBranch` is either `NoAction { state, userdata }` or `ReduceAction { state, source, userdata }` for one nondeterministic branch.
 
 ## No Optimization
 

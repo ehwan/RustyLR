@@ -48,6 +48,7 @@ pub type ParseError = ::rusty_lr::parser::deterministic::ParseError<
     Token,
     ::rusty_lr::DefaultLocation,
     String,
+    i32,
 >;
 /// A enum that represents terminal classes
 #[allow(non_camel_case_types, dead_code)]

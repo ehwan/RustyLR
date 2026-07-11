@@ -23,6 +23,7 @@ impl Grammar {
         let termclass_typename = Ident::new("TerminalClasses", Span::call_site());
         let location_typename = &self.location_typename;
         let reduce_error_typename = &self.error_typename;
+        let user_data_typename = &self.userdata_typename;
 
         let table_structname = if self.emit_dense {
             format_ident!("DenseFlatTables")
@@ -88,7 +89,7 @@ impl Grammar {
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
+                pub type #parse_error_typename = #module_prefix::parser::nondeterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename, #user_data_typename>;
             });
         } else {
             stream.extend(quote! {
@@ -97,7 +98,7 @@ impl Grammar {
                 #[allow(non_camel_case_types,dead_code)]
                 pub type #tables_typename = #module_prefix::parser::table::#table_structname<#termclass_typename, #nonterm_typename, #rule_container_type, #state_index_typename>;
                 #[allow(non_camel_case_types,dead_code)]
-                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename>;
+                pub type #parse_error_typename = #module_prefix::parser::deterministic::ParseError<#token_typename, #location_typename, #reduce_error_typename, #user_data_typename>;
             });
         }
     }
