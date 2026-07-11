@@ -517,7 +517,11 @@ mod reduce_action_errors {
             // grammatically valid and dies from a reduce-action error instead.
             let err = ctx.feed('y').unwrap_err();
 
-            assert_eq!(err.reduce_action_errors, ["rejected token"]);
+            assert_eq!(err.branch_errors.len(), 1);
+            assert_eq!(
+                err.branch_errors[0].reduce_action_error(),
+                Some(&"rejected token")
+            );
             assert!(ctx.userdata_all().all(|userdata| userdata.is_empty()));
         }
     }
@@ -561,8 +565,72 @@ mod reduce_action_errors {
             let success = ctx.feed('y').unwrap();
             let errors = success.errors.expect("reduce branch should be reported");
 
-            assert_eq!(errors.reduce_action_errors, ["bad reduce path"]);
+            assert_eq!(errors.branch_errors.len(), 1);
+            assert_eq!(
+                errors.branch_errors[0].reduce_action_error(),
+                Some(&"bad reduce path")
+            );
             assert_eq!(ctx.accept().unwrap(), ("shift path", ()));
+        }
+    }
+
+    mod glr_multiple_branch_errors {
+        use rusty_lr::lr1;
+
+        // Both reduce alternatives are grammatically valid for the lookahead, but each semantic
+        // action rejects its own GLR branch. The resulting parse error should preserve that branch
+        // boundary instead of flattening the reduce-action errors into one parser-wide list.
+        lr1! {
+            %glr;
+            %nooptim;
+            %tokentype char;
+            %error &'static str;
+            %start S;
+
+            S(&'static str)
+                : A 'y' {
+                    "a"
+                }
+                | B 'y' {
+                    "b"
+                }
+                ;
+
+            A(char): 'x' {
+                if true {
+                    return Err("bad a");
+                }
+                'a'
+            };
+
+            B(char): 'x' {
+                if true {
+                    return Err("bad b");
+                }
+                'b'
+            };
+        }
+
+        #[test]
+        fn glr_parse_error_keeps_reduce_errors_grouped_by_branch() {
+            let mut ctx = SContext::with_default_userdata();
+            ctx.feed('x').unwrap();
+
+            let err = ctx.feed('y').unwrap_err();
+
+            assert_eq!(err.branch_errors.len(), 2);
+            for branch in &err.branch_errors {
+                assert_eq!(branch.states().count(), 1);
+                assert!(branch.reduce_action_error().is_some());
+            }
+
+            let mut reduce_errors: Vec<_> = err
+                .branch_errors
+                .iter()
+                .map(|branch| *branch.reduce_action_error().unwrap())
+                .collect();
+            reduce_errors.sort();
+            assert_eq!(reduce_errors, ["bad a", "bad b"]);
         }
     }
 
@@ -605,7 +673,11 @@ mod reduce_action_errors {
             let errors = success
                 .errors
                 .expect("failed recovery branch should be reported");
-            assert_eq!(errors.reduce_action_errors, ["bad recovery branch"]);
+            assert_eq!(errors.branch_errors.len(), 1);
+            assert_eq!(
+                errors.branch_errors[0].reduce_action_error(),
+                Some(&"bad recovery branch")
+            );
             ctx.debug_check();
 
             ctx.feed('s').unwrap();
@@ -656,7 +728,11 @@ mod reduce_action_errors {
             let errors = success
                 .errors
                 .expect("failed sibling branch should be reported");
-            assert_eq!(errors.reduce_action_errors, ["bad nested branch"]);
+            assert_eq!(errors.branch_errors.len(), 1);
+            assert_eq!(
+                errors.branch_errors[0].reduce_action_error(),
+                Some(&"bad nested branch")
+            );
 
             ctx.debug_check();
             assert_eq!(ctx.accept().unwrap(), ("good", ()));

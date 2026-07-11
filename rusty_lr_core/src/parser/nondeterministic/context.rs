@@ -5,6 +5,7 @@ use super::Node;
 use super::NodeId;
 use super::ParseError;
 use super::error::FeedSuccess;
+use super::error::ParseErrorBranch;
 
 use crate::Location;
 use crate::TerminalSymbol;
@@ -105,6 +106,11 @@ struct FailedBranchToRemove {
 enum FailedFeedPlan {
     FailedAndNeedsRemoval(FailedBranchToRemove),
     FailedAndAlreadyRemoved,
+}
+
+struct ReduceFailure<Source> {
+    state: usize,
+    source: Source,
 }
 
 #[derive(Clone, Copy)]
@@ -470,9 +476,10 @@ pub struct Context<
     /// For recovery from error
     fallback_branches: Vec<Branch<Data::UserData>>,
 
-    /// For temporary use. store reduce errors returned from `reduce_action`.
-    /// But we don't want to reallocate every `feed` call
-    pub(crate) reduce_errors: Vec<Data::ReduceActionError>,
+    /// Reusable branch-scoped errors returned while processing one lookahead.
+    ///
+    /// Keeping this buffer on the context avoids reallocating on every `feed` call.
+    pub(crate) branch_errors: Vec<ParseErrorBranch<Data::ReduceActionError>>,
 
     /// Reusable container for CFG-only GLR feed plans.
     feed_plan_container: FeedPlanContainer<P::NonTerm, StateIndex>,
@@ -507,7 +514,7 @@ impl<
             empty_node_indices: Default::default(),
             current_branches: Default::default(),
             next_branches: Default::default(),
-            reduce_errors: Default::default(),
+            branch_errors: Default::default(),
             fallback_branches: Default::default(),
             feed_plan_container: Default::default(),
             can_feed_plan_container: Default::default(),
@@ -984,7 +991,7 @@ impl<
         shift: &mut bool,
         can_reuse_node_for_reduce: bool,
         userdata: &mut Data::UserData,
-    ) -> Result<NodeId, Data::ReduceActionError>
+    ) -> Result<NodeId, ReduceFailure<Data::ReduceActionError>>
     where
         Data: Clone,
         P::Term: Clone,
@@ -1020,8 +1027,9 @@ impl<
                 Ok(node_to_shift)
             }
             Err(err) => {
+                let state = self.state(node_to_shift);
                 self.try_remove_node_recursive(node_to_shift);
-                Err(err)
+                Err(ReduceFailure { state, source: err })
             }
         }
     }
@@ -1398,7 +1406,8 @@ impl<
                         if can_reuse_node_for_reduce {
                             node_removed = true;
                         }
-                        self.reduce_errors.push(err);
+                        self.branch_errors
+                            .push(ParseErrorBranch::reduce_action(err.state, err.source));
                     }
                 }
 
@@ -1457,6 +1466,24 @@ impl<
 
     fn discard_branch_node(&mut self, node: NodeId) {
         self.try_remove_node_subtree_recursive(node);
+    }
+
+    fn no_action_branch_errors_from<'a>(
+        &'a self,
+        branches: impl Iterator<Item = &'a Branch<Data::UserData>>,
+    ) -> Vec<ParseErrorBranch<Data::ReduceActionError>> {
+        branches
+            .map(|branch| ParseErrorBranch::no_action(self.state(branch.node)))
+            .collect()
+    }
+
+    fn push_fallback_no_action_branch_errors(&mut self) {
+        let branch_errors = self.no_action_branch_errors_from(self.fallback_branches.iter());
+        self.branch_errors.extend(branch_errors);
+    }
+
+    fn take_branch_errors(&mut self) -> Vec<ParseErrorBranch<Data::ReduceActionError>> {
+        std::mem::take(&mut self.branch_errors)
     }
 
     fn discard_fallback_branches(&mut self) {
@@ -1586,7 +1613,7 @@ impl<
     {
         use crate::Location;
 
-        self.reduce_errors.clear();
+        self.branch_errors.clear();
         self.fallback_branches.clear();
         self.next_branches.clear();
 
@@ -1641,16 +1668,20 @@ impl<
                 // replaying its plan, report that semantic/runtime failure instead.
 
                 std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+                let no_action_branch_errors =
+                    self.no_action_branch_errors_from(self.current_branches.iter());
+                self.branch_errors.extend(no_action_branch_errors);
                 self.feed_plan_container = container;
 
                 return Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
-                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    states: self.states().collect(),
+                    branch_errors: self.take_branch_errors(),
                 });
             }
 
+            let no_action_branch_errors =
+                self.no_action_branch_errors_from(self.fallback_branches.iter());
             let mut extra_state_stack = container.take_extra_state_stack();
             while let Some(Branch { node, userdata }) = self.fallback_branches.pop() {
                 // Recovery searches only concrete branch stacks; the implicit root state precedes
@@ -1660,12 +1691,12 @@ impl<
             container.put_extra_state_stack(extra_state_stack);
 
             if self.next_branches.is_empty() {
+                self.branch_errors.extend(no_action_branch_errors);
                 self.feed_plan_container = container;
                 Err(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
-                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    states: self.states().collect(),
+                    branch_errors: self.take_branch_errors(),
                 })
             } else {
                 debug_assert!(self.current_branches.is_empty());
@@ -1720,20 +1751,18 @@ impl<
                     Err(ParseError {
                         term: TerminalSymbol::Terminal(term),
                         location,
-                        reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                        states: self.states().collect(),
+                        branch_errors: self.take_branch_errors(),
                     })
                 } else {
                     // A recovered branch keeps the feed successful. Semantic failures from sibling
                     // recovery branches are still surfaced, matching ordinary GLR branch pruning.
-                    let errors = if self.reduce_errors.is_empty() {
+                    let errors = if self.branch_errors.is_empty() {
                         None
                     } else {
                         Some(ParseError {
                             term: TerminalSymbol::Terminal(term),
                             location: location.clone(),
-                            reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                            states: Vec::new(),
+                            branch_errors: self.take_branch_errors(),
                         })
                     };
 
@@ -1748,20 +1777,15 @@ impl<
             debug_assert!(!self.next_branches.is_empty());
             // Surviving original branches define feed success; sibling failures are diagnostics,
             // not a fatal parse result.
-            let errors = if self.fallback_branches.is_empty() && self.reduce_errors.is_empty() {
+            let errors = if self.fallback_branches.is_empty() && self.branch_errors.is_empty() {
                 None
             } else {
-                let states = self
-                    .fallback_branches
-                    .iter()
-                    .map(|branch| self.state(branch.node))
-                    .collect();
+                self.push_fallback_no_action_branch_errors();
                 self.discard_fallback_branches();
                 Some(ParseError {
                     term: TerminalSymbol::Terminal(term),
                     location,
-                    reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                    states,
+                    branch_errors: self.take_branch_errors(),
                 })
             };
             std::mem::swap(&mut self.current_branches, &mut self.next_branches);
@@ -1851,7 +1875,7 @@ impl<
     {
         use crate::location::Location;
 
-        self.reduce_errors.clear();
+        self.branch_errors.clear();
         self.fallback_branches.clear();
         self.next_branches.clear();
 
@@ -1897,13 +1921,15 @@ impl<
         // and restore nodes to original state from fallback_branches
         if self.next_branches.is_empty() {
             std::mem::swap(&mut self.current_branches, &mut self.fallback_branches);
+            let no_action_branch_errors =
+                self.no_action_branch_errors_from(self.current_branches.iter());
+            self.branch_errors.extend(no_action_branch_errors);
             self.feed_plan_container = container;
 
             Err(ParseError {
                 term: TerminalSymbol::Eof,
                 location: eof_location,
-                reduce_action_errors: std::mem::take(&mut self.reduce_errors),
-                states: self.states().collect(),
+                branch_errors: self.take_branch_errors(),
             })
         } else {
             self.discard_fallback_branches();
@@ -1962,7 +1988,7 @@ where
             empty_node_indices: self.empty_node_indices.clone(),
             current_branches: self.current_branches.clone(),
             next_branches: Default::default(),
-            reduce_errors: Default::default(),
+            branch_errors: Default::default(),
             fallback_branches: Default::default(),
             feed_plan_container: Default::default(),
             can_feed_plan_container: Default::default(),

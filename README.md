@@ -175,7 +175,7 @@ Feed failures are classified by cause. `NoAction` means the CFG cannot consume t
 
 RustyLR provides native support for Generalized LR (GLR) parsing. When you add the `%glr;` directive to a grammar, RustyLR generates a non-deterministic parser that forks state branches upon encountering shift/reduce or reduce/reduce conflicts. This is particularly useful for ambiguous grammars or complex programming languages.
 
-GLR `feed()` and `feed_location()` return a success value that may contain errors from branches pruned while another branch survived. Treat the feed as failed only when the returned `Result` is `Err`; inspect the success value when branch-level diagnostics matter.
+GLR `feed()` and `feed_location()` return a success value that may contain errors from branches pruned while another branch survived. Treat the feed as failed only when the returned `Result` is `Err`; inspect the success value when branch-level diagnostics matter. GLR `ParseError::branch_errors` stores `ParseErrorBranch` values, each preserving the failed branch's state and, for semantic failures, its reduce-action error.
 
 In GLR mode, user data is branch-local. When the parser forks, the current user data is cloned so each active branch owns and mutates an independent `UserData` value.
 

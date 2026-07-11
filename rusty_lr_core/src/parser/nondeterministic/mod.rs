@@ -5,5 +5,6 @@ mod node;
 pub use context::Context;
 pub use error::FeedSuccess;
 pub use error::ParseError;
+pub use error::ParseErrorBranch;
 pub use node::Node;
 pub(crate) use node::NodeId;

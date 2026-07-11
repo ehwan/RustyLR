@@ -131,7 +131,7 @@ While implementing:
 - Use `%left`, `%right`, or `%precedence` before changing grammar shape solely to fix expression conflicts.
 - Use the `error` terminal for recovery points such as delimiters, statements, or object members.
 - Include `error` in precedence declarations if recovery productions introduce a shift/reduce conflict.
-- Treat reduce-action `Err` values as semantic failures, not recovery triggers. In GLR mode, a successful feed may still return branch errors through its success value when other branches were pruned.
+- Treat reduce-action `Err` values as semantic failures, not recovery triggers. In GLR mode, a successful feed may still return branch errors through its success value when other branches were pruned; inspect `ParseError::branch_errors` to distinguish per-branch `NoAction { state }` and `ReduceAction { state, source }` failures.
 - Keep generated parser files committed only if the project convention does so.
 
 When debugging:

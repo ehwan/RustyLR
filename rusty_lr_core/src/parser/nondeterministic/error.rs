@@ -8,11 +8,29 @@ pub struct ParseError<Term, Location, ReduceActionError> {
     pub term: crate::TerminalSymbol<Term>,
     /// Location of the terminal symbol.
     pub location: Location,
-    /// Error from reduce action (from every diverged paths)
-    pub reduce_action_errors: Vec<ReduceActionError>,
+    /// Errors grouped by the GLR branch that produced them.
+    pub branch_errors: Vec<ParseErrorBranch<ReduceActionError>>,
+}
 
-    /// States when the error occurred (from all diverged paths)
-    pub(crate) states: Vec<usize>,
+/// Errors observed while processing one GLR branch for a single lookahead.
+///
+/// A branch failure is either a grammatical `NoAction` at one parser state or one reduce-action
+/// error raised at one parser state. Keeping that pair in a single value makes it explicit that
+/// the state and semantic error came from the same nondeterministic branch.
+#[derive(Clone, Debug)]
+pub enum ParseErrorBranch<ReduceActionError> {
+    /// No parser-table action was available for this branch.
+    NoAction {
+        /// Parser state associated with this branch's failure.
+        state: usize,
+    },
+    /// A reduce action rejected this branch.
+    ReduceAction {
+        /// Parser state associated with this branch's failure.
+        state: usize,
+        /// Error returned from the reduce action while replaying this branch.
+        source: ReduceActionError,
+    },
 }
 
 /// Successful GLR feed result.
@@ -36,9 +54,41 @@ impl<Term, Location, ReduceActionError> ParseError<Term, Location, ReduceActionE
     pub fn term(&self) -> &crate::TerminalSymbol<Term> {
         &self.term
     }
-    /// States when the error occurred (from all diverged paths)
+    /// States when the error occurred, flattened across all failed branches.
     pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
-        self.states.iter().copied()
+        self.branch_errors.iter().flat_map(|branch| branch.states())
+    }
+}
+
+impl<ReduceActionError> ParseErrorBranch<ReduceActionError> {
+    pub(crate) fn no_action(state: usize) -> Self {
+        ParseErrorBranch::NoAction { state }
+    }
+
+    pub(crate) fn reduce_action(state: usize, source: ReduceActionError) -> Self {
+        ParseErrorBranch::ReduceAction { state, source }
+    }
+
+    /// State associated with this branch's failure.
+    pub fn state(&self) -> usize {
+        match self {
+            ParseErrorBranch::NoAction { state } => *state,
+            ParseErrorBranch::ReduceAction { state, .. } => *state,
+        }
+    }
+
+    /// State associated with this branch's failure, returned as an iterator for API symmetry with
+    /// `ParseError::states()`.
+    pub fn states(&self) -> impl Iterator<Item = usize> + '_ {
+        std::iter::once(self.state())
+    }
+
+    /// Reduce-action error for this branch, if this branch failed semantically.
+    pub fn reduce_action_error(&self) -> Option<&ReduceActionError> {
+        match self {
+            ParseErrorBranch::NoAction { .. } => None,
+            ParseErrorBranch::ReduceAction { source, .. } => Some(source),
+        }
     }
 }
 
@@ -47,6 +97,7 @@ where
     Term: Display,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ParseError: {}, States: {:?}", self.term, self.states)
+        let states: Vec<_> = self.states().collect();
+        write!(f, "ParseError: {}, States: {:?}", self.term, states)
     }
 }
