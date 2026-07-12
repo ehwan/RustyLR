@@ -939,7 +939,7 @@ impl Grammar {
                         .join(" ")
                 );
 
-                use super::nonterminal_info::ReduceAction;
+                use crate::nonterminal_info::ReduceAction;
 
                 if rule.is_used {
                     // Generate debug assertions to verify that the variants on the data stack
