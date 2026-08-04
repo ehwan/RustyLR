@@ -18,4 +18,9 @@ All notable changes to the "RustyLR LSP" extension will be documented in this fi
   - **Auto-Completion:** Intelligent suggestions for symbols, directives, variables, and locations.
 
 ## 0.1.1
- - Bug fixes: Check only the major number when checking for rustylr version compatibility.
+
+- Bug fixes: Check only the major number when checking for rustylr version compatibility.
+
+## 0.1.3
+
+- Security: Updated `brace-expansion` to 5.0.9 to address CVE-2026-14257.
