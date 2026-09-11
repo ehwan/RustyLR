@@ -1877,10 +1877,10 @@ impl<
     /// So this function will return `false` even if term can be shifted as `error` token,
     /// and will return `true` if `Err` variant is returned by `reduce_action`.
     pub fn can_feed(&self, term: &P::Term) -> bool {
-        if self.is_consumed() {
-            return false;
-        }
-        let class = P::TermClass::from_term(term);
+        !self.is_consumed() && self.can_feed_class(P::TermClass::from_term(term))
+    }
+
+    fn can_feed_class(&self, class: P::TermClass) -> bool {
         let mut container = self.can_feed_plan_container.borrow_mut();
         let mut extra_state_stack = container.take_extra_state_stack();
         let can_feed = self.current_branches.iter().any(|branch| {
@@ -2041,22 +2041,7 @@ impl<
     }
     /// Check if current context can be terminated and get the start value.
     pub fn can_accept(&self) -> bool {
-        if self.is_consumed() {
-            return false;
-        }
-        let mut container = self.can_feed_plan_container.borrow_mut();
-        let mut extra_state_stack = container.take_extra_state_stack();
-        let can_accept = self.current_branches.iter().any(|branch| {
-            let node = branch.node;
-            extra_state_stack.clear();
-
-            let node_range = container.node_subrange(self, node);
-            container
-                .plan_feed(self, &mut extra_state_stack, node_range, P::TermClass::EOF)
-                .is_some()
-        });
-        container.put_extra_state_stack(extra_state_stack);
-        can_accept
+        !self.is_consumed() && self.can_feed_class(P::TermClass::EOF)
     }
 }
 

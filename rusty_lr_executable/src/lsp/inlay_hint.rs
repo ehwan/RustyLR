@@ -7,7 +7,7 @@ use crate::lsp::hover;
 use crate::lsp::position::{offset_to_position, position_to_offset};
 
 pub fn inlay_hints(content: &str, range: Range) -> Vec<InlayHint> {
-    let Ok(args) = completion::parse_args(content) else {
+    let Ok(args) = super::grammar::parse_args(content) else {
         return Vec::new();
     };
     let Ok(grammar) = Grammar::from_grammar_args(args.clone()) else {

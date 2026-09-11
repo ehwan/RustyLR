@@ -410,6 +410,46 @@ mod glr_can_feed_planning {
     }
 
     #[test]
+    fn repeated_glr_probes_preserve_branches_and_allow_commit() {
+        for terminal in [None, Some('x'), Some('y')] {
+            let mut ctx = SContext::with_default_userdata();
+            let stacks = ctx
+                .state_stacks()
+                .map(|stack| stack.collect::<Vec<_>>())
+                .collect::<Vec<_>>();
+            for _ in 0..16 {
+                assert!(ctx.can_accept());
+                assert!(ctx.can_feed(&'x'));
+                assert!(!ctx.can_feed(&'z'));
+                assert!(ctx.can_feed(&'y'));
+                assert_eq!(
+                    ctx.state_stacks()
+                        .map(|stack| stack.collect::<Vec<_>>())
+                        .collect::<Vec<_>>(),
+                    stacks
+                );
+                ctx.debug_check();
+            }
+            if let Some(terminal) = terminal {
+                ctx.feed(terminal).unwrap();
+                ctx.debug_check();
+                assert!(ctx.can_accept());
+                assert!(!ctx.can_feed(&'x'));
+                assert!(!ctx.can_feed(&'y'));
+            }
+            let expected = match terminal {
+                Some('x') => "x",
+                Some('y') => "y",
+                None => "empty",
+                _ => unreachable!(),
+            };
+            assert_eq!(ctx.accept().unwrap(), (expected, ()));
+            assert!(!ctx.can_accept());
+            assert!(!ctx.can_feed(&'x'));
+        }
+    }
+
+    #[test]
     fn glr_can_feed_and_can_accept_reuse_feed_planning_through_reduce_chains() {
         let ctx = SContext::with_default_userdata();
 

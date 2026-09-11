@@ -384,6 +384,37 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         }
     }
 
+    /// Follows the representative predecessor path to the start of a reduction.
+    /// An incomplete path cannot provide a diagnostic backtrace.
+    fn reduction_backtrace(
+        &self,
+        production_idx: usize,
+        mut state_id: usize,
+        predecessors: &[usize],
+        states: &[State<TerminalSymbol<Term>, NonTerm>],
+    ) -> Vec<LR0ItemRef>
+    where
+        Term: PartialEq + Copy,
+        NonTerm: Copy + PartialEq + Ord,
+    {
+        for _ in &self.rules[production_idx].rule.rhs {
+            if state_id == usize::MAX {
+                return Vec::new();
+            }
+            state_id = predecessors[state_id];
+        }
+        if state_id == usize::MAX {
+            return Vec::new();
+        }
+
+        let mut backtrace = vec![LR0ItemRef {
+            production_idx,
+            dot: 0,
+        }];
+        self.expand_backward(&mut backtrace, &states[state_id].ruleset);
+        backtrace
+    }
+
     /// check for any shift/reduce or reduce/reduce conflicts and report them to `diags`.
     fn check_conflicts(
         &self,
@@ -426,25 +457,8 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     let reduce_rules = reduce_rules
                         .iter()
                         .map(|&rule| {
-                            let len = self.rules[rule].rule.rhs.len();
-                            let mut state = state_id;
-                            for _ in 0..len {
-                                if state == usize::MAX {
-                                    break;
-                                }
-                                state = from[state];
-                            }
-                            let shift_rules = if state != usize::MAX {
-                                let mut rules = vec![LR0ItemRef {
-                                    production_idx: rule,
-                                    dot: 0,
-                                }];
-                                self.expand_backward(&mut rules, &states[state].ruleset);
-                                rules
-                            } else {
-                                Default::default()
-                            };
-                            (rule, shift_rules)
+                            let backtrace = self.reduction_backtrace(rule, state_id, &from, states);
+                            (rule, backtrace)
                         })
                         .collect();
                     diags.add_shift_reduce_conflict(
@@ -457,25 +471,8 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     let reduce_rules = reduce_rules
                         .iter()
                         .map(|&rule| {
-                            let len = self.rules[rule].rule.rhs.len();
-                            let mut state = state_id;
-                            for _ in 0..len {
-                                if state == usize::MAX {
-                                    break;
-                                }
-                                state = from[state];
-                            }
-                            let shift_rules = if state != usize::MAX {
-                                let mut rules = vec![LR0ItemRef {
-                                    production_idx: rule,
-                                    dot: 0,
-                                }];
-                                self.expand_backward(&mut rules, &states[state].ruleset);
-                                rules
-                            } else {
-                                Default::default()
-                            };
-                            (rule, shift_rules)
+                            let backtrace = self.reduction_backtrace(rule, state_id, &from, states);
+                            (rule, backtrace)
                         })
                         .collect();
                     // no shift/reduce conflict
@@ -975,7 +972,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
                     rule_ref.dot += 1;
                     next_rules_nonterm
                         .entry(*nonterm)
-                        .or_insert(ItemSet::new())
+                        .or_insert_with(ItemSet::new)
                         .add(rule_ref, lookaheads);
                     // Duplicated rule will be handled in reduce/reduce conflict
                 }
@@ -1120,17 +1117,7 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
         }
         reduce_map.retain(|_, reduce_rules| !reduce_rules.is_empty());
 
-        // process rules that no more tokens left to shift
-        // if next token is one of lookahead, add reduce action
-        // if there are multiple reduce rules for same lookahead, it is a reduce/reduce conflict
-        // reduce_type conflict resolving
-        for (lookahead, reduce_rules) in reduce_map.into_iter() {
-            let state = &mut states[state_id];
-            // no shift/reduce conflict
-            // check for reduce/reduce conflict
-            // just add this reduce action for now
-            state.reduce_map.insert(lookahead, reduce_rules);
-        }
+        states[state_id].reduce_map = reduce_map;
 
         // process next rules with token
         // add shift and goto action
@@ -1154,18 +1141,93 @@ impl<Term, NonTerm> Grammar<TerminalSymbol<Term>, NonTerm> {
     }
 }
 
-// impl<Term: Display, NonTerm: Display> Display for Grammar<Term, NonTerm> {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         for (id, rule) in self.rules.iter().enumerate() {
-//             writeln!(f, "{}: {}", id, rule)?;
-//         }
-
-//         Ok(())
-//     }
-// }
-
 impl<Term, NonTerm> Default for Grammar<TerminalSymbol<Term>, NonTerm> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn item(production_idx: usize, dot: usize) -> LR0ItemRef {
+        LR0ItemRef {
+            production_idx,
+            dot,
+        }
+    }
+
+    #[test]
+    fn conflicts_share_reduction_backtraces() {
+        let mut grammar = Grammar::<TerminalSymbol<char>, char>::new();
+        let terminal = TerminalSymbol::Terminal('a');
+        let a = grammar.add_rule('A', vec![Symbol::Terminal(terminal)], Precedence::None, 0);
+        let b = grammar.add_rule('B', vec![Symbol::Terminal(terminal)], Precedence::None, 0);
+        let s = grammar.add_rule('S', vec![Symbol::NonTerminal('A')], Precedence::None, 0);
+        let t = grammar.add_rule('T', vec![Symbol::NonTerminal('B')], Precedence::None, 0);
+        let expected = vec![
+            (a, vec![item(a, 0), item(s, 0)]),
+            (b, vec![item(b, 0), item(t, 0)]),
+        ];
+
+        for has_shift in [false, true] {
+            let mut states = vec![State::new(), State::new(), State::new()];
+            states[0].ruleset = BTreeSet::from([item(s, 0), item(t, 0)]);
+            states[0].shift_goto_map_term.insert(terminal, 1);
+            states[1]
+                .reduce_map
+                .insert(terminal, BTreeSet::from([a, b]));
+            if has_shift {
+                states[1].shift_goto_map_term.insert(terminal, 2);
+                states[2].ruleset.insert(item(a, 1));
+            }
+            let mut diagnostics = DiagnosticCollector::new(true);
+            grammar.check_conflicts(&states, &mut diagnostics);
+            if has_shift {
+                assert_eq!(diagnostics.shift_reduce_conflicts.len(), 1);
+                assert_eq!(
+                    diagnostics.shift_reduce_conflicts.values().next().unwrap(),
+                    &expected.iter().cloned().collect()
+                );
+                assert!(diagnostics.reduce_reduce_conflicts.is_empty());
+            } else {
+                assert_eq!(
+                    diagnostics.reduce_reduce_conflicts,
+                    BTreeMap::from([(expected.clone(), BTreeSet::from([terminal]))])
+                );
+                assert!(diagnostics.shift_reduce_conflicts.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn reduction_backtrace_handles_empty_productions_and_incomplete_paths() {
+        let mut grammar = Grammar::<TerminalSymbol<char>, char>::new();
+        let empty = grammar.add_rule('E', vec![], Precedence::None, 0);
+        let parent = grammar.add_rule('S', vec![Symbol::NonTerminal('E')], Precedence::None, 0);
+        let long = grammar.add_rule('L', vec![Symbol::NonTerminal('S'); 2], Precedence::None, 0);
+        let mut states = vec![State::new(), State::new()];
+        states[0].ruleset.insert(item(parent, 0));
+        let predecessors = [usize::MAX, 0];
+        assert_eq!(
+            grammar.reduction_backtrace(empty, 0, &predecessors, &states),
+            vec![item(empty, 0), item(parent, 0)]
+        );
+        assert!(
+            grammar
+                .reduction_backtrace(parent, 0, &predecessors, &states)
+                .is_empty()
+        );
+        assert!(
+            grammar
+                .reduction_backtrace(long, 0, &predecessors, &states)
+                .is_empty()
+        );
+        assert!(
+            grammar
+                .reduction_backtrace(long, 1, &predecessors, &states)
+                .is_empty()
+        );
     }
 }

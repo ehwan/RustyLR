@@ -1,154 +1,31 @@
 use lsp_types::{Position, Range};
-use proc_macro2::TokenStream;
-use rusty_lr_parser::grammar::Grammar;
-use rusty_lr_parser::{
-    GrammarArgs, IdentOrLiteral, Located, PatternArgs, PrecDPrecArgs, TerminalSetItem,
+
+use super::grammar::{
+    IdentifierScope, collect_identifiers, identifier_at_offset, parse_args, symbol_definition,
 };
-use std::str::FromStr;
+use super::position::{position_to_offset, range_to_lsp_range};
 
-use crate::lsp::diagnostics::split_stream;
-use crate::lsp::position::{position_to_offset, range_to_lsp_range};
-
-/// Traverses the AST of GrammarArgs to collect only terminal, non-terminal, prec, and error references.
-fn collect_references(args: &GrammarArgs) -> Vec<Located<String>> {
-    let mut collected = Vec::new();
-
-    // 1. %start names
-    for start_name in &args.start_rule_name {
-        collected.push(start_name.clone());
-    }
-
-    // 2. %token definitions
-    for (t_name, _) in &args.terminals {
-        collected.push(t_name.clone());
-    }
-
-    // 3. Precedence definitions
-    for (_, _, items) in &args.precedences {
-        for item in items {
-            if let IdentOrLiteral::Ident(ident) = item {
-                collected.push(ident.clone());
-            }
-        }
-    }
-
-    // 4. Rule definitions, pattern idents, and %prec
-    for rule in &args.rules {
-        collected.push(rule.name.clone());
-        for line in &rule.rule_lines {
-            // Pattern idents
-            for (_, pattern) in &line.tokens {
-                collect_pattern_located(pattern, &mut collected);
-            }
-            // %prec identifiers
-            for prec in &line.precs {
-                if let PrecDPrecArgs::Prec(IdentOrLiteral::Ident(ident)) = prec {
-                    collected.push(ident.clone());
-                }
-            }
-        }
-    }
-
-    collected
-}
-
-/// Recursively traverses a PatternArgs structure to collect Located<String> instances.
-fn collect_pattern_located(pattern: &PatternArgs, collected: &mut Vec<Located<String>>) {
-    match pattern {
-        PatternArgs::Ident(ident) => {
-            collected.push(ident.clone());
-        }
-        PatternArgs::Plus { base, .. }
-        | PatternArgs::Star { base, .. }
-        | PatternArgs::Question { base, .. }
-        | PatternArgs::Exclamation { base, .. } => {
-            collect_pattern_located(base, collected);
-        }
-        PatternArgs::TerminalSet(ts) => {
-            for item in &ts.items {
-                match item {
-                    TerminalSetItem::Terminal(ident) => {
-                        collected.push(ident.clone());
-                    }
-                    TerminalSetItem::Range(first, last) => {
-                        collected.push(first.clone());
-                        collected.push(last.clone());
-                    }
-                    _ => {}
-                }
-            }
-        }
-        PatternArgs::Group { alternatives, .. } => {
-            for alt in alternatives {
-                for pat in alt {
-                    collect_pattern_located(pat, collected);
-                }
-            }
-        }
-        PatternArgs::Minus { base, exclude } => {
-            collect_pattern_located(base, collected);
-            collect_pattern_located(exclude, collected);
-        }
-        PatternArgs::Sep {
-            base, delimiter, ..
-        } => {
-            collect_pattern_located(base, collected);
-            collect_pattern_located(delimiter, collected);
-        }
-        _ => {}
-    }
-}
-
-/// Finds all references of the terminal or non-terminal symbol under the cursor.
+/// Finds all references of the symbol under the cursor, including declarations.
 pub fn find_references(content: &str, target_pos: Position) -> Option<Vec<Range>> {
-    let offset = position_to_offset(content, target_pos);
-
-    // Parse the entire document into TokenStream
-    let token_stream = TokenStream::from_str(content).ok()?;
-    let (_, macro_stream) = split_stream(token_stream).ok()?;
-    let grammar_args = Grammar::parse_args(macro_stream).ok()?;
-    let span_manager = grammar_args.span_manager.clone();
-
-    // Collect all referenceable locations
-    let all_references = collect_references(&grammar_args);
-
-    // Find the one that contains the click offset
-    let clicked = all_references.iter().find(|loc| {
-        if let Some(range) = span_manager.get_byterange(&loc.location()) {
-            range.contains(&offset)
-        } else {
-            false
-        }
-    })?;
-
+    let args = parse_args(content).ok()?;
+    let identifiers = collect_identifiers(&args, IdentifierScope::SymbolReferences);
+    let clicked =
+        identifier_at_offset(&args, &identifiers, position_to_offset(content, target_pos))?;
     let name = clicked.value();
 
-    // Ensure the symbol is indeed a valid terminal, non-terminal, precedence symbol, or 'error'
-    let is_terminal = grammar_args.terminals.iter().any(|(t, _)| t.value == *name);
-    let is_nonterminal = grammar_args.rules.iter().any(|r| r.name.value == *name);
-    let is_prec_symbol = grammar_args.precedences.iter().any(|(_, _, items)| {
-        items.iter().any(|item| match item {
-            IdentOrLiteral::Ident(ident) => ident.value() == name,
-            _ => false,
-        })
-    });
-    let is_error = name == "error";
-
-    if !is_terminal && !is_nonterminal && !is_prec_symbol && !is_error {
+    // The recovery symbol is implicit and has no declaration in the grammar.
+    if name != "error" && symbol_definition(&args, name).is_none() {
         return None;
     }
 
-    // Filter and map all matches of the clicked name to LSP Range
-    let mut result = Vec::new();
-    for loc in &all_references {
-        if loc.value() == name {
-            if let Some(range) = span_manager.get_byterange(&loc.location()) {
-                result.push(range_to_lsp_range(content, range));
-            }
-        }
-    }
-
-    Some(result)
+    Some(
+        identifiers
+            .iter()
+            .filter(|ident| ident.value() == name)
+            .filter_map(|ident| args.span_manager.get_byterange(&ident.location()))
+            .map(|range| range_to_lsp_range(content, range))
+            .collect(),
+    )
 }
 
 #[cfg(test)]

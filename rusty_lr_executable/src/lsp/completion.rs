@@ -6,9 +6,8 @@ use proc_macro2::{TokenStream, TokenTree};
 use rusty_lr_parser::grammar::Grammar;
 use rusty_lr_parser::{GrammarArgs, Location, PatternArgs};
 use std::collections::{BTreeMap, BTreeSet};
-use std::str::FromStr;
 
-use crate::lsp::diagnostics::split_stream;
+use super::grammar::parse_args;
 use crate::lsp::hover;
 use crate::lsp::position::{offset_to_position, position_to_offset};
 
@@ -443,12 +442,6 @@ fn add_positional_value_items(builder: &mut CompletionBuilder, line_variables: &
         };
         builder.variable(&format!("${index}"), &detail, documentation);
     }
-}
-
-pub(crate) fn parse_args(content: &str) -> Result<GrammarArgs, ()> {
-    let token_stream = TokenStream::from_str(content).map_err(|_| ())?;
-    let (_, macro_stream) = split_stream(token_stream).map_err(|_| ())?;
-    Grammar::parse_args(macro_stream).map_err(|_| ())
 }
 
 fn completion_mode(content: &str, offset: usize) -> CompletionMode {

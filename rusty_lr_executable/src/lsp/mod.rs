@@ -25,6 +25,7 @@ mod completion;
 mod diagnostics;
 mod formatter;
 mod goto_definition;
+mod grammar;
 mod hover;
 mod inlay_hint;
 mod position;

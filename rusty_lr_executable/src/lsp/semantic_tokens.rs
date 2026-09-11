@@ -24,7 +24,7 @@ pub fn semantic_tokens(content: &str) -> Option<SemanticTokens> {
     let (mut terminals, mut non_terminals) = collect_names(&tokens);
 
     // Also attempt to get names from completion module's parsed GrammarArgs if possible
-    if let Ok(args) = crate::lsp::completion::parse_args(content) {
+    if let Ok(args) = crate::lsp::grammar::parse_args(content) {
         for (term, _) in args.terminals {
             terminals.insert(term.value().clone());
         }

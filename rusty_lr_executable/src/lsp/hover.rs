@@ -15,7 +15,7 @@ use crate::lsp::position::position_to_offset;
 
 pub fn hover(content: &str, position: Position) -> Option<Hover> {
     let offset = position_to_offset(content, position);
-    let parsed = completion::parse_args(content).ok();
+    let parsed = super::grammar::parse_args(content).ok();
     let location_type = parsed
         .as_ref()
         .map(|args| completion::location_type_for_offset(args, content, offset))

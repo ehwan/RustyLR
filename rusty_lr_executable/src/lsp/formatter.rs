@@ -3,14 +3,13 @@ use proc_macro2::{TokenStream, TokenTree};
 use rusty_lr_parser::{GrammarArgs, PatternArgs};
 use std::ops::Range;
 
-use crate::lsp::completion;
 use crate::lsp::position::range_to_lsp_range;
 
 const RULE_INDENT: &str = "    ";
 const ACTION_INNER_INDENT: &str = "        ";
 
 pub fn formatting(content: &str) -> Vec<TextEdit> {
-    let Ok(args) = completion::parse_args(content) else {
+    let Ok(args) = super::grammar::parse_args(content) else {
         return Vec::new();
     };
 
@@ -835,7 +834,7 @@ Rule(i32): a {
 
         assert!(formatted.contains("// | Pattern error {"));
         assert!(formatted.contains("//     Pattern"));
-        assert!(crate::lsp::completion::parse_args(&formatted).is_ok());
+        assert!(crate::lsp::grammar::parse_args(&formatted).is_ok());
     }
 
     fn apply_edits(content: &str, edits: Vec<TextEdit>) -> String {

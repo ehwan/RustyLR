@@ -28,6 +28,7 @@ mod input;
 mod optimize;
 #[cfg(test)]
 mod tests;
+mod type_inference;
 
 pub struct TerminalClassDefinition {
     pub terminals: Vec<Terminal>,

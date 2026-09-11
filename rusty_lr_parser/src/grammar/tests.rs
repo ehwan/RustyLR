@@ -1281,3 +1281,28 @@ fn test_duplicate_start_symbol() {
         err
     );
 }
+
+#[test]
+fn test_type_inference_through_repetition_helpers() {
+    let args = Grammar::parse_args(quote! {
+        %tokentype char;
+        %start Expr;
+        Expr(_) : Items;
+        Items(_) : Atom+;
+        Atom(_) : 'a';
+    })
+    .unwrap();
+    let grammar = Grammar::from_grammar_args(args).unwrap();
+    for name in ["Expr", "Items"] {
+        let nonterminal = &grammar.nonterminals[grammar.nonterminals_index[name]];
+        assert_eq!(
+            nonterminal.ruletype.as_ref().unwrap().to_string(),
+            quote! { Vec<char> }.to_string()
+        );
+    }
+    for nonterminal in &grammar.nonterminals {
+        if let Some(typename) = &nonterminal.ruletype {
+            assert!(!typename.to_string().contains("__rustylr_placeholder_"));
+        }
+    }
+}

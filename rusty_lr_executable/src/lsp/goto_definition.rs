@@ -1,170 +1,27 @@
 use lsp_types::{Position, Range};
-use proc_macro2::TokenStream;
-use rusty_lr_parser::grammar::Grammar;
-use rusty_lr_parser::{
-    GrammarArgs, IdentOrLiteral, Located, PatternArgs, PrecDPrecArgs, TerminalSetItem,
+
+use super::grammar::{
+    IdentifierScope, collect_identifiers, identifier_at_offset, parse_args, symbol_definition,
 };
-use std::str::FromStr;
-
-use crate::lsp::diagnostics::split_stream;
-use crate::lsp::position::{position_to_offset, range_to_lsp_range};
-
-/// Traverses the AST of GrammarArgs to collect all Located<String> instances.
-fn collect_located(args: &GrammarArgs) -> Vec<Located<String>> {
-    let mut collected = Vec::new();
-
-    // 1. %start names
-    for start_name in &args.start_rule_name {
-        collected.push(start_name.clone());
-    }
-
-    // 2. %token definitions
-    for (t_name, _) in &args.terminals {
-        collected.push(t_name.clone());
-    }
-
-    // 3. Precedence definitions
-    for (_, _, items) in &args.precedences {
-        for item in items {
-            if let IdentOrLiteral::Ident(ident) = item {
-                collected.push(ident.clone());
-            }
-        }
-    }
-
-    // 4. %allow diagnostics names
-    for (allow_name, _) in &args.allowed_diagnostics {
-        collected.push(allow_name.clone());
-    }
-
-    // 5. Rule definitions
-    for rule in &args.rules {
-        collected.push(rule.name.clone());
-        for line in &rule.rule_lines {
-            for (opt_loc, pattern) in &line.tokens {
-                if let Some(loc) = opt_loc {
-                    collected.push(loc.clone());
-                }
-                collect_pattern_located(pattern, &mut collected);
-            }
-            // %prec identifiers
-            for prec in &line.precs {
-                if let PrecDPrecArgs::Prec(IdentOrLiteral::Ident(ident)) = prec {
-                    collected.push(ident.clone());
-                }
-            }
-        }
-    }
-
-    collected
-}
-
-/// Recursively traverses a PatternArgs structure to collect Located<String> instances.
-fn collect_pattern_located(pattern: &PatternArgs, collected: &mut Vec<Located<String>>) {
-    match pattern {
-        PatternArgs::Ident(ident) => {
-            collected.push(ident.clone());
-        }
-        PatternArgs::Plus { base, .. }
-        | PatternArgs::Star { base, .. }
-        | PatternArgs::Question { base, .. }
-        | PatternArgs::Exclamation { base, .. } => {
-            collect_pattern_located(base, collected);
-        }
-        PatternArgs::TerminalSet(ts) => {
-            for item in &ts.items {
-                match item {
-                    TerminalSetItem::Terminal(ident) => {
-                        collected.push(ident.clone());
-                    }
-                    TerminalSetItem::Range(first, last) => {
-                        collected.push(first.clone());
-                        collected.push(last.clone());
-                    }
-                    _ => {}
-                }
-            }
-        }
-        PatternArgs::Group { alternatives, .. } => {
-            for alt in alternatives {
-                for pat in alt {
-                    collect_pattern_located(pat, collected);
-                }
-            }
-        }
-        PatternArgs::Minus { base, exclude } => {
-            collect_pattern_located(base, collected);
-            collect_pattern_located(exclude, collected);
-        }
-        PatternArgs::Sep {
-            base, delimiter, ..
-        } => {
-            collect_pattern_located(base, collected);
-            collect_pattern_located(delimiter, collected);
-        }
-        _ => {}
-    }
-}
+use super::position::{position_to_offset, range_to_lsp_range};
 
 /// Locates the definition of the symbol under the cursor.
 pub fn find_definition(content: &str, target_pos: Position) -> Option<Range> {
-    let offset = position_to_offset(content, target_pos);
-
-    // Parse the entire document into TokenStream
-    let token_stream = TokenStream::from_str(content).ok()?;
-    let (_, macro_stream) = split_stream(token_stream).ok()?;
-    let grammar_args = Grammar::parse_args(macro_stream).ok()?;
-    let span_manager = grammar_args.span_manager.clone();
-
-    // Collect all located identifier strings in the AST
-    let all_located = collect_located(&grammar_args);
-
-    // Find the one that contains the click offset
-    let clicked = all_located.iter().find(|loc| {
-        if let Some(range) = span_manager.get_byterange(&loc.location()) {
-            range.contains(&offset)
-        } else {
-            false
-        }
-    })?;
-
-    // Look up the definition by name
-    let name = clicked.value();
-
-    // 1. Check rule definitions
-    if let Some(rule) = grammar_args.rules.iter().find(|r| r.name.value == *name) {
-        let def_range = span_manager.get_byterange(&rule.name.location())?;
-        return Some(range_to_lsp_range(content, def_range));
-    }
-
-    // 2. Check token definitions
-    if let Some((t_name, _)) = grammar_args
-        .terminals
-        .iter()
-        .find(|(t, _)| t.value == *name)
-    {
-        let def_range = span_manager.get_byterange(&t_name.location())?;
-        return Some(range_to_lsp_range(content, def_range));
-    }
-
-    // 3. Check precedence definitions
-    for (_, _, items) in &grammar_args.precedences {
-        for item in items {
-            if let IdentOrLiteral::Ident(ident) = item {
-                if ident.value() == name {
-                    let def_range = span_manager.get_byterange(&ident.location())?;
-                    return Some(range_to_lsp_range(content, def_range));
-                }
-            }
-        }
-    }
-
-    None
+    let args = parse_args(content).ok()?;
+    let identifiers = collect_identifiers(&args, IdentifierScope::DefinitionLookup);
+    let clicked =
+        identifier_at_offset(&args, &identifiers, position_to_offset(content, target_pos))?;
+    let definition = symbol_definition(&args, clicked.value())?;
+    let range = args.span_manager.get_byterange(&definition.location())?;
+    Some(range_to_lsp_range(content, range))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lsp::diagnostics::split_stream;
+    use proc_macro2::TokenStream;
+    use std::str::FromStr;
 
     const MOCK_GRAMMAR: &str = r#"
 #[derive(Debug, Clone)]
